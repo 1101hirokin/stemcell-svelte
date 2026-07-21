@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster } from '../src/lib';
+  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField } from '../src/lib';
 
   let theme = $state<'auto' | 'standard-light' | 'standard-dark'>('auto');
   let density = $state<'comfortable' | 'compact'>('comfortable');
   let threshold = $state('30rem');
+  let password = $state('abc');
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
   const colors = ['primary', 'danger', 'warning', 'plain'] as const;
@@ -81,6 +82,48 @@
         <Button variant="soft">プレビュー</Button>
       </Switcher>
     </div>
+  </section>
+
+  <section>
+    <h2>TextField</h2>
+    <p>
+      複合フィールド(label / description / error 内包)。エラー文は danger.soft-fg の転用
+      (実測 10.45:1 / 11.04:1)。invalid は8文字未満で立つ(逐次 change のデモ)。
+    </p>
+    <Stack gap="lg">
+      <TextField bind:value={password} invalid={password.length < 8} keyboard="text">
+        {#snippet label()}パスワード{/snippet}
+        {#snippet description()}8文字以上{/snippet}
+        {#snippet error()}短すぎる({password.length}文字)。8文字以上にすること{/snippet}
+      </TextField>
+      <TextField required autocomplete="name" placeholder="例: 山田太郎">
+        {#snippet label()}氏名(required + placeholder){/snippet}
+      </TextField>
+      <TextField keyboard="email" autocomplete="email">
+        {#snippet label()}メール(keyboard=email){/snippet}
+        {#snippet start()}@{/snippet}
+        {#snippet end()}<Button variant="text" size="sm">消去</Button>{/snippet}
+      </TextField>
+      <Cluster gap="md">
+        <TextField size="sm">
+          {#snippet label()}sm{/snippet}
+        </TextField>
+        <TextField size="md">
+          {#snippet label()}md{/snippet}
+        </TextField>
+        <TextField size="lg">
+          {#snippet label()}lg{/snippet}
+        </TextField>
+      </Cluster>
+      <Cluster gap="md">
+        <TextField disabled value="編集不可">
+          {#snippet label()}disabled{/snippet}
+        </TextField>
+        <TextField readonly value="読める">
+          {#snippet label()}readonly{/snippet}
+        </TextField>
+      </Cluster>
+    </Stack>
   </section>
 
   <section>
