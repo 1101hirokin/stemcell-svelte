@@ -24,6 +24,11 @@ Stemcell の Svelte 実装。規範は [stemcell-component-prompts](../stemcell-
 各コンポーネントは `src/lib/<Name>/meta.ts` に PROPS(既定値の単一の源)を持ち、
 コンポーネント本体はそこから既定値を読む。契約 ↔ meta ↔ 実装が一列に繋がる。
 
+## Playground
+
+`bun run playground` で起動する(WORKFLOW §2-6。裁定 2026-07: 各実装リポは実装済み部品を
+実物で触って確認する器を持つ)。実測検証と「実物で判断」保留の消化の器であり、配信物ではない。
+
 ## トークン
 
 `@stemcell/tokens` は未 publish(初回 publish は「第三者が追従可能になった時点」。GOVERNANCE §3)。
