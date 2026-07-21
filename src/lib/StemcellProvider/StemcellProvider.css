@@ -1,0 +1,8 @@
+/* 地の面(StemcellProvider.md §6)。import しても何も起きない部品にしない(第4条-1) */
+body {
+  background: var(--elevation-flat-surface);
+  color: var(--color-app-foreground);
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+}

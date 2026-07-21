@@ -1,0 +1,81 @@
+/* 配線の源は foundations/emphasis.rules.json / size.rules.json。ここはその Web への写像。 */
+.sc-button {
+  display: inline-flex; /* shrink-wrap 既定(layout.md §2) */
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-inline-sm); /* HOLES #1: start/end と文字の間隔の段は仕様未指定。inline-sm を仮置き */
+  border: none;
+  border-radius: var(--shape-semantic-control);
+  font-family: var(--typography-label-lg-font-family);
+  font-size: var(--typography-label-lg-font-size);
+  font-weight: var(--typography-label-lg-font-weight);
+  line-height: var(--typography-label-lg-line-height);
+  letter-spacing: var(--typography-label-lg-letter-spacing);
+  cursor: pointer;
+  transition: background-color var(--motion-feedback-duration) var(--motion-feedback-easing),
+    border-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+.sc-button[data-block='true'] { display: flex; inline-size: 100%; }
+.sc-button[data-size='sm'] { padding: var(--spacing-inset-sm); }
+.sc-button[data-size='md'] { padding: var(--spacing-inset-md); }
+.sc-button[data-size='lg'] { padding: var(--spacing-inset-lg); }
+
+/* intent の一家をチャンネル変数へ(色を1箇所で束ね、variant はチャンネルだけを見る) */
+.sc-button[data-color='primary'] {
+  --_bg: var(--color-semantic-primary-bg); --_bg-h: var(--color-semantic-primary-bg-hover);
+  --_bg-p: var(--color-semantic-primary-bg-pressed); --_fg: var(--color-semantic-primary-fg);
+  --_soft-bg: var(--color-semantic-primary-soft-bg); --_soft-bg-h: var(--color-semantic-primary-soft-bg-hover);
+  --_soft-bg-p: var(--color-semantic-primary-soft-bg-pressed); --_soft-fg: var(--color-semantic-primary-soft-fg);
+  --_border: var(--color-semantic-primary-border); --_ring: var(--color-semantic-primary-focus-ring);
+}
+.sc-button[data-color='danger'] {
+  --_bg: var(--color-semantic-danger-bg); --_bg-h: var(--color-semantic-danger-bg-hover);
+  --_bg-p: var(--color-semantic-danger-bg-pressed); --_fg: var(--color-semantic-danger-fg);
+  --_soft-bg: var(--color-semantic-danger-soft-bg); --_soft-bg-h: var(--color-semantic-danger-soft-bg-hover);
+  --_soft-bg-p: var(--color-semantic-danger-soft-bg-pressed); --_soft-fg: var(--color-semantic-danger-soft-fg);
+  --_border: var(--color-semantic-danger-border); --_ring: var(--color-semantic-danger-focus-ring);
+}
+.sc-button[data-color='warning'] {
+  --_bg: var(--color-semantic-warning-bg); --_bg-h: var(--color-semantic-warning-bg-hover);
+  --_bg-p: var(--color-semantic-warning-bg-pressed); --_fg: var(--color-semantic-warning-fg);
+  --_soft-bg: var(--color-semantic-warning-soft-bg); --_soft-bg-h: var(--color-semantic-warning-soft-bg-hover);
+  --_soft-bg-p: var(--color-semantic-warning-soft-bg-pressed); --_soft-fg: var(--color-semantic-warning-soft-fg);
+  --_border: var(--color-semantic-warning-border); --_ring: var(--color-semantic-warning-focus-ring);
+}
+.sc-button[data-color='plain'] {
+  --_bg: var(--color-semantic-plain-bg); --_bg-h: var(--color-semantic-plain-bg-hover);
+  --_bg-p: var(--color-semantic-plain-bg-pressed); --_fg: var(--color-semantic-plain-fg);
+  --_soft-bg: var(--color-semantic-plain-soft-bg); --_soft-bg-h: var(--color-semantic-plain-soft-bg-hover);
+  --_soft-bg-p: var(--color-semantic-plain-soft-bg-pressed); --_soft-fg: var(--color-semantic-plain-soft-fg);
+  --_border: var(--color-semantic-plain-border); --_ring: var(--color-semantic-plain-focus-ring);
+}
+/* disabled は intent の差し替え(state.md §7)。減衰ではない */
+.sc-button:disabled {
+  --_bg: var(--color-semantic-disabled-bg); --_fg: var(--color-semantic-disabled-fg);
+  --_soft-bg: var(--color-semantic-disabled-soft-bg); --_soft-fg: var(--color-semantic-disabled-soft-fg);
+  --_border: var(--color-semantic-disabled-border);
+  cursor: not-allowed;
+}
+
+/* emphasis.rules.json の配線 */
+.sc-button[data-variant='filled'] { background: var(--_bg); color: var(--_fg); }
+.sc-button[data-variant='filled']:hover:not(:disabled) { background: var(--_bg-h); }
+.sc-button[data-variant='filled']:active:not(:disabled) { background: var(--_bg-p); }
+.sc-button[data-variant='soft'] { background: var(--_soft-bg); color: var(--_soft-fg); }
+.sc-button[data-variant='soft']:hover:not(:disabled) { background: var(--_soft-bg-h); }
+.sc-button[data-variant='soft']:active:not(:disabled) { background: var(--_soft-bg-p); }
+.sc-button[data-variant='outlined'] {
+  background: transparent; color: var(--_soft-fg);
+  border: var(--shape-border-width) solid var(--_border);
+}
+.sc-button[data-variant='outlined']:hover:not(:disabled) { background: var(--_soft-bg); }
+.sc-button[data-variant='outlined']:active:not(:disabled) { background: var(--_soft-bg-h); }
+.sc-button[data-variant='text'] { background: transparent; color: var(--_soft-fg); }
+.sc-button[data-variant='text']:hover:not(:disabled) { background: var(--_soft-bg); }
+.sc-button[data-variant='text']:active:not(:disabled) { background: var(--_soft-bg-h); }
+
+/* focus-ring.md: :focus-visible + outline + offset */
+.sc-button:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
