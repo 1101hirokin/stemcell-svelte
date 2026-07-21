@@ -12,6 +12,7 @@
     "conformance": "bun conformance/generate.ts && vitest run conformance"
   },
   "devDependencies": {
+    "@stemcell/tokens": "0.0.0-alpha.1",
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
     "@testing-library/svelte": "^5.2.0",
     "@types/node": "^22",

@@ -14,7 +14,7 @@ import { chromium } from 'playwright-core';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const TOKENS = join(import.meta.dirname, '../../../stemcell-tokens/dist/web');
+const TOKENS = join(import.meta.dirname, '../../node_modules/@stemcell/tokens/dist/web');
 const LIB = join(import.meta.dirname, '../../src/lib');
 const css = (p: string) => readFileSync(p, 'utf-8');
 

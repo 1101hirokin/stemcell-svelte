@@ -31,5 +31,8 @@ Stemcell の Svelte 実装。規範は [stemcell-component-prompts](../stemcell-
 
 ## トークン
 
-`@stemcell/tokens` は未 publish(初回 publish は「第三者が追従可能になった時点」。GOVERNANCE §3)。
-それまで隣の作業コピー(`../stemcell-tokens/dist/web`)を参照する。
+`@stemcell/tokens` はローカル registry(verdaccio。リリース後の消費を想定)に publish された
+pin を devDependency として install する(.npmrc が @stemcell スコープを localhost:4873 へ向ける)。
+公開 npm へは未 publish(初回 publish は「第三者が追従可能になった時点」。GOVERNANCE §3)。
+以前ここには「未 publish のため隣の作業コピー(`../stemcell-tokens/dist/web`)を参照する」と
+書いてあった。registry の運用開始(2026-07)で置き換えた。

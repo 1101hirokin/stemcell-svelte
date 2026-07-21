@@ -5,6 +5,7 @@
     "": {
       "name": "@stemcell/svelte",
       "devDependencies": {
+        "@stemcell/tokens": "0.0.0-alpha.1",
         "@sveltejs/vite-plugin-svelte": "^4.0.0",
         "@testing-library/svelte": "^5.2.0",
         "@types/node": "^22",
@@ -142,6 +143,8 @@
     "@rollup/rollup-win32-x64-gnu": ["@rollup/rollup-win32-x64-gnu@4.62.2", "", { "os": "win32", "cpu": "x64" }, "sha512-T6xr6ucWSFto+VGajA8YH26LdpHRuP4YLHEKAtCWvJDOlnmWcDZVCI2Jmjr+IFHDlt2zRaTAKE4tfjTaWLgJBg=="],
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.62.2", "", { "os": "win32", "cpu": "x64" }, "sha512-BfzEnDJOt9T8M989/lA37EcJgat01wLRnoi5dQf3QzOH7jzpqTAzdDbVfRljVr5r+jzKqpbHeyOfAaXxAd0PAA=="],
+
+    "@stemcell/tokens": ["@stemcell/tokens@0.0.0-alpha.1", "http://localhost:4873/@stemcell/tokens/-/tokens-0.0.0-alpha.1.tgz", {}, "sha512-DlKQ8HAGuS03BSx/b2QQuwy+8Pr3jZpjeN2SsZLwfmubjVsXkVhDoLUYM/HU+WDZDSAr4Btx9Vq5leM1FkANqw=="],
 
     "@sveltejs/acorn-typescript": ["@sveltejs/acorn-typescript@1.0.11", "", { "peerDependencies": { "acorn": "^8.9.0" } }, "sha512-LFuZUkjJ9iF7JZye/aG5XM0SFcQ5VyL0oVX4WJ9dc0Va3R3s0OauX1BESVCb+YN/ol8TAfqGDDAQsTG627Y5kw=="],
 
