@@ -4,7 +4,7 @@ import { createRawSnippet } from 'svelte';
 import { vi } from 'vitest';
 import Cluster from './Cluster.svelte';
 
-const kids = createRawSnippet(() => ({ render: () => '<span>a</span><span>b</span>' }));
+const kids = createRawSnippet(() => ({ render: () => '<span>a</span>' }));
 const cluster = (c: HTMLElement) => c.querySelector('.sc-cluster') as HTMLElement;
 
 it('既定: gap=md / align=start', () => {

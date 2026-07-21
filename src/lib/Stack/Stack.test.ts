@@ -4,7 +4,7 @@ import { createRawSnippet } from 'svelte';
 import { vi } from 'vitest';
 import Stack from './Stack.svelte';
 
-const kids = createRawSnippet(() => ({ render: () => '<span>a</span><span>b</span>' }));
+const kids = createRawSnippet(() => ({ render: () => '<span>a</span>' }));
 const stack = (c: HTMLElement) => c.querySelector('.sc-stack') as HTMLElement;
 
 it('既定: direction=stack / gap=md / align=stretch', () => {

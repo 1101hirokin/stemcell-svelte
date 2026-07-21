@@ -1,3 +1,16 @@
+<script lang="ts" module>
+  /**
+   * as の許可リスト。多相の目的は「意味的要素へ」(layout.md §6)であり、器になりうる
+   * 意味的要素だけを開く。型(keyof HTMLElementTagNameMap)は script / style / iframe も
+   * 通してしまい、実行時検証が無いと危険要素をそのまま生成できる(独立レビューが実測で指摘)。
+   */
+  const AS_ALLOWED = [
+    'div', 'span', 'section', 'article', 'aside', 'nav', 'main', 'header', 'footer',
+    'figure', 'figcaption', 'address', 'p', 'blockquote', 'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+    'details', 'summary', 'search', 'fieldset', 'form',
+  ] as const;
+</script>
+
 <script lang="ts">
   import './Box.css';
   import { isTier, isGlobalPrimitive, warnSpacing } from '../internal/spacing';
@@ -11,7 +24,7 @@
      * as 多相(意味的要素へ)と自由 style を許す唯一の逃げ道。素の div の直接使用は非推奨で、
      * 素の器が欲しいケースはここに集約する。トークン値の使用を推奨(自由な指定は最終手段)。
      */
-    as?: keyof HTMLElementTagNameMap;
+    as?: (typeof AS_ALLOWED)[number];
     style?: string;
     class?: string;
     children: Snippet;
@@ -20,14 +33,20 @@
 
   const tier = $derived(inset !== undefined && isTier(inset));
   const primitive = $derived(inset !== undefined && !tier && isGlobalPrimitive(inset));
+  const asValid = $derived((AS_ALLOWED as readonly string[]).includes(as));
   $effect(() => {
     if (inset !== undefined && !tier && !primitive) warnSpacing('Box', 'inset', inset, '余白なし');
+    if (!asValid) {
+      console.warn(
+        `[stemcell] Box: as="${as}" は許可された意味的要素ではない。"div" へ退避する(layout.md §6: 多相は意味的要素へ)。`,
+      );
+    }
   });
 </script>
 
 <!-- 見た目と意味を持たない器(契約 a11y)。意味が要るときは as で意味的要素になる。 -->
 <svelte:element
-  this={as}
+  this={asValid ? as : 'div'}
   class={klass ? `sc-box ${klass}` : 'sc-box'}
   {style}
   data-inset={tier ? inset : undefined}

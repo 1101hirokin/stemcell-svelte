@@ -44,6 +44,20 @@ it('as: 意味的要素へ多相する(逃げ道は Box だけ。layout.md §6)'
   expect(el.tagName).toBe('SECTION');
 });
 
+it('as: 許可リスト外(script 等の危険要素・不正な文字列)は warn して div へ退避する', () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  for (const bad of ['script', 'style', 'iframe', 'banana']) {
+    const { container } = render(Box, { props: { children: kids, as: bad as never } });
+    expect(box(container).tagName, `as="${bad}"`).toBe('DIV');
+    expect(container.querySelector(bad), `no <${bad}> in DOM`).toBeNull();
+    expect(
+      warn.mock.calls.some((c) => String(c[0]).includes(`as="${bad}"`)),
+      `warn for as="${bad}"`,
+    ).toBe(true);
+  }
+  warn.mockRestore();
+});
+
 it('style / class: 自由 style の受け口(Svelte の土地の声)が通る', () => {
   const { container } = render(Box, {
     props: { children: kids, style: 'max-width: 20rem', class: 'consumer' },

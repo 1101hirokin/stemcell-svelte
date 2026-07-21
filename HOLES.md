@@ -18,5 +18,5 @@
 | 8 | Switcher | 閾値評価の実現機構(契約が expressive と明示) | flex-basis 算術(Every Layout 同型)。コンテナクエリは `@container` の条件部が custom property を受けず、prop 駆動の閾値をインスタンスごとに運べないため不採用 | B(切替点の正確さは実測済み。experiments/switcher-threshold/RESULTS.md §1) |
 | 9 | Switcher | gap の値語彙(段+大域の原始 X)の不正値時の挙動 | console.warn(無条件。Provider の themes 警告と同じ形)を出し既定の md へ退避 | B(仕様は沈黙のままでよい) |
 | 10 | Switcher | threshold の不正値時の挙動。長さでない文字列は calc() を無効にし、flex-basis が auto へ縮退して閾値駆動(Normative)が無警告で内容駆動の折返しに戻る(独立レビューが実測で検出) | 検査(rem の長さか)を行い、不正なら warn して既定 30rem へ退避。当初は構文(CSS の長さか)のみ裁いていたが、単位が rem と裁定され(2026-07。契約 alpha.1)rem 以外も拒否に更新。数値集合の語彙は未決のまま裁かない | B(解消に向け更新済み。数値集合は Grid min と共有の未決) |
-| 11 | Box | 逃げ道(自由 style)の Svelte での形。契約は中立表面(inset)だけを持ち、逃げ道は各実装の土地の声(layout.md §6 の裁定) | `as`(要素の多相)+ `style` + `class` の3口。rest props の全面開放は採らない(開くほど「素の div」に近づき、逃げ道の集約という規範の意味が薄れる) | B(消費者が現れて足りなければ広げる) |
+| 11 | Box | 逃げ道(自由 style)の Svelte での形。契約は中立表面(inset)だけを持ち、逃げ道は各実装の土地の声(layout.md §6 の裁定) | `as`(要素の多相)+ `style` + `class` の3口。rest props の全面開放は採らない(開くほど「素の div」に近づき、逃げ道の集約という規範の意味が薄れる)。as は意味的要素の許可リストで裁く: 型だけでは script / style / iframe も通り、危険要素をそのまま生成できた(独立レビューが実測で検出。許可外は warn して div へ退避) | B(消費者が現れて足りなければ広げる) |
 | 12 | Box | inset 語彙外の値の退避先。gap 系は既定 md へ退避するが、inset の契約既定は「余白なし」 | warn して余白なし(省略時と同じ)へ退避。存在しない md を発明しない | B |

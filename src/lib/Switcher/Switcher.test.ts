@@ -9,7 +9,7 @@ import Switcher from './Switcher.svelte';
 import { isRemLength } from './meta';
 import { isGlobalPrimitive } from '../internal/spacing';
 
-const kids = createRawSnippet(() => ({ render: () => '<button>a</button><button>b</button>' }));
+const kids = createRawSnippet(() => ({ render: () => '<span>a</span>' }));
 const sw = (c: HTMLElement) => c.querySelector('.sc-switcher') as HTMLElement;
 
 it('gap: 段(sm/md/lg)は data-gap で意味層を引き、既定は md', () => {
