@@ -6,7 +6,8 @@ import { render } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { vi } from 'vitest';
 import Switcher from './Switcher.svelte';
-import { isGlobalPrimitive, isLength } from './meta';
+import { isRemLength } from './meta';
+import { isGlobalPrimitive } from '../internal/spacing';
 
 const kids = createRawSnippet(() => ({ render: () => '<button>a</button><button>b</button>' }));
 const sw = (c: HTMLElement) => c.querySelector('.sc-switcher') as HTMLElement;
@@ -44,9 +45,9 @@ it('isGlobalPrimitive: 境界(7/8/24/25)と非正規形(08)を正しく裁く', 
   for (const bad of ['7', '25', '08', '8.5', '-8', '']) expect(isGlobalPrimitive(bad), bad).toBe(false);
 });
 
-it('threshold: 長さでない文字列は warn して既定 30rem へ退避する(閾値機構の無警告消滅を防ぐ)', () => {
+it('threshold: rem の長さでない文字列は warn して既定 30rem へ退避する(単位の裁定 + 閾値機構の無警告消滅を防ぐ)', () => {
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-  for (const bad of ['banana', '', '30', 'calc(100% - 2rem)']) {
+  for (const bad of ['banana', '', '30', '480px', 'calc(100% - 2rem)']) {
     const { container } = render(Switcher, { props: { children: kids, threshold: bad } });
     expect(
       sw(container).style.getPropertyValue('--sc-switcher-threshold'),
@@ -62,7 +63,8 @@ it('threshold: 長さでない文字列は warn して既定 30rem へ退避す�
   warn.mockRestore();
 });
 
-it('isLength: 構文だけを裁き、単位の語彙は裁かない(裁定待ち。layout.md §9)', () => {
-  for (const ok of ['30rem', '480px', '40em', '66ch', '50vw', '0.5rem']) expect(isLength(ok), ok).toBe(true);
-  for (const bad of ['30', 'rem', 'banana', '', '30 rem', '30%']) expect(isLength(bad), bad).toBe(false);
+it('isRemLength: rem の長さだけを許す(単位は rem と裁定済み。数値集合は未決のため裁かない)', () => {
+  for (const ok of ['30rem', '0.5rem', '40rem', ' 30rem ']) expect(isRemLength(ok), ok).toBe(true);
+  for (const bad of ['480px', '40em', '66ch', '30', 'rem', 'banana', '', '30 rem', '30%'])
+    expect(isRemLength(bad), bad).toBe(false);
 });
