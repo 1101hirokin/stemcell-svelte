@@ -1,0 +1,29 @@
+/* 2カラム(Sidebar.md)。折返しの機構は flex-wrap(Every Layout 同型。HOLES #23):
+   本体(flex-grow 999)が min-inline-size を守れなくなった瞬間に折れ、
+   折れた脇(flex-grow 1)は行を独占して全幅になる。条件は本体の窮屈さであって画面幅ではない。 */
+.sc-sidebar {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.sc-sidebar-side {
+  /* sideWidth 省略時は内容幅(auto)。指定時はその幅を基底にする */
+  flex-basis: var(--sc-sidebar-side-width, auto);
+  flex-grow: 1;
+}
+
+.sc-sidebar-content {
+  flex-basis: 0;
+  flex-grow: 999;
+  min-inline-size: var(--sc-sidebar-content-min);
+}
+
+.sc-sidebar[data-gap='sm'] {
+  gap: var(--spacing-gap-sm);
+}
+.sc-sidebar[data-gap='md'] {
+  gap: var(--spacing-gap-md);
+}
+.sc-sidebar[data-gap='lg'] {
+  gap: var(--spacing-gap-lg);
+}

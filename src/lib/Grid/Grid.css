@@ -1,0 +1,16 @@
+/* 内在的な格子(Grid.md)。列数は器が決める: 各列は min を下回らず、余れば 1fr で伸びる。
+   min(var, 100%) の防波堤は、器が min より狭いときに単一列が器からあふれるのを防ぐ。 */
+.sc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--sc-grid-min), 100%), 1fr));
+}
+
+.sc-grid[data-gap='sm'] {
+  gap: var(--spacing-gap-sm);
+}
+.sc-grid[data-gap='md'] {
+  gap: var(--spacing-gap-md);
+}
+.sc-grid[data-gap='lg'] {
+  gap: var(--spacing-gap-lg);
+}

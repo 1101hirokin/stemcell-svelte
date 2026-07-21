@@ -5,3 +5,5 @@ export { default as Box } from './Box/Box.svelte';
 export { default as Stack } from './Stack/Stack.svelte';
 export { default as Cluster } from './Cluster/Cluster.svelte';
 export { default as TextField } from './TextField/TextField.svelte';
+export { default as Grid } from './Grid/Grid.svelte';
+export { default as Sidebar } from './Sidebar/Sidebar.svelte';

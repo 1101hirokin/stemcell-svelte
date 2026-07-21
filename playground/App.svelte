@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField } from '../src/lib';
+  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar } from '../src/lib';
 
   let theme = $state<'auto' | 'standard-light' | 'standard-dark'>('auto');
   let density = $state<'comfortable' | 'compact'>('comfortable');
   let threshold = $state('30rem');
   let invite = $state('abc');
+  let gridMin = $state('16rem');
+  let sidebarSide = $state<'start' | 'end'>('start');
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
   const colors = ['primary', 'danger', 'warning', 'plain'] as const;
@@ -164,6 +166,48 @@
           <div class="pg-chip">低い</div>
         </Stack>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Grid</h2>
+    <p>
+      内在的な格子。列は min({gridMin})を下回らず、器に応じて増減する
+      (メディアクエリなし)。右下の掴みで器をドラッグして確認する。
+    </p>
+    <label class="pg-field">
+      min
+      <input bind:value={gridMin} />
+    </label>
+    <div class="pg-resizable">
+      <Grid min={gridMin} gap="sm">
+        {#each ['一', '二', '三', '四', '五', '六'] as t (t)}
+          <div class="pg-chip">カード {t}</div>
+        {/each}
+      </Grid>
+    </div>
+  </section>
+
+  <section>
+    <h2>Sidebar</h2>
+    <p>
+      2カラム。脇は内容幅(または sideWidth)で立ち、本体は fill。本体が contentMin
+      (50%)を割ると縦へ折れる(条件は本体の窮屈さで、画面幅ではない)。
+    </p>
+    <label class="pg-field">
+      side
+      <select bind:value={sidebarSide}>
+        <option value="start">start(脇が先)</option>
+        <option value="end">end(本体が先)</option>
+      </select>
+    </label>
+    <div class="pg-resizable">
+      <Sidebar side={sidebarSide} sideWidth="12rem" gap="md">
+        {#snippet sideSlot()}
+          <div class="pg-chip">ナビ(脇)</div>
+        {/snippet}
+        <div class="pg-chip">本体。器を狭めると縦積みへ折れ、DOM 順は変わらない。</div>
+      </Sidebar>
     </div>
   </section>
 

@@ -46,6 +46,8 @@ try {
     stack: document.querySelectorAll('.sc-stack').length,
     cluster: document.querySelectorAll('.sc-cluster').length,
     textfield: document.querySelectorAll('.sc-textfield').length,
+    grid: document.querySelectorAll('.sc-grid').length,
+    sidebar: document.querySelectorAll('.sc-sidebar').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -114,6 +116,20 @@ try {
     return new Set([...sw.children].map((k) => (k as HTMLElement).offsetTop)).size;
   });
   if (rows !== 3) throw new Error(`360px で縦(3行)にならない: ${rows}行`);
+
+  // Sidebar: 狭い器で縦へ折れ、DOM 順(side=start: 脇→本体)は折れても変わらない
+  const sb = await page.evaluate(() => {
+    const el = document.querySelector('.sc-sidebar') as HTMLElement;
+    (el.parentElement as HTMLElement).style.width = '260px';
+    const [a, b] = [...el.children] as HTMLElement[];
+    return {
+      folded: a!.offsetTop !== b!.offsetTop,
+      order: [...el.children].map((k) => k.className),
+    };
+  });
+  if (!sb.folded) throw new Error('Sidebar が 260px で折れない');
+  if (sb.order.join(',') !== 'sc-sidebar-side,sc-sidebar-content')
+    throw new Error(`Sidebar の DOM 順が視覚順と食い違う: ${sb.order.join(',')}`);
 
   await browser.close();
   console.log(

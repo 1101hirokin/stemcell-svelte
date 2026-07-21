@@ -11,8 +11,12 @@
  * 1px 刻みに走査して切替点を測る。jsdom はレイアウトを計算しないため実ブラウザを使う。
  */
 import { chromium } from 'playwright-core';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+
+const executablePath =
+  process.env.PW_CHROMIUM ??
+  (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : chromium.executablePath());
 
 const TOKENS = join(import.meta.dirname, '../../node_modules/@stemcell/tokens/dist/web');
 const LIB = join(import.meta.dirname, '../../src/lib');
@@ -37,10 +41,7 @@ body { margin: 0; }
 
 const LABELS = ['変更を保存', 'キャンセル', 'プレビュー'];
 
-const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium',
-  args: ['--no-sandbox'],
-});
+const browser = await chromium.launch({ executablePath, args: ['--no-sandbox'] });
 const page = await browser.newPage();
 
 /** 器の幅 containerPx で描画し、形(horizontal / vertical / mixed)と溢れを返す。 */
