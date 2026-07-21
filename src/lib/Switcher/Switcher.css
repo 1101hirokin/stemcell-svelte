@@ -1,0 +1,24 @@
+/* 閾値駆動の一斉切替(契約: 器の幅が threshold 未満で縦)。
+   機構は flex-basis 算術(Every Layout の Switcher と同型): (threshold - 100%) は
+   器が閾値より狭いときだけ正になり、999 倍で basis が器を溢れて各子が1行を占める。
+   コンテナクエリを採らないのは、@container の条件部が custom property を受けず
+   (layout.md §8)、prop 駆動の閾値をインスタンスごとに CSS へ運べないため。 */
+.sc-switcher {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.sc-switcher[data-gap='sm'] {
+  gap: var(--spacing-gap-sm);
+}
+.sc-switcher[data-gap='md'] {
+  gap: var(--spacing-gap-md);
+}
+.sc-switcher[data-gap='lg'] {
+  gap: var(--spacing-gap-lg);
+}
+
+.sc-switcher > * {
+  flex-grow: 1;
+  flex-basis: calc((var(--sc-switcher-threshold, 30rem) - 100%) * 999);
+}
