@@ -1,0 +1,25 @@
+/* 折り返す横並び。行に収まらなければ次の行へ流れる(全体の一斉切替は Switcher)。 */
+.sc-cluster {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.sc-cluster[data-gap='sm'] {
+  gap: var(--spacing-gap-sm);
+}
+.sc-cluster[data-gap='md'] {
+  gap: var(--spacing-gap-md);
+}
+.sc-cluster[data-gap='lg'] {
+  gap: var(--spacing-gap-lg);
+}
+
+.sc-cluster[data-align='start'] {
+  align-items: flex-start;
+}
+.sc-cluster[data-align='center'] {
+  align-items: center;
+}
+.sc-cluster[data-align='end'] {
+  align-items: flex-end;
+}

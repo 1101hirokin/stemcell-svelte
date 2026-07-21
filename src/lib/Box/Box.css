@@ -1,0 +1,10 @@
+/* 内在スタイルの器。既定は何も足さない(inset 省略時は余白なし)。 */
+.sc-box[data-inset='sm'] {
+  padding: var(--spacing-inset-sm);
+}
+.sc-box[data-inset='md'] {
+  padding: var(--spacing-inset-md);
+}
+.sc-box[data-inset='lg'] {
+  padding: var(--spacing-inset-lg);
+}

@@ -1,0 +1,43 @@
+/* 縦または横の並び。間隔を所有する(layout.md §1: 中身は外側 margin を持たない)。 */
+.sc-stack {
+  display: flex;
+}
+.sc-stack[data-direction='stack'] {
+  flex-direction: column;
+}
+.sc-stack[data-direction='inline'] {
+  flex-direction: row;
+}
+
+/* 段は direction に応じて stack / inline の意味層を引く(契約 gap description) */
+.sc-stack[data-direction='stack'][data-gap='sm'] {
+  gap: var(--spacing-stack-sm);
+}
+.sc-stack[data-direction='stack'][data-gap='md'] {
+  gap: var(--spacing-stack-md);
+}
+.sc-stack[data-direction='stack'][data-gap='lg'] {
+  gap: var(--spacing-stack-lg);
+}
+.sc-stack[data-direction='inline'][data-gap='sm'] {
+  gap: var(--spacing-inline-sm);
+}
+.sc-stack[data-direction='inline'][data-gap='md'] {
+  gap: var(--spacing-inline-md);
+}
+.sc-stack[data-direction='inline'][data-gap='lg'] {
+  gap: var(--spacing-inline-lg);
+}
+
+.sc-stack[data-align='stretch'] {
+  align-items: stretch;
+}
+.sc-stack[data-align='start'] {
+  align-items: flex-start;
+}
+.sc-stack[data-align='center'] {
+  align-items: center;
+}
+.sc-stack[data-align='end'] {
+  align-items: flex-end;
+}
