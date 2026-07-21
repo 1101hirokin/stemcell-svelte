@@ -68,6 +68,31 @@ try {
   if (errLight.got !== errLight.want)
     throw new Error(`エラー文が danger.soft-fg を引いていない(light): ${JSON.stringify(errLight)}`);
 
+  // disabled×invalid は disabled が勝つ(state.md §3.1)。CSS の後勝ちに依存するため回帰保護を置く
+  // (独立レビュー major 指摘: 自動テストが無かった)
+  const cascade = await page.evaluate(() => {
+    const tf = document.querySelector(
+      '.sc-textfield[data-disabled="true"][data-invalid="true"]',
+    ) as HTMLElement | null;
+    if (!tf) return null;
+    const probe = (v: string) => {
+      const s = document.createElement('span');
+      s.style.color = `var(${v})`;
+      tf.appendChild(s);
+      const c = getComputedStyle(s).color;
+      s.remove();
+      return c;
+    };
+    return {
+      border: getComputedStyle(tf.querySelector('.sc-textfield-control')!).borderTopColor,
+      disabled: probe('--color-semantic-disabled-border'),
+      danger: probe('--color-semantic-danger-border'),
+    };
+  });
+  if (!cascade) throw new Error('disabled×invalid の TextField が playground に無い');
+  if (cascade.border !== cascade.disabled || cascade.border === cascade.danger)
+    throw new Error(`disabled×invalid で disabled が勝っていない: ${JSON.stringify(cascade)}`);
+
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
   await page.waitForTimeout(100);

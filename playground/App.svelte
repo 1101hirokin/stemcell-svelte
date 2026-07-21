@@ -4,7 +4,7 @@
   let theme = $state<'auto' | 'standard-light' | 'standard-dark'>('auto');
   let density = $state<'comfortable' | 'compact'>('comfortable');
   let threshold = $state('30rem');
-  let password = $state('abc');
+  let invite = $state('abc');
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
   const colors = ['primary', 'danger', 'warning', 'plain'] as const;
@@ -91,10 +91,10 @@
       (実測 10.45:1 / 11.04:1)。invalid は8文字未満で立つ(逐次 change のデモ)。
     </p>
     <Stack gap="lg">
-      <TextField bind:value={password} invalid={password.length < 8} keyboard="text">
-        {#snippet label()}パスワード{/snippet}
+      <TextField bind:value={invite} invalid={invite.length < 8} keyboard="text">
+        {#snippet label()}招待コード{/snippet}
         {#snippet description()}8文字以上{/snippet}
-        {#snippet error()}短すぎる({password.length}文字)。8文字以上にすること{/snippet}
+        {#snippet error()}短すぎる({invite.length}文字)。8文字以上にすること{/snippet}
       </TextField>
       <TextField required autocomplete="name" placeholder="例: 山田太郎">
         {#snippet label()}氏名(required + placeholder){/snippet}
@@ -121,6 +121,10 @@
         </TextField>
         <TextField readonly value="読める">
           {#snippet label()}readonly{/snippet}
+        </TextField>
+        <TextField disabled invalid value="無効が勝つ">
+          {#snippet label()}disabled × invalid{/snippet}
+          {#snippet error()}枠は disabled の色になる(state.md §3.1){/snippet}
         </TextField>
       </Cluster>
     </Stack>

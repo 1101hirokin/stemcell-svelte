@@ -7,6 +7,7 @@ import { render, fireEvent } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { vi } from 'vitest';
 import TextField from './TextField.svelte';
+import RejectDigits from './fixtures/RejectDigits.svelte';
 
 const snip = (html: string) => createRawSnippet(() => ({ render: () => html }));
 const label = snip('<span>氏名</span>');
@@ -83,6 +84,22 @@ it('required: native 属性で届き、視覚標示を部品が自動で出す(f
   expect(input(container).required).toBe(true);
   const marker = container.querySelector('.sc-textfield-required') as HTMLElement;
   expect(marker.getAttribute('aria-hidden')).toBe('true');
+});
+
+it('値の所有(bind): アプリが差し戻した値は DOM へも反映される(field.md §5。独立レビュー指摘 blocker の検証)', async () => {
+  const { container, getByTestId } = render(RejectDigits);
+  expect(input(container).value).toBe('abc');
+  await fireEvent.input(input(container), { target: { value: 'abc1' } });
+  expect(getByTestId('app-value').textContent, 'アプリ側の値').toBe('abc');
+  expect(input(container).value, 'DOM 側の値').toBe('abc');
+});
+
+it('値の所有(非 bind): 入力後でも value prop の更新は DOM へ流れる(アプリからのリセット)', async () => {
+  const { container, rerender } = render(TextField, { props: { label, value: 'abc' } });
+  await fireEvent.input(input(container), { target: { value: 'abc1' } });
+  expect(input(container).value).toBe('abc1');
+  await rerender({ value: '' });
+  expect(input(container).value).toBe('');
 });
 
 it('disabled / placeholder / autocomplete / keyboard は native 属性へ写る(契約の mirrorsNativeAttr)', () => {
