@@ -1,6 +1,6 @@
 <script lang="ts">
   import './Switcher.css';
-  import { META, GAP_TIERS, isGlobalPrimitive } from './meta';
+  import { META, GAP_TIERS, isGlobalPrimitive, isLength } from './meta';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -18,10 +18,16 @@
 
   const isTier = $derived((GAP_TIERS as readonly string[]).includes(gap));
   const isPrimitive = $derived(!isTier && isGlobalPrimitive(gap));
+  const validThreshold = $derived(isLength(threshold));
   $effect(() => {
     if (!isTier && !isPrimitive) {
       console.warn(
         `[stemcell] Switcher: gap="${gap}" は spacing の語彙(sm/md/lg または 8〜24)ではない。既定の "${META.props.gap.default}" へ退避する(layout.md §6)。`,
+      );
+    }
+    if (!validThreshold) {
+      console.warn(
+        `[stemcell] Switcher: threshold="${threshold}" は長さとして解釈できず、閾値駆動の切替(Normative)が無効になる。既定の "${META.props.threshold.default}" へ退避する。`,
       );
     }
   });
@@ -33,7 +39,7 @@
   class="sc-switcher"
   data-gap={isPrimitive ? undefined : isTier ? gap : META.props.gap.default}
   style:gap={isPrimitive ? `var(--spacing-${gap})` : undefined}
-  style:--sc-switcher-threshold={threshold}
+  style:--sc-switcher-threshold={validThreshold ? threshold : META.props.threshold.default}
 >
   {@render children()}
 </div>

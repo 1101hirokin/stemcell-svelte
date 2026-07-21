@@ -9,5 +9,5 @@
     "verbatimModuleSyntax": true,
     "types": ["svelte", "vitest/globals", "node"]
   },
-  "include": ["src/**/*", "conformance/**/*"]
+  "include": ["src/**/*", "conformance/**/*", "experiments/**/*"]
 }

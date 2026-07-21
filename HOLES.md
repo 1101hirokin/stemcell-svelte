@@ -16,4 +16,5 @@
 | 6 | Button | pressed の視覚の Web 機構 | `:active` 擬似クラス | B(state.md §3.3 の発火条件の記録と整合) |
 | 7 | (harness) | enum を持たない string prop(theme 等)は適合テストが値を照合できない | 名前と既定値のみ照合 | C(契約スキーマの表現力の既知の限界と同根) |
 | 8 | Switcher | 閾値評価の実現機構(契約が expressive と明示) | flex-basis 算術(Every Layout 同型)。コンテナクエリは `@container` の条件部が custom property を受けず、prop 駆動の閾値をインスタンスごとに運べないため不採用 | B(切替点の正確さは実測済み。experiments/switcher-threshold/RESULTS.md §1) |
-| 9 | Switcher | gap の値語彙(段+大域の原始 X)の不正値時の挙動 | dev で console.warn を出し既定の md へ退避 | B(StemcellProvider の themes 警告と同じ形。仕様は沈黙のままでよい) |
+| 9 | Switcher | gap の値語彙(段+大域の原始 X)の不正値時の挙動 | console.warn(無条件。Provider の themes 警告と同じ形)を出し既定の md へ退避 | B(仕様は沈黙のままでよい) |
+| 10 | Switcher | threshold の不正値時の挙動。長さでない文字列は calc() を無効にし、flex-basis が auto へ縮退して閾値駆動(Normative)が無警告で内容駆動の折返しに戻る(独立レビューが実測で検出) | 構文検査(CSS の長さか)のみ行い、不正なら warn して既定 30rem へ退避。単位の語彙(px/rem の裁定・生 px の拒否)は layout.md §9 の裁定後に実装する | B+A 待ち(構文は表現の防御。語彙は裁定待ちのため裁かない) |
