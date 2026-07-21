@@ -8,9 +8,9 @@
 import { readdirSync, existsSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const SPEC = join(import.meta.dir, '../../stemcell-component-prompts/contracts');
-const OUT = join(import.meta.dir, 'generated');
-const LIB = join(import.meta.dir, '../src/lib');
+const SPEC = join(import.meta.dirname, '../../stemcell-component-prompts/contracts');
+const OUT = join(import.meta.dirname, 'generated');
+const LIB = join(import.meta.dirname, '../src/lib');
 
 type Prop = { type: string; values?: string[]; default?: unknown; optional?: boolean };
 type Contract = {
