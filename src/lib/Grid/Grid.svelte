@@ -33,7 +33,10 @@
 
 <!-- 見た目と意味を持たない器(契約 a11y): states 無し・focus 無し・構造の主張無し。
      列数は器が決める(auto-fit / minmax)。min が長さでないと template が無効になり
-     内在の格子(Normative)が無警告で消えるため、検査して退避する -->
+     内在の格子(Normative)が無警告で消えるため、検査して退避する。
+     ul の grid 化がリスト意味論を壊す罠(Grid.md §4 / layout.md §6)は、現行 API では
+     発火しない: grid になるのはこの div であり、中身の ul は素のまま。ul 自体を格子に
+     したい合成は消費者の責任で role="list" を再付与する(独立レビュー指摘で明文化) -->
 <div
   class="sc-grid"
   data-gap={gapPrimitive ? undefined : gapTier ? gap : META.props.gap.default}
