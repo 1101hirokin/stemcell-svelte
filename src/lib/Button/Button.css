@@ -3,7 +3,7 @@
   display: inline-flex; /* shrink-wrap 既定(layout.md §2) */
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-inline-sm); /* HOLES #1: start/end と文字の間隔の段は仕様未指定。inline-sm を仮置き */
+  gap: var(--spacing-inline-md); /* 契約 alpha.5 が明記(HOLES #1 解消) */
   border: none;
   border-radius: var(--shape-semantic-control);
   font-family: var(--typography-label-lg-font-family);

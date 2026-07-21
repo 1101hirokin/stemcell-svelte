@@ -8,7 +8,7 @@
 
 | # | 部品 | 何が決まっていなかったか | 仮置き | 分類 |
 |---|---|---|---|---|
-| 1 | Button | start / end スロットと文字の間隔の段。契約は「spacing の inline を引く」とだけ書き、sm / md / lg のどれかを指定していない | `inline-sm` を仮置き | A(仕様に段の明記が要る) |
+| 1 | Button | start / end スロットと文字の間隔の段。契約は「spacing の inline を引く」とだけ書き、sm / md / lg のどれかを指定していない | `inline-sm` を仮置き → 契約 alpha.5 が inline-md(8px) を明記し解消。実装追従済み | A(解消済み。仕様へ戻す運用の最初の実例) |
 | 2 | Icon | アイコンセット未受領のため name → グリフの描画が定義できない | 実装保留(スタブも作らない) | A・既知(iconography.md §6 の TODO と整合。セット受領で解消) |
 | 3 | Button | disabled の機構(native 属性 か aria-disabled か)は Web の表現として実装に委ねられている | native `disabled` 属性を選択。根拠: 契約の mirrorsNativeAttr、抑制(state.md §3.2)が無償、支援技術からは閲覧カーソルで到達可能 | B(state.md §5 の3要求は満たす。実測検証は実装 Done の条件) |
 | 4 | Button | click イベントの FW 写像 | Svelte 5 の callback prop(`onclick`)に写像 | B(契約: 命名は各 FW の規約に写像される) |
