@@ -203,7 +203,7 @@
     </label>
     <div class="pg-resizable">
       <Sidebar side={sidebarSide} sideWidth="12rem" gap="md">
-        {#snippet sideSlot()}
+        {#snippet aside()}
           <div class="pg-chip">ナビ(脇)</div>
         {/snippet}
         <div class="pg-chip">本体。器を狭めると縦積みへ折れ、DOM 順は変わらない。</div>

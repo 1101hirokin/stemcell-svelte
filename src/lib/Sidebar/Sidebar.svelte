@@ -8,14 +8,14 @@
   interface Props {
     /** 脇をどちらに置くか。論理方向(RTL で反転)。DOM 順も決める(視覚だけの入替はしない)。 */
     side?: (typeof META.props.side.values)[number];
-    /** 脇の幅(rem の長さ。値語彙は未確定の seed。layout.md §9)。省略時は脇の内容幅。 */
+    /** 脇の幅(rem の長さ。契約 alpha.1 が単位 rem を記録。数値集合は未確定の seed)。省略時は脇の内容幅。 */
     sideWidth?: string;
     /** 本体が保つ最小比率(百分率の文字列)。これを割ると縦積みへ折れる。 */
     contentMin?: string;
     /** spacing の語彙: 段(sm / md / lg)または大域の原始 X(8〜24)。 */
     gap?: string;
-    /** 契約の slot「side」。prop の side(enum)と名前空間が衝突するため <name>Slot へ写像(HOLES #22)。 */
-    sideSlot: Snippet;
+    /** 脇の中身(契約 alpha.1 の slot「aside」。旧名 side は prop と衝突し、GOVERNANCE §4 の規則で改名された)。 */
+    aside: Snippet;
     children: Snippet;
   }
   let {
@@ -23,7 +23,7 @@
     sideWidth,
     contentMin = META.props.contentMin.default,
     gap = META.props.gap.default,
-    sideSlot,
+    aside,
     children,
   }: Props = $props();
 
@@ -56,10 +56,10 @@
   style:--sc-sidebar-content-min={validContentMin ? contentMin : META.props.contentMin.default}
 >
   {#if side === 'start'}
-    <div class="sc-sidebar-side">{@render sideSlot()}</div>
+    <div class="sc-sidebar-side">{@render aside()}</div>
     <div class="sc-sidebar-content">{@render children()}</div>
   {:else}
     <div class="sc-sidebar-content">{@render children()}</div>
-    <div class="sc-sidebar-side">{@render sideSlot()}</div>
+    <div class="sc-sidebar-side">{@render aside()}</div>
   {/if}
 </div>
