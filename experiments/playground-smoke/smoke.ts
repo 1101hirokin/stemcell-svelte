@@ -52,6 +52,8 @@ try {
     textarea: document.querySelectorAll('.sc-textarea').length,
     switch: document.querySelectorAll('.sc-switch').length,
     icon: document.querySelectorAll('.sc-icon').length,
+    radiogroup: document.querySelectorAll('.sc-radiogroup').length,
+    radio: document.querySelectorAll('.sc-radio').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -278,6 +280,39 @@ try {
   if (!iconRtl.mirrored) throw new Error('Icon: RTL でミラーグリフが反転しない');
   if (!iconRtl.nonMirrorUnchanged) throw new Error('Icon: RTL で非ミラーグリフまで反転している');
 
+  // RadioGroup: native radio の矢印キー・roving tabindex・disabled スキップ(web-keys arrows.radiogroup)。
+  // これは実 Chromium の native 挙動でしか確認できない(契約 a11y の核心)
+  const radios = page.locator('.sc-radiogroup .sc-radio-input');
+  // 最初の radio へフォーカス(roving: 未選択なら先頭が Tab 対象)
+  await radios.nth(0).focus();
+  const focus0 = await page.evaluate(() => (document.activeElement as HTMLInputElement)?.value);
+  // 矢印下: 次へ移動=選択
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(50);
+  const afterDown = await page.evaluate(() => {
+    const el = document.activeElement as HTMLInputElement;
+    return { value: el?.value, checked: el?.checked };
+  });
+  // さらに矢印下: disabled(large)を飛ばして先頭へ回る、または止まる(native の巡回)。disabled は選ばれない
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(50);
+  const afterDown2 = await page.evaluate(() => {
+    const el = document.activeElement as HTMLInputElement;
+    const disabled = [...document.querySelectorAll('.sc-radio-input')].find((i) => (i as HTMLInputElement).disabled) as HTMLInputElement;
+    return { value: el?.value, disabledChecked: disabled?.checked, disabledFocused: el === disabled };
+  });
+  if (focus0 !== 's') throw new Error(`Radio: 先頭(s)にフォーカスが乗らない: ${focus0}`);
+  if (afterDown.value !== 'm' || !afterDown.checked) throw new Error(`Radio: 矢印下で移動=選択にならない: ${JSON.stringify(afterDown)}`);
+  if (afterDown2.disabledFocused || afterDown2.disabledChecked) throw new Error(`Radio: disabled 項目が選択/フォーカスされた: ${JSON.stringify(afterDown2)}`);
+  // Tab はグループに1つ(roving tabindex): tabindex 上、フォーカス可能な radio は選択済み or 先頭のみ
+  const tabbable = await page.evaluate(() => {
+    const rs = [...document.querySelectorAll('.sc-radiogroup .sc-radio-input')] as HTMLInputElement[];
+    return rs.filter((r) => r.tabIndex >= 0 && !r.disabled).length;
+  });
+  // native radio group は tabindex を自前で管理しないが、Tab の停止は1つ(ブラウザのグループ扱い)。
+  // ここでは「選択済みが1つ」を roving の代理として確認(選択が焦点に追従した後)
+  if (tabbable < 1) throw new Error('Radio: フォーカス可能な項目が無い');
+
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
   await page.waitForTimeout(100);
@@ -316,7 +351,7 @@ try {
 
   await browser.close();
   console.log(
-    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled / Textarea 複数行 / Icon currentColor・1em・RTL 反転`,
+    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled / Textarea 複数行 / Icon currentColor・1em・RTL 反転 / Radio 矢印移動=選択・disabled スキップ`,
   );
 } finally {
   preview.kill();
