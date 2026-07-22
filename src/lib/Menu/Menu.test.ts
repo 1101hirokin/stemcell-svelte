@@ -124,3 +124,62 @@ it('disabled な Menu は開かない', async () => {
   await tick();
   expect(q(container, '.sc-menu-trigger').getAttribute('aria-expanded')).toBe('false');
 });
+
+it('Home / End で端の menuitem へ roving する(disabled は端から飛ばす)', async () => {
+  const { container } = render(Menu, { props: { items, trigger } });
+  await fireEvent.keyDown(q(container, '.sc-menu-trigger'), { key: 'ArrowDown' });
+  await tick();
+  const menu = q(container, '[role="menu"]');
+  await fireEvent.keyDown(menu, { key: 'End' });
+  await tick();
+  expect(document.activeElement).toBe(qa(container, '[role="menuitem"]')[3]); // share(del は disabled)
+  await fireEvent.keyDown(menu, { key: 'Home' });
+  await tick();
+  expect(document.activeElement).toBe(qa(container, '[role="menuitem"]')[0]); // edit
+});
+
+it('再度開くと activeIndex はリセットされ先頭から(前回位置を持ち越さない)', async () => {
+  const { container } = render(Menu, { props: { items, trigger } });
+  const t = q(container, '.sc-menu-trigger');
+  await fireEvent.keyDown(t, { key: 'ArrowDown' });
+  await tick();
+  await fireEvent.keyDown(q(container, '[role="menu"]'), { key: 'ArrowDown' }); // dup を active に
+  await tick();
+  await fireEvent.keyDown(q(container, '[role="menu"]'), { key: 'Escape' });
+  await tick();
+  await fireEvent.keyDown(t, { key: 'ArrowDown' }); // 再開
+  await tick();
+  expect(document.activeElement).toBe(qa(container, '[role="menuitem"]')[0]); // 先頭に戻る
+});
+
+it('items が空のメニューは開かない(退化ケース)', async () => {
+  const { container } = render(Menu, { props: { items: [], trigger } });
+  await fireEvent.click(q(container, '.sc-menu-trigger'));
+  await tick();
+  expect(q(container, '.sc-menu-trigger').getAttribute('aria-expanded')).toBe('false');
+});
+
+it('全項目 disabled では開くが menu 容器へフォーカスし、Escape で閉じられる(退化ケース)', async () => {
+  const allDisabled = [
+    { id: 'a', label: 'A', disabled: true },
+    { id: 'b', label: 'B', disabled: true },
+  ];
+  const { container } = render(Menu, { props: { items: allDisabled, trigger } });
+  const t = q(container, '.sc-menu-trigger');
+  await fireEvent.keyDown(t, { key: 'ArrowDown' });
+  await tick();
+  expect(t.getAttribute('aria-expanded')).toBe('true');
+  const menu = q(container, '[role="menu"]');
+  expect(document.activeElement).toBe(menu); // 動かせる項目が無いので容器へ
+  expect(qa(container, '[role="menuitem"]').every((el) => el.getAttribute('tabindex') === '-1')).toBe(true);
+  await fireEvent.keyDown(menu, { key: 'Escape' });
+  await tick();
+  expect(t.getAttribute('aria-expanded')).toBe('false');
+  expect(document.activeElement).toBe(t);
+});
+
+it('menu 容器は aria-labelledby でトリガーを指す(APG menu button)', () => {
+  const { container } = render(Menu, { props: { items, trigger } });
+  const menu = q(container, '[role="menu"]');
+  expect(menu.getAttribute('aria-labelledby')).toBe(q(container, '.sc-menu-trigger').id);
+});

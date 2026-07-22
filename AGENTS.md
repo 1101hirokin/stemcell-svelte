@@ -220,7 +220,7 @@ props:
 
 - `items`: array — メニュー項目の列。データとして渡す(Select の options と同じ理由: 4プラットフォーム中立の契約はデータが安い。Select.md §3 / RFC 0008)。区切り(separator)と節(section)は初版で持たず、items の構造拡張で後から足せる(非破壊)。
 - `disabled`: boolean(既定 false) — トリガー全体を無効化する(state.md §3.1 / §5)。開けない。
-- `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段(TextField / Select と同じ)。トリガーの inset と項目の密度に効く。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段(TextField / Select と同じ)。トリガーの inset に効く。項目の密度は size 非依存で固定(Select の option が段によらず一定なのと同じ。ドロップダウンの中身は器の寸法に追従しない)。
 - `placement`: "block-end" | "block-start"(既定 "block-end") — トリガーに対する優先の開き方向(論理方向)。Popover へ委譲する(Popover.placement)。画面端での反転は Expressive(overlay.md §5)。
 
 events(Svelte では callback prop):
@@ -234,6 +234,8 @@ slots(Svelte では snippet。default は子要素をそのまま):
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - APG の menu button + menu パターン。トリガーは role=button + aria-haspopup=menu + aria-expanded(open に追従)+ aria-controls(メニューの id)。ポップアップは role=menu、各項目は role=menuitem。キーは web-keys.rules.json の arrows.menu(RFC 0008)。
+- 配線は双方向。トリガーからメニューへは aria-controls、メニューからトリガーへは aria-labelledby(menu 容器がトリガーの id を指し、どのトリガーに属すかを支援技術へ伝える。APG menu button の正準実装)。
+- 項目の description(副文)は menuitem の accessible name に label と連結して読まれる(補足は名前の一部。aria-describedby で分離しない — 初版の決定。分離が要る事由が立てば将来 RFC)。
 - 中への移動は実 DOM フォーカスの roving(overlay.md §4 の二形態のうち Menu 側。role=menuitem を実フォーカスする。Select / Combobox の listbox が DOM フォーカスをトリガーに留めて aria-activedescendant で仮想的に指すのと対を成す)。開くと先頭 menuitem(ArrowUp なら末尾)へ実フォーカスする。
 - activate は Enter と Space の両方(APG menu。listbox が Enter のみで Space を type-ahead に割いたのと異なる — menuitem は活性化が主で Space も活性化に割く。web-keys arrows.menu)。活性化するとメニューを閉じ、フォーカスをトリガーへ戻す。Escape も閉じてトリガーへ戻す。
 - disabled の menuitem は roving を飛ばし、aria-disabled で伝える(活性化しない。state.md §5)。

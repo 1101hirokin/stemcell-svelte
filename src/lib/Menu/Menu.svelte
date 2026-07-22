@@ -48,7 +48,10 @@
   // roving の指す先(実 DOM フォーカスの対象。activedescendant ではない)。閉じている間は -1。
   let activeIndex = $state(-1);
   let triggerEl = $state<HTMLButtonElement>();
-  const itemEls: HTMLLIElement[] = [];
+  let menuListEl = $state<HTMLUListElement>();
+  // 各 menuitem 要素の実フォーカス用の参照。$state で持ち、配列の伸縮を Svelte の管理下に置く
+  // (bind:this を非 reactive な素の配列へ張ると binding_property_non_reactive 警告になる)。
+  let itemEls = $state<HTMLLIElement[]>([]);
 
   const enabledIndexes = $derived(
     items.map((it, i) => (it.disabled ? -1 : i)).filter((i) => i >= 0),
@@ -60,10 +63,18 @@
     itemEls[i]?.focus();
   }
   async function openMenu(edge: 'first' | 'last') {
-    if (disabled) return;
+    if (disabled || items.length === 0) return; // 項目が無いメニューは開かない
     open = true;
     const target = edge === 'last' ? enabledIndexes.at(-1) : enabledIndexes[0];
-    if (target !== undefined) await focusItem(target);
+    if (target !== undefined) {
+      await focusItem(target);
+    } else {
+      // 全項目 disabled: 動かせる項目が無いので menu 容器へ実フォーカスを入れる(トリガーに残さない)。
+      // これで focus は popover 内に入り、Escape(容器の keydown)で閉じられる。フォーカスがトリガーに
+      // 残ると Popover の focusout が誤発火しない代わりに矢印も効かず操作不能に見えるのを避ける。
+      await tick();
+      menuListEl?.focus();
+    }
   }
   // 閉じるときはトリガーへフォーカスを返す(Escape / 活性化 / 外側。native popover も同じ先へ戻すので二重でも同一)。
   function closeMenu() {
@@ -101,7 +112,7 @@
   }
 
   function onTriggerKeydown(e: KeyboardEvent) {
-    if (open) return; // 開いている間フォーカスは項目にあり、ここへは来ない
+    if (open) return; // 開いている間フォーカスは項目(または全 disabled 時は menu 容器)にあり、ここへは来ない
     if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
       e.preventDefault();
       openMenu('first');
@@ -177,7 +188,15 @@
     </button>
   {/snippet}
   {#snippet content()}
-    <ul class="sc-menu-list" id={menuId} role="menu" data-size={size} onkeydown={onMenuKeydown}>
+    <ul
+      bind:this={menuListEl}
+      class="sc-menu-list"
+      id={menuId}
+      role="menu"
+      aria-labelledby={triggerId}
+      tabindex="-1"
+      onkeydown={onMenuKeydown}
+    >
       {#each items as it, i (it.id)}
         <!-- キーボードは menu(ul)側の onMenuKeydown が roving で一括処理する(APG menu パターン。項目個別の
              keydown は持たない)。onclick はマウス活性化。ゆえに項目単位のキーハンドラ欠如は設計どおり -->
