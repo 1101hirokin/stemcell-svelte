@@ -240,6 +240,73 @@ try {
   if (nat.chevronPE !== 'none' || !nat.chevronHitsSelect)
     throw new Error('Select(native): chevron の上のクリックが背後の <select> に届かない(押下で開けない)');
 
+  // Menu(APG menu button + menu): 中への移動は実 DOM フォーカスの roving(overlay.md §4 の二形態のうち Menu 側。
+  // Select の listbox が仮想フォーカスなのと対)。jsdom は popover API を持たないので top-layer と native dismiss は
+  // ここ(実 Chromium)でしか測れない。ArrowDown で開き先頭項目を実フォーカス、矢印で移動、Enter で活性化して閉じ
+  // フォーカスがトリガーへ戻る、Escape/外側で閉じる、を通す。
+  const menuTrigger = page.locator('.sc-menu-trigger').first();
+  if ((await menuTrigger.count()) === 0)
+    throw new Error('Menu: トリガー(.sc-menu-trigger)が playground に無い');
+  await menuTrigger.focus();
+  await page.keyboard.press('ArrowDown'); // 開いて先頭 menuitem を実フォーカス
+  await page.waitForTimeout(200);
+  const menuOpen = await page.evaluate(() => {
+    const t = document.querySelector('.sc-menu-trigger') as HTMLElement;
+    const list = document.querySelector('.sc-menu-list') as HTMLElement | null;
+    const content = list?.closest('.sc-popover-content') as HTMLElement | null;
+    const topLayer = content
+      ? (() => {
+          try {
+            return content.matches(':popover-open');
+          } catch {
+            return false;
+          }
+        })()
+      : false;
+    const items = [...(list?.querySelectorAll('[role="menuitem"]') ?? [])] as HTMLElement[];
+    return {
+      expanded: t.getAttribute('aria-expanded'),
+      topLayer, // top-layer に出ている = overflow:hidden で切れない
+      focusOnFirstItem: document.activeElement === items[0], // roving は実 DOM フォーカス(Select と対)
+      firstTabindex: items[0]?.getAttribute('tabindex'),
+    };
+  });
+  if (menuOpen.expanded !== 'true' || !menuOpen.topLayer)
+    throw new Error(`Menu: メニューが top-layer popover に開かない(${JSON.stringify(menuOpen)})`);
+  if (!menuOpen.focusOnFirstItem || menuOpen.firstTabindex !== '0')
+    throw new Error('Menu: 開いても先頭 menuitem を実フォーカスしない(roving。overlay.md §4 の Menu 側)');
+  await page.keyboard.press('ArrowDown'); // 次項目へ roving
+  await page.waitForTimeout(80);
+  const moved = await page.evaluate(() => {
+    const items = [...document.querySelectorAll('.sc-menu-list [role="menuitem"]')] as HTMLElement[];
+    return document.activeElement === items[1];
+  });
+  if (!moved) throw new Error('Menu: ArrowDown で実フォーカスが次の menuitem へ移らない(roving)');
+  await page.keyboard.press('Enter'); // 活性化して閉じる
+  await page.waitForTimeout(150);
+  const afterActivate = await page.evaluate(() => {
+    const t = document.querySelector('.sc-menu-trigger') as HTMLElement;
+    return { expanded: t.getAttribute('aria-expanded'), focusBackOnTrigger: document.activeElement === t };
+  });
+  if (afterActivate.expanded !== 'false')
+    throw new Error('Menu: 活性化してもメニューが閉じない');
+  if (!afterActivate.focusBackOnTrigger)
+    throw new Error('Menu: 活性化後フォーカスがトリガーへ戻らない');
+  await menuTrigger.focus();
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(120);
+  await page.keyboard.press('Escape'); // native light dismiss
+  await page.waitForTimeout(150);
+  if ((await menuTrigger.getAttribute('aria-expanded')) !== 'false')
+    throw new Error('Menu: Escape で閉じない');
+  await menuTrigger.focus();
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(120);
+  await page.mouse.click(5, 5); // 外側を実クリック(native light dismiss)
+  await page.waitForTimeout(150);
+  if ((await menuTrigger.getAttribute('aria-expanded')) !== 'false')
+    throw new Error('Menu: 外側クリックで閉じない(native light dismiss)');
+
   // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
   // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)
   const cb = await page.evaluate(() => {
