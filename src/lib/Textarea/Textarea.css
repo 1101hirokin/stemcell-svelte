@@ -1,0 +1,105 @@
+/* TextField を継承する複数行入力(契約 extends。tokensRequired は TextField と同じ)。
+   TextField.css の写しで、start / end を持たず、control は縦に伸びる。 */
+.sc-textarea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  /* フィールドは fill(横いっぱい)が既定。憲法第3条・field.md §2・layout.md §2 */
+  inline-size: 100%;
+  min-inline-size: 0;
+  --_border: var(--color-app-border);
+  --_ring: var(--color-semantic-plain-focus-ring);
+}
+.sc-textarea[data-invalid='true'] {
+  --_border: var(--color-semantic-danger-border);
+  --_ring: var(--color-semantic-danger-focus-ring);
+}
+.sc-textarea[data-disabled='true'] {
+  --_border: var(--color-semantic-disabled-border);
+}
+
+.sc-textarea-label {
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-textarea-required {
+  margin-inline-start: 0.25em;
+}
+
+.sc-textarea-control {
+  display: flex;
+  /* TextField の control の flex gap を継承する(契約 extends。tokensRequired も継承)。
+     Textarea は start/end を持たないので子は1つで、この gap に空ける相手は無い(視覚効果なし)。
+     TextField 由来の spacing.inline.md を同じ構造の場所で引くための保持であり発明ではない */
+  gap: var(--spacing-inline-md);
+  background: var(--color-app-surface);
+  border: var(--shape-border-width) solid var(--_border);
+  border-radius: var(--shape-semantic-control);
+  transition:
+    border-color var(--motion-feedback-duration) var(--motion-feedback-easing),
+    background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+.sc-textarea[data-size='sm'] .sc-textarea-control {
+  padding: var(--spacing-inset-sm);
+}
+.sc-textarea[data-size='md'] .sc-textarea-control {
+  padding: var(--spacing-inset-md);
+}
+.sc-textarea[data-size='lg'] .sc-textarea-control {
+  padding: var(--spacing-inset-lg);
+}
+.sc-textarea[data-disabled='true'] .sc-textarea-control {
+  background: var(--color-semantic-disabled-soft-bg);
+  cursor: not-allowed;
+}
+
+.sc-textarea-input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  inline-size: 100%;
+  border: none;
+  background: none;
+  padding: 0;
+  outline: none;
+  /* リサイズは土地の声(契約 Expressive)。縦のみ許し、横は器が持つ */
+  resize: vertical;
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-textarea-input::placeholder {
+  color: var(--color-app-fg-muted);
+}
+.sc-textarea[data-disabled='true'] .sc-textarea-input {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+  resize: none;
+}
+
+.sc-textarea-control:has(.sc-textarea-input:focus-visible) {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.sc-textarea-description,
+.sc-textarea-error {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-textarea-description {
+  color: var(--color-app-fg-muted);
+}
+.sc-textarea-error {
+  color: var(--color-semantic-danger-soft-fg);
+}

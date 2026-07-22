@@ -1,0 +1,11 @@
+/* 絵は文字と同じ role・寸法(iconography.md §4)。色は currentColor(svg 属性)、寸法は 1em。
+   段や独自の縮小ロジックは持たない(size.md §2「縮小のロジックは1つ」)。 */
+.sc-icon {
+  display: inline-block;
+  vertical-align: -0.125em; /* 文字のベースラインに揃える(1em 基調の並び) */
+  flex: none;
+}
+/* 読み方向に紐づく水平方向指示は RTL で反転する(iconography.md §4。glyph の mirrorInRTL) */
+:dir(rtl) .sc-icon[data-mirror='true'] {
+  transform: scaleX(-1);
+}

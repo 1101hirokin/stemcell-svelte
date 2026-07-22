@@ -7,3 +7,7 @@ export { default as Cluster } from './Cluster/Cluster.svelte';
 export { default as TextField } from './TextField/TextField.svelte';
 export { default as Grid } from './Grid/Grid.svelte';
 export { default as Sidebar } from './Sidebar/Sidebar.svelte';
+export { default as Checkbox } from './Checkbox/Checkbox.svelte';
+export { default as Textarea } from './Textarea/Textarea.svelte';
+export { default as Switch } from './Switch/Switch.svelte';
+export { default as Icon } from './Icon/Icon.svelte';

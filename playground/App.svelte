@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar } from '../src/lib';
+  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox, Textarea, Switch, Icon } from '../src/lib';
+  import checkGlyph from '@stemcell/icons/check';
 
   let theme = $state<'auto' | 'standard-light' | 'standard-dark'>('auto');
   let density = $state<'comfortable' | 'compact'>('comfortable');
@@ -7,6 +8,12 @@
   let invite = $state('abc');
   let gridMin = $state('16rem');
   let sidebarSide = $state<'start' | 'end'>('start');
+  let agree = $state(false);
+  let agreeTouched = $state(false);
+  let toppings = $state({ cheese: true, tomato: false });
+  let bio = $state('');
+  let notify = $state(true);
+
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
   const colors = ['primary', 'danger', 'warning', 'plain'] as const;
@@ -167,6 +174,134 @@
         </Stack>
       </div>
     </div>
+  </section>
+
+  <section>
+    <h2>Icon</h2>
+    <p>
+      語彙を絵で示す描画器。色は currentColor(文字色を継承)、寸法は 1em(font-size に追従)。
+      既定は装飾で支援技術から隠れ、label を付けると意味を運ぶ。
+    </p>
+    <div class="pg-row">
+      <code class="pg-tag">currentColor</code>
+      <Cluster gap="md" align="center">
+        <span style="color: var(--color-semantic-primary-bg)"><Icon name="check" /></span>
+        <span style="color: var(--color-semantic-danger-bg)"><Icon name="delete" /></span>
+        <Icon name="search" label="検索" />
+        <Icon name="setting" />
+        <Icon name="bookmark" />
+        <Icon name="bookmark.fill" />
+        <Icon name="star" />
+        <Icon name="star.half" />
+        <Icon name="star.fill" />
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">1em(font-size 追従)</code>
+      <Cluster gap="md" align="center">
+        <span style="font-size: 1rem"><Icon name="love" /></span>
+        <span style="font-size: 1.5rem"><Icon name="love" /></span>
+        <span style="font-size: 2.5rem"><Icon name="love" /></span>
+        <span style="font-size: 1rem">テキストと並ぶ <Icon name="chevron.right" /> 絵</span>
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">RTL 反転</code>
+      <Cluster gap="lg" align="center">
+        <span dir="ltr">LTR: <Icon name="arrow.left" /> <Icon name="arrow.right" /></span>
+        <span dir="rtl">RTL: <Icon name="arrow.left" /> <Icon name="arrow.right" /></span>
+        <span dir="rtl">整列は不変: <Icon name="text_align.left" /></span>
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">Button 内</code>
+      <Button>{#snippet start()}<Icon name="file.download" />{/snippet}保存</Button>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">glyph 渡し</code>
+      <Cluster gap="md" align="center">
+        <Icon glyph={checkGlyph} label="完了(静的・ツリーシェイク)" />
+        <span>name(全束)と glyph(使う分だけ)の二口。iconography.md §6</span>
+      </Cluster>
+    </div>
+  </section>
+
+  <section>
+    <h2>Textarea</h2>
+    <p>複数行入力。TextField を継承(extends)し、start / end は持たない。縦リサイズ可。</p>
+    <Textarea bind:value={bio} rows={4} invalid={bio.length > 20}>
+      {#snippet label()}自己紹介{/snippet}
+      {#snippet description()}20字以内(現在 {bio.length}字){/snippet}
+      {#snippet error()}長すぎる{/snippet}
+    </Textarea>
+  </section>
+
+  <section>
+    <h2>Switch</h2>
+    <p>独立した設定の on / off(即時反映。field.md §7)。invalid / required を持たない。</p>
+    <Stack gap="sm">
+      <Switch bind:checked={notify}>
+        {#snippet label()}通知を受け取る{/snippet}
+        {#snippet description()}メールとプッシュで届く{/snippet}
+      </Switch>
+      <Switch disabled>
+        {#snippet label()}disabled(off){/snippet}
+      </Switch>
+      <Switch checked disabled>
+        {#snippet label()}disabled(on){/snippet}
+      </Switch>
+    </Stack>
+  </section>
+
+  <section>
+    <h2>Checkbox</h2>
+    <p>
+      集合からの選択・同意(field.md §7)。リッチ label(リンク内包)の二重発火防止と、
+      親の indeterminate(集計表示)を実演する。checked は primary の塗り、未チェックの hover は
+      plain のウォッシュ。
+    </p>
+    <Stack gap="md">
+      <!-- invalid は操作後(離脱)にだけ立てる。field.md §3: エラー判定は入力完了まで待つ -->
+      <Checkbox
+        checked={agree}
+        required
+        invalid={agreeTouched && !agree}
+        onchange={(c) => { agree = c; agreeTouched = true; }}
+      >
+        {#snippet label()}
+          <a href="/terms" onclick={(e) => e.preventDefault()}>利用規約</a>に同意する
+        {/snippet}
+        {#snippet description()}続行には同意が必要{/snippet}
+        {#snippet error()}同意してください{/snippet}
+      </Checkbox>
+
+      <Checkbox
+        checked={toppings.cheese && toppings.tomato}
+        indeterminate={toppings.cheese !== toppings.tomato}
+        onchange={(c) => (toppings = { cheese: c, tomato: c })}
+      >
+        {#snippet label()}トッピング全部(親){/snippet}
+      </Checkbox>
+      <Box inset="8">
+        <Stack gap="sm">
+          <Checkbox bind:checked={toppings.cheese}>
+            {#snippet label()}チーズ{/snippet}
+          </Checkbox>
+          <Checkbox bind:checked={toppings.tomato}>
+            {#snippet label()}トマト{/snippet}
+          </Checkbox>
+        </Stack>
+      </Box>
+
+      <Cluster gap="md">
+        <Checkbox checked disabled>
+          {#snippet label()}disabled(checked){/snippet}
+        </Checkbox>
+        <Checkbox disabled>
+          {#snippet label()}disabled{/snippet}
+        </Checkbox>
+      </Cluster>
+    </Stack>
   </section>
 
   <section>

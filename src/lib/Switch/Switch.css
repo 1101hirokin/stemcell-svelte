@@ -1,0 +1,111 @@
+/* 独立設定の on/off(field.md §7)。native <input role=switch> が値と a11y の源。
+   視覚は track + thumb が描く(契約 expressive)。off は plain の面、on は primary の面。 */
+.sc-switch-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+}
+
+.sc-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+  cursor: pointer;
+  /* off のチャンネル(既定)。checked で primary へ差し替える */
+  --_track: var(--color-semantic-plain-bg);
+  --_track-hover: var(--color-semantic-plain-bg-hover);
+  --_track-pressed: var(--color-semantic-plain-bg-pressed);
+  --_ring: var(--color-semantic-primary-focus-ring);
+}
+.sc-switch-field[data-disabled='true'] .sc-switch {
+  cursor: not-allowed;
+}
+
+/* input は track を覆って置き、クリック・フォーカスを受ける。視覚は透明 */
+.sc-switch-input {
+  position: absolute;
+  inline-size: 2.25rem;
+  block-size: 1.25rem;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.sc-switch-track {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  inline-size: 2.25rem;
+  block-size: 1.25rem;
+  padding: 0.125rem;
+  border-radius: var(--shape-semantic-pill);
+  background: var(--_track);
+  transition: background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+.sc-switch-thumb {
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: var(--shape-semantic-pill);
+  background: var(--color-app-surface);
+  transition: transform var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+/* on: track を primary へ、thumb を右へ(論理方向。RTL で反転) */
+.sc-switch-input:checked + .sc-switch-track {
+  --_track: var(--color-semantic-primary-bg);
+  --_track-hover: var(--color-semantic-primary-bg-hover);
+  --_track-pressed: var(--color-semantic-primary-bg-pressed);
+}
+.sc-switch-input:checked + .sc-switch-track .sc-switch-thumb {
+  transform: translateX(1rem);
+}
+:dir(rtl) .sc-switch-input:checked + .sc-switch-track .sc-switch-thumb {
+  transform: translateX(-1rem);
+}
+
+/* hover / pressed(state.md §3.2: disabled は抑制) */
+.sc-switch:hover .sc-switch-track {
+  background: var(--_track-hover);
+}
+.sc-switch:active .sc-switch-track {
+  background: var(--_track-pressed);
+}
+
+/* focus-ring は track に出す */
+.sc-switch-input:focus-visible + .sc-switch-track {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* disabled が勝つ(state.md §3.1)。interaction を抑制する(§3.2) */
+.sc-switch-field[data-disabled='true'] .sc-switch-track,
+.sc-switch-field[data-disabled='true'] .sc-switch-input:checked + .sc-switch-track {
+  --_track: var(--color-semantic-disabled-bg);
+  background: var(--color-semantic-disabled-bg);
+}
+.sc-switch-field[data-disabled='true'] .sc-switch:hover .sc-switch-track,
+.sc-switch-field[data-disabled='true'] .sc-switch:active .sc-switch-track {
+  background: var(--color-semantic-disabled-bg);
+}
+
+.sc-switch-label {
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-switch-field[data-disabled='true'] .sc-switch-label {
+  color: var(--color-semantic-disabled-fg);
+}
+
+.sc-switch-description {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+  color: var(--color-app-fg-muted);
+}

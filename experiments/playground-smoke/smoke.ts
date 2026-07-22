@@ -48,6 +48,10 @@ try {
     textfield: document.querySelectorAll('.sc-textfield').length,
     grid: document.querySelectorAll('.sc-grid').length,
     sidebar: document.querySelectorAll('.sc-sidebar').length,
+    checkbox: document.querySelectorAll('.sc-checkbox').length,
+    textarea: document.querySelectorAll('.sc-textarea').length,
+    switch: document.querySelectorAll('.sc-switch').length,
+    icon: document.querySelectorAll('.sc-icon').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -131,6 +135,149 @@ try {
   if (fillWidth < 590)
     throw new Error(`TextField が fill しない(600px の器で ${fillWidth}px。inline-size:100% を確認)`);
 
+  // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
+  // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)
+  const cb = await page.evaluate(() => {
+    const first = document.querySelector('.sc-checkbox') as HTMLElement; // 同意(リッチ label)
+    const input = first.querySelector('.sc-checkbox-input') as HTMLInputElement;
+    const link = first.querySelector('a') as HTMLAnchorElement;
+    const text = first.querySelector('.sc-checkbox-label') as HTMLElement;
+    // (1) リンク活性化はトグルしない(interactive descendant の例外)
+    const before = input.checked;
+    link.click();
+    const afterLinkClick = input.checked;
+    // (2) label のテキスト(リンク以外)クリックはトグルする = label 機構が生きている証拠。
+    // これが無いと (1) は label 破壊時も自明に通る(何も繋がらないため)。両方で検出力を持たせる
+    text.click();
+    const toggledByText = input.checked !== afterLinkClick;
+
+    // 親の indeterminate(集計表示): checked=false かつ indeterminate=true で aria mixed
+    const parent = [...document.querySelectorAll('.sc-checkbox-input')].find(
+      (i) => (i as HTMLInputElement).indeterminate,
+    ) as HTMLInputElement | undefined;
+
+    // disabled: click しても発火しない
+    const disabled = [...document.querySelectorAll('.sc-checkbox-input')].find(
+      (i) => (i as HTMLInputElement).disabled,
+    ) as HTMLInputElement;
+    const dBefore = disabled.checked;
+    disabled.click();
+    const dAfter = disabled.checked;
+
+    return {
+      linkNoToggle: before === afterLinkClick,
+      toggledByText,
+      hasIndeterminate: !!parent && parent.indeterminate && !parent.checked,
+      disabledNoToggle: dBefore === dAfter,
+    };
+  });
+  if (!cb.linkNoToggle) throw new Error('Checkbox: リッチ label 内のリンククリックがトグルを発火させた(二重発火)');
+  if (!cb.toggledByText) throw new Error('Checkbox: label テキストのクリックがトグルしない(label 機構が死んでいる。二重発火検査の検出力の担保)');
+  if (!cb.hasIndeterminate) throw new Error('Checkbox: indeterminate(集計表示)が mixed になっていない');
+  if (!cb.disabledNoToggle) throw new Error('Checkbox: disabled が click を抑制していない');
+
+  // 同意 Checkbox を「操作後に未チェック」= invalid へ運ぶ。前段の cb 検査でトグル済みのため
+  // 現在値に依らず data-invalid になるまでクリックする(playground は field.md §3 どおり離脱後にだけ
+  // invalid を立てる)
+  await page.evaluate(async () => {
+    const input = document.querySelector('.sc-checkbox-input') as HTMLElement;
+    const field = document.querySelector('.sc-checkbox-field') as HTMLElement;
+    for (let i = 0; i < 3 && field.dataset.invalid !== 'true'; i++) {
+      input.click();
+      await new Promise((r) => setTimeout(r, 20));
+    }
+  });
+  await page.waitForTimeout(60);
+
+  // invalid の未チェック Checkbox は hover でも danger の枠を保つ(state.md §3.2: invalid は
+  // 抑制しない。独立レビュー major が実測した回帰。hover が中立 border を直書きすると赤枠が消えた)。
+  // 実 hover を Playwright で当てて CSS :hover を発火させる
+  const invalidField = page.locator('.sc-checkbox-field[data-invalid="true"]').first();
+  if (await invalidField.count()) {
+    const danger = await page.evaluate(() => {
+      const f = document.querySelector('.sc-checkbox-field[data-invalid="true"]') as HTMLElement;
+      const s = document.createElement('span'); s.style.color = 'var(--color-semantic-danger-border)';
+      f.appendChild(s); const c = getComputedStyle(s).color; s.remove(); return c;
+    });
+    await invalidField.locator('.sc-checkbox').hover();
+    await page.waitForTimeout(60);
+    const hovered = await invalidField.locator('.sc-checkbox-box').evaluate((el) => getComputedStyle(el).borderTopColor);
+    if (hovered !== danger)
+      throw new Error(`Checkbox: invalid 未チェックの枠が hover で danger を失う(${hovered} ≠ ${danger}。state.md §3.2)`);
+  }
+
+  // Switch: role=switch・トグルでサムが動く(track の transition を待つ)・disabled 抑制
+  const thumbX = () => page.evaluate(() => {
+    const t = document.querySelector('.sc-switch-thumb') as HTMLElement;
+    return t.getBoundingClientRect().x;
+  });
+  const swRole = await page.evaluate(() => document.querySelector('.sc-switch-input')!.getAttribute('role'));
+  if (swRole !== 'switch') throw new Error(`Switch: role が switch でない(${swRole})`);
+  const offX = await thumbX();
+  await page.evaluate(() => (document.querySelector('.sc-switch-input') as HTMLElement).click());
+  await page.waitForTimeout(250); // transition の完了を待つ
+  const onX = await thumbX();
+  if (Math.abs(onX - offX) < 4) throw new Error(`Switch: トグルでサムが動かない(${offX} → ${onX})`);
+  const swDis = await page.evaluate(() => {
+    const dis = [...document.querySelectorAll('.sc-switch-input')].find((i) => (i as HTMLInputElement).disabled) as HTMLInputElement;
+    const before = dis.checked; dis.click(); return before === dis.checked;
+  });
+  if (!swDis) throw new Error('Switch: disabled が click を抑制していない');
+
+  // Textarea: textarea 要素で rows を持ち、複数行が入る
+  const ta = await page.evaluate(() => {
+    const el = document.querySelector('.sc-textarea-input') as HTMLTextAreaElement;
+    return { tag: el.tagName, rows: el.rows };
+  });
+  if (ta.tag !== 'TEXTAREA' || ta.rows < 1) throw new Error(`Textarea が textarea/rows を持たない: ${JSON.stringify(ta)}`);
+
+  // Icon: currentColor が文字色を継承・1em が font-size に追従・RTL でミラーグリフだけ反転・
+  // 装飾/意味の a11y。実 Chromium でしか測れない currentColor と 1em を重点に
+  const icon = await page.evaluate(() => {
+    // currentColor: fill=currentColor が親の color を継承する。色付き span 内のアイコンの
+    // 実効 fill が、親の color(非黒)と一致するかを見る
+    let inherits = false;
+    for (const s of document.querySelectorAll('span')) {
+      const ic = s.querySelector('.sc-icon') as SVGElement | null;
+      if (!ic) continue;
+      const parentColor = getComputedStyle(s).color;
+      if (parentColor === 'rgb(0, 0, 0)') continue; // 色を付けていない span は飛ばす
+      if (getComputedStyle(ic).fill === parentColor) { inherits = true; break; }
+    }
+    // 1em: 全アイコンの実寸に font-size 由来の幅を持つ。最大と最小に十分な差があるか
+    const widths = [...document.querySelectorAll('.sc-icon')].map((i) => i.getBoundingClientRect().width);
+    const scales = widths.length > 0 && Math.max(...widths) > Math.min(...widths) + 10;
+    const decorative = document.querySelector('.sc-icon[aria-hidden="true"]');
+    const meaningful = document.querySelector('.sc-icon[role="img"]');
+    return {
+      inherits,
+      scales,
+      widthRange: [Math.min(...widths), Math.max(...widths)],
+      hasDecorative: !!decorative,
+      hasMeaningful: !!meaningful && !!meaningful.getAttribute('aria-label'),
+    };
+  });
+  if (!icon.inherits) throw new Error('Icon: currentColor が文字色を継承していない');
+  if (!icon.scales) throw new Error(`Icon: 1em が font-size に追従していない(幅 ${JSON.stringify(icon.widthRange)})`);
+  if (!icon.hasDecorative) throw new Error('Icon: 装飾(aria-hidden)が無い');
+  if (!icon.hasMeaningful) throw new Error('Icon: 意味(role=img + aria-label)が無い');
+
+  // RTL: ミラーグリフ(arrow.left)は RTL で反転、非ミラー(text_align.left)は反転しない
+  const iconRtl = await page.evaluate(() => {
+    const rtlSpan = [...document.querySelectorAll('span[dir="rtl"]')].find((s) => s.querySelector('.sc-icon[data-mirror="true"]'));
+    const mirror = rtlSpan?.querySelector('.sc-icon[data-mirror="true"]') as SVGElement;
+    const nonMirrorSpan = [...document.querySelectorAll('span[dir="rtl"]')].find(
+      (s) => s.querySelector('.sc-icon:not([data-mirror])'),
+    );
+    const nonMirror = nonMirrorSpan?.querySelector('.sc-icon:not([data-mirror])') as SVGElement;
+    return {
+      mirrored: mirror ? getComputedStyle(mirror).transform !== 'none' : false,
+      nonMirrorUnchanged: nonMirror ? getComputedStyle(nonMirror).transform === 'none' : false,
+    };
+  });
+  if (!iconRtl.mirrored) throw new Error('Icon: RTL でミラーグリフが反転しない');
+  if (!iconRtl.nonMirrorUnchanged) throw new Error('Icon: RTL で非ミラーグリフまで反転している');
+
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
   await page.waitForTimeout(100);
@@ -169,7 +316,7 @@ try {
 
   await browser.close();
   console.log(
-    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill`,
+    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled / Textarea 複数行 / Icon currentColor・1em・RTL 反転`,
   );
 } finally {
   preview.kill();
