@@ -1,17 +1,12 @@
 <script lang="ts">
   import './Icon.css';
-  import type { Glyph } from '@stemcell/icons';
-
-  // viewBox は全グリフ統一の定数(iconography.md §7)。@stemcell/icons から import すると
-  // その値と同じモジュールにある全マップ(glyphs)まで main チャンクへ引き込まれ、glyph 渡しの
-  // ツリーシェイクが壊れる(実測)。定数は直書きして静的 import を型だけにする。
-  const viewBox = '0 0 32 32';
+  // viewBox / Glyph 型は map-free の ./meta から取る(全マップを引き込まずツリーシェイクを守る。
+  // icons alpha.3 で分離。独立レビュー M2)。直書きの重複を避け、SSOT を icons に一元化する。
+  import { viewBox, type Glyph } from '@stemcell/icons/meta';
 
   // 語彙を絵で示す描画器(iconography.md)。色は currentColor、寸法は 1em。
   // 二つの口(iconography.md §6): name(中立契約。文字列。全束が入る)/ glyph(Web 方言。静的に
   // 取ってツリーシェイク。`import glyph from '@stemcell/icons/arrow.down'` して渡す)。
-  // Icon は全マップを import しない: glyph 渡しでツリーシェイクを効かせるため。name の解決は
-  // 別モジュール(./resolve)へ分け、glyph だけを使う消費者に全マップが混入しないようにする。
   interface Props {
     /** セットの意味名(中立契約。iconography.md §3)。全グリフが束に入る。 */
     name?: string;
@@ -22,21 +17,23 @@
   }
   let { name, glyph, label }: Props = $props();
 
-  // name の解決は動的 import で分離する: glyph だけの消費者のバンドルに全マップを混入させない。
-  let resolved = $state<Glyph | undefined>(undefined);
+  // glyph 渡しは同期で描く($derived。SSR でも出る)。name の解決だけは動的 import で分離し
+  // (glyph だけの消費者に全マップを混入させない。HOLES #30)、その分だけ非同期に埋める。
+  let named = $state<Glyph | undefined>(undefined);
   $effect(() => {
-    if (glyph) {
-      resolved = glyph;
-    } else if (name) {
-      // 全マップは name を使うときだけ読み込む(動的 import はバンドルを別チャンクに分ける)
-      import('./resolve').then(({ resolveByName }) => {
-        resolved = resolveByName(name!);
-        if (!resolved) console.warn(`[stemcell] Icon: 未知の name "${name}"(セットに無い。iconography.md §3)`);
-      });
-    } else {
-      resolved = undefined;
+    if (glyph || !name) {
+      named = undefined;
+      return;
     }
+    let live = true;
+    import('./resolve').then(({ resolveByName }) => {
+      if (!live) return;
+      named = resolveByName(name);
+      if (!named) console.warn(`[stemcell] Icon: 未知の name "${name}"(セットに無い。iconography.md §3)`);
+    });
+    return () => { live = false; };
   });
+  const resolved = $derived(glyph ?? named);
 </script>
 
 {#if resolved}

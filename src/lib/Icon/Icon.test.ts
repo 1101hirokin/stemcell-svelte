@@ -13,6 +13,10 @@ import arrowLeft from '@stemcell/icons/arrow.left';
 const svg = (c: HTMLElement) => c.querySelector('.sc-icon') as SVGElement;
 const findSvg = (c: HTMLElement) => waitFor(() => { if (!svg(c)) throw new Error('not yet'); return svg(c); });
 
+// SSR で glyph が描かれること(独立レビュー B1)は消費アプリの vite SSR ビルドで実測する
+// (vitest は .svelte を client 用にコンパイルし svelte/server と混ざると effect_orphan になるため)。
+// glyph は $derived(同期)で resolved に流れ SSR で出る。name は $effect の非同期解決なので SSR 直後は出ない。
+
 it('glyph 渡し(Web 方言): 同期で描画され viewBox 32・currentColor・1em を持つ', () => {
   const { container } = render(Icon, { props: { glyph: check } });
   const el = svg(container); // glyph は同期
