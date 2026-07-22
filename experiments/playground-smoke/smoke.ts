@@ -173,11 +173,16 @@ try {
   if (!cb.hasIndeterminate) throw new Error('Checkbox: indeterminate(集計表示)が mixed になっていない');
   if (!cb.disabledNoToggle) throw new Error('Checkbox: disabled が click を抑制していない');
 
-  // 同意 Checkbox を「操作後に未チェック」へ運んで invalid にする(2回クリック: 入→切)。
-  // playground は field.md §3 どおり離脱後にだけ invalid を立てる
-  await page.evaluate(() => {
+  // 同意 Checkbox を「操作後に未チェック」= invalid へ運ぶ。前段の cb 検査でトグル済みのため
+  // 現在値に依らず data-invalid になるまでクリックする(playground は field.md §3 どおり離脱後にだけ
+  // invalid を立てる)
+  await page.evaluate(async () => {
     const input = document.querySelector('.sc-checkbox-input') as HTMLElement;
-    input.click(); input.click();
+    const field = document.querySelector('.sc-checkbox-field') as HTMLElement;
+    for (let i = 0; i < 3 && field.dataset.invalid !== 'true'; i++) {
+      input.click();
+      await new Promise((r) => setTimeout(r, 20));
+    }
   });
   await page.waitForTimeout(60);
 
