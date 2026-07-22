@@ -10,8 +10,11 @@
   gap: var(--spacing-stack-sm);
 }
 
+/* legend は fieldset 内で特殊描画(flex アイテムにならず、fieldset の gap が効かない)。
+   TextField の label→control(stack-sm)と縦間隔を揃えるため、明示マージンで間隔を持たせる */
 .sc-radiogroup-label {
   padding: 0;
+  margin-block-end: var(--spacing-stack-sm);
   font-family: var(--typography-label-md-font-family);
   font-size: var(--typography-label-md-font-size);
   font-weight: var(--typography-label-md-font-weight);

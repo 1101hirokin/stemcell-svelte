@@ -6,3 +6,11 @@ body {
   font-size: var(--typography-body-md-font-size);
   line-height: var(--typography-body-md-line-height);
 }
+
+/* 等幅要素は UA の生 monospace ではなく DS の等幅スタックへ(StemcellProvider.md §6)。
+   code/kbd/samp/pre は UA が font-family を要素へ直接当てるため body の継承が届かない。
+   :where で詳細度を 0 に保ち、アプリの上書き余地を残す。font-size:1em は UA の縮小を打ち消す */
+:where(code, kbd, samp, pre) {
+  font-family: var(--font-family-code);
+  font-size: 1em;
+}
