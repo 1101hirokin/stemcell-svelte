@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox, Textarea, Switch } from '../src/lib';
+  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox, Textarea, Switch, Icon } from '../src/lib';
 
   let theme = $state<'auto' | 'standard-light' | 'standard-dark'>('auto');
   let density = $state<'comfortable' | 'compact'>('comfortable');
@@ -172,6 +172,49 @@
           <div class="pg-chip">低い</div>
         </Stack>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Icon</h2>
+    <p>
+      語彙を絵で示す描画器。色は currentColor(文字色を継承)、寸法は 1em(font-size に追従)。
+      既定は装飾で支援技術から隠れ、label を付けると意味を運ぶ。
+    </p>
+    <div class="pg-row">
+      <code class="pg-tag">currentColor</code>
+      <Cluster gap="md" align="center">
+        <span style="color: var(--color-semantic-primary-bg)"><Icon name="check" /></span>
+        <span style="color: var(--color-semantic-danger-bg)"><Icon name="delete" /></span>
+        <Icon name="search" label="検索" />
+        <Icon name="setting" />
+        <Icon name="bookmark" />
+        <Icon name="bookmark.fill" />
+        <Icon name="star" />
+        <Icon name="star.half" />
+        <Icon name="star.fill" />
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">1em(font-size 追従)</code>
+      <Cluster gap="md" align="center">
+        <span style="font-size: 1rem"><Icon name="love" /></span>
+        <span style="font-size: 1.5rem"><Icon name="love" /></span>
+        <span style="font-size: 2.5rem"><Icon name="love" /></span>
+        <span style="font-size: 1rem">テキストと並ぶ <Icon name="chevron.right" /> 絵</span>
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">RTL 反転</code>
+      <Cluster gap="lg" align="center">
+        <span dir="ltr">LTR: <Icon name="arrow.left" /> <Icon name="arrow.right" /></span>
+        <span dir="rtl">RTL: <Icon name="arrow.left" /> <Icon name="arrow.right" /></span>
+        <span dir="rtl">整列は不変: <Icon name="text_align.left" /></span>
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">Button 内</code>
+      <Button>{#snippet start()}<Icon name="file.download" />{/snippet}保存</Button>
     </div>
   </section>
 

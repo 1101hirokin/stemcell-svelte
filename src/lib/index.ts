@@ -10,3 +10,4 @@ export { default as Sidebar } from './Sidebar/Sidebar.svelte';
 export { default as Checkbox } from './Checkbox/Checkbox.svelte';
 export { default as Textarea } from './Textarea/Textarea.svelte';
 export { default as Switch } from './Switch/Switch.svelte';
+export { default as Icon } from './Icon/Icon.svelte';

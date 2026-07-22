@@ -51,6 +51,7 @@ try {
     checkbox: document.querySelectorAll('.sc-checkbox').length,
     textarea: document.querySelectorAll('.sc-textarea').length,
     switch: document.querySelectorAll('.sc-switch').length,
+    icon: document.querySelectorAll('.sc-icon').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -230,6 +231,53 @@ try {
   });
   if (ta.tag !== 'TEXTAREA' || ta.rows < 1) throw new Error(`Textarea が textarea/rows を持たない: ${JSON.stringify(ta)}`);
 
+  // Icon: currentColor が文字色を継承・1em が font-size に追従・RTL でミラーグリフだけ反転・
+  // 装飾/意味の a11y。実 Chromium でしか測れない currentColor と 1em を重点に
+  const icon = await page.evaluate(() => {
+    // currentColor: fill=currentColor が親の color を継承する。色付き span 内のアイコンの
+    // 実効 fill が、親の color(非黒)と一致するかを見る
+    let inherits = false;
+    for (const s of document.querySelectorAll('span')) {
+      const ic = s.querySelector('.sc-icon') as SVGElement | null;
+      if (!ic) continue;
+      const parentColor = getComputedStyle(s).color;
+      if (parentColor === 'rgb(0, 0, 0)') continue; // 色を付けていない span は飛ばす
+      if (getComputedStyle(ic).fill === parentColor) { inherits = true; break; }
+    }
+    // 1em: 全アイコンの実寸に font-size 由来の幅を持つ。最大と最小に十分な差があるか
+    const widths = [...document.querySelectorAll('.sc-icon')].map((i) => i.getBoundingClientRect().width);
+    const scales = widths.length > 0 && Math.max(...widths) > Math.min(...widths) + 10;
+    const decorative = document.querySelector('.sc-icon[aria-hidden="true"]');
+    const meaningful = document.querySelector('.sc-icon[role="img"]');
+    return {
+      inherits,
+      scales,
+      widthRange: [Math.min(...widths), Math.max(...widths)],
+      hasDecorative: !!decorative,
+      hasMeaningful: !!meaningful && !!meaningful.getAttribute('aria-label'),
+    };
+  });
+  if (!icon.inherits) throw new Error('Icon: currentColor が文字色を継承していない');
+  if (!icon.scales) throw new Error(`Icon: 1em が font-size に追従していない(幅 ${JSON.stringify(icon.widthRange)})`);
+  if (!icon.hasDecorative) throw new Error('Icon: 装飾(aria-hidden)が無い');
+  if (!icon.hasMeaningful) throw new Error('Icon: 意味(role=img + aria-label)が無い');
+
+  // RTL: ミラーグリフ(arrow.left)は RTL で反転、非ミラー(text_align.left)は反転しない
+  const iconRtl = await page.evaluate(() => {
+    const rtlSpan = [...document.querySelectorAll('span[dir="rtl"]')].find((s) => s.querySelector('.sc-icon[data-mirror="true"]'));
+    const mirror = rtlSpan?.querySelector('.sc-icon[data-mirror="true"]') as SVGElement;
+    const nonMirrorSpan = [...document.querySelectorAll('span[dir="rtl"]')].find(
+      (s) => s.querySelector('.sc-icon:not([data-mirror])'),
+    );
+    const nonMirror = nonMirrorSpan?.querySelector('.sc-icon:not([data-mirror])') as SVGElement;
+    return {
+      mirrored: mirror ? getComputedStyle(mirror).transform !== 'none' : false,
+      nonMirrorUnchanged: nonMirror ? getComputedStyle(nonMirror).transform === 'none' : false,
+    };
+  });
+  if (!iconRtl.mirrored) throw new Error('Icon: RTL でミラーグリフが反転しない');
+  if (!iconRtl.nonMirrorUnchanged) throw new Error('Icon: RTL で非ミラーグリフまで反転している');
+
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
   await page.waitForTimeout(100);
@@ -268,7 +316,7 @@ try {
 
   await browser.close();
   console.log(
-    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled / Textarea 複数行`,
+    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled / Textarea 複数行 / Icon currentColor・1em・RTL 反転`,
   );
 } finally {
   preview.kill();

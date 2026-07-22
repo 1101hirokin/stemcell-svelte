@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Grid, Sidebar, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Grid, Icon, Sidebar, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -153,6 +153,20 @@ slots(Svelte では snippet。default は子要素をそのまま):
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
+
+### Icon(契約 0.0.0-alpha.0)
+
+語彙を絵で示す。それ自体は何もしない。stemcell 自作セット専用の描画器であり、セット外のアイコンはこれを経由せず各部品のスロットへ直接置く(iconography.md §2)。
+
+props:
+
+- `name`: string — セットの意味名(iconography.md §3)。名詞・後置修飾・最大3階層・複合語はアンダースコア・視覚差分(塗り/半分)は .fill / .half のサフィックス(サフィックス無しが基本形)。語彙が凍結するまで string に留め、凍結後に enum 化する(同 §3 / §7)。
+- `label`: string((省略可)) — 意味を運ぶときの名前。省略時は装飾であり支援技術から隠れる(iconography.md §5)。絵を消したとき情報が失われるなら必須。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 既定は装飾: 支援技術から隠す(Web の表現は aria-hidden)。label があるときだけ意味を運び、画像として名前が届く(Web の表現は role=img + アクセシブルネーム)。
+- フォーカスを受け取らない。相互作用しないので最低標的(size.md §4)も適用外。押せる絵は IconButton。
 
 ### Sidebar(契約 0.0.0-alpha.3)
 
