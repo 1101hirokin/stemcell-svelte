@@ -83,6 +83,20 @@
   resize: none;
 }
 
+/* オートフィル: input の autofill 背景を box-shadow で潰し、control 全面に :has(:autofill) で同色を敷いて
+   角丸の全面で一致させる(TextField と同じ。Web 表現)。色は brand の淡い青(primary.soft-bg)。 */
+.sc-textarea-input:-webkit-autofill,
+.sc-textarea-input:-webkit-autofill:hover,
+.sc-textarea-input:-webkit-autofill:focus,
+.sc-textarea-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 100px var(--color-semantic-primary-soft-bg) inset;
+  -webkit-text-fill-color: var(--color-app-foreground);
+  caret-color: var(--color-app-foreground);
+}
+.sc-textarea-control:has(.sc-textarea-input:autofill) {
+  background: var(--color-semantic-primary-soft-bg);
+}
+
 .sc-textarea-control:has(.sc-textarea-input:focus-visible) {
   outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
   outline-offset: var(--focus-ring-offset);
