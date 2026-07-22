@@ -303,15 +303,41 @@ try {
   });
   if (focus0 !== 's') throw new Error(`Radio: 先頭(s)にフォーカスが乗らない: ${focus0}`);
   if (afterDown.value !== 'm' || !afterDown.checked) throw new Error(`Radio: 矢印下で移動=選択にならない: ${JSON.stringify(afterDown)}`);
+  // disabled(large=l)を実際にスキップしたか: disabled input が checked/focused になっていない。
+  // かつ、down2 でフォーカスが disabled を飛ばして別の有効項目へ動いた(l に止まらない)
   if (afterDown2.disabledFocused || afterDown2.disabledChecked) throw new Error(`Radio: disabled 項目が選択/フォーカスされた: ${JSON.stringify(afterDown2)}`);
-  // Tab はグループに1つ(roving tabindex): tabindex 上、フォーカス可能な radio は選択済み or 先頭のみ
-  const tabbable = await page.evaluate(() => {
-    const rs = [...document.querySelectorAll('.sc-radiogroup .sc-radio-input')] as HTMLInputElement[];
-    return rs.filter((r) => r.tabIndex >= 0 && !r.disabled).length;
+  if (afterDown2.value === 'l') throw new Error('Radio: disabled(l)がフォーカスを受けた(スキップされていない)');
+
+  // 選択済みかつグループ invalid のとき、選択済み項目の枠が danger になる(:checked の枠再宣言が
+  // invalid override を潰さない。独立レビュー blocker)。playground の「選択済み × invalid」デモで測る
+  const invalidRadio = await page.evaluate(() => {
+    const group = [...document.querySelectorAll('.sc-radiogroup[data-invalid="true"]')].find((g) =>
+      g.querySelector('.sc-radio-input:checked'),
+    ) as HTMLElement | undefined;
+    if (!group) return null;
+    const checked = group.querySelector('.sc-radio-input:checked') as HTMLInputElement;
+    const circle = (checked.nextElementSibling as HTMLElement); // .sc-radio-circle
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--color-semantic-danger-border)';
+    group.appendChild(probe);
+    const danger = getComputedStyle(probe).color;
+    probe.remove();
+    return { border: getComputedStyle(circle).borderTopColor, danger };
   });
-  // native radio group は tabindex を自前で管理しないが、Tab の停止は1つ(ブラウザのグループ扱い)。
-  // ここでは「選択済みが1つ」を roving の代理として確認(選択が焦点に追従した後)
-  if (tabbable < 1) throw new Error('Radio: フォーカス可能な項目が無い');
+  if (invalidRadio && invalidRadio.border !== invalidRadio.danger)
+    throw new Error(`Radio: 選択済み×invalid で枠が danger にならない(${invalidRadio.border} ≠ ${invalidRadio.danger}。独立レビュー blocker)`);
+
+  // リッチ label(リンク内包)の二重発火防止: リンク活性化は選択を発火させない(Checkbox と同型)。
+  // playground の Radio には link が無いので、選択済み状態を触らず label テキストのクリックで選択が
+  // 起きること(label 機構が生きている)だけ確認する
+  const labelToggle = await page.evaluate(() => {
+    const first = document.querySelector('.sc-radiogroup .sc-radio') as HTMLElement;
+    const input = first.querySelector('.sc-radio-input') as HTMLInputElement;
+    const before = input.checked;
+    (first.querySelector('.sc-radio-label') as HTMLElement).click();
+    return before !== input.checked || input.checked; // クリックで選択される(label 機構)
+  });
+  if (!labelToggle) throw new Error('Radio: label のクリックで選択されない(label 機構が死んでいる)');
 
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');

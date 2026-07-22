@@ -257,6 +257,13 @@
       </Radio>
     </RadioGroup>
     <p>選択中: {size ?? '(未選択)'}</p>
+    <p>選択済みかつ invalid(不正な組み合わせ。枠は danger・塗りは primary):</p>
+    <RadioGroup value="m" invalid>
+      {#snippet label()}選択済み × invalid{/snippet}
+      {#snippet error()}この組み合わせは不正です{/snippet}
+      <Radio value="s">{#snippet label()}s{/snippet}</Radio>
+      <Radio value="m">{#snippet label()}m(選択済み){/snippet}</Radio>
+    </RadioGroup>
   </section>
 
   <section>

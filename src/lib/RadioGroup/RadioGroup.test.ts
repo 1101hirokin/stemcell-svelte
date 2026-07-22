@@ -40,6 +40,15 @@ it('グループの label は集合の名前として fieldset/legend と aria-l
   expect(fs.getAttribute('aria-labelledby')).toBe(legend.id);
 });
 
+it('invalid×選択済み: CSS の invalid override が :checked の枠再宣言に潰されない配線がある(独立レビュー blocker)', () => {
+  // 実際の色は smoke が実 Chromium で測る。ここでは選択済み項目にも data-invalid が降りていることを確認
+  const { container } = render(Harness, { props: { value: 'b', invalid: true } });
+  const fields = [...container.querySelectorAll('.sc-radio-field')] as HTMLElement[];
+  const checkedField = fields[1]!; // value=b が選択済み
+  expect((checkedField.querySelector('.sc-radio-input') as HTMLInputElement).checked).toBe(true);
+  expect(checkedField.dataset.invalid, '選択済み項目にも invalid が降りる').toBe('true');
+});
+
 it('invalid はグループの状態として届き、danger が項目へ降りる(Radio は invalid prop を持たない)', () => {
   const { container } = render(Harness, { props: { invalid: true, error: snip('<span>選択が必要</span>') } });
   const fs = container.querySelector('.sc-radiogroup') as HTMLElement;

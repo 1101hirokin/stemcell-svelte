@@ -92,6 +92,12 @@
   --_ring: var(--sc-radio-invalid-ring);
 }
 
+/* 選択済みかつ invalid: :checked ルールが --_box を circle に直接再宣言し祖先の invalid override を
+   潰すため、ここで枠だけ danger に戻す(塗りは primary のまま、枠が danger。独立レビュー blocker) */
+.sc-radio-field[data-invalid='true'] .sc-radio-input:checked + .sc-radio-circle {
+  --_border: var(--sc-radio-invalid-border);
+}
+
 /* disabled が勝つ(state.md §3.1)。interaction を抑制する(§3.2) */
 .sc-radio-field[data-disabled='true'] .sc-radio-circle,
 .sc-radio-field[data-disabled='true'] .sc-radio-input:checked + .sc-radio-circle {
