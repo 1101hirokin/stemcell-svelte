@@ -44,11 +44,13 @@ it('mirrorInRTL のグリフは data-mirror を持ち、そうでないグリフ
   expect(svg(c2).getAttribute('data-mirror')).toBeNull();
 });
 
-it('未知の name は warn して何も描かない', () => {
+it('未知の name は warn して何も描かない(prototype キーも同じ。__proto__/constructor)', () => {
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-  const { container } = render(Icon, { props: { name: 'no_such_icon' } });
-  expect(svg(container)).toBeNull();
-  expect(warn.mock.calls.some((c) => String(c[0]).includes('no_such_icon'))).toBe(true);
+  for (const bad of ['no_such_icon', '', '__proto__', 'constructor', 'toString']) {
+    const { container } = render(Icon, { props: { name: bad } });
+    expect(svg(container), `name="${bad}"`).toBeNull();
+    expect(warn.mock.calls.some((c) => String(c[0]).includes(bad || '未知の name "')), `warn for "${bad}"`).toBe(true);
+  }
   warn.mockRestore();
 });
 

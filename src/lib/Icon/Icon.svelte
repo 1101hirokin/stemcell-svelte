@@ -12,7 +12,10 @@
   }
   let { name, label }: Props = $props();
 
-  const glyph = $derived(glyphs[name as IconName]);
+  // Object.hasOwn で lookup する: name="__proto__" / "constructor" は prototype 由来の値を
+  // 拾って !glyph を false にし、warn を漏らして空 svg を描く(独立レビュー minor)。自セットの
+  // 実キーだけを見る
+  const glyph = $derived(Object.hasOwn(glyphs, name) ? glyphs[name as IconName] : undefined);
   $effect(() => {
     if (!glyph) console.warn(`[stemcell] Icon: 未知の name "${name}"(セットに無い。iconography.md §3)`);
   });
