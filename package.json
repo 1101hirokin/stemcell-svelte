@@ -13,6 +13,7 @@
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
+    "AGENTS.md",
     "dist",
     "!dist/**/*.test.*",
     "!dist/**/fixtures"
@@ -26,8 +27,10 @@
     "prepublishOnly": "bun run package",
     "playground": "vite --config vite.playground.config.ts",
     "playground:build": "vite build --config vite.playground.config.ts",
-    "test": "bun conformance/generate.ts && vitest run",
-    "conformance": "bun conformance/generate.ts && vitest run conformance"
+    "test": "bun conformance/generate.ts && bun agents/generate.ts --check && vitest run",
+    "conformance": "bun conformance/generate.ts && vitest run conformance",
+    "agents": "bun agents/generate.ts",
+    "agents:check": "bun agents/generate.ts --check"
   },
   "peerDependencies": {
     "svelte": "^5.0.0"
