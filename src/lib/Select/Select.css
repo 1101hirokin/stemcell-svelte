@@ -1,0 +1,123 @@
+/* native <select> 基盤の選択入力。構造・トークンは TextField と同型(field.md §6)。
+   縦 inset は一次内容(select)、横 inset は器が持つ(size.md §2 内包則)。 */
+.sc-select {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  /* フィールドは fill(横いっぱい)が既定(憲法第3条・field.md §2・layout.md §2) */
+  inline-size: 100%;
+  min-inline-size: 0;
+  /* 中立の資材(TextField.md §2: resting の枠は color.app.border。hover 役が無いので hover を持たない) */
+  --_border: var(--color-app-border);
+  --_ring: var(--color-semantic-plain-focus-ring);
+}
+/* invalid は intent を danger へ差し替える(state.md §3.1 / §7) */
+.sc-select[data-invalid='true'] {
+  --_border: var(--color-semantic-danger-border);
+  --_ring: var(--color-semantic-danger-focus-ring);
+}
+/* disabled が invalid に勝つ(state.md §3.1) */
+.sc-select[data-disabled='true'] {
+  --_border: var(--color-semantic-disabled-border);
+}
+
+.sc-select-label {
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+/* 記号そのものは seed(field.md §4)。造形は expressive */
+.sc-select-required {
+  margin-inline-start: 0.25em;
+}
+
+.sc-select-control {
+  display: flex;
+  align-items: stretch;
+  gap: var(--spacing-inline-md);
+  --_inset: var(--spacing-inset-md);
+  padding-inline: var(--_inset);
+  background: var(--color-app-surface);
+  border: var(--shape-border-width) solid var(--_border);
+  border-radius: var(--shape-semantic-control);
+  transition:
+    border-color var(--motion-feedback-duration) var(--motion-feedback-easing),
+    background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+.sc-select[data-size='sm'] .sc-select-control {
+  --_inset: var(--spacing-inset-sm);
+}
+.sc-select[data-size='lg'] .sc-select-control {
+  --_inset: var(--spacing-inset-lg);
+}
+.sc-select[data-disabled='true'] .sc-select-control {
+  background: var(--color-semantic-disabled-soft-bg);
+  cursor: not-allowed;
+}
+
+.sc-select-input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  /* native の矢印を消し、自前の chevron を描く(Select.md §2) */
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: none;
+  /* 縦 inset は一次内容(select)が持ち、器の高さを決める(size.md §2)。横は器の padding-inline */
+  padding-block: var(--_inset);
+  padding-inline: 0;
+  outline: none;
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+  color: var(--color-app-foreground);
+  cursor: pointer;
+}
+/* required で未選択(placeholder 表示)のとき、文字を fg-muted にして placeholder らしく見せる */
+.sc-select-input:required:invalid {
+  color: var(--color-app-fg-muted);
+}
+.sc-select[data-disabled='true'] .sc-select-input {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+
+/* focus-ring は箱(control)に出す(focus-ring.md)。select の focus を拾う */
+.sc-select-control:has(.sc-select-input:focus-visible) {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* 開閉インジケータ。装飾で、クリックは下の select が受ける(pointer-events: none) */
+.sc-select-chevron {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  color: var(--color-app-fg-muted);
+  pointer-events: none;
+}
+.sc-select[data-disabled='true'] .sc-select-chevron {
+  color: var(--color-semantic-disabled-fg);
+}
+
+.sc-select-description,
+.sc-select-error {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-select-description {
+  color: var(--color-app-fg-muted);
+}
+/* エラー文は danger.soft-fg の転用(TextField と同じ。コントラストはレビュー実測済み) */
+.sc-select-error {
+  color: var(--color-semantic-danger-soft-fg);
+}

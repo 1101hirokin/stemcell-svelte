@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -9,6 +9,7 @@
   let density = $state<'comfortable' | 'compact'>('comfortable');
   let threshold = $state('30rem');
   let invite = $state('abc');
+  let shipSize = $state('');
   let gridMin = $state('16rem');
   let sidebarSide = $state<'start' | 'end'>('start');
   let agree = $state(false);
@@ -191,6 +192,46 @@
           {#snippet label()}disabled × invalid{/snippet}
           {#snippet error()}枠は disabled の色になる(state.md §3.1){/snippet}
         </TextField>
+      </Cluster>
+    </Stack>
+  </section>
+
+  <section>
+    <h2>Select</h2>
+    <p>
+      native select 基盤。閉じた選択肢からひとつ選ぶ。placeholder は無効化された先頭 option、開閉は
+      ブラウザ所有(契約に open を持たない)。構造・トークンは TextField と同型。invalid は未選択で立つ。
+    </p>
+    <Stack gap="lg">
+      <Select
+        bind:value={shipSize}
+        placeholder="配送サイズを選択"
+        required
+        invalid={shipSize === ''}
+        options={[
+          { value: 's', label: '小(〜2kg)' },
+          { value: 'm', label: '中(〜10kg)' },
+          { value: 'l', label: '大(〜25kg)' },
+          { value: 'xl', label: '特大(法人のみ)', disabled: true },
+        ]}
+      >
+        {#snippet label()}配送サイズ{/snippet}
+        {#snippet description()}梱包後の総重量で選ぶ{/snippet}
+        {#snippet error()}選択が必要{/snippet}
+      </Select>
+      <Cluster gap="md">
+        <Select size="sm" value="jp" options={[{ value: 'jp', label: '日本' }, { value: 'us', label: '米国' }]}>
+          {#snippet label()}sm{/snippet}
+        </Select>
+        <Select size="md" value="jp" options={[{ value: 'jp', label: '日本' }, { value: 'us', label: '米国' }]}>
+          {#snippet label()}md{/snippet}
+        </Select>
+        <Select size="lg" value="jp" options={[{ value: 'jp', label: '日本' }, { value: 'us', label: '米国' }]}>
+          {#snippet label()}lg{/snippet}
+        </Select>
+        <Select disabled value="jp" options={[{ value: 'jp', label: '日本' }]}>
+          {#snippet label()}disabled{/snippet}
+        </Select>
       </Cluster>
     </Stack>
   </section>
