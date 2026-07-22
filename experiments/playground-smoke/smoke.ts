@@ -137,6 +137,23 @@ try {
   if (fillWidth < 590)
     throw new Error(`TextField が fill しない(600px の器で ${fillWidth}px。inline-size:100% を確認)`);
 
+  // TextField: affix に内包した対話要素が器を押し上げない(高さは一次内容が所有。size.md §2 裁定)。
+  // 内包ボタンは器の行高へ従属し、当たり判定は門(24px)を割らない
+  const affix = await page.evaluate(() => {
+    const all = [...document.querySelectorAll('.sc-textfield')] as HTMLElement[];
+    const h = (tf: HTMLElement) => Math.round((tf.querySelector('.sc-textfield-control') as HTMLElement).getBoundingClientRect().height);
+    const withBtn = all.find((tf) => tf.querySelector('.sc-textfield-end button'));
+    const plain = all.find((tf) => tf.dataset.size === 'md' && !tf.querySelector('.sc-textfield-end') && !tf.querySelector('.sc-textfield-start'));
+    if (!withBtn) return null;
+    const btn = withBtn.querySelector('.sc-textfield-end button') as HTMLElement;
+    return { withBtnH: h(withBtn), plainH: plain ? h(plain) : null, btnH: Math.round(btn.getBoundingClientRect().height) };
+  });
+  if (!affix) throw new Error('TextField: affix にボタンを内包した例が playground に無い');
+  if (affix.plainH !== null && affix.withBtnH !== affix.plainH)
+    throw new Error(`TextField: affix 内包で器が膨らむ(${affix.withBtnH}px ≠ 素の md ${affix.plainH}px。size.md §2 内包則)`);
+  if (affix.btnH < 24)
+    throw new Error(`TextField: affix ボタンの当たり判定が門(24px)未満(${affix.btnH}px)`);
+
   // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
   // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)
   const cb = await page.evaluate(() => {
@@ -225,6 +242,23 @@ try {
     const before = dis.checked; dis.click(); return before === dis.checked;
   });
   if (!swDis) throw new Error('Switch: disabled が click を抑制していない');
+  // Switch: サムの余白が全周均一(OFF 左・ON 右・縦が同値。裁定 2026-07。実 Chromium で幾何を測る)
+  const swGap = await page.evaluate(async () => {
+    const input = document.querySelector('.sc-switch-input') as HTMLInputElement;
+    const track = input.nextElementSibling as HTMLElement;
+    const thumb = track.querySelector('.sc-switch-thumb') as HTMLElement;
+    const wait = () => new Promise((r) => setTimeout(r, 250));
+    if (input.checked) { input.click(); await wait(); }
+    const t1 = track.getBoundingClientRect(), h1 = thumb.getBoundingClientRect();
+    const offLeft = +(h1.left - t1.left).toFixed(1);
+    const vertical = +(h1.top - t1.top).toFixed(1);
+    input.click(); await wait();
+    const t2 = track.getBoundingClientRect(), h2 = thumb.getBoundingClientRect();
+    const onRight = +(t2.right - h2.right).toFixed(1);
+    return { offLeft, onRight, vertical };
+  });
+  if (Math.abs(swGap.offLeft - swGap.onRight) > 0.5 || Math.abs(swGap.offLeft - swGap.vertical) > 0.5)
+    throw new Error(`Switch: サム余白が全周均一でない(左 ${swGap.offLeft} / 右 ${swGap.onRight} / 縦 ${swGap.vertical})`);
 
   // Textarea: textarea 要素で rows を持ち、複数行が入る
   const ta = await page.evaluate(() => {
@@ -377,7 +411,7 @@ try {
 
   await browser.close();
   console.log(
-    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled / Textarea 複数行 / Icon currentColor・1em・RTL 反転 / Radio 矢印移動=選択・disabled スキップ`,
+    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill・affix 非膨張(内包則) / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled・サム余白全周均一 / Textarea 複数行 / Icon currentColor・1em・RTL 反転 / Radio 矢印移動=選択・disabled スキップ`,
   );
 } finally {
   preview.kill();
