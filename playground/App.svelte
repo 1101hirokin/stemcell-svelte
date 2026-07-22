@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox } from '../src/lib';
+  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox, Textarea, Switch } from '../src/lib';
 
   let theme = $state<'auto' | 'standard-light' | 'standard-dark'>('auto');
   let density = $state<'comfortable' | 'compact'>('comfortable');
@@ -10,6 +10,8 @@
   let agree = $state(false);
   let agreeTouched = $state(false);
   let toppings = $state({ cheese: true, tomato: false });
+  let bio = $state('');
+  let notify = $state(true);
 
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
@@ -171,6 +173,33 @@
         </Stack>
       </div>
     </div>
+  </section>
+
+  <section>
+    <h2>Textarea</h2>
+    <p>複数行入力。TextField を継承(extends)し、start / end は持たない。縦リサイズ可。</p>
+    <Textarea bind:value={bio} rows={4} invalid={bio.length > 20}>
+      {#snippet label()}自己紹介{/snippet}
+      {#snippet description()}20字以内(現在 {bio.length}字){/snippet}
+      {#snippet error()}長すぎる{/snippet}
+    </Textarea>
+  </section>
+
+  <section>
+    <h2>Switch</h2>
+    <p>独立した設定の on / off(即時反映。field.md §7)。invalid / required を持たない。</p>
+    <Stack gap="sm">
+      <Switch bind:checked={notify}>
+        {#snippet label()}通知を受け取る{/snippet}
+        {#snippet description()}メールとプッシュで届く{/snippet}
+      </Switch>
+      <Switch disabled>
+        {#snippet label()}disabled(off){/snippet}
+      </Switch>
+      <Switch checked disabled>
+        {#snippet label()}disabled(on){/snippet}
+      </Switch>
+    </Stack>
   </section>
 
   <section>

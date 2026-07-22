@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Grid, Sidebar, Stack, StemcellProvider, Switcher, TextField } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Grid, Sidebar, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -204,6 +204,33 @@ props:
 - `themes`: array((省略可)) — カスタムテーマの登録。消費者が上書きできるのは列挙した事項(色)だけである(第3条・rfc 0003)。任意のトークン木は受けない(StemcellProvider.md §7 の型強制。この fields が閉じていることがその機械可読な形である)。
   - 注意: この Svelte 実装では未実装。渡すと warn して無視する(HOLES #5。仕様側の変換ユーティリティの置き場が未決)
 
+### Switch(契約 0.0.0-alpha.1)
+
+独立した設定の on / off。即時反映し、保存・送信を要しない(field.md §7 の線引き。裁定済み 2026-07)。invalid / indeterminate / required を持たないのは部分集合の選択である(state.md §4)。エラーを出したい Switch は Checkbox であるべき兆候。
+
+props:
+
+- `checked`: boolean(既定 false) — 値であって状態ではない(state.md §6)。アプリが所有する。語彙は Checkbox と同一(field.md §7: 業界は同一 DS 内でも checked / selected / toggled と割れているが、Stemcell は checked に統一する。第2条)。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: boolean) => void — 切替が起きたことを伝える。payload は新しい checked(field.md §5。裁定済み 2026-07)。即時反映が前提: アプリは change を受けて設定をその場で適用する。適用に確定ステップが要るなら、この部品の選択が誤りである(field.md §7)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 名前。無名は許さない(field.md §2。反面教師: M3 の Web 実装は Switch が label を持たず常に別配線を要求する)。
+- `description` — 説明。支援技術に説明として届く(field.md §2)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- on / off が状態として届く(Web の表現は aria-checked true / false。switch role の aria-checked は真偽値のみで mixed を持たない — indeterminate を持たない契約と整合)。
+- Space で切り替わる(web-keys.rules.json。native に switch 要素は無く、Web の標準パターンは native checkbox を土台に role=switch を載せる形なので、土台の挙動に一致させる)。
+- disabled は3要求すべてを満たすこと(state.md §5)。
+- 適用に時間がかかるときの伝達は aria-busy の領域(state.md §6 の loading)であり、本契約は持たない。要る部品が現れたら自分の契約で定義する。
+- label は control の後ろ(論理方向)。Checkbox と同じ扱い(field.md §8)。
+- 標的の門: size.md §4。
+
 ### Switcher(契約 0.0.0-alpha.1)
 
 器の幅が閾値を下回ったら、横並び全体が縦へ一斉に切り替わる。項目ごとに流れるのは Cluster。切替は閾値駆動が Normative(裁定): 同じ幅なら同じ形。内容駆動(収まらなくなったら切替)は採らない。
@@ -259,4 +286,37 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - disabled は3要求すべてを満たすこと(foundations/state.md §5)。readonly は到達でき、読め、選択できる(state.md §6)。
 - textbox は活性化のキーを持たない(web-keys.rules.json: 空配列)。操作は文字入力そのものであり、1行入力での Enter の意味(暗黙送信)は HTML のフォームの挙動であって本契約の関心ではない。
 - 標的の門: 当たり判定は size.md §4 の下限を下回らない。
+
+### Textarea(契約 0.0.0-alpha.0)
+
+複数行のテキスト入力。TextField を継承する(props / states / tokensRequired)。別部品である理由は Textarea.md §1: SwiftUI では 1行(TextField)と複数行(TextEditor)で型そのものが変わり、boolean の multiline prop では実装の分岐を吸収できない(2026-07 native 調査)。slots / events は継承されないので再宣言する(スキーマの extends 意味論)。start / end を再宣言しないのは意図的である: 複数行の器にアイコンの行内配置は成立しない。
+
+props:
+
+- `value`: string(既定 "") — 現在値。アプリが所有する(field.md §5: SwiftUI の Binding も Compose の value+onValueChange も単方向で、Web の controlled と同型)。部品は change で新しい値を通知するだけで、自分では保持しない。uncontrolled は土地の便宜であり契約外。
+- `placeholder`: string((省略可)) — 入力例のヒント。label の代替ではない(field.md §2: 入力した瞬間に消える名前は、名前ではない)。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
+- `readonly`: boolean(既定 false) — 読めるが編集できない。状態ではなく property である(state.md §6)。invalid と同時に成立しない(HTML が readonly を constraint validation から除外する)。コントラストの免除は受けない(Understanding SC 1.4.3 は disabled のみを例示)。
+- `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2。判定が値から来たかサーバから来たかは問わない)。intent を danger へ差し替える(state.md §7)。いつ立てるか(blur / submit / 逐次)は Stemcell が規範化しない(field.md §3「バリデーションの所有」)。
+- `required`: boolean(既定 false) — 必須。支援技術に届くことは Normative、視覚標示も部品が自動で出す(field.md §4。裁定済み 2026-07。記号そのものは seed)。
+- `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。
+- `keyboard`: "text" | "email" | "numeric" | "decimal" | "tel" | "url"(既定 "text") — ソフトウェアキーボードの種類。検証ではなく入力の補助である(Web の inputmode / iOS の keyboardType / Compose の KeyboardOptions.keyboardType へ写像。6値は3プラットフォームすべてに対応物がある交差集合)。数字だが数値演算しない文字列(電話・郵便番号・カード番号)は numeric を使う。数値スピナー(type=number 相当)の意味論は持たない(2026-07 調査: その弊害は業界の一致)。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る(Carbon / Ant / Spectrum も入力に複数段を持つ)。段が引く余白の配線は foundations/size.rules.json。
+- `rows`: number(既定 3) — 初期の行高(行数)。上限ではない。内容に応じた自動成長を既定にしない: Web の field-sizing: content は 2026-07 時点で Baseline の Widely Available 未達(Newly Available 2026-06)であり、採るなら progressive enhancement(第7条)。成長のさせ方は Expressive。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: string) => void — 値が変わったことを伝える。逐次であり、payload は新しい値(field.md §5。裁定済み 2026-07)。TextField と同一定義の再宣言。複数行での改行は値の変化であり、確定ではない。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 名前。TextField と同じ規則(field.md §2 / §6)。
+- `description` — 説明・入力条件。TextField と同じ規則。
+- `error` — invalid のときのエラー文。TextField と同じ規則(並置。field.md §3)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- TextField の notes がすべて当てはまる。複数行であることが支援技術に届く(Web の表現は native textarea 要素、または aria-multiline)。
+- keyboard prop は継承される。Compose は複数行でも keyboardType を持つ。iOS の複数行(TextEditor)で同様に効くかは未確認である(一次情報が bot 遮断で未達、二次情報は割れている。下敷きの UITextView は UITextInputTraits に準拠し keyboardType を持つため、効く可能性がむしろ高い — 独立レビューの指摘で当初の「対応物が無い」という断定を訂正)。swiftui 実装の実験で決着する。効かないと実証された場合の器は第7条(技術の普及の時間軸)ではなく ceded(removes。GOVERNANCE §4 の構造差の器)を検討する。
+- Enter は改行であり、暗黙送信は起きない(HTML の挙動。本契約の関心ではないが、TextField との違いとして記録)。
 

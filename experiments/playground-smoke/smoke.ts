@@ -49,6 +49,8 @@ try {
     grid: document.querySelectorAll('.sc-grid').length,
     sidebar: document.querySelectorAll('.sc-sidebar').length,
     checkbox: document.querySelectorAll('.sc-checkbox').length,
+    textarea: document.querySelectorAll('.sc-textarea').length,
+    switch: document.querySelectorAll('.sc-switch').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -203,6 +205,31 @@ try {
       throw new Error(`Checkbox: invalid 未チェックの枠が hover で danger を失う(${hovered} ≠ ${danger}。state.md §3.2)`);
   }
 
+  // Switch: role=switch・トグルでサムが動く(track の transition を待つ)・disabled 抑制
+  const thumbX = () => page.evaluate(() => {
+    const t = document.querySelector('.sc-switch-thumb') as HTMLElement;
+    return t.getBoundingClientRect().x;
+  });
+  const swRole = await page.evaluate(() => document.querySelector('.sc-switch-input')!.getAttribute('role'));
+  if (swRole !== 'switch') throw new Error(`Switch: role が switch でない(${swRole})`);
+  const offX = await thumbX();
+  await page.evaluate(() => (document.querySelector('.sc-switch-input') as HTMLElement).click());
+  await page.waitForTimeout(250); // transition の完了を待つ
+  const onX = await thumbX();
+  if (Math.abs(onX - offX) < 4) throw new Error(`Switch: トグルでサムが動かない(${offX} → ${onX})`);
+  const swDis = await page.evaluate(() => {
+    const dis = [...document.querySelectorAll('.sc-switch-input')].find((i) => (i as HTMLInputElement).disabled) as HTMLInputElement;
+    const before = dis.checked; dis.click(); return before === dis.checked;
+  });
+  if (!swDis) throw new Error('Switch: disabled が click を抑制していない');
+
+  // Textarea: textarea 要素で rows を持ち、複数行が入る
+  const ta = await page.evaluate(() => {
+    const el = document.querySelector('.sc-textarea-input') as HTMLTextAreaElement;
+    return { tag: el.tagName, rows: el.rows };
+  });
+  if (ta.tag !== 'TEXTAREA' || ta.rows < 1) throw new Error(`Textarea が textarea/rows を持たない: ${JSON.stringify(ta)}`);
+
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
   await page.waitForTimeout(100);
@@ -241,7 +268,7 @@ try {
 
   await browser.close();
   console.log(
-    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill / Checkbox 二重発火防止・indeterminate・disabled 抑制`,
+    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled / Textarea 複数行`,
   );
 } finally {
   preview.kill();
