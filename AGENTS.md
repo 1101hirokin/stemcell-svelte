@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Divider, Grid, Icon, IconButton, Radio, RadioGroup, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Divider, Grid, Icon, IconButton, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -265,6 +265,39 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 矢印キーの規則は web-keys.rules.json の arrows.radiogroup が持つ(移動=選択、roving tabindex、disabled スキップ)。Tab はグループにひとつ: チェック済みがあればそこへ、なければ先頭へ。
 - invalid はグループの状態として届き(Web の表現は radiogroup への aria-invalid + aria-describedby)、error 文はグループの説明として届く。
 - 既定選択を置かない場合、Tab での進入先は先頭項目になる。未選択のまま送信された required グループが invalid の典型である。
+
+### Select(契約 0.0.0-alpha.0)
+
+閉じた選択肢の集合からひとつ選ぶ入力。選択肢を畳んで見せる(全選択肢を見せるなら RadioGroup。GOV.UK は「公開サービスでは最後の手段」とまで言う — 少数の選択肢は Radio が原則)。Web の実装は native select を基本とする(Select.md §2)。検索付き(Combobox)・複数選択は別部品の関心であり本契約は持たない。
+
+props:
+
+- `value`: string(既定 "") — 選択中の選択肢の value。空文字は未選択。アプリが所有する(field.md §5)。
+- `options`: array — 選択肢の列。データとして渡す。
+- `placeholder`: string((省略可)) — 未選択時の表示文。label の代替ではない(field.md §2)。Web の表現は「無効化された未選択の先頭 option」(選ばれ得ない)。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。
+- `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2)。intent を danger へ差し替える(state.md §7)。
+- `required`: boolean(既定 false) — 選択が必須(placeholder のまま送信させない)。支援技術に届くことは Normative、視覚標示は部品が自動で出す(field.md §4。裁定済み 2026-07)。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段(TextField と同じ)。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: string) => void — 選択が変わったことを伝える。payload は新しい value(field.md §5)。選択肢を選ぶ操作は離散であり、逐次と確定の区別が生じない。change でのページ遷移や送信を実装・アプリが仕込んではならない(WCAG 2.2 SC 3.2.2 On Input。キーボードの探索中に発火して誤遷移する — 2026-07 調査の一致)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 名前。無名は許さない(field.md §2)。8種と同じ slot 形状(field.md §6)。
+- `description` — 説明。field.md §2。
+- `error` — invalid のときのエラー文。description と並置(field.md §3。裁定済み 2026-07)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- role が combobox なのは HTML-AAM の写像に一致させたため: native の select(単一選択)は combobox role に写る。listbox はポップアップ側の role であり本体ではない。
+- 開閉(open)を契約が持たないのは書き落としではない。Web の実装基盤である native select は開閉をブラウザが所有し、プログラムからの制御を許さない。中立の契約に open を書けば、native select 実装が契約を満たせなくなる(Select.md §2)。開閉のキーも UA 所有(web-keys.rules.json $combobox)。
+- options のグルーピング(optgroup)は初版で持たない。必要の立証後に options の構造拡張で足す(破壊的でない)。
+- invalid / required / disabled の配線は TextField と同じ(aria-invalid / required / state.md §5 の3要求)。
+- モバイルでは OS のネイティブピッカーが開くことが利点そのものである(2026-07 調査: 専門家の一致)。ピッカーの見た目は UA / OS のものであり、Stemcell は関与しない。
+- 標的の門: size.md §4。
 
 ### Sidebar(契約 0.0.0-alpha.3)
 
