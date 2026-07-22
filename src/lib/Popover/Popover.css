@@ -7,12 +7,15 @@
 .sc-popover-content {
   position: absolute;
   z-index: var(--layer-popover-z);
-  /* トリガー幅に揃える(Select の常態)。長い option は縦に伸びる */
-  inline-size: 100%;
-  min-inline-size: max-content;
+  /* 幅は消費者が変数で与える(既定はトリガー幅に揃える)。Select は content 幅 + clamp を与える */
+  inline-size: var(--sc-popover-inline-size, 100%);
+  min-inline-size: var(--sc-popover-min-inline-size, max-content);
+  max-inline-size: var(--sc-popover-max-inline-size, none);
   background: var(--elevation-popover-surface);
   box-shadow: var(--elevation-popover-shadow);
   border-radius: var(--shape-semantic-popover);
+  /* 中身を角で切り抜く。端まで使う項目(余白なしの listbox 等)が丸角からはみ出さない */
+  overflow: hidden;
   /* 出現(overlay.md §2: entrance)。reduced-motion で 0ms でも「現れる」意味は保つ(第7条) */
   animation: sc-popover-in var(--motion-entrance-duration) var(--motion-entrance-easing);
   /* 退場のトークンを参照する transition(閉じる直前の opacity 変化に効く。exit の手触りは Expressive) */

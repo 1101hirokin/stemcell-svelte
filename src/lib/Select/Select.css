@@ -9,6 +9,12 @@
   min-inline-size: 0;
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);
+  /* ドロップダウンの幅: 自然幅(content)を下限〜上限で clamp。下限 = max(x, トリガー幅) を上限で頭打ち、
+     上限 = y。full-width トリガーでも y で止まり馴染みある幅に、狭いトリガーでは最低トリガー幅を保つ。
+     x=12rem / y=24rem は暫定(調整可)。 */
+  --sc-popover-inline-size: max-content;
+  --sc-popover-min-inline-size: min(max(12rem, 100%), 24rem);
+  --sc-popover-max-inline-size: 24rem;
 }
 .sc-select[data-invalid='true'] {
   --_border: var(--color-semantic-danger-border);
@@ -131,11 +137,12 @@
   color: var(--color-semantic-disabled-fg);
 }
 
-/* listbox(Popover の中身)。面/影/角/層は Popover が着せる。ここは並びと余白とスクロール */
+/* listbox(Popover の中身)。面/影/角/層は Popover が着せる。ここは並びとスクロール。
+   余白は持たず、項目が端まで使う(active/selected の地が全幅のバンドになる) */
 .sc-select-listbox {
   list-style: none;
   margin: 0;
-  padding: var(--spacing-inset-sm);
+  padding: 0;
   max-block-size: 16rem;
   overflow-y: auto;
 }
@@ -144,7 +151,6 @@
   align-items: center;
   gap: var(--spacing-inline-md);
   padding: var(--spacing-inset-sm);
-  border-radius: var(--shape-semantic-control);
   cursor: pointer;
   color: var(--color-app-foreground);
 }
