@@ -1,0 +1,112 @@
+/* 配線の源は foundations/field.md(解剖)・size.rules.json(段→inset)・state.md §3.1(intent の差し替え)。 */
+.sc-textfield {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  /* フィールドは fill(横いっぱい)が既定。憲法第3条・field.md §2・layout.md §2(裁定 2026-07) */
+  inline-size: 100%;
+  min-inline-size: 0;
+  /* 中立の資材(TextField.md §2: resting の枠は color.app.border。hover 役が無いので hover を持たない) */
+  --_border: var(--color-app-border);
+  --_ring: var(--color-semantic-plain-focus-ring);
+}
+/* invalid は intent を danger へ差し替える(state.md §3.1 / §7) */
+.sc-textfield[data-invalid='true'] {
+  --_border: var(--color-semantic-danger-border);
+  --_ring: var(--color-semantic-danger-focus-ring);
+}
+/* disabled が invalid に勝つ(state.md §3.1)。同詳細度の後勝ちで上書きする */
+.sc-textfield[data-disabled='true'] {
+  --_border: var(--color-semantic-disabled-border);
+}
+
+.sc-textfield-label {
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+/* 記号そのものは seed(field.md §4)。造形は expressive */
+.sc-textfield-required {
+  margin-inline-start: 0.25em;
+}
+
+.sc-textfield-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+  background: var(--color-app-surface);
+  border: var(--shape-border-width) solid var(--_border);
+  border-radius: var(--shape-semantic-control);
+  transition:
+    border-color var(--motion-feedback-duration) var(--motion-feedback-easing),
+    background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+.sc-textfield[data-size='sm'] .sc-textfield-control {
+  padding: var(--spacing-inset-sm);
+}
+.sc-textfield[data-size='md'] .sc-textfield-control {
+  padding: var(--spacing-inset-md);
+}
+.sc-textfield[data-size='lg'] .sc-textfield-control {
+  padding: var(--spacing-inset-lg);
+}
+.sc-textfield[data-disabled='true'] .sc-textfield-control {
+  background: var(--color-semantic-disabled-soft-bg);
+  cursor: not-allowed;
+}
+
+.sc-textfield-input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  outline: none;
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-textfield-input::placeholder {
+  color: var(--color-app-fg-muted);
+}
+.sc-textfield[data-disabled='true'] .sc-textfield-input {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+
+/* focus-ring.md: :focus-visible + outline + offset。ring は箱(control)に出す。
+   :focus-within を使わないのは、end 内の対話要素(クリアボタン等)の focus で箱を光らせないため */
+.sc-textfield-control:has(.sc-textfield-input:focus-visible) {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.sc-textfield-start,
+.sc-textfield-end {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-app-fg-muted);
+}
+
+.sc-textfield-description,
+.sc-textfield-error {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-textfield-description {
+  color: var(--color-app-fg-muted);
+}
+/* エラー文は danger.soft-fg の転用(TextField.md §2。コントラストはレビュー実測済み 10.45:1 / 11.04:1) */
+.sc-textfield-error {
+  color: var(--color-semantic-danger-soft-fg);
+}

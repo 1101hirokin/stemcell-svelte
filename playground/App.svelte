@@ -1,9 +1,12 @@
 <script lang="ts">
-  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster } from '../src/lib';
+  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar } from '../src/lib';
 
   let theme = $state<'auto' | 'standard-light' | 'standard-dark'>('auto');
   let density = $state<'comfortable' | 'compact'>('comfortable');
   let threshold = $state('30rem');
+  let invite = $state('abc');
+  let gridMin = $state('16rem');
+  let sidebarSide = $state<'start' | 'end'>('start');
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
   const colors = ['primary', 'danger', 'warning', 'plain'] as const;
@@ -84,6 +87,52 @@
   </section>
 
   <section>
+    <h2>TextField</h2>
+    <p>
+      複合フィールド(label / description / error 内包)。エラー文は danger.soft-fg の転用
+      (実測 10.45:1 / 11.04:1)。invalid は8文字未満で立つ(逐次 change のデモ)。
+    </p>
+    <Stack gap="lg">
+      <TextField bind:value={invite} invalid={invite.length < 8} keyboard="text">
+        {#snippet label()}招待コード{/snippet}
+        {#snippet description()}8文字以上{/snippet}
+        {#snippet error()}短すぎる({invite.length}文字)。8文字以上にすること{/snippet}
+      </TextField>
+      <TextField required autocomplete="name" placeholder="例: 山田太郎">
+        {#snippet label()}氏名(required + placeholder){/snippet}
+      </TextField>
+      <TextField keyboard="email" autocomplete="email">
+        {#snippet label()}メール(keyboard=email){/snippet}
+        {#snippet start()}@{/snippet}
+        {#snippet end()}<Button variant="text" size="sm">消去</Button>{/snippet}
+      </TextField>
+      <Cluster gap="md">
+        <TextField size="sm">
+          {#snippet label()}sm{/snippet}
+        </TextField>
+        <TextField size="md">
+          {#snippet label()}md{/snippet}
+        </TextField>
+        <TextField size="lg">
+          {#snippet label()}lg{/snippet}
+        </TextField>
+      </Cluster>
+      <Cluster gap="md">
+        <TextField disabled value="編集不可">
+          {#snippet label()}disabled{/snippet}
+        </TextField>
+        <TextField readonly value="読める">
+          {#snippet label()}readonly{/snippet}
+        </TextField>
+        <TextField disabled invalid value="無効が勝つ">
+          {#snippet label()}disabled × invalid{/snippet}
+          {#snippet error()}枠は disabled の色になる(state.md §3.1){/snippet}
+        </TextField>
+      </Cluster>
+    </Stack>
+  </section>
+
+  <section>
     <h2>Box</h2>
     <p>内在スタイルの器。inset は段(sm/md/lg)と大域の原始 X(8〜24)。</p>
     <Cluster gap="sm">
@@ -117,6 +166,48 @@
           <div class="pg-chip">低い</div>
         </Stack>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Grid</h2>
+    <p>
+      内在的な格子。列は min({gridMin})を下回らず、器に応じて増減する
+      (メディアクエリなし)。右下の掴みで器をドラッグして確認する。
+    </p>
+    <label class="pg-field">
+      min
+      <input bind:value={gridMin} />
+    </label>
+    <div class="pg-resizable">
+      <Grid min={gridMin} gap="sm">
+        {#each ['一', '二', '三', '四', '五', '六'] as t (t)}
+          <div class="pg-chip">カード {t}</div>
+        {/each}
+      </Grid>
+    </div>
+  </section>
+
+  <section>
+    <h2>Sidebar</h2>
+    <p>
+      2カラム。脇は内容幅(または sideWidth)で立ち、本体は fill。本体が contentMin
+      (50%)を割ると縦へ折れる(条件は本体の窮屈さで、画面幅ではない)。
+    </p>
+    <label class="pg-field">
+      side
+      <select bind:value={sidebarSide}>
+        <option value="start">start(脇が先)</option>
+        <option value="end">end(本体が先)</option>
+      </select>
+    </label>
+    <div class="pg-resizable">
+      <Sidebar side={sidebarSide} sideWidth="12rem" gap="md">
+        {#snippet aside()}
+          <div class="pg-chip">ナビ(脇)</div>
+        {/snippet}
+        <div class="pg-chip">本体。器を狭めると縦積みへ折れ、DOM 順は変わらない。</div>
+      </Sidebar>
     </div>
   </section>
 

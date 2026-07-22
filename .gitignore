@@ -2,3 +2,4 @@ node_modules/
 dist/
 conformance/generated/
 playground/dist/
+.svelte-kit/

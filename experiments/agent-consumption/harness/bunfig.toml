@@ -1,0 +1,2 @@
+[install.scopes]
+"@stemcell" = "http://localhost:4873"

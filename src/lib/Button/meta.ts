@@ -8,3 +8,11 @@ export const META = {
     block: { default: false },
   },
 } as const;
+
+/**
+ * type は Web 層の取り決めであり中立契約に無い(Button.md §6)。ゆえに META.props(契約と
+ * 照合される既定の源)には入れず、ここで別に持つ。既定 button で form 内の暗黙送信を塞ぐ(HOLES #24)。
+ */
+export const WEB = {
+  type: { values: ['button', 'submit', 'reset'], default: 'button' },
+} as const;

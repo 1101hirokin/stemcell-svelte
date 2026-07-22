@@ -1,17 +1,43 @@
 {
   "name": "@stemcell/svelte",
-  "version": "0.0.0-alpha.0",
-  "private": true,
+  "version": "0.0.0-alpha.4",
   "type": "module",
   "description": "Stemcell の Svelte 実装。stemcell-component-prompts の契約に適合する(GOVERNANCE §6-2)。仕様から一意に実装できるかの実験リポでもあり、穴は HOLES.md に記録する。",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "AGENTS.md",
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/fixtures"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "scripts": {
     "check": "svelte-check --tsconfig ./tsconfig.json",
+    "package": "svelte-package -i src/lib -o dist",
+    "prepublishOnly": "bun run agents:check && bun run package",
     "playground": "vite --config vite.playground.config.ts",
     "playground:build": "vite build --config vite.playground.config.ts",
-    "test": "bun conformance/generate.ts && vitest run",
-    "conformance": "bun conformance/generate.ts && vitest run conformance"
+    "test": "bun conformance/generate.ts && bun agents/generate.ts --check && vitest run",
+    "conformance": "bun conformance/generate.ts && vitest run conformance",
+    "agents": "bun agents/generate.ts",
+    "agents:check": "bun agents/generate.ts --check"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
   },
   "devDependencies": {
+    "@stemcell/tokens": "0.0.0-alpha.2",
+    "@sveltejs/package": "^2.5.8",
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
     "@testing-library/svelte": "^5.2.0",
     "@types/node": "^22",

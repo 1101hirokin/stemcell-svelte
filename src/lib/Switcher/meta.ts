@@ -7,10 +7,7 @@ export const META = {
 } as const;
 
 /**
- * threshold が rem の長さか。単位は rem と裁定済み(2026-07。契約 alpha.1・layout.md §9):
- * 「同じ幅」は本文相対で定義する。rem 以外の単位と生の px は受けない。
- * 構文で裁く理由: 長さでない文字列は calc() を計算値時点で無効にし、flex-basis が auto へ
- * 縮退して閾値機構(Normative)が無警告で消えるため(HOLES #10)。
- * 値語彙(許す数値の集合)は未確定で、ここでは裁かない(Grid の min と共有)。
+ * threshold の検査は Grid / Sidebar と共有の internal/length.ts へ移した(単位 rem の裁定と
+ * 構文で裁く理由はそちらに記録)。テストの参照互換のため再輸出する。
  */
-export const isRemLength = (v: string): boolean => /^\d*\.?\d+rem$/.test(v.trim());
+export { isRemLength } from '../internal/length';

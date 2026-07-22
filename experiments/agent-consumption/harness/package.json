@@ -1,0 +1,17 @@
+{
+  "name": "agent-consumption-harness",
+  "private": true,
+  "type": "module",
+  "description": "被験者コードを門に掛ける消費者ハーネス。registry の @stemcell/* だけに依存する素の vite アプリ。",
+  "dependencies": {
+    "@stemcell/svelte": "0.0.0-alpha.3",
+    "@stemcell/tokens": "0.0.0-alpha.1"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5",
+    "vite": "^5.4.0"
+  }
+}

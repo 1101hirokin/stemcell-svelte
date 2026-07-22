@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [svelte()],
   server: {
     // tokens は未 publish のため隣の作業コピーを読む(README)。root の外を許可する
-    fs: { allow: ['..', '../../stemcell-tokens'] },
+    fs: { allow: ['..'] },
   },
   build: { outDir: 'dist' },
 });
