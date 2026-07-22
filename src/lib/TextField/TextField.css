@@ -92,6 +92,21 @@
   cursor: not-allowed;
 }
 
+/* オートフィル: ブラウザは autofill 背景を input にだけ乗せる。input は横 inset のぶん狭く角も四角なので
+   ハイライトが両端で切れ角が合わない。input の背景を box-shadow で同色に潰しつつ、control 全面に
+   :has(:autofill) で同色を敷いて、角丸の全面でハイライトを一致させる。色は brand の淡い青(primary.soft-bg)。 */
+.sc-textfield-input:-webkit-autofill,
+.sc-textfield-input:-webkit-autofill:hover,
+.sc-textfield-input:-webkit-autofill:focus,
+.sc-textfield-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 100px var(--color-semantic-primary-soft-bg) inset;
+  -webkit-text-fill-color: var(--color-app-foreground);
+  caret-color: var(--color-app-foreground);
+}
+.sc-textfield-control:has(.sc-textfield-input:autofill) {
+  background: var(--color-semantic-primary-soft-bg);
+}
+
 /* focus-ring.md: :focus-visible + outline + offset。ring は箱(control)に出す。
    :focus-within を使わないのは、end 内の対話要素(クリアボタン等)の focus で箱を光らせないため */
 .sc-textfield-control:has(.sc-textfield-input:focus-visible) {
