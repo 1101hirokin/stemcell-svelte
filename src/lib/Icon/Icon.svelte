@@ -1,40 +1,56 @@
 <script lang="ts">
   import './Icon.css';
-  import { glyphs, viewBox, type IconName } from '@stemcell/icons';
+  import type { Glyph } from '@stemcell/icons';
 
-  // 語彙を絵で示す。それ自体は何もしない(契約)。色は currentColor(文字と同じ role)、
-  // 寸法は 1em 基調(iconography.md §4)。相互作用しない・focus を受けない・states を持たない。
+  // viewBox は全グリフ統一の定数(iconography.md §7)。@stemcell/icons から import すると
+  // その値と同じモジュールにある全マップ(glyphs)まで main チャンクへ引き込まれ、glyph 渡しの
+  // ツリーシェイクが壊れる(実測)。定数は直書きして静的 import を型だけにする。
+  const viewBox = '0 0 32 32';
+
+  // 語彙を絵で示す描画器(iconography.md)。色は currentColor、寸法は 1em。
+  // 二つの口(iconography.md §6): name(中立契約。文字列。全束が入る)/ glyph(Web 方言。静的に
+  // 取ってツリーシェイク。`import glyph from '@stemcell/icons/arrow.down'` して渡す)。
+  // Icon は全マップを import しない: glyph 渡しでツリーシェイクを効かせるため。name の解決は
+  // 別モジュール(./resolve)へ分け、glyph だけを使う消費者に全マップが混入しないようにする。
   interface Props {
-    /** セットの意味名(iconography.md §3)。凍結までは string で受け、未知の名は warn する。 */
-    name: string;
+    /** セットの意味名(中立契約。iconography.md §3)。全グリフが束に入る。 */
+    name?: string;
+    /** 静的に取ったグリフ(Web 方言。ツリーシェイク。iconography.md §6)。name より優先。 */
+    glyph?: Glyph;
     /** 意味を運ぶときの名前。省略時は装飾で支援技術から隠れる(iconography.md §5)。 */
     label?: string;
   }
-  let { name, label }: Props = $props();
+  let { name, glyph, label }: Props = $props();
 
-  // Object.hasOwn で lookup する: name="__proto__" / "constructor" は prototype 由来の値を
-  // 拾って !glyph を false にし、warn を漏らして空 svg を描く(独立レビュー minor)。自セットの
-  // 実キーだけを見る
-  const glyph = $derived(Object.hasOwn(glyphs, name) ? glyphs[name as IconName] : undefined);
+  // name の解決は動的 import で分離する: glyph だけの消費者のバンドルに全マップを混入させない。
+  let resolved = $state<Glyph | undefined>(undefined);
   $effect(() => {
-    if (!glyph) console.warn(`[stemcell] Icon: 未知の name "${name}"(セットに無い。iconography.md §3)`);
+    if (glyph) {
+      resolved = glyph;
+    } else if (name) {
+      // 全マップは name を使うときだけ読み込む(動的 import はバンドルを別チャンクに分ける)
+      import('./resolve').then(({ resolveByName }) => {
+        resolved = resolveByName(name!);
+        if (!resolved) console.warn(`[stemcell] Icon: 未知の name "${name}"(セットに無い。iconography.md §3)`);
+      });
+    } else {
+      resolved = undefined;
+    }
   });
 </script>
 
-<!-- label があるときだけ意味を運ぶ(role=img + アクセシブルネーム)。無ければ装飾で隠す(aria-hidden)。
-     mirrorInRTL のグリフは RTL で左右反転する(CSS。iconography.md §4) -->
-{#if glyph}
+{#if resolved}
   <svg
     class="sc-icon"
     {viewBox}
     width="1em"
     height="1em"
     fill="currentColor"
-    data-mirror={glyph.mirrorInRTL ? 'true' : undefined}
+    data-mirror={resolved.mirrorInRTL ? 'true' : undefined}
     role={label ? 'img' : undefined}
     aria-label={label}
     aria-hidden={label ? undefined : 'true'}
   >
-    <path d={glyph.path} fill-rule={glyph.fillRule} />
+    <path d={resolved.path} fill-rule={resolved.fillRule} />
   </svg>
 {/if}

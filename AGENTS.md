@@ -41,6 +41,10 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 - autocomplete は WHATWG Autofill の語彙で書く(例: name / email / tel / postal-code /
   street-address / organization)。個人情報を集める欄では省略しない
 - disabled と invalid が同時のときは disabled の見た目が勝つ(仕様)
+- Icon は二つの口を持つ(iconography.md §6)。`<Icon name="check" />`(中立契約。文字列。使う分だけ
+  でなく全 208 グリフが束に入る。読み込みは name 使用時のみの別チャンク)/ `<Icon glyph={check} />`
+  (Web 方言。`import check from '@stemcell/icons/check'` で静的に取って渡す。使ったものだけ束に入る=
+  ツリーシェイク)。バンドルを絞りたいときは glyph 渡しを使う
 
 ## 部品
 

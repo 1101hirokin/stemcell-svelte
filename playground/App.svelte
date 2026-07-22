@@ -1,5 +1,6 @@
 <script lang="ts">
   import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox, Textarea, Switch, Icon } from '../src/lib';
+  import checkGlyph from '@stemcell/icons/check';
 
   let theme = $state<'auto' | 'standard-light' | 'standard-dark'>('auto');
   let density = $state<'comfortable' | 'compact'>('comfortable');
@@ -215,6 +216,13 @@
     <div class="pg-row">
       <code class="pg-tag">Button 内</code>
       <Button>{#snippet start()}<Icon name="file.download" />{/snippet}保存</Button>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">glyph 渡し</code>
+      <Cluster gap="md" align="center">
+        <Icon glyph={checkGlyph} label="完了(静的・ツリーシェイク)" />
+        <span>name(全束)と glyph(使う分だけ)の二口。iconography.md §6</span>
+      </Cluster>
     </div>
   </section>
 
