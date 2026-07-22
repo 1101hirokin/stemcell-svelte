@@ -9,12 +9,12 @@
   min-inline-size: 0;
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);
-  /* ドロップダウンの幅: 自然幅(content)を下限〜上限で clamp。下限 = max(x, トリガー幅) を上限で頭打ち、
-     上限 = y。full-width トリガーでも y で止まり馴染みある幅に、狭いトリガーでは最低トリガー幅を保つ。
-     x=12rem / y=24rem は暫定(調整可)。 */
-  --sc-popover-inline-size: max-content;
-  --sc-popover-min-inline-size: min(max(12rem, 100%), 24rem);
-  --sc-popover-max-inline-size: 24rem;
+  /* ドロップダウンの幅: fill(トリガー幅に一致。fill のフィールドなら dropdown も横いっぱい=第3条の
+     fill を popover まで及ぼす)。トリガーが fill なのでトリガー幅が支配し、選択内容で変動しない。
+     下限は content(選択肢が溢れない最小)。上限は敷かない。 */
+  --sc-popover-inline-size: 100%;
+  --sc-popover-min-inline-size: max-content;
+  --sc-popover-max-inline-size: none;
 }
 .sc-select[data-invalid='true'] {
   --_border: var(--color-semantic-danger-border);
@@ -36,10 +36,12 @@
   margin-inline-start: 0.25em;
 }
 
-/* 器(native の wrapper / custom のトリガー button が共有)。横 inset は器、縦 inset は中身が持つ */
+/* 器(native の wrapper / custom のトリガー button が共有)。横 inset は器、縦 inset は中身が持つ。
+   フィールドは fill(横いっぱい。field.md §2・第3条)。custom の button は既定 shrink-wrap なので明示する */
 .sc-select-control {
   display: flex;
   align-items: stretch;
+  inline-size: 100%;
   gap: var(--spacing-inline-md);
   --_inset: var(--spacing-inset-md);
   padding-inline: var(--_inset);
