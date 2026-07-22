@@ -1,0 +1,56 @@
+/* 相互排他の選択肢の集合。fieldset / legend が集合の名前を運ぶ(WCAG 1.3.1)。fieldset の既定装飾を
+   落とし、項目は縦積み(spacing.stack)を既定とする(契約: orientation prop は初版で持たない)。 */
+.sc-radiogroup {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+}
+
+/* legend は fieldset 内で特殊描画(flex アイテムにならず、fieldset の gap が効かない)。
+   TextField の label→control(stack-sm)と縦間隔を揃えるため、明示マージンで間隔を持たせる */
+.sc-radiogroup-label {
+  padding: 0;
+  margin-block-end: var(--spacing-stack-sm);
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-radiogroup-required {
+  margin-inline-start: 0.25em;
+}
+
+.sc-radiogroup-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+}
+
+/* invalid の danger を項目へ降ろす(契約 expressive: 差し替えは項目の描画に降りる。項目は danger を
+   自分の契約に持たず、グループが所有する)。CSS custom property の継承で項目へ運ぶ。 */
+.sc-radiogroup[data-invalid='true'] {
+  --sc-radio-invalid-border: var(--color-semantic-danger-border);
+  --sc-radio-invalid-ring: var(--color-semantic-danger-focus-ring);
+}
+
+.sc-radiogroup-description,
+.sc-radiogroup-error {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-radiogroup-description {
+  color: var(--color-app-fg-muted);
+}
+.sc-radiogroup-error {
+  color: var(--color-semantic-danger-soft-fg);
+}

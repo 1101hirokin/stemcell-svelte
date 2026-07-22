@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Grid, Icon, Sidebar, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Grid, Icon, Radio, RadioGroup, Sidebar, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -171,6 +171,60 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 既定は装飾: 支援技術から隠す(Web の表現は aria-hidden)。label があるときだけ意味を運び、画像として名前が届く(Web の表現は role=img + アクセシブルネーム)。
 - フォーカスを受け取らない。相互作用しないので最低標的(size.md §4)も適用外。押せる絵は IconButton。
+
+### Radio(契約 0.0.0-alpha.1)
+
+RadioGroup の項目。単体では使えない(グループの外に単一選択は存在しない。React Aria は例外を投げ、Radix は単体を公開しない。Ant だけが単体 checked を許すが採らない — field.md §5)。選ばれているかはグループの value との一致から導かれ、checked という prop は持たない(導出値は prop ではない)。
+
+props:
+
+- `value`: string — この項目の識別子。グループの value がこれと一致するとき選ばれている。native の <input type=radio> の value 属性と同じ観念。既定は持たない(識別子の無い選択肢は集合に立てない)。
+- `disabled`: boolean(既定 false) — この項目だけの無効。グループの disabled とは独立に立てられる(state.md §3.1 / §5)。矢印キーの巡回から外れる(web-keys.rules.json arrows.radiogroup)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 選択肢の名前。無名は許さない(field.md §2)。リッチ内容の規則は Checkbox と同じ(field.md §6。アクセシブルネームは内容のテキストから構成し、label 内の対話要素の活性化は選択へ伝播させない)。
+- `description` — この選択肢への補足(GOV.UK の item hint と同じ観念)。グループの description とは層が違う(field.md §2「グループの解剖」)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 選ばれているかは状態として届く(Web の表現は aria-checked true / false。native input[type=radio] なら無償)。
+- Space で選択(web-keys.rules.json)。矢印はグループの規則(arrows.radiogroup: 移動=選択)。
+- イベントを持たないのは書き落としではない。値の変化はグループの change が運ぶ(field.rules.json groupItems。機械強制あり)。押された事実だけが要る用途は現れていない。
+- invalid を持たないのも同じ線: エラーは集合への判定でありグループが宣言する。グループが invalid のとき、この項目の描画に danger が降りる(実装の文脈渡し。RadioGroup 契約の expressive notes)。
+- disabled は3要求すべてを満たすこと(state.md §5)。
+- label は control の後ろ(論理方向)。Checkbox と同じ扱い(field.md §8)。
+- 標的の門: size.md §4。
+
+### RadioGroup(契約 0.0.0-alpha.1)
+
+相互排他の選択肢の集合。値はグループがひとつ持つ(field.md §5。単一選択の値は集合にひとつ — React Aria / Radix / Base UI / Carbon が同じ側)。項目は Radio。グループの label は集合の名前であり(field.md §2「グループの解剖」)、error もグループに帰属する。
+
+props:
+
+- `value`: string((省略可)) — 選択中の Radio の value。アプリが所有する(field.md §5)。未指定は未選択であり、契約は未選択を許す。既定選択を置くべきかは業界が割れており(GOV.UK: 誘導を避けるため置くな / NN/g: 最頻値を置け)、アプリの文脈判断である — 契約は両方を表現できる形を取る。
+- `disabled`: boolean(既定 false) — グループ全体の無効。項目へ降りる(state.md §3.1 / §5 の3要求は各項目で満たされる)。
+- `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2)。集合への判定(未選択・不正な組み合わせ)であり、特定の項目に帰属しない(field.md §2「グループの解剖」)。intent の danger 差し替え(state.md §7)は項目の描画へ実装の文脈で降りる。
+- `required`: boolean(既定 false) — いずれかの選択が必須。支援技術に届くことは Normative、視覚標示はグループの label に部品が自動で出す(field.md §4。裁定済み 2026-07)。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: string) => void — 選択が変わったことを伝える。payload は新しく選ばれた Radio の value(field.md §5)。value の更新はアプリが行う。項目は change を発火しない(グループが値を所有するため。field.rules.json の groupItems)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 集合の名前(Web の表現は fieldset / legend。WCAG 2.2 SC 1.3.1: グループ名が無いと「何についての質問か」が支援技術に届かない)。無名は許さない(field.md §2)。
+- `description` — 集合への説明。項目の description(個々の補足)とは層が違う(field.md §2「グループの解剖」)。
+- `error` — invalid のときのエラー文。グループに1つ(Carbon / GOV.UK / Polaris / Spectrum の4系統一致)。description と並置(field.md §3。裁定済み 2026-07)。
+- `default`(必須) — 項目(Radio)の列。中身の構造は Radio が持ち、並べ方(縦横・間隔)はレイアウトの仕事 — グループは縦(spacing.stack)を既定とし、orientation prop は初版で持たない(第3条。横並びが要る文脈は稀で、GOV.UK は「2択かつ短いときだけ」と限定する)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- focusRing が false なのはグループ自身がフォーカスを受けないため。焦点と輪郭は項目(Radio)に立つ。
+- グループ名の配線: Web の表現は fieldset / legend(H71)、または role=radiogroup + aria-labelledby。SwiftUI / Compose では見出しとグループの semantics(Compose は selectableGroup)。
+- 矢印キーの規則は web-keys.rules.json の arrows.radiogroup が持つ(移動=選択、roving tabindex、disabled スキップ)。Tab はグループにひとつ: チェック済みがあればそこへ、なければ先頭へ。
+- invalid はグループの状態として届き(Web の表現は radiogroup への aria-invalid + aria-describedby)、error 文はグループの説明として届く。
+- 既定選択を置かない場合、Tab での進入先は先頭項目になる。未選択のまま送信された required グループが invalid の典型である。
 
 ### Sidebar(契約 0.0.0-alpha.3)
 

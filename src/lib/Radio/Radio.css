@@ -1,0 +1,134 @@
+/* RadioGroup の項目。Checkbox と同じ合成(選択済み=primary の塗り、未選択=plain のウォッシュ)だが
+   円形(shape.semantic.pill)。native <input> が値と a11y の源、視覚は sibling の丸が描く。 */
+.sc-radio-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+}
+
+.sc-radio {
+  display: inline-flex;
+  align-items: start;
+  gap: var(--spacing-inline-md);
+  cursor: pointer;
+  /* 未選択のチャンネル(既定)。選択で primary へ差し替える */
+  --_bg: var(--color-app-surface);
+  --_border: var(--color-app-border);
+  --_hover: var(--color-semantic-plain-soft-bg-hover);
+  --_pressed: var(--color-semantic-plain-soft-bg-pressed);
+  --_dot: transparent;
+  --_ring: var(--color-semantic-primary-focus-ring);
+}
+.sc-radio-field[data-disabled='true'] .sc-radio {
+  cursor: not-allowed;
+}
+
+.sc-radio-input {
+  position: absolute;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.sc-radio-circle {
+  position: relative;
+  flex: 0 0 auto;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border: var(--shape-border-width) solid var(--_border);
+  border-radius: var(--shape-semantic-pill);
+  background: var(--_bg);
+  transition:
+    background-color var(--motion-feedback-duration) var(--motion-feedback-easing),
+    border-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+/* 選択マーク(内円) */
+.sc-radio-circle::after {
+  content: '';
+  position: absolute;
+  inset: 50%;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: var(--shape-semantic-pill);
+  background: var(--_dot);
+  transform: translate(-50%, -50%);
+  transition: background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+
+/* 選択済み: primary の塗り + 白の内円 */
+.sc-radio-input:checked + .sc-radio-circle {
+  --_bg: var(--color-semantic-primary-bg);
+  --_border: var(--color-semantic-primary-bg);
+  --_hover: var(--color-semantic-primary-bg-hover);
+  --_pressed: var(--color-semantic-primary-bg-pressed);
+  --_dot: var(--color-semantic-primary-fg);
+}
+
+/* hover / pressed(state.md §3.2: disabled は抑制)。未選択は枠を保ち面のウォッシュ */
+.sc-radio:hover .sc-radio-circle {
+  background: var(--_hover);
+  border-color: var(--_hover);
+}
+.sc-radio:active .sc-radio-circle {
+  background: var(--_pressed);
+  border-color: var(--_pressed);
+}
+.sc-radio:hover .sc-radio-input:not(:checked) + .sc-radio-circle {
+  border-color: var(--_border);
+}
+
+/* focus-ring は丸に出す */
+.sc-radio-input:focus-visible + .sc-radio-circle {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* invalid はグループが宣言し danger が降りる。Radio は danger を自分では引かない(契約: 項目は
+   invalid prop を持たず、danger を所有するのはグループ)。グループが継承 CSS 変数で運ぶ */
+.sc-radio-field[data-invalid='true'] .sc-radio {
+  --_border: var(--sc-radio-invalid-border);
+  --_ring: var(--sc-radio-invalid-ring);
+}
+
+/* 選択済みかつ invalid: :checked ルールが --_box を circle に直接再宣言し祖先の invalid override を
+   潰すため、ここで枠だけ danger に戻す(塗りは primary のまま、枠が danger。独立レビュー blocker) */
+.sc-radio-field[data-invalid='true'] .sc-radio-input:checked + .sc-radio-circle {
+  --_border: var(--sc-radio-invalid-border);
+}
+
+/* disabled が勝つ(state.md §3.1)。interaction を抑制する(§3.2) */
+.sc-radio-field[data-disabled='true'] .sc-radio-circle,
+.sc-radio-field[data-disabled='true'] .sc-radio-input:checked + .sc-radio-circle {
+  --_bg: var(--color-semantic-disabled-soft-bg);
+  --_border: var(--color-semantic-disabled-border);
+  --_dot: var(--color-semantic-disabled-fg);
+}
+.sc-radio-field[data-disabled='true'] .sc-radio:hover .sc-radio-circle,
+.sc-radio-field[data-disabled='true'] .sc-radio:active .sc-radio-circle {
+  background: var(--color-semantic-disabled-soft-bg);
+  border-color: var(--color-semantic-disabled-border);
+}
+
+.sc-radio-label {
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-radio-field[data-disabled='true'] .sc-radio-label {
+  color: var(--color-semantic-disabled-fg);
+}
+
+.sc-radio-description {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+  color: var(--color-app-fg-muted);
+}

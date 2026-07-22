@@ -1,6 +1,6 @@
 {
   "name": "@stemcell/svelte",
-  "version": "0.0.0-alpha.14",
+  "version": "0.0.0-alpha.16",
   "type": "module",
   "description": "Stemcell の Svelte 実装。stemcell-component-prompts の契約に適合する(GOVERNANCE §6-2)。仕様から一意に実装できるかの実験リポでもあり、穴は HOLES.md に記録する。",
   "exports": {
@@ -36,7 +36,7 @@
     "svelte": "^5.0.0"
   },
   "devDependencies": {
-    "@stemcell/tokens": "0.0.0-alpha.2",
+    "@stemcell/tokens": "0.0.0-alpha.4",
     "@sveltejs/package": "^2.5.8",
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
     "@testing-library/svelte": "^5.2.0",

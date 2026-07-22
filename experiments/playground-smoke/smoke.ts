@@ -52,6 +52,8 @@ try {
     textarea: document.querySelectorAll('.sc-textarea').length,
     switch: document.querySelectorAll('.sc-switch').length,
     icon: document.querySelectorAll('.sc-icon').length,
+    radiogroup: document.querySelectorAll('.sc-radiogroup').length,
+    radio: document.querySelectorAll('.sc-radio').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -134,6 +136,23 @@ try {
   });
   if (fillWidth < 590)
     throw new Error(`TextField が fill しない(600px の器で ${fillWidth}px。inline-size:100% を確認)`);
+
+  // TextField: affix に内包した対話要素が器を押し上げない(高さは一次内容が所有。size.md §2 裁定)。
+  // 内包ボタンは器の行高へ従属し、当たり判定は門(24px)を割らない
+  const affix = await page.evaluate(() => {
+    const all = [...document.querySelectorAll('.sc-textfield')] as HTMLElement[];
+    const h = (tf: HTMLElement) => Math.round((tf.querySelector('.sc-textfield-control') as HTMLElement).getBoundingClientRect().height);
+    const withBtn = all.find((tf) => tf.querySelector('.sc-textfield-end button'));
+    const plain = all.find((tf) => tf.dataset.size === 'md' && !tf.querySelector('.sc-textfield-end') && !tf.querySelector('.sc-textfield-start'));
+    if (!withBtn) return null;
+    const btn = withBtn.querySelector('.sc-textfield-end button') as HTMLElement;
+    return { withBtnH: h(withBtn), plainH: plain ? h(plain) : null, btnH: Math.round(btn.getBoundingClientRect().height) };
+  });
+  if (!affix) throw new Error('TextField: affix にボタンを内包した例が playground に無い');
+  if (affix.plainH !== null && affix.withBtnH !== affix.plainH)
+    throw new Error(`TextField: affix 内包で器が膨らむ(${affix.withBtnH}px ≠ 素の md ${affix.plainH}px。size.md §2 内包則)`);
+  if (affix.btnH < 24)
+    throw new Error(`TextField: affix ボタンの当たり判定が門(24px)未満(${affix.btnH}px)`);
 
   // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
   // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)
@@ -223,6 +242,23 @@ try {
     const before = dis.checked; dis.click(); return before === dis.checked;
   });
   if (!swDis) throw new Error('Switch: disabled が click を抑制していない');
+  // Switch: サムの余白が全周均一(OFF 左・ON 右・縦が同値。裁定 2026-07。実 Chromium で幾何を測る)
+  const swGap = await page.evaluate(async () => {
+    const input = document.querySelector('.sc-switch-input') as HTMLInputElement;
+    const track = input.nextElementSibling as HTMLElement;
+    const thumb = track.querySelector('.sc-switch-thumb') as HTMLElement;
+    const wait = () => new Promise((r) => setTimeout(r, 250));
+    if (input.checked) { input.click(); await wait(); }
+    const t1 = track.getBoundingClientRect(), h1 = thumb.getBoundingClientRect();
+    const offLeft = +(h1.left - t1.left).toFixed(1);
+    const vertical = +(h1.top - t1.top).toFixed(1);
+    input.click(); await wait();
+    const t2 = track.getBoundingClientRect(), h2 = thumb.getBoundingClientRect();
+    const onRight = +(t2.right - h2.right).toFixed(1);
+    return { offLeft, onRight, vertical };
+  });
+  if (Math.abs(swGap.offLeft - swGap.onRight) > 0.5 || Math.abs(swGap.offLeft - swGap.vertical) > 0.5)
+    throw new Error(`Switch: サム余白が全周均一でない(左 ${swGap.offLeft} / 右 ${swGap.onRight} / 縦 ${swGap.vertical})`);
 
   // Textarea: textarea 要素で rows を持ち、複数行が入る
   const ta = await page.evaluate(() => {
@@ -278,6 +314,65 @@ try {
   if (!iconRtl.mirrored) throw new Error('Icon: RTL でミラーグリフが反転しない');
   if (!iconRtl.nonMirrorUnchanged) throw new Error('Icon: RTL で非ミラーグリフまで反転している');
 
+  // RadioGroup: native radio の矢印キー・roving tabindex・disabled スキップ(web-keys arrows.radiogroup)。
+  // これは実 Chromium の native 挙動でしか確認できない(契約 a11y の核心)
+  const radios = page.locator('.sc-radiogroup .sc-radio-input');
+  // 最初の radio へフォーカス(roving: 未選択なら先頭が Tab 対象)
+  await radios.nth(0).focus();
+  const focus0 = await page.evaluate(() => (document.activeElement as HTMLInputElement)?.value);
+  // 矢印下: 次へ移動=選択
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(50);
+  const afterDown = await page.evaluate(() => {
+    const el = document.activeElement as HTMLInputElement;
+    return { value: el?.value, checked: el?.checked };
+  });
+  // さらに矢印下: disabled(large)を飛ばして先頭へ回る、または止まる(native の巡回)。disabled は選ばれない
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(50);
+  const afterDown2 = await page.evaluate(() => {
+    const el = document.activeElement as HTMLInputElement;
+    const disabled = [...document.querySelectorAll('.sc-radio-input')].find((i) => (i as HTMLInputElement).disabled) as HTMLInputElement;
+    return { value: el?.value, disabledChecked: disabled?.checked, disabledFocused: el === disabled };
+  });
+  if (focus0 !== 's') throw new Error(`Radio: 先頭(s)にフォーカスが乗らない: ${focus0}`);
+  if (afterDown.value !== 'm' || !afterDown.checked) throw new Error(`Radio: 矢印下で移動=選択にならない: ${JSON.stringify(afterDown)}`);
+  // disabled(large=l)を実際にスキップしたか: disabled input が checked/focused になっていない。
+  // かつ、down2 でフォーカスが disabled を飛ばして別の有効項目へ動いた(l に止まらない)
+  if (afterDown2.disabledFocused || afterDown2.disabledChecked) throw new Error(`Radio: disabled 項目が選択/フォーカスされた: ${JSON.stringify(afterDown2)}`);
+  if (afterDown2.value === 'l') throw new Error('Radio: disabled(l)がフォーカスを受けた(スキップされていない)');
+
+  // 選択済みかつグループ invalid のとき、選択済み項目の枠が danger になる(:checked の枠再宣言が
+  // invalid override を潰さない。独立レビュー blocker)。playground の「選択済み × invalid」デモで測る
+  const invalidRadio = await page.evaluate(() => {
+    const group = [...document.querySelectorAll('.sc-radiogroup[data-invalid="true"]')].find((g) =>
+      g.querySelector('.sc-radio-input:checked'),
+    ) as HTMLElement | undefined;
+    if (!group) return null;
+    const checked = group.querySelector('.sc-radio-input:checked') as HTMLInputElement;
+    const circle = (checked.nextElementSibling as HTMLElement); // .sc-radio-circle
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--color-semantic-danger-border)';
+    group.appendChild(probe);
+    const danger = getComputedStyle(probe).color;
+    probe.remove();
+    return { border: getComputedStyle(circle).borderTopColor, danger };
+  });
+  if (invalidRadio && invalidRadio.border !== invalidRadio.danger)
+    throw new Error(`Radio: 選択済み×invalid で枠が danger にならない(${invalidRadio.border} ≠ ${invalidRadio.danger}。独立レビュー blocker)`);
+
+  // リッチ label(リンク内包)の二重発火防止: リンク活性化は選択を発火させない(Checkbox と同型)。
+  // playground の Radio には link が無いので、選択済み状態を触らず label テキストのクリックで選択が
+  // 起きること(label 機構が生きている)だけ確認する
+  const labelToggle = await page.evaluate(() => {
+    const first = document.querySelector('.sc-radiogroup .sc-radio') as HTMLElement;
+    const input = first.querySelector('.sc-radio-input') as HTMLInputElement;
+    const before = input.checked;
+    (first.querySelector('.sc-radio-label') as HTMLElement).click();
+    return before !== input.checked || input.checked; // クリックで選択される(label 機構)
+  });
+  if (!labelToggle) throw new Error('Radio: label のクリックで選択されない(label 機構が死んでいる)');
+
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
   await page.waitForTimeout(100);
@@ -316,7 +411,7 @@ try {
 
   await browser.close();
   console.log(
-    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled / Textarea 複数行 / Icon currentColor・1em・RTL 反転`,
+    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill・affix 非膨張(内包則) / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled・サム余白全周均一 / Textarea 複数行 / Icon currentColor・1em・RTL 反転 / Radio 矢印移動=選択・disabled スキップ`,
   );
 } finally {
   preview.kill();

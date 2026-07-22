@@ -33,10 +33,14 @@
   margin-inline-start: 0.25em;
 }
 
+/* 内包時の高さは一次内容(入力)が決める(size.md §2 裁定)。縦 inset は入力に付き、器は横 inset だけを
+   持つ。align-items:stretch で affix は器の行高へ従属する(器を押し上げない) */
 .sc-textfield-control {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: var(--spacing-inline-md);
+  --_inset: var(--spacing-inset-md);
+  padding-inline: var(--_inset);
   background: var(--color-app-surface);
   border: var(--shape-border-width) solid var(--_border);
   border-radius: var(--shape-semantic-control);
@@ -45,13 +49,19 @@
     background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
 }
 .sc-textfield[data-size='sm'] .sc-textfield-control {
-  padding: var(--spacing-inset-sm);
-}
-.sc-textfield[data-size='md'] .sc-textfield-control {
-  padding: var(--spacing-inset-md);
+  --_inset: var(--spacing-inset-sm);
 }
 .sc-textfield[data-size='lg'] .sc-textfield-control {
-  padding: var(--spacing-inset-lg);
+  --_inset: var(--spacing-inset-lg);
+}
+/* 付属が自前のコントロール(ボタン)を持つ辺では、そのボタンが縁と当たり判定を所有するので、
+   フィールドの横 inset を手放す(size.md §2 の水平版。二重取りを避ける)。裸のアイコン/装飾の辺は
+   inset を残し、内容が枠に触れないようにする */
+.sc-textfield-control:has(.sc-textfield-start button) {
+  padding-inline-start: 0;
+}
+.sc-textfield-control:has(.sc-textfield-end button) {
+  padding-inline-end: 0;
 }
 .sc-textfield[data-disabled='true'] .sc-textfield-control {
   background: var(--color-semantic-disabled-soft-bg);
@@ -63,7 +73,9 @@
   min-inline-size: 0;
   border: none;
   background: none;
-  padding: 0;
+  /* 縦 inset は一次内容(入力)が持ち、器の高さを決める(size.md §2)。横は器の padding-inline が持つ */
+  padding-block: var(--_inset);
+  padding-inline: 0;
   outline: none;
   font-family: var(--typography-body-md-font-family);
   font-size: var(--typography-body-md-font-size);
@@ -91,7 +103,15 @@
 .sc-textfield-end {
   display: inline-flex;
   align-items: center;
+  /* 器の行高に従属する(size.md §2 内包時の裁定)。行高いっぱいに広がり hit-target を器が満たす */
+  align-self: stretch;
   color: var(--color-app-fg-muted);
+}
+/* affix の対話要素/装飾は器の行高に従い、自前の縦 inset で器を押し上げない(内包時の裁定) */
+.sc-textfield-start > :where(button),
+.sc-textfield-end > :where(button) {
+  align-self: stretch;
+  padding-block: 0;
 }
 
 .sc-textfield-description,

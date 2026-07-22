@@ -1,6 +1,9 @@
 <script lang="ts">
-  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox, Textarea, Switch, Icon } from '../src/lib';
+  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
+
+  let size = $state<string | undefined>(undefined);
+  let sizeTouched = $state(false);
 
   let theme = $state<'auto' | 'standard-light' | 'standard-dark'>('auto');
   let density = $state<'comfortable' | 'compact'>('comfortable');
@@ -224,6 +227,43 @@
         <span>name(全束)と glyph(使う分だけ)の二口。iconography.md §6</span>
       </Cluster>
     </div>
+  </section>
+
+  <section>
+    <h2>RadioGroup / Radio</h2>
+    <p>
+      相互排他の集合。値はグループが1つ持つ(項目は checked を持たない)。矢印キーで移動=選択、
+      Tab はグループに1つ(選択済みへ)。矢印キー・roving tabindex は native radio に任せる。
+    </p>
+    <RadioGroup
+      value={size}
+      required
+      invalid={sizeTouched && !size}
+      onchange={(v) => { size = v; sizeTouched = true; }}
+    >
+      {#snippet label()}配送サイズ{/snippet}
+      {#snippet description()}ひとつ選んでください{/snippet}
+      {#snippet error()}サイズの選択が必要です{/snippet}
+      <Radio value="s">
+        {#snippet label()}small{/snippet}
+        {#snippet description()}〜60cm{/snippet}
+      </Radio>
+      <Radio value="m">
+        {#snippet label()}medium{/snippet}
+        {#snippet description()}〜100cm{/snippet}
+      </Radio>
+      <Radio value="l" disabled>
+        {#snippet label()}large(在庫切れ){/snippet}
+      </Radio>
+    </RadioGroup>
+    <p>選択中: {size ?? '(未選択)'}</p>
+    <p>選択済みかつ invalid(不正な組み合わせ。枠は danger・塗りは primary):</p>
+    <RadioGroup value="m" invalid>
+      {#snippet label()}選択済み × invalid{/snippet}
+      {#snippet error()}この組み合わせは不正です{/snippet}
+      <Radio value="s">{#snippet label()}s{/snippet}</Radio>
+      <Radio value="m">{#snippet label()}m(選択済み){/snippet}</Radio>
+    </RadioGroup>
   </section>
 
   <section>
