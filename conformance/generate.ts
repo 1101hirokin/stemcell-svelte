@@ -33,6 +33,9 @@ const resolve = (c: Contract): Contract => {
     props: { ...(p.props ?? {}), ...(c.props ?? {}) },
     states: c.states ?? p.states,
     tokensRequired: [...new Set([...(p.tokensRequired ?? []), ...(c.tokensRequired ?? [])])],
+    // a11y も継承する: focusRing は role と同じく親から降りる形状の性質であり、子が a11y を
+    // 省いたとき親の focusRing:true が脱落すると幾何の CSS 検査が無警告で抜ける(独立レビュー major)。
+    a11y: c.a11y ?? p.a11y,
   };
 };
 

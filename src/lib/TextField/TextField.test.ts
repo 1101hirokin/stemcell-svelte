@@ -6,12 +6,23 @@
 import { render, fireEvent } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import TextField from './TextField.svelte';
 import RejectDigits from './fixtures/RejectDigits.svelte';
 
 const snip = (html: string) => createRawSnippet(() => ({ render: () => html }));
 const label = snip('<span>氏名</span>');
 const input = (c: HTMLElement) => c.querySelector('.sc-textfield-input') as HTMLInputElement;
+
+it('フィールドは fill(横いっぱい)の宣言を持つ(field.md §2・layout.md §2。裁定 2026-07)', () => {
+  // jsdom はレイアウトを計算しないため、出荷される CSS の宣言を直接検査する
+  // (conformance が tokensRequired の CSS 変数を照合するのと同じ手法)。実際の描画幅は smoke が測る。
+  const css = readFileSync(join(import.meta.dirname, 'TextField.css'), 'utf-8');
+  const block = css.slice(css.indexOf('.sc-textfield {'), css.indexOf('}', css.indexOf('.sc-textfield {')));
+  expect(block).toContain('inline-size: 100%');
+  expect(block).toContain('min-inline-size: 0');
+});
 
 it('label: for/id で input の名前として配線される(field.md §2)', () => {
   const { container } = render(TextField, { props: { label } });

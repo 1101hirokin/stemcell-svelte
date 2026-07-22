@@ -113,13 +113,23 @@ try {
   if (borderContrast < 3)
     throw new Error(`中立 border が地に対し 3:1 未満: ${borderContrast.toFixed(2)}:1(WCAG 2.2 SC 1.4.11)`);
 
-  // フィールドは fill(横いっぱい。裁定 2026-07): 器の幅とほぼ一致する
-  const fills = await page.evaluate(() => {
+  // フィールドは fill(横いっぱい。裁定 2026-07)。検出力を持たせるため、stretch しない文脈で測る:
+  // Stack の align=stretch は全子を伸ばすので fill の有無を隠す(独立レビュー指摘)。ここでは
+  // shrink-to-fit にならない固定幅の flex 行に clone を1つだけ置き、幅が器に一致するかを見る。
+  // inline-size:100% が無ければ内容幅に縮むため、この検査は削除で RED 化する。
+  const fillWidth = await page.evaluate(() => {
     const tf = document.querySelector('.sc-textfield') as HTMLElement;
-    const parent = tf.parentElement as HTMLElement;
-    return tf.offsetWidth >= parent.clientWidth - 2;
+    const box = document.createElement('div');
+    box.style.cssText = 'display:flex; align-items:flex-start; inline-size:600px; position:absolute; left:-9999px';
+    const clone = tf.cloneNode(true) as HTMLElement;
+    box.appendChild(clone);
+    document.body.appendChild(box);
+    const w = clone.offsetWidth;
+    box.remove();
+    return w;
   });
-  if (!fills) throw new Error('TextField が fill(横いっぱい)になっていない');
+  if (fillWidth < 590)
+    throw new Error(`TextField が fill しない(600px の器で ${fillWidth}px。inline-size:100% を確認)`);
 
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');

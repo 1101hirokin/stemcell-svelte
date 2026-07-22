@@ -134,10 +134,10 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 - error slot は invalid が true のときだけ描画される。常時渡してよい(出し分けは部品がやる)
 - placeholder を label の代わりに使わない(label は必須の snippet)
-- Button に type の prop は無い(フォーム参加は仕様未決。Button.md §6)。実装は native の
-  \`<button>\` を素のまま出すため、\`<form>\` 内に置くと HTML の既定(type=submit)で暗黙送信が
-  起きる点に注意。意図しない送信・再読み込みを避けるには form に入れないか、form の
-  onsubmit で preventDefault する。送信ロジックは onclick で書く(HOLES #24)
+- Button は \`type\`(\`button\` / \`submit\` / \`reset\`。既定 \`button\`)を持つ。これは Web 層の
+  取り決めで中立契約には無いため、上の props 表には現れない(Button.md §6)。既定 \`button\` は
+  \`<form>\` 内でも送信しない(HTML 既定の暗黙送信の罠を塞ぐ)。フォームを送信するボタンには
+  明示的に \`type="submit"\` を指定する。送信の副作用そのものはアプリが書く
 - blur / focus のイベントは契約に無い。確定タイミングが要るなら部品を包む要素で
   focusout / keydown を捕捉する
 - autocomplete は WHATWG Autofill の語彙で書く(例: name / email / tel / postal-code /
