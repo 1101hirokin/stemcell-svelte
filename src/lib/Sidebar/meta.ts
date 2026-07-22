@@ -2,7 +2,7 @@
 export const META = {
   props: {
     side: { values: ['start', 'end'], default: 'start' },
-    sideWidth: {},
+    sideWidth: { values: ['8rem', '12rem', '16rem', '20rem', '24rem', '32rem'] },
     contentMin: { default: '50%' },
     gap: { default: 'md' },
   },

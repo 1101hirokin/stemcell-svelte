@@ -120,14 +120,14 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 
-### Sidebar(契約 0.0.0-alpha.2)
+### Sidebar(契約 0.0.0-alpha.3)
 
 2カラム。脇(sidebar)は内容幅で立ち、本体は fill。本体の幅が contentMin を割ったら縦積みへ折れる。
 
 props:
 
 - `side`: "start" | "end"(既定 "start") — 脇をどちらに置くか。論理方向(RTL で反転。Button の start/end と同じ線)。
-- `sideWidth`: string((省略可)) — 脇の幅。省略時は脇の内容幅(intrinsic)。指定するときは閉じた段の集合(8rem / 12rem / 16rem / 20rem / 24rem / 32rem。裁定 2026-07。単位は rem、集合は Grid の min と共有の6段。layout.md §9)。段外の値は warn して省略時(内容幅)へ退避する。生の px は書かない。段の集合は seed。
+- `sideWidth`: "8rem" | "12rem" | "16rem" | "20rem" | "24rem" | "32rem"((省略可)) — 脇の幅。閉じた6段(裁定 2026-07。Grid min と共有。単位 rem。layout.md §9)。省略時は脇の内容幅(intrinsic)。gap と違い純粋な閉集合なので enum で表現する(layout.md §6)。生の px は書かない。
 - `contentMin`: string(既定 "50%") — 本体が保つ最小比率。これを割ると縦積みへ折れる(切替の条件は本体の窮屈さであって画面幅ではない。コンテナ方針)。百分率の文字列。
 - `gap`: string(既定 "md") — 2カラム間(折れたら縦)の間隔。spacing の語彙。段(sm / md / lg)または大域の原始 X(8〜24 の整数の文字列。32px〜)。小域の原始(0〜7)は受けない(spacing.md §6: 小域は意味層で。layout.md §6)。生の px は受けない。混合型のため string であり、値の照合は実装側の適合テストの仕事。
 
