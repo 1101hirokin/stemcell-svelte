@@ -24,7 +24,7 @@
   "scripts": {
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "package": "svelte-package -i src/lib -o dist",
-    "prepublishOnly": "bun run package",
+    "prepublishOnly": "bun run agents:check && bun run package",
     "playground": "vite --config vite.playground.config.ts",
     "playground:build": "vite build --config vite.playground.config.ts",
     "test": "bun conformance/generate.ts && bun agents/generate.ts --check && vitest run",

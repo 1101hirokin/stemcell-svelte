@@ -18,13 +18,15 @@ AI ネイティブ化の土台(裁定 2026-07: 根本思想として今から取
 |---|---|
 | A: 契約のみ | 対象5部品の contract.json |
 | B: 契約+散文 | A + 各部品の .md + foundations/field.md / layout.md |
-| C: 契約+生成 AGENTS.md | A + 生成器 v1 の出力(生成器の効果測定。後日) |
+| C: 契約+生成 AGENTS.md | A + 生成器 v1 の出力(生成器の効果測定) |
 
 出力は App.svelte 1ファイルと、「分からなかったこと・推測で埋めたこと」の自己申告。
 自己申告が主目的である(門が拾えるのは書き間違いだけで、正しく動くが規範に反する使い方や、
 推測が偶然当たった場合の危うさは自己申告でしか見えない)。
 
-評価は消費者ハーネス(@stemcell/svelte を registry から install した素の vite アプリ)で行う:
+評価は消費者ハーネス([harness/](./harness)。@stemcell/svelte を registry から install した
+素の vite アプリ)で行う。被験者の生成物と自己申告の原文は [subjects/](./subjects) にあり、
+再実行は `cd harness && bun install` の後 `bun experiments/agent-consumption/probe.ts <A|B|C>`:
 
 1. svelte-check(型 = 使用検証の門の原型。存在しない prop / snippet はここで落ちる)
 2. vite build

@@ -49,10 +49,19 @@ const resolve = (c: Contract): Contract => {
 /** イベント名 → Svelte の callback prop 名。 */
 const eventProp = (name: string) => `on${name}`;
 
-const propRow = (name: string, p: Prop): string => {
+/** 部品内の個別 prop の実装保留(HOLES 参照)。契約は正しくても、この実装ではまだ動かないもの。
+ * 生成物に必ず注記する(独立レビュー major 指摘: 告げなければ「黙って無視される」最悪の失敗形になる)。 */
+const UNIMPLEMENTED: Record<string, Record<string, string>> = {
+  StemcellProvider: {
+    themes: 'この Svelte 実装では未実装。渡すと warn して無視する(HOLES #5。仕様側の変換ユーティリティの置き場が未決)',
+  },
+};
+
+const propRow = (component: string, name: string, p: Prop): string => {
   const type = p.values ? p.values.map((v) => `"${v}"`).join(' | ') : p.type;
   const dflt = p.default === undefined ? (p.optional ? '(省略可)' : '') : `既定 ${JSON.stringify(p.default)}`;
-  return `- \`${name}\`: ${type}${dflt ? `(${dflt})` : ''}${p.description ? ` — ${p.description}` : ''}`;
+  const pending = UNIMPLEMENTED[component]?.[name];
+  return `- \`${name}\`: ${type}${dflt ? `(${dflt})` : ''}${p.description ? ` — ${p.description}` : ''}${pending ? `\n  - 注意: ${pending}` : ''}`;
 };
 
 const dirs = readdirSync(SPEC, { withFileTypes: true })
@@ -68,7 +77,7 @@ const sections = dirs.map((name) => {
   const props = Object.entries(c.props ?? {});
   if (props.length) {
     lines.push('props:', '');
-    for (const [n, p] of props) lines.push(propRow(n, p));
+    for (const [n, p] of props) lines.push(propRow(name, n, p));
     lines.push('');
   }
   const events = Object.entries(c.events ?? {});
@@ -125,7 +134,10 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 - error slot は invalid が true のときだけ描画される。常時渡してよい(出し分けは部品がやる)
 - placeholder を label の代わりに使わない(label は必須の snippet)
-- Button に type="submit" は無い(フォーム参加は未決の仕様)。送信は onclick でアプリが行う
+- Button に type の prop は無い(フォーム参加は仕様未決。Button.md §6)。実装は native の
+  \`<button>\` を素のまま出すため、\`<form>\` 内に置くと HTML の既定(type=submit)で暗黙送信が
+  起きる点に注意。意図しない送信・再読み込みを避けるには form に入れないか、form の
+  onsubmit で preventDefault する。送信ロジックは onclick で書く(HOLES #24)
 - blur / focus のイベントは契約に無い。確定タイミングが要るなら部品を包む要素で
   focusout / keydown を捕捉する
 - autocomplete は WHATWG Autofill の語彙で書く(例: name / email / tel / postal-code /

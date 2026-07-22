@@ -30,7 +30,10 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 - error slot は invalid が true のときだけ描画される。常時渡してよい(出し分けは部品がやる)
 - placeholder を label の代わりに使わない(label は必須の snippet)
-- Button に type="submit" は無い(フォーム参加は未決の仕様)。送信は onclick でアプリが行う
+- Button に type の prop は無い(フォーム参加は仕様未決。Button.md §6)。実装は native の
+  `<button>` を素のまま出すため、`<form>` 内に置くと HTML の既定(type=submit)で暗黙送信が
+  起きる点に注意。意図しない送信・再読み込みを避けるには form に入れないか、form の
+  onsubmit で preventDefault する。送信ロジックは onclick で書く(HOLES #24)
 - blur / focus のイベントは契約に無い。確定タイミングが要るなら部品を包む要素で
   focusout / keydown を捕捉する
 - autocomplete は WHATWG Autofill の語彙で書く(例: name / email / tel / postal-code /
@@ -165,6 +168,7 @@ props:
 - `theme`: string(既定 "auto") — テーマ名。auto(既定)は OS のカラースキームに追従し、Web では属性を付けないこと自体が auto である(StemcellProvider.md §4)。組み込みは standard-light / standard-dark。themes で登録したカスタムテーマの key も指せるため、値集合は閉じておらず enum ではない。
 - `density`: "comfortable" | "compact"(既定 "comfortable") — 密度。文脈の軸なので、これを受け取るのは Provider だけである(第6条)。決定主体と切替 UI の扱いは spacing.md §5「密度の決定主体」。Web にしか存在しない(ceded 参照)。
 - `themes`: array((省略可)) — カスタムテーマの登録。消費者が上書きできるのは列挙した事項(色)だけである(第3条・rfc 0003)。任意のトークン木は受けない(StemcellProvider.md §7 の型強制。この fields が閉じていることがその機械可読な形である)。
+  - 注意: この Svelte 実装では未実装。渡すと warn して無視する(HOLES #5。仕様側の変換ユーティリティの置き場が未決)
 
 ### Switcher(契約 0.0.0-alpha.1)
 
