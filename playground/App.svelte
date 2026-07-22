@@ -9,7 +9,6 @@
   let density = $state<'comfortable' | 'compact'>('comfortable');
   let threshold = $state('30rem');
   let invite = $state('abc');
-  let shipSize = $state('');
   let gridMin = $state('16rem');
   let sidebarSide = $state<'start' | 'end'>('start');
   let agree = $state(false);
@@ -17,6 +16,8 @@
   let toppings = $state({ cheese: true, tomato: false });
   let bio = $state('');
   let notify = $state(true);
+  let ship = $state('');
+  let account = $state('personal');
 
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
@@ -199,37 +200,35 @@
   <section>
     <h2>Select</h2>
     <p>
-      native select 基盤。閉じた選択肢からひとつ選ぶ。placeholder は無効化された先頭 option、開閉は
-      ブラウザ所有(契約に open を持たない)。構造・トークンは TextField と同型。invalid は未選択で立つ。
+      二経路(RFC 0007 の B2)。pointer はカスタム combobox+listbox(リッチ選択肢・aria-activedescendant・
+      Popover を合成)、touch(pointer:coarse)は native select に切替。開閉はコンポーネント内部が所有、
+      light dismiss(外側/Escape)。invalid は未選択で立つ。
     </p>
     <Stack gap="lg">
       <Select
-        bind:value={shipSize}
-        placeholder="配送サイズを選択"
+        bind:value={ship}
+        placeholder="配送方法を選択"
         required
-        invalid={shipSize === ''}
+        invalid={ship === ''}
         options={[
-          { value: 's', label: '小(〜2kg)' },
-          { value: 'm', label: '中(〜10kg)' },
-          { value: 'l', label: '大(〜25kg)' },
-          { value: 'xl', label: '特大(法人のみ)', disabled: true },
+          { value: 'std', label: '通常配送', icon: 'menu', description: '3〜5営業日' },
+          { value: 'exp', label: '速達', icon: 'arthmetic.plus', description: '翌日着' },
+          { value: 'pick', label: '店舗受取', icon: 'search', description: '最寄り店で受け取り' },
+          { value: 'frz', label: '冷凍便(法人のみ)', icon: 'delete', disabled: true },
         ]}
       >
-        {#snippet label()}配送サイズ{/snippet}
-        {#snippet description()}梱包後の総重量で選ぶ{/snippet}
+        {#snippet label()}配送方法{/snippet}
+        {#snippet description()}リッチ選択肢(アイコン ＋ 副文){/snippet}
         {#snippet error()}選択が必要{/snippet}
       </Select>
       <Cluster gap="md">
-        <Select size="sm" value="jp" options={[{ value: 'jp', label: '日本' }, { value: 'us', label: '米国' }]}>
+        <Select size="sm" bind:value={account} options={[{ value: 'personal', label: '個人' }, { value: 'business', label: '法人' }]}>
           {#snippet label()}sm{/snippet}
         </Select>
-        <Select size="md" value="jp" options={[{ value: 'jp', label: '日本' }, { value: 'us', label: '米国' }]}>
-          {#snippet label()}md{/snippet}
-        </Select>
-        <Select size="lg" value="jp" options={[{ value: 'jp', label: '日本' }, { value: 'us', label: '米国' }]}>
+        <Select size="lg" bind:value={account} options={[{ value: 'personal', label: '個人' }, { value: 'business', label: '法人' }]}>
           {#snippet label()}lg{/snippet}
         </Select>
-        <Select disabled value="jp" options={[{ value: 'jp', label: '日本' }]}>
+        <Select disabled value="personal" options={[{ value: 'personal', label: '個人' }]}>
           {#snippet label()}disabled{/snippet}
         </Select>
       </Cluster>

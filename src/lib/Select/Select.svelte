@@ -2,27 +2,26 @@
   import './Select.css';
   import { META } from './meta';
   import Icon from '../Icon/Icon.svelte';
+  import Popover from '../Popover/Popover.svelte';
   import type { Snippet } from 'svelte';
 
-  // 閉じた選択肢からひとつ選ぶ入力。Web は native <select> を基本とする(Select.md §2)。
-  // 構造・トークンは TextField と同型(field.md §6)。開閉はブラウザが所有(契約に open を持たない)。
+  // 閉じた選択肢からひとつ選ぶ入力。Web は二経路(RFC 0007 の B2): touch=native select、
+  // pointer=カスタム combobox+listbox(Popover を合成)。構造・トークンは TextField と同型(field.md §6)。
   interface Option {
     value: string;
     label: string;
+    icon?: string;
+    description?: string;
     disabled?: boolean;
   }
   interface Props {
-    /** 選択中の value。空文字は未選択。アプリが所有する(field.md §5)。 */
     value?: string;
-    /** 選択肢の列。データとして渡す(裁定: native select は文字列 label のみ)。 */
     options: Option[];
-    /** 未選択時の表示。label の代替ではない。Web の表現は無効化された先頭 option。 */
     placeholder?: string;
     disabled?: boolean;
     invalid?: boolean;
     required?: boolean;
     size?: (typeof META.props.size.values)[number];
-    /** 契約の change。payload は新しい value(field.md §5)。離散なので逐次/確定の区別が無い。 */
     onchange?: (value: string) => void;
     label: Snippet;
     description?: Snippet;
@@ -44,14 +43,121 @@
 
   const uid = $props.id();
   const inputId = `${uid}-input`;
+  const listboxId = `${uid}-listbox`;
   const descriptionId = `${uid}-description`;
   const errorId = `${uid}-error`;
+  const optId = (i: number) => `${uid}-opt-${i}`;
 
   const describedby = $derived(
-    [description ? descriptionId : null, invalid && error ? errorId : null]
-      .filter(Boolean)
-      .join(' ') || undefined,
+    [description ? descriptionId : null, invalid && error ? errorId : null].filter(Boolean).join(' ') ||
+      undefined,
   );
+
+  // pointer 検出(B2)。coarse(touch 主)は native、fine(pointer)は custom(Select.md §2)
+  let coarse = $state(false);
+  $effect(() => {
+    const mq = window.matchMedia('(pointer: coarse)');
+    const update = () => (coarse = mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  });
+
+  // ---- custom(pointer)経路の状態 ----
+  let open = $state(false);
+  let activeIndex = $state(-1); // aria-activedescendant の指す先(DOM focus はトリガー据置)
+  const selectedIndex = $derived(options.findIndex((o) => o.value === value));
+  const selectedOption = $derived(options.find((o) => o.value === value));
+  const enabledIndexes = $derived(
+    options.map((o, i) => (o.disabled ? -1 : i)).filter((i) => i >= 0),
+  );
+
+  function selectAt(i: number) {
+    const o = options[i];
+    if (!o || o.disabled) return;
+    value = o.value;
+    onchange?.(o.value);
+  }
+  function openList() {
+    if (disabled) return;
+    open = true;
+    activeIndex =
+      selectedIndex >= 0 && !options[selectedIndex]?.disabled
+        ? selectedIndex
+        : (enabledIndexes[0] ?? -1);
+  }
+  function closeList() {
+    open = false;
+    activeIndex = -1;
+  }
+  function moveActive(dir: 1 | -1) {
+    if (!enabledIndexes.length) return;
+    const pos = enabledIndexes.indexOf(activeIndex);
+    const nextPos = pos < 0 ? (dir > 0 ? 0 : enabledIndexes.length - 1) : pos + dir;
+    const clamped = Math.min(Math.max(nextPos, 0), enabledIndexes.length - 1);
+    activeIndex = enabledIndexes[clamped]!;
+  }
+
+  // type-ahead(先頭一致。空白を含む多語 label も辿れる。web-keys arrows.listbox)
+  let typeBuffer = '';
+  let typeTimer: ReturnType<typeof setTimeout> | undefined;
+  function typeahead(ch: string) {
+    typeBuffer += ch.toLowerCase();
+    clearTimeout(typeTimer);
+    typeTimer = setTimeout(() => (typeBuffer = ''), 500);
+    const hit = enabledIndexes.find((i) => options[i]!.label.toLowerCase().startsWith(typeBuffer));
+    if (hit !== undefined) activeIndex = hit;
+  }
+
+  function onTriggerKeydown(e: KeyboardEvent) {
+    if (!open) {
+      if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) {
+        e.preventDefault();
+        openList();
+      }
+      return;
+    }
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        moveActive(1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        moveActive(-1);
+        break;
+      case 'Home':
+        e.preventDefault();
+        activeIndex = enabledIndexes[0] ?? -1;
+        break;
+      case 'End':
+        e.preventDefault();
+        activeIndex = enabledIndexes.at(-1) ?? -1;
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (activeIndex >= 0) selectAt(activeIndex);
+        closeList();
+        break;
+      case 'Escape':
+        e.preventDefault();
+        closeList();
+        break;
+      case 'Tab':
+        // commit して閉じ、フォーカスは進める(preventDefault しない)
+        if (activeIndex >= 0) selectAt(activeIndex);
+        closeList();
+        break;
+      case ' ':
+        // 開いている間の Space は type-ahead の文字(選択キーではない。web-keys arrows.listbox)
+        e.preventDefault();
+        typeahead(' ');
+        break;
+      default:
+        if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) typeahead(e.key);
+        break;
+    }
+  }
 </script>
 
 <div class="sc-select" data-size={size} data-invalid={invalid} data-disabled={disabled}>
@@ -59,29 +165,93 @@
     {@render label()}{#if required}<span class="sc-select-required" aria-hidden="true">*</span
       >{/if}
   </label>
-  <div class="sc-select-control">
-    <!-- native select が値と a11y(role=combobox。HTML-AAM)の源。開閉キーは UA 所有。
-         change でのページ遷移/送信は禁止(WCAG 3.2.2)だが機械強制できないので結線側の規範 -->
-    <select
-      class="sc-select-input"
-      id={inputId}
-      bind:value
-      {disabled}
-      {required}
-      aria-invalid={invalid ? 'true' : undefined}
-      aria-describedby={describedby}
-      onchange={(e) => onchange?.(e.currentTarget.value)}
-    >
-      {#if placeholder !== undefined}
-        <option value="" disabled>{placeholder}</option>
-      {/if}
-      {#each options as opt (opt.value)}
-        <option value={opt.value} disabled={opt.disabled}>{opt.label}</option>
-      {/each}
-    </select>
-    <!-- 開閉インジケータ(expressive)。native の矢印は appearance:none で消し、自前で描く。装飾 -->
-    <span class="sc-select-chevron" aria-hidden="true"><Icon name="chevron.down" /></span>
-  </div>
+
+  {#if coarse}
+    <!-- touch: native <select>。開閉・キー・SR・高コントラストは UA 所有。リッチは name へ劣化(Select.md §2) -->
+    <div class="sc-select-control">
+      <select
+        class="sc-select-input"
+        id={inputId}
+        bind:value
+        {disabled}
+        {required}
+        aria-invalid={invalid ? 'true' : undefined}
+        aria-describedby={describedby}
+        onchange={(e) => onchange?.(e.currentTarget.value)}
+      >
+        {#if placeholder !== undefined}
+          <option value="" disabled>{placeholder}</option>
+        {/if}
+        {#each options as opt (opt.value)}
+          <option value={opt.value} disabled={opt.disabled}>{opt.label}</option>
+        {/each}
+      </select>
+      <span class="sc-select-chevron" aria-hidden="true"><Icon name="chevron.down" /></span>
+    </div>
+  {:else}
+    <!-- pointer: カスタム combobox + listbox(APG select-only。DOM focus はトリガー、option は activedescendant) -->
+    <Popover {open} onopenchange={(o) => (o ? openList() : closeList())}>
+      {#snippet anchor()}
+        <button
+          class="sc-select-control sc-select-trigger"
+          id={inputId}
+          type="button"
+          role="combobox"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={listboxId}
+          aria-activedescendant={open && activeIndex >= 0 ? optId(activeIndex) : undefined}
+          aria-invalid={invalid ? 'true' : undefined}
+          aria-required={required ? 'true' : undefined}
+          aria-describedby={describedby}
+          {disabled}
+          onclick={() => (open ? closeList() : openList())}
+          onkeydown={onTriggerKeydown}
+        >
+          <span class="sc-select-value" data-placeholder={!selectedOption}>
+            {#if selectedOption}
+              {#if selectedOption.icon}<Icon name={selectedOption.icon} />{/if}
+              {selectedOption.label}
+            {:else}{placeholder ?? ''}{/if}
+          </span>
+          <span class="sc-select-chevron" aria-hidden="true"><Icon name="chevron.down" /></span>
+        </button>
+      {/snippet}
+      {#snippet content()}
+        <ul class="sc-select-listbox" id={listboxId} role="listbox">
+          {#each options as opt, i (opt.value)}
+            <li
+              class="sc-select-option"
+              id={optId(i)}
+              role="option"
+              aria-selected={opt.value === value}
+              aria-disabled={opt.disabled || undefined}
+              data-active={i === activeIndex}
+              data-disabled={opt.disabled || undefined}
+              onpointerdown={(e) => {
+                e.preventDefault(); // トリガーの blur を防ぎ focus を保つ
+                if (!opt.disabled) {
+                  selectAt(i);
+                  closeList();
+                }
+              }}
+              onpointerenter={() => {
+                if (!opt.disabled) activeIndex = i;
+              }}
+            >
+              {#if opt.icon}<span class="sc-select-option-icon" aria-hidden="true"><Icon name={opt.icon} /></span>{/if}
+              <span class="sc-select-option-body">
+                <span class="sc-select-option-label">{opt.label}</span>
+                {#if opt.description}<span class="sc-select-option-desc">{opt.description}</span>{/if}
+              </span>
+              {#if opt.value === value}<span class="sc-select-option-check" aria-hidden="true"><Icon name="check" /></span>{/if}
+            </li>
+          {/each}
+        </ul>
+      {/snippet}
+    </Popover>
+  {/if}
+
   {#if description}<p class="sc-select-description" id={descriptionId}>
       {@render description()}
     </p>{/if}

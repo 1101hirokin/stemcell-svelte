@@ -163,6 +163,35 @@ try {
   if (affix.btnPadBlock !== '0px')
     throw new Error(`TextField: affix ボタンの padding-block が 0 でない(${affix.btnPadBlock}。内包則の縦 inset 手放しが詳細度負けで死んでいる)`);
 
+  // Select: pointer 経路の custom combobox+listbox(RFC 0007。実 Chromium は pointer:fine で custom を描く)。
+  // popover の実描画・aria-activedescendant(仮想 focus)・light dismiss は jsdom で測れない層
+  const sel = await page.evaluate(async () => {
+    const trigger = document.querySelector('.sc-select-trigger') as HTMLElement | null;
+    if (!trigger) return null;
+    const wait = () => new Promise((r) => setTimeout(r, 200));
+    // 実操作の順: フォーカス → ArrowDown で開く(web-keys の open キー)。DOM focus はトリガーに留まる
+    trigger.focus();
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    await wait();
+    const listbox = document.querySelector('.sc-select-listbox') as HTMLElement | null;
+    const inPopover = !!listbox?.closest('.sc-popover-content');
+    const expandedOpen = trigger.getAttribute('aria-expanded');
+    const domFocusOnTrigger = document.activeElement === trigger; // 仮想 focus: DOM focus はトリガー据置
+    const ad = trigger.getAttribute('aria-activedescendant');
+    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    await wait();
+    const expandedAfterOutside = trigger.getAttribute('aria-expanded');
+    return { inPopover, expandedOpen, domFocusOnTrigger, ad, expandedAfterOutside };
+  });
+  if (!sel) throw new Error('Select: custom トリガー(.sc-select-trigger)が playground に無い(pointer 経路)');
+  if (sel.expandedOpen !== 'true' || !sel.inPopover)
+    throw new Error(`Select: クリックで listbox が Popover に開かない(${JSON.stringify(sel)})`);
+  if (!sel.domFocusOnTrigger)
+    throw new Error('Select: 開いても DOM focus はトリガーに留まるべき(activedescendant。overlay.md §4)');
+  if (!sel.ad) throw new Error('Select: ArrowDown で aria-activedescendant が立たない(仮想 focus)');
+  if (sel.expandedAfterOutside !== 'false')
+    throw new Error('Select: 外側 pointerdown で閉じない(light dismiss。overlay.rules.json)');
+
   // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
   // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)
   const cb = await page.evaluate(() => {
@@ -420,7 +449,7 @@ try {
 
   await browser.close();
   console.log(
-    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill・affix 非膨張(内包則) / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled・サム余白全周均一 / Textarea 複数行 / Icon currentColor・1em・RTL 反転 / Radio 矢印移動=選択・disabled スキップ`,
+    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill・affix 非膨張(内包則) / Select custom: popover 開閉・activedescendant・light dismiss / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled・サム余白全周均一 / Textarea 複数行 / Icon currentColor・1em・RTL 反転 / Radio 矢印移動=選択・disabled スキップ`,
   );
 } finally {
   preview.kill();

@@ -17,3 +17,4 @@ export { default as Radio } from './Radio/Radio.svelte';
 export { default as RadioGroup } from './RadioGroup/RadioGroup.svelte';
 export { default as Divider } from './Divider/Divider.svelte';
 export { default as Skeleton } from './Skeleton/Skeleton.svelte';
+export { default as Popover } from './Popover/Popover.svelte';

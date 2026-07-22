@@ -1,0 +1,44 @@
+/* アンカー従属の一時面(popover 類。Popover.md)。面/影は elevation.popover、角は shape.popover、
+   層は layer.popover、出入りは motion.entrance/exit。位置はアンカー(ラッパー)従属で絶対配置。 */
+.sc-popover {
+  position: relative;
+}
+
+.sc-popover-content {
+  position: absolute;
+  z-index: var(--layer-popover-z);
+  /* 幅は消費者が変数で与える(既定はトリガー幅に揃える)。Select は content 幅 + clamp を与える */
+  inline-size: var(--sc-popover-inline-size, 100%);
+  min-inline-size: var(--sc-popover-min-inline-size, max-content);
+  max-inline-size: var(--sc-popover-max-inline-size, none);
+  background: var(--elevation-popover-surface);
+  box-shadow: var(--elevation-popover-shadow);
+  border-radius: var(--shape-semantic-popover);
+  /* 中身を角で切り抜く。端まで使う項目(余白なしの listbox 等)が丸角からはみ出さない */
+  overflow: hidden;
+  /* 出現(overlay.md §2: entrance)。reduced-motion で 0ms でも「現れる」意味は保つ(第7条) */
+  animation: sc-popover-in var(--motion-entrance-duration) var(--motion-entrance-easing);
+  /* 退場のトークンを参照する transition(閉じる直前の opacity 変化に効く。exit の手触りは Expressive) */
+  transition: opacity var(--motion-exit-duration) var(--motion-exit-easing);
+}
+/* アンカーからの開き方向(論理方向)。block-end は下、block-start は上 */
+.sc-popover-content[data-placement='block-end'] {
+  inset-block-start: 100%;
+  margin-block-start: var(--spacing-inline-md);
+}
+.sc-popover-content[data-placement='block-start'] {
+  inset-block-end: 100%;
+  margin-block-end: var(--spacing-inline-md);
+}
+
+@keyframes sc-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-popover-content {
+    animation: none;
+  }
+}

@@ -1,22 +1,25 @@
-/* native <select> 基盤の選択入力。構造・トークンは TextField と同型(field.md §6)。
-   縦 inset は一次内容(select)、横 inset は器が持つ(size.md §2 内包則)。 */
+/* 二経路の選択入力(RFC 0007 の B2)。field は TextField と同型(field.md §6)。
+   touch=native <select>、pointer=custom combobox(トリガー)+ listbox(Popover の中身)。
+   ドロップダウンの面/影/角/層/出入りは Popover が所有し、Select は field と option を着せる。 */
 .sc-select {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-stack-sm);
-  /* フィールドは fill(横いっぱい)が既定(憲法第3条・field.md §2・layout.md §2) */
   inline-size: 100%;
   min-inline-size: 0;
-  /* 中立の資材(TextField.md §2: resting の枠は color.app.border。hover 役が無いので hover を持たない) */
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);
+  /* ドロップダウンの幅: 自然幅(content)を下限〜上限で clamp。下限 = max(x, トリガー幅) を上限で頭打ち、
+     上限 = y。full-width トリガーでも y で止まり馴染みある幅に、狭いトリガーでは最低トリガー幅を保つ。
+     x=12rem / y=24rem は暫定(調整可)。 */
+  --sc-popover-inline-size: max-content;
+  --sc-popover-min-inline-size: min(max(12rem, 100%), 24rem);
+  --sc-popover-max-inline-size: 24rem;
 }
-/* invalid は intent を danger へ差し替える(state.md §3.1 / §7) */
 .sc-select[data-invalid='true'] {
   --_border: var(--color-semantic-danger-border);
   --_ring: var(--color-semantic-danger-focus-ring);
 }
-/* disabled が invalid に勝つ(state.md §3.1) */
 .sc-select[data-disabled='true'] {
   --_border: var(--color-semantic-disabled-border);
 }
@@ -29,11 +32,11 @@
   letter-spacing: var(--typography-label-md-letter-spacing);
   color: var(--color-app-foreground);
 }
-/* 記号そのものは seed(field.md §4)。造形は expressive */
 .sc-select-required {
   margin-inline-start: 0.25em;
 }
 
+/* 器(native の wrapper / custom のトリガー button が共有)。横 inset は器、縦 inset は中身が持つ */
 .sc-select-control {
   display: flex;
   align-items: stretch;
@@ -58,15 +61,14 @@
   cursor: not-allowed;
 }
 
+/* native path: <select> 本体 */
 .sc-select-input {
   flex: 1 1 auto;
   min-inline-size: 0;
-  /* native の矢印を消し、自前の chevron を描く(Select.md §2) */
   appearance: none;
   -webkit-appearance: none;
   border: none;
   background: none;
-  /* 縦 inset は一次内容(select)が持ち、器の高さを決める(size.md §2)。横は器の padding-inline */
   padding-block: var(--_inset);
   padding-inline: 0;
   outline: none;
@@ -78,7 +80,6 @@
   color: var(--color-app-foreground);
   cursor: pointer;
 }
-/* required で未選択(placeholder 表示)のとき、文字を fg-muted にして placeholder らしく見せる */
 .sc-select-input:required:invalid {
   color: var(--color-app-fg-muted);
 }
@@ -86,14 +87,45 @@
   color: var(--color-semantic-disabled-fg);
   cursor: not-allowed;
 }
-
-/* focus-ring は箱(control)に出す(focus-ring.md)。select の focus を拾う */
 .sc-select-control:has(.sc-select-input:focus-visible) {
   outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
   outline-offset: var(--focus-ring-offset);
 }
 
-/* 開閉インジケータ。装飾で、クリックは下の select が受ける(pointer-events: none) */
+/* custom path: combobox トリガー(button を器として使う) */
+.sc-select-trigger {
+  padding-block: var(--_inset);
+  font: inherit;
+  color: var(--color-app-foreground);
+  text-align: start;
+  cursor: pointer;
+}
+.sc-select-trigger:disabled {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+.sc-select-trigger:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+.sc-select-value {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+}
+.sc-select-value[data-placeholder='true'] {
+  color: var(--color-app-fg-muted);
+}
+
+/* 開閉インジケータ(装飾。native の矢印は appearance:none で消し自前で描く) */
 .sc-select-chevron {
   display: inline-flex;
   align-items: center;
@@ -103,6 +135,57 @@
 }
 .sc-select[data-disabled='true'] .sc-select-chevron {
   color: var(--color-semantic-disabled-fg);
+}
+
+/* listbox(Popover の中身)。面/影/角/層は Popover が着せる。ここは並びとスクロール。
+   余白は持たず、項目が端まで使う(active/selected の地が全幅のバンドになる) */
+.sc-select-listbox {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-block-size: 16rem;
+  overflow-y: auto;
+}
+.sc-select-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+  padding: var(--spacing-inset-sm);
+  cursor: pointer;
+  color: var(--color-app-foreground);
+}
+/* selected の淡い地(primary.soft-bg)。active(キーボード/hover)の地(plain.soft-bg)が上に勝つ */
+.sc-select-option[aria-selected='true'] {
+  background: var(--color-semantic-primary-soft-bg);
+}
+.sc-select-option[data-active='true'] {
+  background: var(--color-semantic-plain-soft-bg);
+}
+.sc-select-option[data-disabled='true'] {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+.sc-select-option-icon,
+.sc-select-option-check {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+.sc-select-option-body {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sc-select-option-label {
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+}
+.sc-select-option-desc {
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  line-height: var(--typography-body-sm-line-height);
+  color: var(--color-app-fg-muted);
 }
 
 .sc-select-description,
@@ -117,7 +200,6 @@
 .sc-select-description {
   color: var(--color-app-fg-muted);
 }
-/* エラー文は danger.soft-fg の転用(TextField と同じ。コントラストはレビュー実測済み) */
 .sc-select-error {
   color: var(--color-semantic-danger-soft-fg);
 }
