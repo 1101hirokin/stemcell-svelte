@@ -15,6 +15,32 @@ svelte-check・vite build・実 Chromium の a11y 配線検査を行い、自己
 3条件とも「正しく動くアクセシブルなフォーム」に到達した。差は正しさではなく確証の量と
 判断の質に出た。
 
+## 条件D: Checkbox(部品追加のたびの実測。2026-07-22)
+
+WORKFLOW §2-6 の「エージェント消費の実測を実装 Done に含める」の最初の運用。Checkbox 実装後、
+まっさらな Sonnet に利用規約同意フォーム(必須同意のリッチ label・任意購読・親子 indeterminate・
+送信)を書かせた。読ませたのは AGENTS.md と Checkbox/TextField/Button/Stack の契約のみ。
+コードと自己申告は [subjects/D-checkbox.svelte](./subjects/D-checkbox.svelte) と同 -report.md。
+
+| 条件 | 型 | build | 実 Chromium | 推測 |
+|---|---|---|---|---|
+| D: 契約+AGENTS.md | 0 エラー | 成功 | 二重発火防止・親子 indeterminate 同期(子チェックで親 mixed、親トグルで子が揃う)が green | 実ギャップ2件 |
+
+読み取れたこと:
+
+- 難所(リッチ label のリンク二重発火、indeterminate の第三の値、Button の type)はすべて
+  AGENTS.md と契約から正しく読めた。被験者は stopPropagation を書かず native の抑制に委ね、
+  indeterminate を独立の値として親子同期を $derived で組んだ。契約の記述が難所を運べている。
+- 実ギャップは2件。(1) checked が bind 可能か AGENTS.md に無かった(value のみ記載)。被験者は
+  非 bind の controlled パターンに倒して正解した。→ 生成器の写像規則を「値の prop(value /
+  checked / indeterminate)は bind に対応する」と一般化して還流した。(2) form の組み立て
+  (form タグ・送信)の具体例が AGENTS.md に無い。patterns/forms.md §2 が定めているが、生成器は
+  契約のみを源とするためパターン文書が載らない。パターン文書をエージェント配布物へ載せる経路は
+  今後の課題(生成器 v2 の候補)。
+- 検査の教訓: 実 Chromium で反応的な状態(親子同期)を測るときは、DOM の .click() を別々の
+  evaluate に分けて Svelte の更新をフラッシュさせる必要がある(1回の evaluate 内でクリック直後に
+  読むと未反映で偽陰性になる。probe の初版がこれを踏んだ)。
+
 ## 読み取れること
 
 1. 契約だけでも Svelte 5 の慣習知識で写像の推測がすべて当たる(条件A)。これは実装が

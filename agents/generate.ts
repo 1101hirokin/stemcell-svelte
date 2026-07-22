@@ -123,8 +123,10 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 - イベントは callback prop で受ける。契約の \`click\` は \`onclick={fn}\`、\`change\` は
   \`onchange={(value) => ...}\`(payload は第1引数)。\`on:click\` ディレクティブ形式ではない
 - slot は snippet で渡す: \`{#snippet label()}氏名{/snippet}\`。default slot は子要素をそのまま書く
-- \`value\` は \`bind:value\` に対応する(\$bindable)。アプリが値を所有して拒否・整形したい場合は
-  bind + onchange で差し戻す。非 bind の value + onchange はキーストローク単位の拒否が効かない
+- 値の prop(\`value\` / \`checked\` / \`indeterminate\`)は bind に対応する(\$bindable)。
+  \`bind:value\` / \`bind:checked\` が使える。アプリが値を所有して拒否・整形したい場合は bind + onchange で
+  差し戻す。非 bind(prop + onchange)でも動くが、キーストローク/切替単位の拒否は効かない
+  (アプリが onchange で state を更新した分だけ反映される)
 - 間隔(gap / inset)の語彙は 段("sm" / "md" / "lg")または大域の原始("8"〜"24" の整数の文字列)。
   生の px・任意の CSS 値は受けず、warn して既定へ退避する
 - 長さ(threshold / min / sideWidth)の単位は rem の文字列("30rem" 等)。px は受けない
