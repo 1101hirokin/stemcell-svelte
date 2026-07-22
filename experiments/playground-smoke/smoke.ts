@@ -163,34 +163,51 @@ try {
   if (affix.btnPadBlock !== '0px')
     throw new Error(`TextField: affix ボタンの padding-block が 0 でない(${affix.btnPadBlock}。内包則の縦 inset 手放しが詳細度負けで死んでいる)`);
 
-  // Select: pointer 経路の custom combobox+listbox(RFC 0007。実 Chromium は pointer:fine で custom を描く)。
-  // popover の実描画・aria-activedescendant(仮想 focus)・light dismiss は jsdom で測れない層
-  const sel = await page.evaluate(async () => {
-    const trigger = document.querySelector('.sc-select-trigger') as HTMLElement | null;
-    if (!trigger) return null;
-    const wait = () => new Promise((r) => setTimeout(r, 200));
-    // 実操作の順: フォーカス → ArrowDown で開く(web-keys の open キー)。DOM focus はトリガーに留まる
-    trigger.focus();
-    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
-    await wait();
-    const listbox = document.querySelector('.sc-select-listbox') as HTMLElement | null;
-    const inPopover = !!listbox?.closest('.sc-popover-content');
-    const expandedOpen = trigger.getAttribute('aria-expanded');
-    const domFocusOnTrigger = document.activeElement === trigger; // 仮想 focus: DOM focus はトリガー据置
-    const ad = trigger.getAttribute('aria-activedescendant');
-    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-    await wait();
-    const expandedAfterOutside = trigger.getAttribute('aria-expanded');
-    return { inPopover, expandedOpen, domFocusOnTrigger, ad, expandedAfterOutside };
+  // Select: pointer 経路の custom combobox+listbox。native popover(top-layer)で描き、Escape/外側の
+  // light dismiss は native が LIFO 管理(overlay.md §3)。dispatchEvent(untrusted)では native dismiss が
+  // 発火しないので、実操作(page.keyboard/mouse)で検証する。jsdom で測れない層。
+  const selTrigger = page.locator('.sc-select-trigger').first();
+  if ((await selTrigger.count()) === 0)
+    throw new Error('Select: custom トリガー(.sc-select-trigger)が playground に無い(pointer 経路)');
+  await selTrigger.focus();
+  await page.keyboard.press('ArrowDown'); // open(web-keys の open キー)
+  await page.waitForTimeout(200);
+  const selOpen = await page.evaluate(() => {
+    const t = document.querySelector('.sc-select-trigger') as HTMLElement;
+    const lb = document.querySelector('.sc-select-listbox') as HTMLElement | null;
+    const content = lb?.closest('.sc-popover-content') as HTMLElement | null;
+    const topLayer = content
+      ? (() => {
+          try {
+            return content.matches(':popover-open');
+          } catch {
+            return false;
+          }
+        })()
+      : false;
+    return {
+      expanded: t.getAttribute('aria-expanded'),
+      topLayer, // native popover の top-layer に出ている = overflow:hidden で切れない
+      domFocusOnTrigger: document.activeElement === t, // 仮想 focus: DOM focus はトリガー据置
+      ad: t.getAttribute('aria-activedescendant'),
+    };
   });
-  if (!sel) throw new Error('Select: custom トリガー(.sc-select-trigger)が playground に無い(pointer 経路)');
-  if (sel.expandedOpen !== 'true' || !sel.inPopover)
-    throw new Error(`Select: クリックで listbox が Popover に開かない(${JSON.stringify(sel)})`);
-  if (!sel.domFocusOnTrigger)
+  if (selOpen.expanded !== 'true' || !selOpen.topLayer)
+    throw new Error(`Select: listbox が top-layer popover に開かない(${JSON.stringify(selOpen)})`);
+  if (!selOpen.domFocusOnTrigger)
     throw new Error('Select: 開いても DOM focus はトリガーに留まるべき(activedescendant。overlay.md §4)');
-  if (!sel.ad) throw new Error('Select: ArrowDown で aria-activedescendant が立たない(仮想 focus)');
-  if (sel.expandedAfterOutside !== 'false')
-    throw new Error('Select: 外側 pointerdown で閉じない(light dismiss。overlay.rules.json)');
+  if (!selOpen.ad) throw new Error('Select: ArrowDown で aria-activedescendant が立たない(仮想 focus)');
+  await page.keyboard.press('Escape'); // native light dismiss(LIFO。最上位1枚)
+  await page.waitForTimeout(200);
+  if ((await selTrigger.getAttribute('aria-expanded')) !== 'false')
+    throw new Error('Select: Escape で閉じない(native light dismiss。overlay.md §3)');
+  await selTrigger.focus();
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(200);
+  await page.mouse.click(5, 5); // 画面隅の外側を実クリック
+  await page.waitForTimeout(200);
+  if ((await selTrigger.getAttribute('aria-expanded')) !== 'false')
+    throw new Error('Select: 外側クリックで閉じない(native light dismiss)');
 
   // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
   // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)

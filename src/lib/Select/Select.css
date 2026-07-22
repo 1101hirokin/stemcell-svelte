@@ -9,10 +9,9 @@
   min-inline-size: 0;
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);
-  /* ドロップダウンの幅: fill(トリガー幅に一致。fill のフィールドなら dropdown も横いっぱい=第3条の
-     fill を popover まで及ぼす)。トリガーが fill なのでトリガー幅が支配し、選択内容で変動しない。
-     下限は content(選択肢が溢れない最小)。上限は敷かない。 */
-  --sc-popover-inline-size: 100%;
+  /* ドロップダウンの幅: fill(アンカー=トリガー幅に一致。既定でアンカー幅なので inline-size は上書きしない。
+     top-layer では JS が --sc-popover-anchor-inline-size にアンカー幅を入れる)。トリガーが fill なので
+     幅はトリガーが支配し、選択内容で変動しない。下限は content、上限は敷かない。 */
   --sc-popover-min-inline-size: max-content;
   --sc-popover-max-inline-size: none;
 }
