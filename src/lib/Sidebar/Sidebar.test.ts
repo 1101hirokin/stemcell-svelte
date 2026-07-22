@@ -27,16 +27,16 @@ it('視覚だけの入替(order / row-reverse)を使っていない', () => {
   for (const child of el.children) expect((child as HTMLElement).style.order).toBe('');
 });
 
-it('sideWidth: rem の長さは基底幅になり、省略時は変数ごと無い(内容幅)', () => {
-  const { container } = render(Sidebar, { props: { aside, children: kids, sideWidth: '18rem' } });
-  expect(root(container).style.getPropertyValue('--sc-sidebar-side-width')).toBe('18rem');
+it('sideWidth: 段の幅は基底幅になり、省略時は変数ごと無い(内容幅)', () => {
+  const { container } = render(Sidebar, { props: { aside, children: kids, sideWidth: '20rem' } });
+  expect(root(container).style.getPropertyValue('--sc-sidebar-side-width')).toBe('20rem');
   const { container: c2 } = render(Sidebar, { props: { aside, children: kids } });
   expect(root(c2).style.getPropertyValue('--sc-sidebar-side-width')).toBe('');
 });
 
-it('sideWidth: rem の長さでない文字列は warn して内容幅へ退避する(HOLES #21)', () => {
+it('sideWidth: 段外(自由 rem を含む)は warn して内容幅へ退避する(閉じた6段。HOLES #21)', () => {
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-  for (const bad of ['banana', '280px', '30%', '18']) {
+  for (const bad of ['banana', '280px', '30%', '18', '18rem', '40rem']) {
     const { container } = render(Sidebar, { props: { aside, children: kids, sideWidth: bad } });
     expect(
       root(container).style.getPropertyValue('--sc-sidebar-side-width'),

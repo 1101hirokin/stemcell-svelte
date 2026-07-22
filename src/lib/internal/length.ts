@@ -8,6 +8,15 @@
  */
 export const isRemLength = (v: string): boolean => /^\d*\.?\d+rem$/.test(v.trim());
 
+/**
+ * Grid min / Sidebar sideWidth の閉じた段(裁定 2026-07。契約 alpha.2。layout.md §9)。
+ * 自由 rem を許さず6段に絞る(第3条の抑制。段の集合は seed で実測で調整しうる)。
+ */
+export const WIDTH_TIERS = ['8rem', '12rem', '16rem', '20rem', '24rem', '32rem'] as const;
+export type WidthTier = (typeof WIDTH_TIERS)[number];
+export const isWidthTier = (v: string): v is WidthTier =>
+  (WIDTH_TIERS as readonly string[]).includes(v.trim());
+
 /** 百分率(0〜100)の文字列か。Sidebar contentMin 用。 */
 export const isPercentage = (v: string): boolean => {
   const m = /^(\d*\.?\d+)%$/.exec(v.trim());

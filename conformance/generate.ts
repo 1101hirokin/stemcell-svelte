@@ -16,7 +16,11 @@ type Prop = { type: string; values?: string[]; default?: unknown; optional?: boo
 type Contract = {
   component: string; extends?: string;
   props?: Record<string, Prop>; states?: string[]; tokensRequired?: string[];
+  a11y?: { focusRing?: boolean };
 };
+
+/** focusRing: true implies the focus-ring geometry (focus-ring.md §4。契約は列挙しない)。 */
+const FOCUS_RING_GEOMETRY = ['focus-ring.width', 'focus-ring.style', 'focus-ring.offset'];
 
 const load = (name: string): Contract =>
   JSON.parse(readFileSync(join(SPEC, name, 'contract.json'), 'utf-8'));
@@ -35,7 +39,11 @@ const resolve = (c: Contract): Contract => {
 /** color.semantic.{color}.bg -> --color-semantic-primary-bg 等、prop 値で展開した CSS 変数名の集合。 */
 const cssVars = (c: Contract): string[] => {
   let out: string[] = [];
-  for (const t of c.tokensRequired ?? []) {
+  const required = [
+    ...(c.tokensRequired ?? []),
+    ...(c.a11y?.focusRing ? FOCUS_RING_GEOMETRY : []),
+  ];
+  for (const t of required) {
     let names = [t];
     for (const m of t.matchAll(/\{([^}]+)\}/g)) {
       const values = c.props?.[m[1]!]?.values ?? [];

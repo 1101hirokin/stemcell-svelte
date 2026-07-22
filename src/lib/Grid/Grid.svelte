@@ -2,11 +2,11 @@
   import './Grid.css';
   import { META } from './meta';
   import { isTier, isGlobalPrimitive, warnSpacing } from '../internal/spacing';
-  import { isRemLength } from '../internal/length';
+  import { isWidthTier, WIDTH_TIERS } from '../internal/length';
   import type { Snippet } from 'svelte';
 
   interface Props {
-    /** 列の最小幅(rem の長さ。値語彙は未確定の seed。layout.md §9)。これを下回るなら列が減る。 */
+    /** 列の最小幅。閉じた6段(8/12/16/20/24/32rem。契約 alpha.2。layout.md §9)。これを下回るなら列が減る。 */
     min?: string;
     /** spacing の語彙: 段(sm / md / lg。spacing.gap の意味層)または大域の原始 X(8〜24)。両軸に効く。 */
     gap?: string;
@@ -20,12 +20,12 @@
 
   const gapTier = $derived(isTier(gap));
   const gapPrimitive = $derived(!gapTier && isGlobalPrimitive(gap));
-  const validMin = $derived(isRemLength(min));
+  const validMin = $derived(isWidthTier(min));
   $effect(() => {
     if (!gapTier && !gapPrimitive) warnSpacing('Grid', 'gap', gap, `既定の "${META.props.gap.default}" `);
     if (!validMin) {
       console.warn(
-        `[stemcell] Grid: min="${min}" は rem の長さではない(仮置き: threshold の裁定と同じ本文相対。値語彙は未確定)。既定の "${META.props.min.default}" へ退避する(HOLES #20)。`,
+        `[stemcell] Grid: min="${min}" は幅の段(${WIDTH_TIERS.join(' / ')})ではない(裁定 2026-07。契約 alpha.2)。既定の "${META.props.min.default}" へ退避する(HOLES #20)。`,
       );
     }
   });

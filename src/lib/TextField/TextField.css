@@ -3,6 +3,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-stack-sm);
+  /* フィールドは fill(横いっぱい)が既定。憲法第3条・field.md §2・layout.md §2(裁定 2026-07) */
+  inline-size: 100%;
+  min-inline-size: 0;
   /* 中立の資材(TextField.md §2: resting の枠は color.app.border。hover 役が無いので hover を持たない) */
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);

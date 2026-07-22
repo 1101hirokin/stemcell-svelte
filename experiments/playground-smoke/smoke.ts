@@ -95,6 +95,32 @@ try {
   if (cascade.border !== cascade.disabled || cascade.border === cascade.danger)
     throw new Error(`disabled×invalid で disabled が勝っていない: ${JSON.stringify(cascade)}`);
 
+  // 中立 border の較正(裁定 2026-07。tokens alpha.2): resting の枠が地に対し 3:1 を満たす。
+  // WCAG の相対輝度で light の control 枠 vs surface を実測する
+  const borderContrast = await page.evaluate(() => {
+    const tf = document.querySelector('.sc-textfield:not([data-invalid="true"]):not([data-disabled="true"])');
+    const control = tf!.querySelector('.sc-textfield-control') as HTMLElement;
+    const cs = getComputedStyle(control);
+    const parse = (c: string) => (c.match(/\d+\.?\d*/g) ?? []).map(Number);
+    const lum = ([r, g, b]: number[]) => {
+      const f = (v: number) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+      return 0.2126 * f(r!) + 0.7152 * f(g!) + 0.0722 * f(b!);
+    };
+    const lb = lum(parse(cs.borderTopColor)), ls = lum(parse(cs.backgroundColor));
+    const hi = Math.max(lb, ls), lo = Math.min(lb, ls);
+    return (hi + 0.05) / (lo + 0.05);
+  });
+  if (borderContrast < 3)
+    throw new Error(`中立 border が地に対し 3:1 未満: ${borderContrast.toFixed(2)}:1(WCAG 2.2 SC 1.4.11)`);
+
+  // フィールドは fill(横いっぱい。裁定 2026-07): 器の幅とほぼ一致する
+  const fills = await page.evaluate(() => {
+    const tf = document.querySelector('.sc-textfield') as HTMLElement;
+    const parent = tf.parentElement as HTMLElement;
+    return tf.offsetWidth >= parent.clientWidth - 2;
+  });
+  if (!fills) throw new Error('TextField が fill(横いっぱい)になっていない');
+
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
   await page.waitForTimeout(100);
@@ -133,7 +159,7 @@ try {
 
   await browser.close();
   console.log(
-    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got})`,
+    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill`,
   );
 } finally {
   preview.kill();

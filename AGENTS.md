@@ -59,7 +59,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 - 素の器(生の div / View)の直接使用は非推奨で、逃げ道はここに集約する。この規範は契約ではなく layout.md §6 が持つ(全実装を契約の外で拘束する)。
 
-### Button(契約 0.0.0-alpha.6)
+### Button(契約 0.0.0-alpha.7)
 
 ユーザーがその場で起こす行動。押すと何かが起きる。
 
@@ -103,13 +103,13 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 
-### Grid(契約 0.0.0-alpha.1)
+### Grid(契約 0.0.0-alpha.2)
 
 内在的な格子。列数を固定せず、器に応じて列が増減する(auto-fit / minmax。layout.md §4)。固定12列は採らない(コンテナ方針)。
 
 props:
 
-- `min`: string(既定 "16rem") — 列の最小幅。これを下回るなら列が減る。rem の長さの文字列(単位は rem。layout.md §9: container の rem 判断と threshold 裁定の適用。2026-07)。数値集合の語彙は未確定(seed)で Sidebar の sideWidth と共有。
+- `min`: string(既定 "16rem") — 列の最小幅。これを下回るなら列が減る。値は閉じた段の集合(8rem / 12rem / 16rem / 20rem / 24rem / 32rem。裁定 2026-07。単位は rem、集合はこの6段に絞る。layout.md §9)。既定 16rem。段外の値は warn して既定へ退避する(値の照合は実装側の適合テストの仕事)。段の集合は seed であり実測(列数の行列)で調整しうる。
 - `gap`: string(既定 "md") — 格子の間隔(両軸)。spacing の語彙。段(sm / md / lg)または大域の原始 X(8〜24 の整数の文字列。32px〜)。小域の原始(0〜7)は受けない(spacing.md §6: 小域は意味層で。layout.md §6)。生の px は受けない。混合型のため string であり、値の照合は実装側の適合テストの仕事。
 
 slots(Svelte では snippet。default は子要素をそのまま):
@@ -120,14 +120,14 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 
-### Sidebar(契約 0.0.0-alpha.1)
+### Sidebar(契約 0.0.0-alpha.2)
 
 2カラム。脇(sidebar)は内容幅で立ち、本体は fill。本体の幅が contentMin を割ったら縦積みへ折れる。
 
 props:
 
 - `side`: "start" | "end"(既定 "start") — 脇をどちらに置くか。論理方向(RTL で反転。Button の start/end と同じ線)。
-- `sideWidth`: string((省略可)) — 脇の幅。省略時は脇の内容幅(intrinsic)。指定するときは rem の長さの文字列(単位は rem。layout.md §9: container の rem 判断と threshold 裁定の適用。2026-07)。数値集合の語彙は未確定(seed)で Grid の min と共有。生の px は書かない。
+- `sideWidth`: string((省略可)) — 脇の幅。省略時は脇の内容幅(intrinsic)。指定するときは閉じた段の集合(8rem / 12rem / 16rem / 20rem / 24rem / 32rem。裁定 2026-07。単位は rem、集合は Grid の min と共有の6段。layout.md §9)。段外の値は warn して省略時(内容幅)へ退避する。生の px は書かない。段の集合は seed。
 - `contentMin`: string(既定 "50%") — 本体が保つ最小比率。これを割ると縦積みへ折れる(切替の条件は本体の窮屈さであって画面幅ではない。コンテナ方針)。百分率の文字列。
 - `gap`: string(既定 "md") — 2カラム間(折れたら縦)の間隔。spacing の語彙。段(sm / md / lg)または大域の原始 X(8〜24 の整数の文字列。32px〜)。小域の原始(0〜7)は受けない(spacing.md §6: 小域は意味層で。layout.md §6)。生の px は受けない。混合型のため string であり、値の照合は実装側の適合テストの仕事。
 
@@ -189,7 +189,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 切替で DOM / 読み上げ順は変わらない。
 - SwiftUI 実装は ViewThatFits を使わない: あれは内容駆動(収まりで切替)であり、同じ幅でも内容次第で形が割れて共通言語が壊れる(layout.md §9 の記録)。自前で幅を測って閾値と比べる。
 
-### TextField(契約 0.0.0-alpha.1)
+### TextField(契約 0.0.0-alpha.2)
 
 1行のテキスト入力。label / description / error を内包する複合フィールド(README の命名根拠)。解剖は foundations/field.md §2、値とイベントは同 §5(change 1本。裁定済み 2026-07)。8種の語彙の基準器: label の技術形状(slot)はここで決まり、Checkbox のリッチ label が検算する(field.md §6)。
 
@@ -213,7 +213,7 @@ slots(Svelte では snippet。default は子要素をそのまま):
 
 - `label`(必須) — 名前。無名は許さない(field.md §2)。視覚的に隠すことは許すが、隠しても支援技術に名前が届く形が要る。slot(自由内容)である理由は field.md §6: 8種で同じ語彙であり、基準は最も要求が厳しい Checkbox のリッチ label に置く。アクセシブルネームは label の内容のテキストから構成する。
 - `description` — 説明・入力条件(「8文字以上」等)。支援技術に説明として届く(field.md §2。Web の表現は aria-describedby)。
-- `error` — invalid のときのエラー文。色だけで伝えない(WCAG 2.2 SC 1.4.1。field.md §3)。description と並置され、置き換えない(field.md §3。裁定済み 2026-07)。invalid が立つのに error が空であることは機械的には許されるが、何が悪いかが伝わらない。
+- `error` — invalid のときのエラー文。色だけで伝えない(WCAG 2.2 SC 1.4.1。field.md §3)。description と並置され、置き換えない(field.md §3。裁定済み 2026-07)。invalid が立つのに error が空であることは機械的には許されるが、何が悪いかが伝わらない。部品は invalid のときだけ error を描く(invalid=false では現れる内容を渡しても出さない。field.md §3。裁定済み 2026-07)。
 - `start` — 入力に先行するアイコン・接頭辞等(裁定済み 2026-07。Button の start / end と同じ語彙。M3 の leading icon / Polaris の connected / Radix の Slot が同じ観念)。間隔は spacing.inline.md。start / end は論理方向であり RTL で反転する。
 - `end` — 入力に後続するアイコン・接尾辞等。start と同じ規則。中に対話要素(クリアボタン等)を置く場合、それは自分のフォーカス順を持ち、当たり判定の門(size.md §4)にかかる。
 

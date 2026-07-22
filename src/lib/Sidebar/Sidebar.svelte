@@ -2,13 +2,13 @@
   import './Sidebar.css';
   import { META } from './meta';
   import { isTier, isGlobalPrimitive, warnSpacing } from '../internal/spacing';
-  import { isRemLength, isPercentage } from '../internal/length';
+  import { isWidthTier, WIDTH_TIERS, isPercentage } from '../internal/length';
   import type { Snippet } from 'svelte';
 
   interface Props {
     /** 脇をどちらに置くか。論理方向(RTL で反転)。DOM 順も決める(視覚だけの入替はしない)。 */
     side?: (typeof META.props.side.values)[number];
-    /** 脇の幅(rem の長さ。契約 alpha.1 が単位 rem を記録。数値集合は未確定の seed)。省略時は脇の内容幅。 */
+    /** 脇の幅。閉じた6段(8/12/16/20/24/32rem。契約 alpha.2。Grid min と共有)。省略時は脇の内容幅。 */
     sideWidth?: string;
     /** 本体が保つ最小比率(百分率の文字列)。これを割ると縦積みへ折れる。 */
     contentMin?: string;
@@ -29,13 +29,13 @@
 
   const gapTier = $derived(isTier(gap));
   const gapPrimitive = $derived(!gapTier && isGlobalPrimitive(gap));
-  const validSideWidth = $derived(sideWidth === undefined || isRemLength(sideWidth));
+  const validSideWidth = $derived(sideWidth === undefined || isWidthTier(sideWidth));
   const validContentMin = $derived(isPercentage(contentMin));
   $effect(() => {
     if (!gapTier && !gapPrimitive) warnSpacing('Sidebar', 'gap', gap, `既定の "${META.props.gap.default}" `);
     if (!validSideWidth) {
       console.warn(
-        `[stemcell] Sidebar: sideWidth="${sideWidth}" は rem の長さではない(仮置き。値語彙は未確定)。省略時と同じ内容幅へ退避する(HOLES #21)。`,
+        `[stemcell] Sidebar: sideWidth="${sideWidth}" は幅の段(${WIDTH_TIERS.join(' / ')})ではない(裁定 2026-07。契約 alpha.2)。省略時と同じ内容幅へ退避する(HOLES #21)。`,
       );
     }
     if (!validContentMin) {

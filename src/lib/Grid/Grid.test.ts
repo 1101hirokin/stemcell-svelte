@@ -37,9 +37,10 @@ it('gap: 語彙外は warn して md へ退避する(layout.md §6)', () => {
   warn.mockRestore();
 });
 
-it('min: rem の長さでない文字列は warn して既定 16rem へ退避する(template の無警告消滅を防ぐ。HOLES #20)', () => {
+it('min: 段外の値は warn して既定 16rem へ退避する(閉じた6段。裁定 2026-07。HOLES #20)', () => {
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-  for (const bad of ['banana', '', '16', '240px', '50%', 'calc(100% - 2rem)']) {
+  // 段外: 自由 rem(15rem)も含めて拒否する(rem 構文だけでは通さない)
+  for (const bad of ['banana', '', '16', '240px', '50%', 'calc(100% - 2rem)', '15rem', '40rem']) {
     const { container } = render(Grid, { props: { children: kids, min: bad } });
     expect(
       grid(container).style.getPropertyValue('--sc-grid-min'),
@@ -50,7 +51,10 @@ it('min: rem の長さでない文字列は warn して既定 16rem へ退避す
       `warn for min="${bad}"`,
     ).toBe(true);
   }
-  const { container } = render(Grid, { props: { children: kids, min: '20rem' } });
-  expect(grid(container).style.getPropertyValue('--sc-grid-min')).toBe('20rem');
+  // 段内: 6段はすべて通る
+  for (const ok of ['8rem', '12rem', '16rem', '20rem', '24rem', '32rem']) {
+    const { container } = render(Grid, { props: { children: kids, min: ok } });
+    expect(grid(container).style.getPropertyValue('--sc-grid-min'), `min="${ok}"`).toBe(ok);
+  }
   warn.mockRestore();
 });
