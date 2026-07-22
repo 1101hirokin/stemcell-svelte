@@ -173,6 +173,31 @@ try {
   if (!cb.hasIndeterminate) throw new Error('Checkbox: indeterminate(集計表示)が mixed になっていない');
   if (!cb.disabledNoToggle) throw new Error('Checkbox: disabled が click を抑制していない');
 
+  // 同意 Checkbox を「操作後に未チェック」へ運んで invalid にする(2回クリック: 入→切)。
+  // playground は field.md §3 どおり離脱後にだけ invalid を立てる
+  await page.evaluate(() => {
+    const input = document.querySelector('.sc-checkbox-input') as HTMLElement;
+    input.click(); input.click();
+  });
+  await page.waitForTimeout(60);
+
+  // invalid の未チェック Checkbox は hover でも danger の枠を保つ(state.md §3.2: invalid は
+  // 抑制しない。独立レビュー major が実測した回帰。hover が中立 border を直書きすると赤枠が消えた)。
+  // 実 hover を Playwright で当てて CSS :hover を発火させる
+  const invalidField = page.locator('.sc-checkbox-field[data-invalid="true"]').first();
+  if (await invalidField.count()) {
+    const danger = await page.evaluate(() => {
+      const f = document.querySelector('.sc-checkbox-field[data-invalid="true"]') as HTMLElement;
+      const s = document.createElement('span'); s.style.color = 'var(--color-semantic-danger-border)';
+      f.appendChild(s); const c = getComputedStyle(s).color; s.remove(); return c;
+    });
+    await invalidField.locator('.sc-checkbox').hover();
+    await page.waitForTimeout(60);
+    const hovered = await invalidField.locator('.sc-checkbox-box').evaluate((el) => getComputedStyle(el).borderTopColor);
+    if (hovered !== danger)
+      throw new Error(`Checkbox: invalid 未チェックの枠が hover で danger を失う(${hovered} ≠ ${danger}。state.md §3.2)`);
+  }
+
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
   await page.waitForTimeout(100);

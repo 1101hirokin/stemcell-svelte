@@ -8,6 +8,7 @@
   let gridMin = $state('16rem');
   let sidebarSide = $state<'start' | 'end'>('start');
   let agree = $state(false);
+  let agreeTouched = $state(false);
   let toppings = $state({ cheese: true, tomato: false });
 
 
@@ -180,7 +181,13 @@
       plain のウォッシュ。
     </p>
     <Stack gap="md">
-      <Checkbox bind:checked={agree} required invalid={!agree}>
+      <!-- invalid は操作後(離脱)にだけ立てる。field.md §3: エラー判定は入力完了まで待つ -->
+      <Checkbox
+        checked={agree}
+        required
+        invalid={agreeTouched && !agree}
+        onchange={(c) => { agree = c; agreeTouched = true; }}
+      >
         {#snippet label()}
           <a href="/terms" onclick={(e) => e.preventDefault()}>利用規約</a>に同意する
         {/snippet}

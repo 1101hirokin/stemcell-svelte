@@ -91,12 +91,11 @@
   background: var(--_box-pressed);
   border-color: var(--_box-pressed);
 }
-/* 未 checked の hover はウォッシュ(面)であって枠ではない: border は中立のまま面だけ変える */
-.sc-checkbox-input:not(:checked):not(:indeterminate) + .sc-checkbox-box {
-  border-color: var(--_box-border);
-}
+/* 未 checked の hover はウォッシュ(面)であって枠ではない: 面だけ変え、枠は intent の変数
+   (--_box-border)を維持する。直書きの --color-app-border だと invalid の danger 枠が hover で
+   消える(state.md §3.2: invalid は抑制しない。独立レビュー major が実測) */
 .sc-checkbox:hover .sc-checkbox-input:not(:checked):not(:indeterminate) + .sc-checkbox-box {
-  border-color: var(--color-app-border);
+  border-color: var(--_box-border);
 }
 
 /* focus-ring は box に出す(focus-ring.md) */

@@ -45,7 +45,8 @@ it('indeterminate: 切替で下ろされ、change の payload は新しい check
 
 it('リッチ label 内のリンク活性化は切替を発火させない(二重発火防止。契約 a11y)', async () => {
   const onchange = vi.fn();
-  const richLabel = snip('<span>利用規約(<a href="/terms" data-testid="link">全文</a>)に同意</span>');
+  // href は付けず(jsdom のナビゲーション未実装エラーでログを汚さない)、二重発火の対象として役割だけ持たせる
+  const richLabel = snip('<span>利用規約(<a href="#" role="link" data-testid="link" onclick="return false">全文</a>)に同意</span>');
   const { container, getByTestId } = render(Checkbox, { props: { label: richLabel, onchange } });
   const link = getByTestId('link');
   // リンククリックはリンク自身の活性化であってチェックの切替ではない
@@ -94,4 +95,13 @@ it('値の所有: checked prop の更新は DOM へ流れる(field.md §5)', asy
   expect(box(container).checked).toBe(false);
   await rerender({ label, checked: true });
   expect(box(container).checked).toBe(true);
+});
+
+it('indeterminate prop の更新は DOM の property へ流れる(切替とは独立に立て下げできる)', async () => {
+  const { container, rerender } = render(Checkbox, { props: { label, indeterminate: false } });
+  expect(box(container).indeterminate).toBe(false);
+  await rerender({ label, indeterminate: true });
+  expect(box(container).indeterminate).toBe(true);
+  await rerender({ label, indeterminate: false });
+  expect(box(container).indeterminate).toBe(false);
 });

@@ -51,6 +51,10 @@
   <!-- native の <label> がラップする: 中の対話要素(リンク)クリックはトグルへ転送されない
        (HTML 仕様: label の活性化は interactive content の子孫では何もしない)。二重発火は
        この native 挙動で防ぐ(契約 a11y。実測は Checkbox.test.ts と smoke) -->
+  <!-- TextField と違い native change の capture 遮断は不要(HOLES #13 の非対称)。native の
+       change はトグルそのもので契約の change(新しい checked)と意味が一致するため、light DOM を
+       バブルして漏れても取り違えが起きない。TextField は契約 change を逐次に再定義したため native の
+       確定 change と衝突したが、ここは再定義していない(独立レビュー minor で明文化) -->
   <label class="sc-checkbox">
     <input
       bind:this={input}
