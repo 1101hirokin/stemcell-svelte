@@ -1,0 +1,199 @@
+/* 二経路の選択入力(RFC 0007 の B2)。field は TextField と同型(field.md §6)。
+   touch=native <select>、pointer=custom combobox(トリガー)+ listbox(Popover の中身)。
+   ドロップダウンの面/影/角/層/出入りは Popover が所有し、Select は field と option を着せる。 */
+.sc-select {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  inline-size: 100%;
+  min-inline-size: 0;
+  --_border: var(--color-app-border);
+  --_ring: var(--color-semantic-plain-focus-ring);
+}
+.sc-select[data-invalid='true'] {
+  --_border: var(--color-semantic-danger-border);
+  --_ring: var(--color-semantic-danger-focus-ring);
+}
+.sc-select[data-disabled='true'] {
+  --_border: var(--color-semantic-disabled-border);
+}
+
+.sc-select-label {
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-select-required {
+  margin-inline-start: 0.25em;
+}
+
+/* 器(native の wrapper / custom のトリガー button が共有)。横 inset は器、縦 inset は中身が持つ */
+.sc-select-control {
+  display: flex;
+  align-items: stretch;
+  gap: var(--spacing-inline-md);
+  --_inset: var(--spacing-inset-md);
+  padding-inline: var(--_inset);
+  background: var(--color-app-surface);
+  border: var(--shape-border-width) solid var(--_border);
+  border-radius: var(--shape-semantic-control);
+  transition:
+    border-color var(--motion-feedback-duration) var(--motion-feedback-easing),
+    background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+.sc-select[data-size='sm'] .sc-select-control {
+  --_inset: var(--spacing-inset-sm);
+}
+.sc-select[data-size='lg'] .sc-select-control {
+  --_inset: var(--spacing-inset-lg);
+}
+.sc-select[data-disabled='true'] .sc-select-control {
+  background: var(--color-semantic-disabled-soft-bg);
+  cursor: not-allowed;
+}
+
+/* native path: <select> 本体 */
+.sc-select-input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: none;
+  padding-block: var(--_inset);
+  padding-inline: 0;
+  outline: none;
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+  color: var(--color-app-foreground);
+  cursor: pointer;
+}
+.sc-select-input:required:invalid {
+  color: var(--color-app-fg-muted);
+}
+.sc-select[data-disabled='true'] .sc-select-input {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+.sc-select-control:has(.sc-select-input:focus-visible) {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* custom path: combobox トリガー(button を器として使う) */
+.sc-select-trigger {
+  padding-block: var(--_inset);
+  font: inherit;
+  color: var(--color-app-foreground);
+  text-align: start;
+  cursor: pointer;
+}
+.sc-select-trigger:disabled {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+.sc-select-trigger:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+.sc-select-value {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+}
+.sc-select-value[data-placeholder='true'] {
+  color: var(--color-app-fg-muted);
+}
+
+/* 開閉インジケータ(装飾。native の矢印は appearance:none で消し自前で描く) */
+.sc-select-chevron {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  color: var(--color-app-fg-muted);
+  pointer-events: none;
+}
+.sc-select[data-disabled='true'] .sc-select-chevron {
+  color: var(--color-semantic-disabled-fg);
+}
+
+/* listbox(Popover の中身)。面/影/角/層は Popover が着せる。ここは並びと余白とスクロール */
+.sc-select-listbox {
+  list-style: none;
+  margin: 0;
+  padding: var(--spacing-inset-sm);
+  max-block-size: 16rem;
+  overflow-y: auto;
+}
+.sc-select-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+  padding: var(--spacing-inset-sm);
+  border-radius: var(--shape-semantic-control);
+  cursor: pointer;
+  color: var(--color-app-foreground);
+}
+/* selected の淡い地(primary.soft-bg)。active(キーボード/hover)の地(plain.soft-bg)が上に勝つ */
+.sc-select-option[aria-selected='true'] {
+  background: var(--color-semantic-primary-soft-bg);
+}
+.sc-select-option[data-active='true'] {
+  background: var(--color-semantic-plain-soft-bg);
+}
+.sc-select-option[data-disabled='true'] {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+.sc-select-option-icon,
+.sc-select-option-check {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+.sc-select-option-body {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sc-select-option-label {
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+}
+.sc-select-option-desc {
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  line-height: var(--typography-body-sm-line-height);
+  color: var(--color-app-fg-muted);
+}
+
+.sc-select-description,
+.sc-select-error {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-select-description {
+  color: var(--color-app-fg-muted);
+}
+.sc-select-error {
+  color: var(--color-semantic-danger-soft-fg);
+}

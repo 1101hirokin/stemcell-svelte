@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Divider, Grid, Icon, IconButton, Radio, RadioGroup, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Divider, Grid, Icon, IconButton, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -212,6 +212,32 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 名前は label prop が運ぶ。中のアイコンは装飾(iconography.md §5)であり、名前を二重に運ばない。
 - disabled の3要求と当たり判定の門/目標は Button と同じ(state.md §5 / size.md §4)。視覚が絵1つでも当たり判定は縮まない。
 
+### Popover(契約 0.0.0-alpha.0)
+
+アンカー従属の一時面プリミティブ(overlay の popover 類)。Menu / Select(pointer 経路)/ Combobox が合成する再利用の器。開閉・退出(light)・フォーカスの移動と返却・アンカーへの位置決めを担い、中身と役割(role)は消費者が与える。RFC 0007 で最初のオーバーレイ契約として新設(overlay.md §8。当初 Dialog を想定したが Select のカスタム化で先になった)。振る舞いの正は overlay.rules.json、層/描画は layering/elevation、出入りの速さは motion。
+
+props:
+
+- `open`: boolean(既定 false) — 開いているか。値であって状態ではない(overlay.md §6。intent を差し替えずチャンネルを奪わない)。生の Popover の所有はアプリだが、消費者(Select / Tooltip)は内部所有に変えてよい(overlay.md §6: 誰が所有するかは各契約が定める)。
+- `placement`: "block-end" | "block-start"(既定 "block-end") — アンカーに対する優先の開き方向(論理方向。layout.md §7)。block-end は下、block-start は上。画面端での反転・ずらし(衝突回避)は Expressive(overlay.md §5)。Normative なのはアンカーへの帰属が読めることまで。
+
+events(Svelte では callback prop):
+
+- `onopenchange`: (payload: boolean) => void — 開閉の要求を伝える。light dismiss(外側 pointerdown / Escape / フォーカスの外への移動。overlay.rules.json の dismiss.web)は false を発火する。所有者(アプリまたは消費者)が open を更新する。open を値として扱う結線(overlay.md §6)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `anchor`(必須) — トリガー。Popover はこれに従属して位置を決め、aria-expanded / aria-controls をここへ配線する。中身(button / combobox 等)と role は消費者が与える。
+- `content`(必須) — 浮かぶ面の中身。role(listbox / menu 等)は消費者が与える。Popover は面(elevation.popover)・角(shape.popover)・層(layer.popover)・出入り(motion.entrance/exit)を着せる。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- Popover 自身は role を課さない。トリガーの role(combobox / button)と中身の role(listbox / menu)は消費者が与える(overlay.md §7)。
+- 配線: トリガーに aria-expanded(open に追従)、aria-controls(content の id)。フォーカスは overlay.rules.json の focus.interactiveEntersOrVirtual(対話的なら DOM か仮想=activedescendant で中へ、捕捉せず、閉じたらトリガーへ戻す。トリガー消失時は $orphanReturn)。
+- 退出は light(overlay.rules.json の dismiss)。Escape は最上位の1枚だけ(後入れ先出し。overlay.md §3)。
+- アンカーのスクロールに追従する(overlay.md §5。位置再計算は Expressive)。
+- focusRing:false は Popover 自身が焦点を持たないため。トリガーの focus-ring は anchor スロットの中身(消費者)が持つ。
+
 ### Radio(契約 0.0.0-alpha.1)
 
 RadioGroup の項目。単体では使えない(グループの外に単一選択は存在しない。React Aria は例外を投げ、Radix は単体を公開しない。Ant だけが単体 checked を許すが採らない — field.md §5)。選ばれているかはグループの value との一致から導かれ、checked という prop は持たない(導出値は prop ではない)。
@@ -265,6 +291,41 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 矢印キーの規則は web-keys.rules.json の arrows.radiogroup が持つ(移動=選択、roving tabindex、disabled スキップ)。Tab はグループにひとつ: チェック済みがあればそこへ、なければ先頭へ。
 - invalid はグループの状態として届き(Web の表現は radiogroup への aria-invalid + aria-describedby)、error 文はグループの説明として届く。
 - 既定選択を置かない場合、Tab での進入先は先頭項目になる。未選択のまま送信された required グループが invalid の典型である。
+
+### Select(契約 0.0.0-alpha.1)
+
+閉じた選択肢の集合からひとつ選ぶ入力。選択肢を畳んで見せる(全選択肢を見せるなら RadioGroup。GOV.UK は「公開サービスでは最後の手段」とまで言う — 少数の選択肢は Radio が原則)。Web の実装は二経路(RFC 0007 の B2): touch では native select、pointer ではカスタムの popover-listbox(Popover を合成。overlay の popover 類)。リッチな選択肢(アイコン・副文)は pointer で描き、native では name へ優雅に劣化する。検索付き(Combobox)・複数選択は別部品の関心であり本契約は持たない。alpha.0(native select 基盤のみ)からの破壊的変更(RFC 0007。GOVERNANCE §3 の CHANGELOG が記録を担う)。
+
+props:
+
+- `value`: string(既定 "") — 選択中の選択肢の value。空文字は未選択。アプリが所有する(field.md §5)。
+- `options`: array — 選択肢の列。データとして渡す(裁定: native select は文字列 label のみ。リッチは name/文字列駆動の追加欄で、任意内容の option は範囲外・将来 RFC。Select.md §3 / RFC 0007)。
+- `placeholder`: string((省略可)) — 未選択時の表示文。label の代替ではない(field.md §2)。Web の表現は「無効化された未選択の先頭 option」(選ばれ得ない)。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。
+- `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2)。intent を danger へ差し替える(state.md §7)。
+- `required`: boolean(既定 false) — 選択が必須(placeholder のまま送信させない)。支援技術に届くことは Normative、視覚標示は部品が自動で出す(field.md §4。裁定済み 2026-07)。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段(TextField と同じ)。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: string) => void — 選択が変わったことを伝える。payload は新しい value(field.md §5)。選択肢を選ぶ操作は離散であり、逐次と確定の区別が生じない。change でのページ遷移や送信を実装・アプリが仕込んではならない(WCAG 2.2 SC 3.2.2 On Input。キーボードの探索中に発火して誤遷移する — 2026-07 調査の一致)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 名前。無名は許さない(field.md §2)。8種と同じ slot 形状(field.md §6)。
+- `description` — 説明。field.md §2。
+- `error` — invalid のときのエラー文。description と並置(field.md §3。裁定済み 2026-07)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- role が combobox なのは HTML-AAM の写像に一致させたため: native の select(単一選択)は combobox role に写る。pointer 経路のカスタムも select-only combobox として同じ role に落ちる。listbox はポップアップ側の role であり本体ではない。
+- 二経路の a11y(RFC 0007 の B2)。touch: native select がキーボード・SR・高コントラストを UA 水準で満たす。pointer: APG の select-only combobox パターンを自前で満たす — トリガー role=combobox に aria-expanded / aria-controls、ポップアップ role=listbox、各項目 role=option に aria-selected、現在項目は aria-activedescendant(DOM focus はトリガー据置。overlay.md §4 の仮想 focus)。キーは web-keys.rules.json の arrows.listbox。
+- 開閉(open)を prop に持たないのは書き落としではない。touch は native select で開閉を UA が所有し、pointer は Popover を合成してコンポーネント内部が所有する(overlay.md §6: Select の開閉をアプリに管理させるのは実用に反する。Tooltip と同じ)。どちらも open は値であって(overlay.md §6)、契約の面(prop)には現れない。以前ここには「native select は開閉をブラウザが所有し、open を書けば native 実装が契約を満たせない」とだけ記していた(prior/superseded: RFC 0007 で pointer 経路が加わり、内部所有の open が現れた)。
+- options のグルーピング(optgroup)は初版で持たない。必要の立証後に options の構造拡張で足す(破壊的でない)。
+- invalid / required / disabled の配線は TextField と同じ(aria-invalid / required / state.md §5 の3要求)。
+- touch では OS のネイティブピッカーが開くことが利点である(2026-07 調査: 専門家の一致。第1条の便益を B2 が touch で温存する)。ピッカーの見た目は UA / OS のものであり Stemcell は関与しない。pointer では見た目を Stemcell が握る代わりに、a11y を自前で満たす責を負う。
+- リッチ選択肢(icon / description)は pointer でのみ描く。名前(label)はどちらの経路でも支援技術へ届き、icon は装飾・description は補助なので、native への劣化で意味は失われない(第2条: 同じ意味・現地の声)。
+- 標的の門: size.md §4。
 
 ### Sidebar(契約 0.0.0-alpha.3)
 

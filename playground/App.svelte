@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -16,6 +16,8 @@
   let toppings = $state({ cheese: true, tomato: false });
   let bio = $state('');
   let notify = $state(true);
+  let ship = $state('');
+  let account = $state('personal');
 
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
@@ -191,6 +193,44 @@
           {#snippet label()}disabled × invalid{/snippet}
           {#snippet error()}枠は disabled の色になる(state.md §3.1){/snippet}
         </TextField>
+      </Cluster>
+    </Stack>
+  </section>
+
+  <section>
+    <h2>Select</h2>
+    <p>
+      二経路(RFC 0007 の B2)。pointer はカスタム combobox+listbox(リッチ選択肢・aria-activedescendant・
+      Popover を合成)、touch(pointer:coarse)は native select に切替。開閉はコンポーネント内部が所有、
+      light dismiss(外側/Escape)。invalid は未選択で立つ。
+    </p>
+    <Stack gap="lg">
+      <Select
+        bind:value={ship}
+        placeholder="配送方法を選択"
+        required
+        invalid={ship === ''}
+        options={[
+          { value: 'std', label: '通常配送', icon: 'menu', description: '3〜5営業日' },
+          { value: 'exp', label: '速達', icon: 'arthmetic.plus', description: '翌日着' },
+          { value: 'pick', label: '店舗受取', icon: 'search', description: '最寄り店で受け取り' },
+          { value: 'frz', label: '冷凍便(法人のみ)', icon: 'delete', disabled: true },
+        ]}
+      >
+        {#snippet label()}配送方法{/snippet}
+        {#snippet description()}リッチ選択肢(アイコン ＋ 副文){/snippet}
+        {#snippet error()}選択が必要{/snippet}
+      </Select>
+      <Cluster gap="md">
+        <Select size="sm" bind:value={account} options={[{ value: 'personal', label: '個人' }, { value: 'business', label: '法人' }]}>
+          {#snippet label()}sm{/snippet}
+        </Select>
+        <Select size="lg" bind:value={account} options={[{ value: 'personal', label: '個人' }, { value: 'business', label: '法人' }]}>
+          {#snippet label()}lg{/snippet}
+        </Select>
+        <Select disabled value="personal" options={[{ value: 'personal', label: '個人' }]}>
+          {#snippet label()}disabled{/snippet}
+        </Select>
       </Cluster>
     </Stack>
   </section>
