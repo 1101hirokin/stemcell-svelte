@@ -209,6 +209,37 @@ try {
   if ((await selTrigger.getAttribute('aria-expanded')) !== 'false')
     throw new Error('Select: 外側クリックで閉じない(native light dismiss)');
 
+  // Select(native/touch 経路): pointer:coarse では UA の <select>。UA ドロップダウンは <select> の箱に
+  // 揃うので、(1) <select> が器の全幅を占める(選択肢幅=トリガー幅。inset を器でなく中身が持つ設計)、
+  // (2) chevron の上を押しても背後の <select> に当たる(pointer-events:none で透過し、押下で開く)を守る。
+  // 実 Chromium の coarse 文脈でしか測れない層(横 inset を器へ戻すと (1) が、chevron を flex 兄弟へ戻すと (2) が RED)。
+  const touch = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  const tp = await touch.newPage();
+  await tp.goto(`http://localhost:${PORT}/`);
+  await tp.waitForSelector('.sc-select-input');
+  await tp.locator('.sc-select-control').first().scrollIntoViewIfNeeded();
+  const nat = await tp.evaluate(() => {
+    const ctrl = document.querySelector('.sc-select-control') as HTMLElement;
+    const sel = ctrl.querySelector('select') as HTMLSelectElement;
+    const chev = ctrl.querySelector('.sc-select-chevron') as HTMLElement;
+    const cr = ctrl.getBoundingClientRect();
+    const sr = sel.getBoundingClientRect();
+    const r = chev.getBoundingClientRect();
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return {
+      fillRatio: sr.width / cr.width,
+      chevronHitsSelect: hit === sel || sel.contains(hit),
+      chevronPE: getComputedStyle(chev).pointerEvents,
+    };
+  });
+  await touch.close();
+  if (nat.fillRatio < 0.98)
+    throw new Error(
+      `Select(native): <select> が器の全幅でない(fill ${(nat.fillRatio * 100).toFixed(0)}%。UA dropdown がトリガー幅に揃わない)`,
+    );
+  if (nat.chevronPE !== 'none' || !nat.chevronHitsSelect)
+    throw new Error('Select(native): chevron の上のクリックが背後の <select> に届かない(押下で開けない)');
+
   // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
   // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)
   const cb = await page.evaluate(() => {
