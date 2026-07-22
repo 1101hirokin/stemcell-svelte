@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Cluster, Grid, Sidebar, Stack, StemcellProvider, Switcher, TextField } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Grid, Sidebar, Stack, StemcellProvider, Switcher, TextField } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -85,6 +85,38 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - disabled は3つの要求すべてを満たすこと（foundations/state.md §5）: 活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる。属性か aria-disabled かは Web の表現であり第2条により固有。
 - 活性化のキーは本契約が定めない。role が意味論を運び、キーはその表現である（第2条）。Web の APG Button Pattern は Enter と Space、Link Pattern は Enter のみと定めるが、Compose の Modifier.clickable は Role に関わらず両方で発火する。キーを中立の契約に書けば Web の慣習を全プラットフォームへ漏らす。Web の規範層は未着手（component-contract.schema.json の $webKeys）。
+
+### Checkbox(契約 0.0.0-alpha.1)
+
+集合からの選択、または同意。送信(確定ステップ)を伴いうる(field.md §7 の線引き。裁定済み 2026-07)。即時反映する単独の設定なら Switch を使う。label のリッチ内容(リンク内包)の検算器(field.md §6)。
+
+props:
+
+- `checked`: boolean(既定 false) — 値であって状態ではない(state.md §6)。アプリが所有し、部品は change で通知するだけ(field.md §5)。語彙は Switch と同一(field.md §7: 同じ観念が二つの名を持てば共通言語が壊れる。第2条)。
+- `indeterminate`: boolean(既定 false) — 第三の値であり状態ではない(state.md §6: aria-checked は tristate で、mixed は第三の値)。見た目と支援技術への伝達を上書きするが、checked の値は変えない(HTML の checked 属性と indeterminate プロパティの分離と同じモデル。M3 / Carbon / Base UI / Compose の TriState も同型)。反例併記: Radix / Chakra / Polaris は checked='indeterminate' の三値で表す。boolean の checked を三値化すると Switch との語彙統一(checked は boolean)が崩れるため採らない。主用途は親子リストの集計表示。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。
+- `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2)。intent を danger へ差し替える(state.md §7)。主用途は必須の同意(利用規約)が満たされていない送信。
+- `required`: boolean(既定 false) — チェックが必須(同意の強制が主用途)。支援技術に届くことは Normative、視覚標示は部品が自動で出す(field.md §4。裁定済み 2026-07)。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: boolean) => void — 切替が起きたことを伝える。payload は新しい checked(field.md §5。裁定済み 2026-07)。indeterminate は payload に関与しない: native と同じく indeterminate は checked と独立であり、操作は indeterminate を下ろして checked をトグルするだけである。典型(checked=false かつ indeterminate=true の集計表示)では結果は true になるが、契約は checked=true との組を禁じないので、無条件に true ではない(独立レビューの指摘で断定を訂正)。checked と indeterminate の更新はアプリが行う。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 名前。リッチ内容を許す(「利用規約に同意する」のリンク内包が動機。field.md §6 の検算はここで行われた — 結果は a11y.notes)。無名は許さない(field.md §2)。
+- `description` — 説明。支援技術に説明として届く(field.md §2)。
+- `error` — invalid のときのエラー文。description と並置(field.md §3。裁定済み 2026-07)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- アクセシブルネームは label の内容のテキストを平坦化して構成する(ARIA accessible name from content。リンクのテキストも名前に含まれる)。これが field.md §6 の検算結果であり、slot 形状はリッチ label でも名前を壊さない。
+- label 内の対話要素(リンク)は Web の既知の罠: label で control を包む・for で結ぶ構成では、リンクの操作がチェックの切替も発火しうる(二重発火)。実装は、リンク上の活性化が切替へ伝播しないことを保証する。リンクとチェックの標的の近接は SC 2.5.8 の間隔条件(size.md §4)にかかる。
+- checked / indeterminate は tristate として届く(Web の表現は aria-checked true / false / mixed)。
+- Space で切り替わる(web-keys.rules.json)。Enter を足さないのは native の <input type=checkbox> と一致させるため(Enter は暗黙送信に流れる)。
+- disabled は3要求すべてを満たすこと(state.md §5)。
+- label は control の後ろ(論理方向)に置く。位置を構造層として凍結するかは field.md §8 の未決のまま、初版は業界の一致(全系統が後置)に従う。
+- 標的の門: sm の見た目でも当たり判定は size.md §4 の下限を下回らない。
 
 ### Cluster(契約 0.0.0-alpha.0)
 

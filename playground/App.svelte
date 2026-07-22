@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar } from '../src/lib';
+  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox } from '../src/lib';
 
   let theme = $state<'auto' | 'standard-light' | 'standard-dark'>('auto');
   let density = $state<'comfortable' | 'compact'>('comfortable');
@@ -7,6 +7,9 @@
   let invite = $state('abc');
   let gridMin = $state('16rem');
   let sidebarSide = $state<'start' | 'end'>('start');
+  let agree = $state(false);
+  let toppings = $state({ cheese: true, tomato: false });
+
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
   const colors = ['primary', 'danger', 'warning', 'plain'] as const;
@@ -167,6 +170,51 @@
         </Stack>
       </div>
     </div>
+  </section>
+
+  <section>
+    <h2>Checkbox</h2>
+    <p>
+      集合からの選択・同意(field.md §7)。リッチ label(リンク内包)の二重発火防止と、
+      親の indeterminate(集計表示)を実演する。checked は primary の塗り、未チェックの hover は
+      plain のウォッシュ。
+    </p>
+    <Stack gap="md">
+      <Checkbox bind:checked={agree} required invalid={!agree}>
+        {#snippet label()}
+          <a href="/terms" onclick={(e) => e.preventDefault()}>利用規約</a>に同意する
+        {/snippet}
+        {#snippet description()}続行には同意が必要{/snippet}
+        {#snippet error()}同意してください{/snippet}
+      </Checkbox>
+
+      <Checkbox
+        checked={toppings.cheese && toppings.tomato}
+        indeterminate={toppings.cheese !== toppings.tomato}
+        onchange={(c) => (toppings = { cheese: c, tomato: c })}
+      >
+        {#snippet label()}トッピング全部(親){/snippet}
+      </Checkbox>
+      <Box inset="8">
+        <Stack gap="sm">
+          <Checkbox bind:checked={toppings.cheese}>
+            {#snippet label()}チーズ{/snippet}
+          </Checkbox>
+          <Checkbox bind:checked={toppings.tomato}>
+            {#snippet label()}トマト{/snippet}
+          </Checkbox>
+        </Stack>
+      </Box>
+
+      <Cluster gap="md">
+        <Checkbox checked disabled>
+          {#snippet label()}disabled(checked){/snippet}
+        </Checkbox>
+        <Checkbox disabled>
+          {#snippet label()}disabled{/snippet}
+        </Checkbox>
+      </Cluster>
+    </Stack>
   </section>
 
   <section>

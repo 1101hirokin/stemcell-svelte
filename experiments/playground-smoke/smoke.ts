@@ -48,6 +48,7 @@ try {
     textfield: document.querySelectorAll('.sc-textfield').length,
     grid: document.querySelectorAll('.sc-grid').length,
     sidebar: document.querySelectorAll('.sc-sidebar').length,
+    checkbox: document.querySelectorAll('.sc-checkbox').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -131,6 +132,47 @@ try {
   if (fillWidth < 590)
     throw new Error(`TextField が fill しない(600px の器で ${fillWidth}px。inline-size:100% を確認)`);
 
+  // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
+  // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)
+  const cb = await page.evaluate(() => {
+    const first = document.querySelector('.sc-checkbox') as HTMLElement; // 同意(リッチ label)
+    const input = first.querySelector('.sc-checkbox-input') as HTMLInputElement;
+    const link = first.querySelector('a') as HTMLAnchorElement;
+    const text = first.querySelector('.sc-checkbox-label') as HTMLElement;
+    // (1) リンク活性化はトグルしない(interactive descendant の例外)
+    const before = input.checked;
+    link.click();
+    const afterLinkClick = input.checked;
+    // (2) label のテキスト(リンク以外)クリックはトグルする = label 機構が生きている証拠。
+    // これが無いと (1) は label 破壊時も自明に通る(何も繋がらないため)。両方で検出力を持たせる
+    text.click();
+    const toggledByText = input.checked !== afterLinkClick;
+
+    // 親の indeterminate(集計表示): checked=false かつ indeterminate=true で aria mixed
+    const parent = [...document.querySelectorAll('.sc-checkbox-input')].find(
+      (i) => (i as HTMLInputElement).indeterminate,
+    ) as HTMLInputElement | undefined;
+
+    // disabled: click しても発火しない
+    const disabled = [...document.querySelectorAll('.sc-checkbox-input')].find(
+      (i) => (i as HTMLInputElement).disabled,
+    ) as HTMLInputElement;
+    const dBefore = disabled.checked;
+    disabled.click();
+    const dAfter = disabled.checked;
+
+    return {
+      linkNoToggle: before === afterLinkClick,
+      toggledByText,
+      hasIndeterminate: !!parent && parent.indeterminate && !parent.checked,
+      disabledNoToggle: dBefore === dAfter,
+    };
+  });
+  if (!cb.linkNoToggle) throw new Error('Checkbox: リッチ label 内のリンククリックがトグルを発火させた(二重発火)');
+  if (!cb.toggledByText) throw new Error('Checkbox: label テキストのクリックがトグルしない(label 機構が死んでいる。二重発火検査の検出力の担保)');
+  if (!cb.hasIndeterminate) throw new Error('Checkbox: indeterminate(集計表示)が mixed になっていない');
+  if (!cb.disabledNoToggle) throw new Error('Checkbox: disabled が click を抑制していない');
+
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
   await page.waitForTimeout(100);
@@ -169,7 +211,7 @@ try {
 
   await browser.close();
   console.log(
-    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill`,
+    `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill / Checkbox 二重発火防止・indeterminate・disabled 抑制`,
   );
 } finally {
   preview.kill();

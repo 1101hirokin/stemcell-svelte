@@ -1,0 +1,160 @@
+/* 配線の源は field.md(解剖)・state.md §3(合成)・emphasis(checked=primary の塗り)。
+   native の <input> は真の値と a11y の源。視覚は sibling の box が描く(契約 expressive)。 */
+.sc-checkbox-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+}
+
+.sc-checkbox {
+  display: inline-flex;
+  align-items: start;
+  gap: var(--spacing-inline-md);
+  cursor: pointer;
+  /* checked / 未 checked で描き先が分かれる(契約 expressive)。既定は未 checked のチャンネル */
+  --_box-bg: var(--color-app-surface);
+  --_box-border: var(--color-app-border);
+  --_box-hover: var(--color-semantic-plain-soft-bg-hover);
+  --_box-pressed: var(--color-semantic-plain-soft-bg-pressed);
+  --_mark: transparent;
+  --_ring: var(--color-semantic-primary-focus-ring);
+}
+.sc-checkbox-field[data-disabled='true'] .sc-checkbox {
+  cursor: not-allowed;
+}
+
+/* native input は box を覆って置き、クリック・フォーカスを受ける。視覚は透明にして box に委ねる */
+.sc-checkbox-input {
+  position: absolute;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.sc-checkbox-box {
+  position: relative;
+  flex: 0 0 auto;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border: var(--shape-border-width) solid var(--_box-border);
+  border-radius: var(--shape-semantic-selection);
+  background: var(--_box-bg);
+  transition:
+    background-color var(--motion-feedback-duration) var(--motion-feedback-easing),
+    border-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+/* チェックマーク(回転した2辺)。不確定は横棒。色は --_mark */
+.sc-checkbox-box::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 46%;
+  inline-size: 0.3rem;
+  block-size: 0.6rem;
+  border: solid var(--_mark);
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -55%) rotate(45deg);
+}
+
+/* checked: primary の塗り。チャンネル変数を差し替える(未 checked の枠描画をやめ面で描く) */
+.sc-checkbox-input:checked + .sc-checkbox-box {
+  --_box-bg: var(--color-semantic-primary-bg);
+  --_box-border: var(--color-semantic-primary-bg);
+  --_box-hover: var(--color-semantic-primary-bg-hover);
+  --_box-pressed: var(--color-semantic-primary-bg-pressed);
+  --_mark: var(--color-semantic-primary-fg);
+}
+/* indeterminate: 同じ塗りで、マークを横棒に差し替える */
+.sc-checkbox-input:indeterminate + .sc-checkbox-box {
+  --_box-bg: var(--color-semantic-primary-bg);
+  --_box-border: var(--color-semantic-primary-bg);
+  --_box-hover: var(--color-semantic-primary-bg-hover);
+  --_box-pressed: var(--color-semantic-primary-bg-pressed);
+  --_mark: var(--color-semantic-primary-fg);
+}
+.sc-checkbox-input:indeterminate + .sc-checkbox-box::after {
+  inline-size: 0.6rem;
+  block-size: 0;
+  border-width: 0 0 2px 0;
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+
+/* hover / pressed は描き先チャンネルを引く(checked は primary、未 checked は plain のウォッシュ)。
+   disabled は抑制する(state.md §3.2)。native input は :hover を素通しするので label で受ける */
+.sc-checkbox:hover .sc-checkbox-box {
+  background: var(--_box-hover);
+  border-color: var(--_box-hover);
+}
+.sc-checkbox:active .sc-checkbox-box {
+  background: var(--_box-pressed);
+  border-color: var(--_box-pressed);
+}
+/* 未 checked の hover はウォッシュ(面)であって枠ではない: border は中立のまま面だけ変える */
+.sc-checkbox-input:not(:checked):not(:indeterminate) + .sc-checkbox-box {
+  border-color: var(--_box-border);
+}
+.sc-checkbox:hover .sc-checkbox-input:not(:checked):not(:indeterminate) + .sc-checkbox-box {
+  border-color: var(--color-app-border);
+}
+
+/* focus-ring は box に出す(focus-ring.md) */
+.sc-checkbox-input:focus-visible + .sc-checkbox-box {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* invalid は intent を danger へ(state.md §3.1)。未 checked の枠と ring を danger に */
+.sc-checkbox-field[data-invalid='true'] .sc-checkbox {
+  --_box-border: var(--color-semantic-danger-border);
+  --_ring: var(--color-semantic-danger-focus-ring);
+}
+
+/* disabled が勝つ(state.md §3.1)。interaction を抑制する(§3.2) */
+.sc-checkbox-field[data-disabled='true'] .sc-checkbox-box {
+  --_box-bg: var(--color-semantic-disabled-soft-bg);
+  --_box-border: var(--color-semantic-disabled-border);
+}
+.sc-checkbox-field[data-disabled='true'] .sc-checkbox-input:checked + .sc-checkbox-box,
+.sc-checkbox-field[data-disabled='true'] .sc-checkbox-input:indeterminate + .sc-checkbox-box {
+  --_box-bg: var(--color-semantic-disabled-soft-bg);
+  --_box-border: var(--color-semantic-disabled-border);
+  --_mark: var(--color-semantic-disabled-fg);
+}
+.sc-checkbox-field[data-disabled='true'] .sc-checkbox:hover .sc-checkbox-box,
+.sc-checkbox-field[data-disabled='true'] .sc-checkbox:active .sc-checkbox-box {
+  background: var(--color-semantic-disabled-soft-bg);
+  border-color: var(--color-semantic-disabled-border);
+}
+
+.sc-checkbox-label {
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-checkbox-field[data-disabled='true'] .sc-checkbox-label {
+  color: var(--color-semantic-disabled-fg);
+}
+.sc-checkbox-required {
+  margin-inline-start: 0.25em;
+}
+
+.sc-checkbox-description,
+.sc-checkbox-error {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-checkbox-description {
+  color: var(--color-app-fg-muted);
+}
+.sc-checkbox-error {
+  color: var(--color-semantic-danger-soft-fg);
+}
