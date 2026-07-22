@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Grid, Icon, Radio, RadioGroup, Sidebar, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Divider, Grid, Icon, IconButton, Radio, RadioGroup, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -141,6 +141,19 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 
+### Divider(契約 0.0.0-alpha.0)
+
+区切る線。内容を持たない。余白(spacing)で区切りが足りるなら線を引かない、が既定の答えであり(第3条の抑制)、Divider は視覚的な線が要ると判断された場所にだけ現れる。
+
+props:
+
+- `orientation`: "stack" | "inline"(既定 "stack") — 何の流れを切るか。stack は積みの流れを(横書き Web では水平線)、inline は並びの流れを(同・垂直線)切る。値は spacing.md §4 の概念(stack / inline)と同じ論理方向であり、horizontal / vertical という物理値を採らないのは縦書きで軸が入れ替わるため(layout.md §7 の論理プロパティと同じ線)。物理方向への写像(aria-orientation の horizontal/vertical を含む)は各プラットフォームの表現。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 既定は装飾: 支援技術から隠す。意味のある区切り(セクションの境界)は見出し構造が運ぶべきで、線に意味を載せない。
+- 集合の中の意味的な区切り(Menu 内の separator 等)はその集合の契約が定める。Divider 単体は意味を持たない。
+
 ### Grid(契約 0.0.0-alpha.2)
 
 内在的な格子。列数を固定せず、器に応じて列が増減する(auto-fit / minmax。layout.md §4)。固定12列は採らない(コンテナ方針)。
@@ -171,6 +184,33 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 既定は装飾: 支援技術から隠す(Web の表現は aria-hidden)。label があるときだけ意味を運び、画像として名前が届く(Web の表現は role=img + アクセシブルネーム)。
 - フォーカスを受け取らない。相互作用しないので最低標的(size.md §4)も適用外。押せる絵は IconButton。
+
+### IconButton(契約 0.0.0-alpha.0)
+
+Button の一種。ラベルが絵になっただけで、押すと何かが起きる。variant / color / size / disabled / block / states は Button を継承する。events と slots は継承されない(スキーマの extends 意味論)ので、click は Button と同一定義で再宣言している。
+
+props:
+
+- `variant`: "filled" | "soft" | "outlined" | "text"(既定 "filled") — 強調度。emphasis.md §3 の4段すべてを採る。どの role をどの面に塗るかは foundations/emphasis.rules.json が1箇所で持つ。契約は名前を挙げるだけ。
+- `color`: "primary" | "danger" | "warning" | "plain"(既定 "primary") — intent。disabled を含まない。選ぶものではなく、状態から差し替わる(state.md §7)。success / info も含まない。報告にしか使わない intent であり、行動には立たない(color.md §5「行動の intent と報告の intent」。裁定済み)。肯定的な確定は primary である。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る。段が引く余白の配線は foundations/size.rules.json が持つ。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。属性か aria-disabled かは Web の表現であり第2条により固有。
+- `block`: boolean(既定 false) — layout.md §2: コントロールの既定は shrink-wrap(内容幅)。block で fill(器いっぱい)にオプトインする。憲法前文の「Button を block・color=primary で」という共通言語の一部。
+- `label`: string — 名前。可視ラベルが絵に置き換わったぶん、名前の経路が prop へ移る(必須)。Tooltip の併用は補強であって名前の代替ではない(overlay.md §4: hover でしか到達できない情報を作らない)。
+- `shape`: "control" | "pill"(既定 "control") — shape.md §6 のカテゴリから選ぶ(発明不可)。pill は全円。既定は control(裁定: 非選択時のフォールバック)。丸いアイコンボタンと角丸のアイコンボタンはどちらも実在するので、割当てではなく選択に開いた最初の部品。
+
+events(Svelte では callback prop):
+
+- `onclick`: (payload: void) => void — Button と同一定義の再宣言(events は継承されないため)。押されたことを伝える。disabled のとき発火しない(foundations/state.md §3.2)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default`(必須) — アイコン1つ。stemcell セットの Icon でも、プラットフォーム固有アイコン(SF Symbols 等)でもよい(iconography.md §2)。文字は置かない: 文字を持つなら Button である。start / end スロットは継承されない(スロット構成は部品の形そのもの)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 名前は label prop が運ぶ。中のアイコンは装飾(iconography.md §5)であり、名前を二重に運ばない。
+- disabled の3要求と当たり判定の門/目標は Button と同じ(state.md §5 / size.md §4)。視覚が絵1つでも当たり判定は縮まない。
 
 ### Radio(契約 0.0.0-alpha.1)
 
@@ -246,6 +286,20 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 - DOM / 読み上げ順は常に視覚順と一致させる: side が DOM 順も決め(start = 脇→本体、end = 本体→脇)、視覚順だけを CSS(order / row-reverse 等)で入れ替えてはならない(WCAG 1.3.2 Meaningful Sequence)。折れたときは同じ DOM 順のまま縦に積むので、折返しで読み上げ順は変わらない。
+
+### Skeleton(契約 0.0.0-alpha.0)
+
+読み込み中の内容の代役。来るものの形を先に置いて、レイアウトの跳ねを防ぐ。
+
+props:
+
+- `form`: "text" | "box" | "circle"(既定 "text") — 何を模するか。text は文字行(高さは周囲の font に従う。角は tag)、box は面(器いっぱい。角は card)、circle は円(器いっぱいの正円。角は pill)。prop 名の経緯と業界対応は Skeleton.md §2。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 支援技術から常に隠す。代役は情報ではなく、読み込み中であることは領域の側が伝える(aria-busy 相当は Skeleton を包む領域の関心。Skeleton 自身が「読み込み中」を連呼しない)。
+- reduced-motion では shimmer を停止し、静止した面になる(motion.md §6 の loop 特例)。
+- 相互作用しない。当たり判定の門の対象外。
 
 ### Stack(契約 0.0.0-alpha.0)
 

@@ -146,13 +146,22 @@ try {
     const plain = all.find((tf) => tf.dataset.size === 'md' && !tf.querySelector('.sc-textfield-end') && !tf.querySelector('.sc-textfield-start'));
     if (!withBtn) return null;
     const btn = withBtn.querySelector('.sc-textfield-end button') as HTMLElement;
-    return { withBtnH: h(withBtn), plainH: plain ? h(plain) : null, btnH: Math.round(btn.getBoundingClientRect().height) };
+    return {
+      withBtnH: h(withBtn),
+      plainH: plain ? h(plain) : null,
+      btnH: Math.round(btn.getBoundingClientRect().height),
+      // 内包則の機構が生きているか(縦 inset を器が手放し、affix ボタンの padding-block が 0)。
+      // 詳細度で負けると 0 にならず、器が押し上げられうる(独立レビュー blocker の回帰検査)
+      btnPadBlock: getComputedStyle(btn).paddingBlockStart,
+    };
   });
   if (!affix) throw new Error('TextField: affix にボタンを内包した例が playground に無い');
   if (affix.plainH !== null && affix.withBtnH !== affix.plainH)
     throw new Error(`TextField: affix 内包で器が膨らむ(${affix.withBtnH}px ≠ 素の md ${affix.plainH}px。size.md §2 内包則)`);
   if (affix.btnH < 24)
     throw new Error(`TextField: affix ボタンの当たり判定が門(24px)未満(${affix.btnH}px)`);
+  if (affix.btnPadBlock !== '0px')
+    throw new Error(`TextField: affix ボタンの padding-block が 0 でない(${affix.btnPadBlock}。内包則の縦 inset 手放しが詳細度負けで死んでいる)`);
 
   // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
   // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)

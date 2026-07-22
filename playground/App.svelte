@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -97,6 +97,59 @@
   </section>
 
   <section>
+    <h2>IconButton</h2>
+    <p>
+      Button の一種(契約 extends)。絵1つで名前は label(aria-label)。shape は control/pill から
+      選べる(shape.md §6)。当たり判定は絵1つでも縮まない(size.md §4)。
+    </p>
+    <Cluster gap="md">
+      <IconButton label="検索"><Icon name="search" /></IconButton>
+      <IconButton label="メニュー" variant="soft"><Icon name="menu" /></IconButton>
+      <IconButton label="その他" variant="outlined"><Icon name="dots.horizontal" /></IconButton>
+      <IconButton label="削除" variant="text" color="danger"><Icon name="delete" /></IconButton>
+      <IconButton label="追加" shape="pill"><Icon name="arthmetic.plus" /></IconButton>
+      <IconButton label="閉じる" disabled><Icon name="close" /></IconButton>
+    </Cluster>
+    <Cluster gap="md">
+      <IconButton label="小" size="sm"><Icon name="search" /></IconButton>
+      <IconButton label="中" size="md"><Icon name="search" /></IconButton>
+      <IconButton label="大" size="lg"><Icon name="search" /></IconButton>
+      <IconButton label="全円 sm" shape="pill" size="sm" variant="soft"><Icon name="menu" /></IconButton>
+      <IconButton label="全円 lg" shape="pill" size="lg" variant="soft"><Icon name="menu" /></IconButton>
+    </Cluster>
+  </section>
+
+  <section>
+    <h2>Divider</h2>
+    <p>区切る線。装飾(支援技術から隠れる)。stack=水平線 / inline=垂直線(論理方向)。余白は器(Stack/Cluster の gap)が持つ。</p>
+    <Stack gap="md">
+      <span>上のブロック</span>
+      <Divider />
+      <span>下のブロック</span>
+    </Stack>
+    <Cluster gap="md">
+      <span>左</span>
+      <Divider orientation="inline" />
+      <span>中</span>
+      <Divider orientation="inline" />
+      <span>右</span>
+    </Cluster>
+  </section>
+
+  <section>
+    <h2>Skeleton</h2>
+    <p>読み込み中の代役。text=文字行 / box=面 / circle=円。寸法は器か font に従う。reduced-motion で shimmer 停止。</p>
+    <Cluster gap="md">
+      <div style="inline-size: 3rem; block-size: 3rem;"><Skeleton form="circle" /></div>
+      <Stack gap="sm">
+        <div style="inline-size: 14rem;"><Skeleton form="text" /></div>
+        <div style="inline-size: 10rem;"><Skeleton form="text" /></div>
+      </Stack>
+    </Cluster>
+    <div style="inline-size: 14rem; block-size: 6rem;"><Skeleton form="box" /></div>
+  </section>
+
+  <section>
     <h2>TextField</h2>
     <p>
       複合フィールド(label / description / error 内包)。エラー文は danger.soft-fg の転用
@@ -114,7 +167,7 @@
       <TextField keyboard="email" autocomplete="email">
         {#snippet label()}メール(keyboard=email){/snippet}
         {#snippet start()}@{/snippet}
-        {#snippet end()}<Button variant="text" size="sm">消去</Button>{/snippet}
+        {#snippet end()}<IconButton label="消去" variant="text" size="sm"><Icon name="close" /></IconButton>{/snippet}
       </TextField>
       <Cluster gap="md">
         <TextField size="sm">

@@ -1,0 +1,110 @@
+/* Button の一種(契約 extends。tokensRequired は Button ＋ shape.semantic.{shape})。Button.css の
+   チャンネル/variant/focus をそのまま写し、違いは (1) 絵1つで正方 (2) shape を control/pill から選べる。 */
+.sc-iconbutton {
+  display: inline-flex; /* shrink-wrap 既定(layout.md §2) */
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-inline-md); /* Button 継承の gap。子が絵1つなので不活性だが継承の副産物(IconButton.md §2) */
+  border: none;
+  /* 継承した typography.label-lg。可視文字は無いが絵の基準になる(IconButton.md 追記)。
+     行高も Button と同じにし、グリフ枠を 1lh にすることで Button のテキスト行と同じ高さに揃える */
+  font-family: var(--typography-label-lg-font-family);
+  font-size: var(--typography-label-lg-font-size);
+  line-height: var(--typography-label-lg-line-height);
+  cursor: pointer;
+  transition:
+    background-color var(--motion-feedback-duration) var(--motion-feedback-easing),
+    border-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+/* shape.md §6 のカテゴリ(発明不可)。control は角丸、pill は全円 */
+.sc-iconbutton[data-shape='control'] {
+  border-radius: var(--shape-semantic-control);
+}
+.sc-iconbutton[data-shape='pill'] {
+  border-radius: var(--shape-semantic-pill);
+}
+.sc-iconbutton[data-block='true'] {
+  display: flex;
+  inline-size: 100%;
+}
+/* 四辺同値の inset。絵(1em)＋左右上下 inset で正方になり、当たり判定が門/目標へ届く */
+.sc-iconbutton[data-size='sm'] {
+  padding: var(--spacing-inset-sm);
+}
+.sc-iconbutton[data-size='md'] {
+  padding: var(--spacing-inset-md);
+}
+.sc-iconbutton[data-size='lg'] {
+  padding: var(--spacing-inset-lg);
+}
+
+/* intent の一家をチャンネル変数へ(Button と同一。色を1箇所で束ね、variant はチャンネルだけを見る) */
+.sc-iconbutton[data-color='primary'] {
+  --_bg: var(--color-semantic-primary-bg); --_bg-h: var(--color-semantic-primary-bg-hover);
+  --_bg-p: var(--color-semantic-primary-bg-pressed); --_fg: var(--color-semantic-primary-fg);
+  --_soft-bg: var(--color-semantic-primary-soft-bg); --_soft-bg-h: var(--color-semantic-primary-soft-bg-hover);
+  --_soft-bg-p: var(--color-semantic-primary-soft-bg-pressed); --_soft-fg: var(--color-semantic-primary-soft-fg);
+  --_border: var(--color-semantic-primary-border); --_ring: var(--color-semantic-primary-focus-ring);
+}
+.sc-iconbutton[data-color='danger'] {
+  --_bg: var(--color-semantic-danger-bg); --_bg-h: var(--color-semantic-danger-bg-hover);
+  --_bg-p: var(--color-semantic-danger-bg-pressed); --_fg: var(--color-semantic-danger-fg);
+  --_soft-bg: var(--color-semantic-danger-soft-bg); --_soft-bg-h: var(--color-semantic-danger-soft-bg-hover);
+  --_soft-bg-p: var(--color-semantic-danger-soft-bg-pressed); --_soft-fg: var(--color-semantic-danger-soft-fg);
+  --_border: var(--color-semantic-danger-border); --_ring: var(--color-semantic-danger-focus-ring);
+}
+.sc-iconbutton[data-color='warning'] {
+  --_bg: var(--color-semantic-warning-bg); --_bg-h: var(--color-semantic-warning-bg-hover);
+  --_bg-p: var(--color-semantic-warning-bg-pressed); --_fg: var(--color-semantic-warning-fg);
+  --_soft-bg: var(--color-semantic-warning-soft-bg); --_soft-bg-h: var(--color-semantic-warning-soft-bg-hover);
+  --_soft-bg-p: var(--color-semantic-warning-soft-bg-pressed); --_soft-fg: var(--color-semantic-warning-soft-fg);
+  --_border: var(--color-semantic-warning-border); --_ring: var(--color-semantic-warning-focus-ring);
+}
+.sc-iconbutton[data-color='plain'] {
+  --_bg: var(--color-semantic-plain-bg); --_bg-h: var(--color-semantic-plain-bg-hover);
+  --_bg-p: var(--color-semantic-plain-bg-pressed); --_fg: var(--color-semantic-plain-fg);
+  --_soft-bg: var(--color-semantic-plain-soft-bg); --_soft-bg-h: var(--color-semantic-plain-soft-bg-hover);
+  --_soft-bg-p: var(--color-semantic-plain-soft-bg-pressed); --_soft-fg: var(--color-semantic-plain-soft-fg);
+  --_border: var(--color-semantic-plain-border); --_ring: var(--color-semantic-plain-focus-ring);
+}
+/* disabled は intent の差し替え(state.md §7)。減衰ではない */
+.sc-iconbutton:disabled {
+  --_bg: var(--color-semantic-disabled-bg); --_fg: var(--color-semantic-disabled-fg);
+  --_soft-bg: var(--color-semantic-disabled-soft-bg); --_soft-fg: var(--color-semantic-disabled-soft-fg);
+  --_border: var(--color-semantic-disabled-border);
+  cursor: not-allowed;
+}
+
+/* emphasis.rules.json の配線(Button と同一) */
+.sc-iconbutton[data-variant='filled'] { background: var(--_bg); color: var(--_fg); }
+.sc-iconbutton[data-variant='filled']:hover:not(:disabled) { background: var(--_bg-h); }
+.sc-iconbutton[data-variant='filled']:active:not(:disabled) { background: var(--_bg-p); }
+.sc-iconbutton[data-variant='soft'] { background: var(--_soft-bg); color: var(--_soft-fg); }
+.sc-iconbutton[data-variant='soft']:hover:not(:disabled) { background: var(--_soft-bg-h); }
+.sc-iconbutton[data-variant='soft']:active:not(:disabled) { background: var(--_soft-bg-p); }
+.sc-iconbutton[data-variant='outlined'] {
+  background: transparent; color: var(--_soft-fg);
+  border: var(--shape-border-width) solid var(--_border);
+}
+.sc-iconbutton[data-variant='outlined']:hover:not(:disabled) { background: var(--_soft-bg); }
+.sc-iconbutton[data-variant='outlined']:active:not(:disabled) { background: var(--_soft-bg-h); }
+.sc-iconbutton[data-variant='text'] { background: transparent; color: var(--_soft-fg); }
+.sc-iconbutton[data-variant='text']:hover:not(:disabled) { background: var(--_soft-bg); }
+.sc-iconbutton[data-variant='text']:active:not(:disabled) { background: var(--_soft-bg-h); }
+
+/* focus-ring.md: :focus-visible + outline + offset */
+.sc-iconbutton:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* 絵は currentColor で文字色(=intent の fg)を継承する。絵自体は 1em で font-size に追従。
+   枠を 1lh(label-lg の行箱)の正方にし、Button のテキスト行と縦横を揃える → 部品全体が
+   Button と同じ高さの正方になる(絵は中で中央。size.md §4 の検算対象)。 */
+.sc-iconbutton-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1lh;
+  block-size: 1lh;
+}

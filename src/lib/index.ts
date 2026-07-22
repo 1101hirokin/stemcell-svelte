@@ -1,5 +1,6 @@
 export { default as StemcellProvider } from './StemcellProvider/StemcellProvider.svelte';
 export { default as Button } from './Button/Button.svelte';
+export { default as IconButton } from './IconButton/IconButton.svelte';
 export { default as Switcher } from './Switcher/Switcher.svelte';
 export { default as Box } from './Box/Box.svelte';
 export { default as Stack } from './Stack/Stack.svelte';
@@ -13,3 +14,5 @@ export { default as Switch } from './Switch/Switch.svelte';
 export { default as Icon } from './Icon/Icon.svelte';
 export { default as Radio } from './Radio/Radio.svelte';
 export { default as RadioGroup } from './RadioGroup/RadioGroup.svelte';
+export { default as Divider } from './Divider/Divider.svelte';
+export { default as Skeleton } from './Skeleton/Skeleton.svelte';
