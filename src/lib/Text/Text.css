@@ -1,0 +1,139 @@
+/* content に typography 役割を当てる原始(Text.md)。variant は見た目だけ、意味は as(要素)が持つ。
+   要素の既定 margin は消す(見出し/段落の外側間隔は置かれた場所=layout が所有する。layout.md §1)。 */
+.sc-text {
+  margin: 0;
+}
+
+/* variant -> typography の合成役割(16)。font 系5軸を束ねる(typography.md §5)。役割の族ごとに区切る */
+
+.sc-text[data-variant='display-lg'] {
+  font-family: var(--typography-display-lg-font-family);
+  font-size: var(--typography-display-lg-font-size);
+  font-weight: var(--typography-display-lg-font-weight);
+  line-height: var(--typography-display-lg-line-height);
+  letter-spacing: var(--typography-display-lg-letter-spacing);
+}
+.sc-text[data-variant='display-md'] {
+  font-family: var(--typography-display-md-font-family);
+  font-size: var(--typography-display-md-font-size);
+  font-weight: var(--typography-display-md-font-weight);
+  line-height: var(--typography-display-md-line-height);
+  letter-spacing: var(--typography-display-md-letter-spacing);
+}
+
+.sc-text[data-variant='headline-lg'] {
+  font-family: var(--typography-headline-lg-font-family);
+  font-size: var(--typography-headline-lg-font-size);
+  font-weight: var(--typography-headline-lg-font-weight);
+  line-height: var(--typography-headline-lg-line-height);
+  letter-spacing: var(--typography-headline-lg-letter-spacing);
+}
+.sc-text[data-variant='headline-md'] {
+  font-family: var(--typography-headline-md-font-family);
+  font-size: var(--typography-headline-md-font-size);
+  font-weight: var(--typography-headline-md-font-weight);
+  line-height: var(--typography-headline-md-line-height);
+  letter-spacing: var(--typography-headline-md-letter-spacing);
+}
+.sc-text[data-variant='headline-sm'] {
+  font-family: var(--typography-headline-sm-font-family);
+  font-size: var(--typography-headline-sm-font-size);
+  font-weight: var(--typography-headline-sm-font-weight);
+  line-height: var(--typography-headline-sm-line-height);
+  letter-spacing: var(--typography-headline-sm-letter-spacing);
+}
+
+.sc-text[data-variant='title-lg'] {
+  font-family: var(--typography-title-lg-font-family);
+  font-size: var(--typography-title-lg-font-size);
+  font-weight: var(--typography-title-lg-font-weight);
+  line-height: var(--typography-title-lg-line-height);
+  letter-spacing: var(--typography-title-lg-letter-spacing);
+}
+.sc-text[data-variant='title-md'] {
+  font-family: var(--typography-title-md-font-family);
+  font-size: var(--typography-title-md-font-size);
+  font-weight: var(--typography-title-md-font-weight);
+  line-height: var(--typography-title-md-line-height);
+  letter-spacing: var(--typography-title-md-letter-spacing);
+}
+.sc-text[data-variant='title-sm'] {
+  font-family: var(--typography-title-sm-font-family);
+  font-size: var(--typography-title-sm-font-size);
+  font-weight: var(--typography-title-sm-font-weight);
+  line-height: var(--typography-title-sm-line-height);
+  letter-spacing: var(--typography-title-sm-letter-spacing);
+}
+
+.sc-text[data-variant='body-lg'] {
+  font-family: var(--typography-body-lg-font-family);
+  font-size: var(--typography-body-lg-font-size);
+  font-weight: var(--typography-body-lg-font-weight);
+  line-height: var(--typography-body-lg-line-height);
+  letter-spacing: var(--typography-body-lg-letter-spacing);
+}
+.sc-text[data-variant='body-md'] {
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+}
+.sc-text[data-variant='body-sm'] {
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+
+.sc-text[data-variant='label-lg'] {
+  font-family: var(--typography-label-lg-font-family);
+  font-size: var(--typography-label-lg-font-size);
+  font-weight: var(--typography-label-lg-font-weight);
+  line-height: var(--typography-label-lg-line-height);
+  letter-spacing: var(--typography-label-lg-letter-spacing);
+}
+.sc-text[data-variant='label-md'] {
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+}
+.sc-text[data-variant='label-sm'] {
+  font-family: var(--typography-label-sm-font-family);
+  font-size: var(--typography-label-sm-font-size);
+  font-weight: var(--typography-label-sm-font-weight);
+  line-height: var(--typography-label-sm-line-height);
+  letter-spacing: var(--typography-label-sm-letter-spacing);
+}
+
+.sc-text[data-variant='mono-md'] {
+  font-family: var(--typography-mono-md-font-family);
+  font-size: var(--typography-mono-md-font-size);
+  font-weight: var(--typography-mono-md-font-weight);
+  line-height: var(--typography-mono-md-line-height);
+  letter-spacing: var(--typography-mono-md-letter-spacing);
+}
+.sc-text[data-variant='mono-sm'] {
+  font-family: var(--typography-mono-sm-font-family);
+  font-size: var(--typography-mono-sm-font-size);
+  font-weight: var(--typography-mono-sm-font-weight);
+  line-height: var(--typography-mono-sm-line-height);
+  letter-spacing: var(--typography-mono-sm-letter-spacing);
+}
+
+/* 副次の文字色(既定は継承。muted のときだけ宣言する) */
+.sc-text[data-muted] {
+  color: var(--color-app-fg-muted);
+}
+
+/* 1行の省略。全文は DOM に残る(視覚だけの省略)。1行省略には block 文脈が要るので display も与える。
+   ゆえに truncate 時は as=span でもブロックになる(この副作用は Text.md §2 に明記) */
+.sc-text[data-truncate] {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
