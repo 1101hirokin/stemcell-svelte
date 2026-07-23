@@ -1,0 +1,105 @@
+/* 分類の名札(Tag.md)。variant=soft(既定)/ outlined(常在の重さだけ。§2)。形は shape.semantic.tag、
+   文字は label-md、色は plain 固定(分類は intent でない。§2)。静的・選べる(selected)・消せる(dismissible)。 */
+.sc-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-sizing: border-box;
+  border-radius: var(--shape-semantic-tag);
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  /* 色は plain 固定でチャンネルへ束ねる(Button と同型) */
+  --_soft-bg: var(--color-semantic-plain-soft-bg);
+  --_soft-fg: var(--color-semantic-plain-soft-fg);
+  --_soft-bg-hover: var(--color-semantic-plain-soft-bg-hover);
+  --_soft-bg-pressed: var(--color-semantic-plain-soft-bg-pressed);
+  --_border: var(--color-semantic-plain-border);
+}
+.sc-tag[data-size='sm'] { --_inset: var(--spacing-inset-sm); }
+.sc-tag[data-size='md'] { --_inset: var(--spacing-inset-md); }
+
+/* variant(soft=面、outlined=枠) */
+.sc-tag[data-variant='soft'] { background: var(--_soft-bg); color: var(--_soft-fg); }
+.sc-tag[data-variant='outlined'] {
+  background: transparent;
+  color: var(--_soft-fg);
+  border: var(--shape-border-width) solid var(--_border);
+}
+
+/* 選択(値。§2)。見せ方は Expressive: soft を一段濃く + 先頭に check(§5 の第一候補。撤退条件つき) */
+.sc-tag[data-selected='true'] { background: var(--_soft-bg-pressed); }
+
+/* disabled は intent の差し替え(state.md §7。減衰=opacity ではない)。器へ立てて容器ごと disabled 系の面に
+   なるようにする(dismissible では器=容器が :disabled になれないため、data 属性で駆動する) */
+.sc-tag[data-disabled] {
+  --_soft-bg: var(--color-semantic-disabled-soft-bg);
+  --_soft-fg: var(--color-semantic-disabled-soft-fg);
+  --_soft-bg-hover: var(--color-semantic-disabled-soft-bg);
+  --_soft-bg-pressed: var(--color-semantic-disabled-soft-bg);
+  --_border: var(--color-semantic-disabled-border);
+}
+
+/* 静的/選べる(器そのものが本体): 段の inset は器に。基準の高さは相互作用形で門(24px)を兼ねる */
+.sc-tag:not([data-dismissible]) {
+  padding-inline: var(--_inset);
+  min-block-size: 1.5rem;
+}
+
+/* 相互作用の共通(選べる器ボタン・消せる本体・×): native button の見た目を消し、門(24px)を守る */
+button.sc-tag,
+.sc-tag-body,
+.sc-tag-dismiss {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  /* 当たり判定の門(24px)。縦横とも割らない(sm の1字の札でも。size.md §4.3) */
+  min-block-size: 1.5rem;
+  min-inline-size: 1.5rem;
+}
+button.sc-tag:disabled,
+.sc-tag-body:disabled,
+.sc-tag-dismiss:disabled {
+  cursor: not-allowed;
+}
+
+/* hover / pressed(相互作用形のみ。静的な札は応えない。§3) */
+button.sc-tag:hover:not(:disabled),
+.sc-tag-body:hover:not(:disabled),
+.sc-tag-dismiss:hover:not(:disabled) { background: var(--_soft-bg-hover); }
+button.sc-tag:active:not(:disabled),
+.sc-tag-body:active:not(:disabled),
+.sc-tag-dismiss:active:not(:disabled) { background: var(--_soft-bg-pressed); }
+
+/* focus ring(focus-ring.md。色は plain の focus-ring) */
+button.sc-tag:focus-visible,
+.sc-tag-body:focus-visible,
+.sc-tag-dismiss:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-semantic-plain-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* 消せる形(器=容器): 本体と × を内包し、段の inset は中身が持つ。器の角丸を左右の端の中身へ受け継ぐ。
+   器の gap は 0 にする(inset の padding が本体と × を分ける。器の gap が残ると隙間に容器色の筋が出て、
+   受け継いだ角丸で一つの丸角矩形にタイルするのを崩す) */
+.sc-tag[data-dismissible] { gap: 0; }
+.sc-tag[data-dismissible] .sc-tag-body {
+  padding-inline: var(--_inset);
+  border-start-start-radius: inherit;
+  border-end-start-radius: inherit;
+}
+.sc-tag[data-dismissible] .sc-tag-dismiss {
+  padding-inline: 0.25rem var(--_inset);
+  border-start-end-radius: inherit;
+  border-end-end-radius: inherit;
+}

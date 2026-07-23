@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Avatar, Badge, Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Avatar, Badge, Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, Tag, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -609,6 +609,35 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 - 切替で DOM / 読み上げ順は変わらない。
 - SwiftUI 実装は ViewThatFits を使わない: あれは内容駆動(収まりで切替)であり、同じ幅でも内容次第で形が割れて共通言語が壊れる(layout.md §9 の記録)。自前で幅を測って閾値と比べる。
+
+### Tag(契約 0.0.0-alpha.2)
+
+分類の名札。ものに貼られ、集めると絞り込みの語彙になる。静的にも、選べる形(selected)にも、消せる形(dismissible)にもなる(裁定: 選択を初版に含める)。
+
+props:
+
+- `variant`: "soft" | "outlined"(既定 "soft") — 常時そこにあってよい重さだけを採る(emphasis.md §3 の部分集合)。filled の名札は注意を奪う: 印(Badge)との役割分担。
+- `size`: "sm" | "md"(既定 "md") — size.md §2 の部分集合。lg の名札は名札ではなくボタンに見える。
+- `dismissible`: boolean(既定 false) — 消せる名札。閉じる操作の見た目は部品内部(IconButton 相当)だが、公開 API はこの boolean と dismiss イベントだけ。
+- `selected`: boolean((省略可)) — 値であって状態ではない(state.md §6)。選択の所有はアプリ: click を受けてアプリが selected を更新する。この prop が与えられた Tag は選べる名札(絞り込み)として振る舞う。
+- `disabled`: boolean(既定 false) — 相互作用がある形(selected / dismissible)でのみ意味を持つ。state.md §3.1 / §5。
+
+events(Svelte では callback prop):
+
+- `onclick`: (payload: void) => void — 選べる名札が押されたことを伝える。選択の切替はアプリが selected を更新して起こす。静的な Tag(selected も dismissible も無い)は発火しない。
+- `ondismiss`: (payload: void) => void — 消す操作。取り除くのはアプリ(Tag は自分を消さない。リストの所有者が消す)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default`(必須) — ラベル。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- role は相互作用がある形(selected / dismissible)のときの意味論。静的な Tag は操作対象ではなく、role を立てない(Web の表現)。この「条件付きの相互作用」は契約スキーマの想定(常に持つ/常に持たない)の外にあり、機械検査は区別できない。スキーマの限界として認識し、同型の契約が増えたら表現をスキーマで扱う(Tag.md §5)。
+- 選択の伝達(aria-pressed か aria-selected か)は Web の表現であり、単体の選べる名札は押下トグル、集合(絞り込みグループ)での選択は Collection の語彙(クラスタ7)で再訪する。
+- states は相互作用がある形でのみ現れる。静的な Tag はホバーに応えない: 押せないものに反応を返すのは嘘である(state.md §3.2 と同じ第1条)。
+- dismissible と selected が同居するとき、ルートを単一の対話要素にしない。対話要素の入れ子(role=button の中に押せる×)は WAI-ARIA の既知のアンチパターンであり、選択領域と削除領域は同じ階層の兄弟として構成する(MUI Chip が同じ構造で長年の a11y issue を抱えている)。フォーカス順は本体(選択)→ ×(削除)。× のアクセシブルネームは「{ラベル} を削除」の形で合成する(合成の言語表現は各実装)。
+- 相互作用がある形は当たり判定の門(size.md §4)の対象。sm の名札でも判定は 24px を割らず、本体と × の判定の重なりは SC 2.5.8 の間隔条件(size.md §4.4)にかかる。
 
 ### TextField(契約 0.0.0-alpha.2)
 

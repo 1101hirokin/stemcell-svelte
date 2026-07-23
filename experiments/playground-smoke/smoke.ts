@@ -58,6 +58,7 @@ try {
     link: document.querySelectorAll('.sc-link').length,
     badge: document.querySelectorAll('.sc-badge').length,
     avatar: document.querySelectorAll('.sc-avatar').length,
+    tag: document.querySelectorAll('.sc-tag').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -829,6 +830,77 @@ try {
     throw new Error(`Avatar: lg の実寸が avatar-lg(40px 相当の正方)でない(${avatar.lgSize}px square=${avatar.lgSquare})`);
   if (!avatar.initialsHidden || !avatar.initialsText)
     throw new Error('Avatar: src 無しで name のイニシャル退避(aria-hidden の文字)が無い');
+
+  // Tag: 静的は span(非対話)、選べるは button+aria-pressed、消せるは本体と × を兄弟に持ち(入れ子でない)
+  // × の名は本体ラベル + 削除語を aria-labelledby で合成、相互作用形は当たり判定の門(24px)を割らない。
+  const tagStruct = await page.evaluate(() => {
+    const tags = [...document.querySelectorAll('.sc-tag')] as HTMLElement[];
+    const staticTag = tags.find(
+      (t) => t.tagName === 'SPAN' && !t.hasAttribute('data-selected') && !t.hasAttribute('data-dismissible'),
+    );
+    const selectable = document.querySelector('button.sc-tag[aria-pressed]') as HTMLElement | null;
+    const dismissRoot = document.querySelector('.sc-tag[data-dismissible]') as HTMLElement | null;
+    const body = dismissRoot?.querySelector('.sc-tag-body') as HTMLElement | null;
+    const x = dismissRoot?.querySelector('.sc-tag-dismiss') as HTMLElement | null;
+    const labelledby = (x?.getAttribute('aria-labelledby') ?? '').split(' ');
+    const suffix = labelledby[1] ? document.getElementById(labelledby[1]) : null;
+    const h = (el: HTMLElement | null) => (el ? Math.round(el.getBoundingClientRect().height) : 0);
+    const w = (el: HTMLElement | null) => (el ? Math.round(el.getBoundingClientRect().width) : 0);
+    return {
+      staticNoButton: !!staticTag && !staticTag.querySelector('button'),
+      selectablePressed: !!selectable && selectable.hasAttribute('aria-pressed'),
+      dismissSiblings: !!body && !!x && !body.contains(x), // × は本体の子孫でない = 入れ子でない
+      labelledbyBodyFirst: !!body && labelledby[0] === body.id,
+      suffixText: suffix?.textContent ?? '',
+      gate: Math.min(h(body), h(x), w(x), h(selectable)),
+    };
+  });
+  if (!tagStruct.staticNoButton) throw new Error('Tag: 静的な札が非対話(button 無し)でない');
+  if (!tagStruct.selectablePressed) throw new Error('Tag: 選べる札が button + aria-pressed でない');
+  if (!tagStruct.dismissSiblings) throw new Error('Tag: 消せる札の本体と × が兄弟でない(入れ子。§2 のアンチパターン)');
+  if (!tagStruct.labelledbyBodyFirst || !tagStruct.suffixText)
+    throw new Error(`Tag: × の名が本体ラベル + 削除語で合成されない(${JSON.stringify(tagStruct)})`);
+  if (tagStruct.gate < 24)
+    throw new Error(`Tag: 相互作用形が当たり判定の門(24px)を割る(${JSON.stringify(tagStruct)})`);
+
+  // 選べる札を実クリックして aria-pressed がトグルする(選択はアプリが selected を更新して起こす)
+  const svelteTag = page.locator('button.sc-tag', { hasText: 'Svelte' }).first();
+  await svelteTag.scrollIntoViewIfNeeded();
+  const pressedBefore = await svelteTag.getAttribute('aria-pressed');
+  await svelteTag.click();
+  await page.waitForTimeout(60);
+  if ((await svelteTag.getAttribute('aria-pressed')) === pressedBefore)
+    throw new Error(`Tag: 選べる札のクリックで aria-pressed がトグルしない(${pressedBefore} のまま)`);
+
+  // 消せる札の × を実クリックしてチップが取り除かれる(取り除くのはアプリ。Tag は自分を消さない)
+  const dismissBefore = await page.locator('.sc-tag-dismiss').count();
+  await page.locator('.sc-tag[data-dismissible]:not([data-selected]):not([data-disabled]) .sc-tag-dismiss').first().click();
+  await page.waitForTimeout(60);
+  if ((await page.locator('.sc-tag-dismiss').count()) >= dismissBefore)
+    throw new Error('Tag: × クリックでチップが取り除かれない(dismiss イベントが配線されていない)');
+
+  // Tag disabled は減衰(opacity)でなく token 差し替え(state.md §7)。器ごと disabled 系の面になり、
+  // 中身に opacity は残らない(dismissible では器=容器が :disabled になれないので data-disabled で駆動)
+  const tagDisabled = await page.evaluate(() => {
+    const dis = document.querySelector('.sc-tag[data-disabled][data-dismissible]') as HTMLElement | null;
+    if (!dis) return null;
+    const probe = document.createElement('span');
+    probe.style.background = 'var(--color-semantic-disabled-soft-bg)';
+    dis.appendChild(probe);
+    const want = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return {
+      bg: getComputedStyle(dis).backgroundColor,
+      want,
+      childOpacity: getComputedStyle(dis.querySelector('.sc-tag-dismiss') as HTMLElement).opacity,
+    };
+  });
+  if (tagDisabled) {
+    if (tagDisabled.bg !== tagDisabled.want)
+      throw new Error(`Tag(disabled): 器が disabled 系の面にならない(${JSON.stringify(tagDisabled)}。state.md §7)`);
+    if (tagDisabled.childOpacity !== '1')
+      throw new Error('Tag(disabled): 中身に減衰(opacity<1)が残っている(state.md §7 は token 差し替え)');
+  }
 
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
