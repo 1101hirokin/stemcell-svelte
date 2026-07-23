@@ -9,10 +9,9 @@
   min-inline-size: 0;
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);
-  /* ドロップダウンの幅: fill(トリガー幅に一致。fill のフィールドなら dropdown も横いっぱい=第3条の
-     fill を popover まで及ぼす)。トリガーが fill なのでトリガー幅が支配し、選択内容で変動しない。
-     下限は content(選択肢が溢れない最小)。上限は敷かない。 */
-  --sc-popover-inline-size: 100%;
+  /* ドロップダウンの幅: fill(アンカー=トリガー幅に一致。既定でアンカー幅なので inline-size は上書きしない。
+     top-layer では JS が --sc-popover-anchor-inline-size にアンカー幅を入れる)。トリガーが fill なので
+     幅はトリガーが支配し、選択内容で変動しない。下限は content、上限は敷かない。 */
   --sc-popover-min-inline-size: max-content;
   --sc-popover-max-inline-size: none;
 }
@@ -36,15 +35,22 @@
   margin-inline-start: 0.25em;
 }
 
-/* 器(native の wrapper / custom のトリガー button が共有)。横 inset は器、縦 inset は中身が持つ。
+/* 器(native の wrapper / custom のトリガー button が共有)。inset は中身が持ち、器は端まで面を張る。
+   こうすると native の <select> が器の全幅を占め、UA ドロップダウンがトリガー幅に一致する(選択肢のずれ防止)。
    フィールドは fill(横いっぱい。field.md §2・第3条)。custom の button は既定 shrink-wrap なので明示する */
 .sc-select-control {
   display: flex;
   align-items: stretch;
+  /* chevron を絶対配置のオーバーレイにするための基準。主内容が器の全幅を占め、chevron はその上に浮く。
+     これで native は <select> がクリック領域全体を覆い、chevron の上を押しても開く(chevron は透過) */
+  position: relative;
   inline-size: 100%;
-  gap: var(--spacing-inline-md);
+  min-inline-size: 0;
+  /* border-box: inline-size:100% に border を含める(段で総幅がずれない) */
+  box-sizing: border-box;
   --_inset: var(--spacing-inset-md);
-  padding-inline: var(--_inset);
+  /* 右端 chevron が食う幅(アイコン 1em + 隙間)。中身はこの分だけ右を空ける */
+  --_chevron-room: calc(1em + var(--spacing-inline-md));
   background: var(--color-app-surface);
   border: var(--shape-border-width) solid var(--_border);
   border-radius: var(--shape-semantic-control);
@@ -72,7 +78,8 @@
   border: none;
   background: none;
   padding-block: var(--_inset);
-  padding-inline: 0;
+  /* 横 inset は中身(=<select>)が持つ。右は chevron の分だけ足す。器は端まで面なので全幅に広がる */
+  padding-inline: var(--_inset) calc(var(--_inset) + var(--_chevron-room));
   outline: none;
   font-family: var(--typography-body-md-font-family);
   font-size: var(--typography-body-md-font-size);
@@ -113,6 +120,8 @@
 .sc-select-value {
   flex: 1 1 auto;
   min-inline-size: 0;
+  /* 横 inset は中身(=value)が持つ。右は chevron の分だけ足す(native の <select> と同じ規則) */
+  padding-inline: var(--_inset) calc(var(--_inset) + var(--_chevron-room));
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-inline-md);
@@ -127,11 +136,14 @@
   color: var(--color-app-fg-muted);
 }
 
-/* 開閉インジケータ(装飾。native の矢印は appearance:none で消し自前で描く) */
+/* 開閉インジケータ(装飾。native の矢印は appearance:none で消し自前で描く)。器の右端に絶対配置で浮かせ、
+   pointer-events:none でクリックを背後(native は <select>、custom は button)へ透過する */
 .sc-select-chevron {
+  position: absolute;
+  inset-inline-end: var(--_inset);
+  inset-block: 0;
   display: inline-flex;
   align-items: center;
-  align-self: stretch;
   color: var(--color-app-fg-muted);
   pointer-events: none;
 }

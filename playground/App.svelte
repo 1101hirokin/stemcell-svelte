@@ -221,7 +221,7 @@
         {#snippet description()}リッチ選択肢(アイコン ＋ 副文){/snippet}
         {#snippet error()}選択が必要{/snippet}
       </Select>
-      <Cluster gap="md">
+      <Stack gap="md">
         <Select size="sm" bind:value={account} options={[{ value: 'personal', label: '個人' }, { value: 'business', label: '法人' }]}>
           {#snippet label()}sm{/snippet}
         </Select>
@@ -231,7 +231,7 @@
         <Select disabled value="personal" options={[{ value: 'personal', label: '個人' }]}>
           {#snippet label()}disabled{/snippet}
         </Select>
-      </Cluster>
+      </Stack>
     </Stack>
   </section>
 
