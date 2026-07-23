@@ -38,6 +38,26 @@ it('inset: 語彙外は warn して余白なしへ退避する(既定が無い�
   warn.mockRestore();
 });
 
+it('inset: 2値「縦 横」で padding-block / padding-inline を別に引く(段と原始の混在も可)', () => {
+  const a = render(Box, { props: { children: kids, inset: 'md sm' } });
+  expect(box(a.container).dataset.inset).toBeUndefined(); // 2値は data-inset でなくインライン
+  expect(box(a.container).style.paddingBlock).toBe('var(--spacing-inset-md)');
+  expect(box(a.container).style.paddingInline).toBe('var(--spacing-inset-sm)');
+  // 段(縦)× 原始(横)の混在
+  const b = render(Box, { props: { children: kids, inset: 'lg 12' } });
+  expect(box(b.container).style.paddingBlock).toBe('var(--spacing-inset-lg)');
+  expect(box(b.container).style.paddingInline).toBe('var(--spacing-12)');
+});
+
+it('inset: 2値で片方が語彙外なら warn して余白なしへ(部分適用しない)', () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  const { container } = render(Box, { props: { children: kids, inset: 'md banana' } });
+  expect(box(container).style.paddingBlock).toBe('');
+  expect(box(container).style.paddingInline).toBe('');
+  expect(warn.mock.calls.some((c) => String(c[0]).includes('inset="md banana"'))).toBe(true);
+  warn.mockRestore();
+});
+
 it('as: 意味的要素へ多相する(逃げ道は Box だけ。layout.md §6)', () => {
   const { container } = render(Box, { props: { children: kids, as: 'section' } });
   const el = box(container);

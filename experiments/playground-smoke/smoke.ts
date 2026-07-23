@@ -340,12 +340,22 @@ try {
       isModal: (() => { try { return d.matches(':modal'); } catch { return false; } })(),
       labelled: d?.getAttribute('aria-labelledby') === document.querySelector('.sc-dialog-title')?.id,
       focusInside: d?.contains(document.activeElement),
+      // scrim は半透明で背面を残す(文脈維持): ::backdrop の背景 alpha が 0<a<1
+      scrimAlpha: (() => {
+        const bg = getComputedStyle(d, '::backdrop').backgroundColor;
+        if (!bg || bg === 'transparent') return 0;
+        if (bg.includes('/')) { const a = bg.split('/')[1]?.match(/[\d.]+/); return a ? parseFloat(a[0]) : 1; }
+        const n = bg.match(/[\d.]+/g);
+        return n && n.length >= 4 ? parseFloat(n[3]) : 1;
+      })(),
     };
   });
   if (!dlgState.open || !dlgState.isModal)
     throw new Error(`Dialog: showModal で top-layer(:modal)に開かない(${JSON.stringify(dlgState)})`);
   if (!dlgState.labelled) throw new Error('Dialog: aria-labelledby が title を指さない');
   if (!dlgState.focusInside) throw new Error('Dialog: 開いてもフォーカスが中に入らない(focus trap)');
+  if (!(dlgState.scrimAlpha > 0 && dlgState.scrimAlpha < 1))
+    throw new Error(`Dialog: scrim が半透明でない(背面が見えるべき。alpha=${dlgState.scrimAlpha})`);
   // 多重 modal の単一 scrim(RFC 0009)。light の中から確認を重ねて開くと、下の light に data-under が付き
   // ::backdrop が透過になる(見える scrim は最上位の一段だけ。native ::backdrop の積算を抑える)。
   await page.locator('button', { hasText: '確認を重ねて開く' }).click();
@@ -981,6 +991,36 @@ try {
   if (!text.mutedMatch) throw new Error('Text: muted が app.fg-muted にならない');
   if (!text.truncEllipsis || !text.truncClipped)
     throw new Error(`Text: truncate が1行省略にならない(${JSON.stringify(text)})`);
+
+  // UX 調整: Tag の × は正方形、Box は inset 2値で縦横別、Alert の外縁は薄い(alpha<1)。
+  const ux = await page.evaluate(() => {
+    const alpha = (c: string) => {
+      if (!c || c === 'transparent') return 0;
+      if (c.includes('/')) { const a = c.split('/')[1]?.match(/[\d.]+/); return a ? parseFloat(a[0]) : 1; }
+      const n = c.match(/[\d.]+/g);
+      return n && n.length >= 4 ? parseFloat(n[3]) : 1;
+    };
+    // Tag × 正方形(dismissible の × の実寸が縦横ほぼ一致)
+    const x = document.querySelector('.sc-tag[data-dismissible] .sc-tag-dismiss') as HTMLElement | null;
+    const xr = x?.getBoundingClientRect();
+    // Box 2値 inset(縦 sm < 横 lg)
+    const boxes = [...document.querySelectorAll('.sc-box')] as HTMLElement[];
+    const dual = boxes.find((b) => {
+      const s = getComputedStyle(b);
+      return s.paddingTop !== s.paddingLeft && parseFloat(s.paddingTop) < parseFloat(s.paddingLeft);
+    });
+    // Alert 外縁の薄さ(color-mix で alpha<1)
+    const alert = document.querySelector('.sc-alert') as HTMLElement | null;
+    const alertBorderAlpha = alert ? alpha(getComputedStyle(alert).borderTopColor) : 1;
+    return {
+      tagXSquare: xr ? Math.abs(xr.width - xr.height) <= 2 && xr.width >= 24 : false,
+      boxDualInset: !!dual,
+      alertBorderTranslucent: alertBorderAlpha < 1,
+    };
+  });
+  if (!ux.tagXSquare) throw new Error('Tag: dismissible の × が正方形でない(24px 以上の縦横一致)');
+  if (!ux.boxDualInset) throw new Error('Box: inset 2値(縦横別)が padding-block/inline に反映されない');
+  if (!ux.alertBorderTranslucent) throw new Error('Alert: 外縁が薄く(alpha<1)なっていない(color-mix)');
 
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');

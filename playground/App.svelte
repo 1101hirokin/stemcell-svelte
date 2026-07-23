@@ -586,13 +586,19 @@
 
   <section>
     <Text as="h2" variant="title-lg">Box</Text>
-    <Text as="p" variant="body-sm" muted>内在スタイルの器。inset は段(sm/md/lg)と大域の原始 X(8〜24)。</Text>
-    <Cluster gap="sm">
+    <Text as="p" variant="body-sm" muted>内在スタイルの器。inset は段(sm/md/lg)と大域の原始 X(8〜24)。1値で全周、2値「縦 横」で別指定。</Text>
+    <Cluster gap="sm" align="center">
       {#each ['sm', 'md', 'lg', '12'] as inset (inset)}
         <div class="pg-outline">
           <Box {inset}><code>inset="{inset}"</code></Box>
         </div>
       {/each}
+      <div class="pg-outline">
+        <Box inset="sm lg"><code>inset="sm lg"</code></Box>
+      </div>
+      <div class="pg-outline">
+        <Box inset="lg sm"><code>inset="lg sm"</code></Box>
+      </div>
     </Cluster>
   </section>
 
