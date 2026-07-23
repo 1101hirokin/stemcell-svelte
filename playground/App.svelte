@@ -42,10 +42,10 @@
 
 <main class="pg">
   <header class="pg-header">
-    <h1>stemcell svelte playground</h1>
-    <p>
+    <Text as="h1" variant="display-md">stemcell svelte playground</Text>
+    <Text as="p" variant="body-sm" muted>
       実装済み部品を実物で触って確認する器(WORKFLOW §2-6)。配信物ではない。
-    </p>
+    </Text>
     <div class="pg-controls">
       <label>
         theme
@@ -66,8 +66,8 @@
   </header>
 
   <section>
-    <h2>Button</h2>
-    <p>variant × color の全組。下段は size と disabled / block。</p>
+    <Text as="h2" variant="title-lg">Button</Text>
+    <Text as="p" variant="body-sm" muted>variant × color の全組。下段は size と disabled / block。</Text>
     {#each variants as variant (variant)}
       <div class="pg-row">
         <code class="pg-tag">{variant}</code>
@@ -94,11 +94,11 @@
   </section>
 
   <section>
-    <h2>Switcher</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Switcher</Text>
+    <Text as="p" variant="body-sm" muted>
       右下の掴みで器の幅をドラッグして切替を確認する。器の幅が threshold
       ({threshold})未満で縦へ一斉に切り替わる(閾値駆動。rem 裁定済み)。
-    </p>
+    </Text>
     <label class="pg-field">
       threshold
       <input bind:value={threshold} />
@@ -113,11 +113,11 @@
   </section>
 
   <section>
-    <h2>IconButton</h2>
-    <p>
+    <Text as="h2" variant="title-lg">IconButton</Text>
+    <Text as="p" variant="body-sm" muted>
       Button の一種(契約 extends)。絵1つで名前は label(aria-label)。shape は control/pill から
       選べる(shape.md §6)。当たり判定は絵1つでも縮まない(size.md §4)。
-    </p>
+    </Text>
     <Cluster gap="md">
       <IconButton label="検索"><Icon name="search" /></IconButton>
       <IconButton label="メニュー" variant="soft"><Icon name="menu" /></IconButton>
@@ -136,25 +136,25 @@
   </section>
 
   <section>
-    <h2>Divider</h2>
-    <p>区切る線。装飾(支援技術から隠れる)。stack=水平線 / inline=垂直線(論理方向)。余白は器(Stack/Cluster の gap)が持つ。</p>
+    <Text as="h2" variant="title-lg">Divider</Text>
+    <Text as="p" variant="body-sm" muted>区切る線。装飾(支援技術から隠れる)。stack=水平線 / inline=垂直線(論理方向)。余白は器(Stack/Cluster の gap)が持つ。</Text>
     <Stack gap="md">
-      <span>上のブロック</span>
+      <Text variant="body-sm">上のブロック</Text>
       <Divider />
-      <span>下のブロック</span>
+      <Text variant="body-sm">下のブロック</Text>
     </Stack>
     <Cluster gap="md">
-      <span>左</span>
+      <Text variant="body-sm">左</Text>
       <Divider orientation="inline" />
-      <span>中</span>
+      <Text variant="body-sm">中</Text>
       <Divider orientation="inline" />
-      <span>右</span>
+      <Text variant="body-sm">右</Text>
     </Cluster>
   </section>
 
   <section>
-    <h2>Skeleton</h2>
-    <p>読み込み中の代役。text=文字行 / box=面 / circle=円。寸法は器か font に従う。reduced-motion で shimmer 停止。</p>
+    <Text as="h2" variant="title-lg">Skeleton</Text>
+    <Text as="p" variant="body-sm" muted>読み込み中の代役。text=文字行 / box=面 / circle=円。寸法は器か font に従う。reduced-motion で shimmer 停止。</Text>
     <Cluster gap="md">
       <div style="inline-size: 3rem; block-size: 3rem;"><Skeleton form="circle" /></div>
       <Stack gap="sm">
@@ -166,16 +166,16 @@
   </section>
 
   <section>
-    <h2>Card</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Card</Text>
+    <Text as="p" variant="body-sm" muted>
       地の上の面(elevation surface の最初の消費者)。器であって意味を持たない(role なし)。押せない(裁定):
       リンクや操作は中身が担う。既定は影の面、outlined は影を消し中立 border で縁取る。
-    </p>
+    </Text>
     <Grid min="14rem" gap="md">
       <Card>
         <Stack gap="sm">
-          <strong>影の面(既定)</strong>
-          <span>関係のある内容を一枚に載せる。中の要素の角は同心角丸に従う。</span>
+          <Text variant="title-sm">影の面(既定)</Text>
+          <Text variant="body-sm">関係のある内容を一枚に載せる。中の要素の角は同心角丸に従う。</Text>
           <Cluster gap="sm">
             <Button size="sm">操作</Button>
             <Link href="/docs">詳細を見る</Link>
@@ -184,34 +184,34 @@
       </Card>
       <Card outlined>
         <Stack gap="sm">
-          <strong>枠の面(outlined)</strong>
-          <span>影を消し、中立 border で縁取る。intent を持たないので variant は使わない。</span>
+          <Text variant="title-sm">枠の面(outlined)</Text>
+          <Text variant="body-sm">影を消し、中立 border で縁取る。intent を持たないので variant は使わない。</Text>
         </Stack>
       </Card>
     </Grid>
   </section>
 
   <section>
-    <h2>Link</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Link</Text>
+    <Text as="p" variant="body-sm" muted>
       場所が変わる(native <code>&lt;a href&gt;</code>)。文字の一種で、大きさ・字面は周囲を継承する
       (variant/size/typography を持たない)。下線は非色手がかり(WCAG 1.4.1)。external は新文脈遷移を
       target=_blank と rel=noopener(native の防御)で得て、非色アイコン ＋ 隠し告知で示す。
-    </p>
+    </Text>
     <Stack gap="sm">
-      <span>本文の中に <Link href="/docs">こういうリンク</Link> が現れる(周囲の文字サイズを継承する)。</span>
-      <span style="font-size: 1.4rem">大きな文でも <Link href="/docs">自分の大きさを主張しない</Link>。</span>
+      <Text variant="body-sm">本文の中に <Link href="/docs">こういうリンク</Link> が現れる(周囲の文字サイズを継承する)。</Text>
+      <Text as="p" variant="title-lg">大きな文でも <Link href="/docs">自分の大きさを主張しない</Link>。</Text>
       <Link href="https://example.com" external>外部サイトへ(新しいタブ)</Link>
     </Stack>
   </section>
 
   <section>
-    <h2>Badge</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Badge</Text>
+    <Text as="p" variant="body-sm" muted>
       状態や数の小さな印。読むもので押せない。数(count)と存在(dot)だけ。max(既定99)超は「{'{max}'}+」へ丸め、
       量の意味は保つ(存在へ降格しない)。色は報告の intent(danger/warning/success/info)、既定 info/filled。
       anchor を包むと隅へ重なる。
-    </p>
+    </Text>
     <div class="pg-row">
       <code class="pg-tag">count / 丸め</code>
       <Cluster gap="md" align="center">
@@ -237,12 +237,12 @@
   </section>
 
   <section>
-    <h2>Avatar</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Avatar</Text>
+    <Text as="p" variant="body-sm" muted>
       主体の顔。src 画像 → name のイニシャル、と退避しても寸法・全円・名前は不変(第7条)。寸法は avatar 段
       (24/32/40px。rem 建て)。イニシャルの切り出しは暫定規則(§5 の Normative 共有規則は ratify 待ち)。
       壊れた src はイニシャルへ退く実演を含む。
-    </p>
+    </Text>
     <div class="pg-row">
       <code class="pg-tag">size / イニシャル</code>
       <Cluster gap="md" align="center">
@@ -267,18 +267,18 @@
       <Cluster gap="sm" align="center">
         <!-- 隣に可視の名前があるので装飾へ落とす(名前の二重読みを避ける。§3) -->
         <Avatar name="佐藤一郎" decorative />
-        <span>佐藤一郎</span>
+        <Text variant="body-sm">佐藤一郎</Text>
       </Cluster>
     </div>
   </section>
 
   <section>
-    <h2>Tag</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Tag</Text>
+    <Text as="p" variant="body-sm" muted>
       分類の名札。静的(読むだけ)・選べる(selected の値を持つ絞り込みチップ)・消せる(dismissible)の3形は同じ
       部品。variant は soft(既定)/ outlined、色は plain 固定(分類は intent でない)。選択と削除は入れ子にせず
       兄弟に置き、× の名は本体ラベル + 削除語で合成。sm/md とも当たり判定は門(24px)を割らない。
-    </p>
+    </Text>
     <div class="pg-row">
       <code class="pg-tag">静的</code>
       <Cluster gap="sm" align="center">
@@ -294,7 +294,7 @@
         {#each [['react', 'React'], ['svelte', 'Svelte'], ['vue', 'Vue']] as [id, name] (id)}
           <Tag selected={tagFilters[id]} onclick={() => (tagFilters[id] = !tagFilters[id])}>{name}</Tag>
         {/each}
-        <span>選択中: {Object.entries(tagFilters).filter(([, v]) => v).map(([k]) => k).join(', ') || '(なし)'}</span>
+        <Text variant="body-sm">選択中: {Object.entries(tagFilters).filter(([, v]) => v).map(([k]) => k).join(', ') || '(なし)'}</Text>
       </Cluster>
     </div>
     <div class="pg-row">
@@ -303,7 +303,7 @@
         {#each tagChips as chip (chip)}
           <Tag dismissible dismissLabel="{chip} を削除" ondismiss={() => (tagChips = tagChips.filter((c) => c !== chip))}>{chip}</Tag>
         {/each}
-        {#if tagChips.length === 0}<span>(すべて削除済み)</span>{/if}
+        {#if tagChips.length === 0}<Text variant="body-sm">(すべて削除済み)</Text>{/if}
         <Button size="sm" variant="text" onclick={() => (tagChips = ['デザイン', 'トークン', '契約'])}>戻す</Button>
       </Cluster>
     </div>
@@ -318,12 +318,12 @@
   </section>
 
   <section>
-    <h2>Alert</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Alert</Text>
+    <Text as="p" variant="body-sm" muted>
       文での報告。その場に留まり状況が続く限り読める(勝手に消えるのは Toast)。intent の4色、先頭に intent の
       絵(色だけで種類を伝えない。1.4.1)。割り込みの度合いは intent から: danger だけ即時(role=alert)、他は
       穏当(role=status)。既定は閉じられない(dismissible で × を出す。× の名は 文脈 + 閉じる語 を合成)。
-    </p>
+    </Text>
     <Stack gap="md">
       <Alert color="info">
         {#snippet title()}お知らせ{/snippet}
@@ -361,11 +361,11 @@
   </section>
 
   <section>
-    <h2>Text</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Text</Text>
+    <Text as="p" variant="body-sm" muted>
       content に typography 役割を当てる原始。多相 as(意味要素)と視覚役割 variant を分離する。既定は
       中立の span。muted は副次色、truncate は1行省略(全文は DOM に残る)。
-    </p>
+    </Text>
     <Stack gap="sm">
       <Text as="h3" variant="headline-md">見出し(as=h3, variant=headline-md)</Text>
       <Text as="p" variant="body-md">
@@ -385,11 +385,11 @@
   </section>
 
   <section>
-    <h2>TextField</h2>
-    <p>
+    <Text as="h2" variant="title-lg">TextField</Text>
+    <Text as="p" variant="body-sm" muted>
       複合フィールド(label / description / error 内包)。エラー文は danger.soft-fg の転用
       (実測 10.45:1 / 11.04:1)。invalid は8文字未満で立つ(逐次 change のデモ)。
-    </p>
+    </Text>
     <Stack gap="lg">
       <TextField bind:value={invite} invalid={invite.length < 8} keyboard="text">
         {#snippet label()}招待コード{/snippet}
@@ -431,12 +431,12 @@
   </section>
 
   <section>
-    <h2>Select</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Select</Text>
+    <Text as="p" variant="body-sm" muted>
       二経路(RFC 0007 の B2)。pointer はカスタム combobox+listbox(リッチ選択肢・aria-activedescendant・
       Popover を合成)、touch(pointer:coarse)は native select に切替。開閉はコンポーネント内部が所有、
       light dismiss(外側/Escape)。invalid は未選択で立つ。
-    </p>
+    </Text>
     <Stack gap="lg">
       <Select
         bind:value={ship}
@@ -469,11 +469,11 @@
   </section>
 
   <section>
-    <h2>Menu</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Menu</Text>
+    <Text as="p" variant="body-sm" muted>
       アクションの集合を畳んで出す(APG の menu button + menu)。トリガーは Menu が所有し、中への移動は実 DOM
       フォーカスの roving。選ぶと活性化して閉じ、フォーカスはトリガーへ戻る。値は持たない(行為であって選択でない)。
-    </p>
+    </Text>
     <Cluster gap="md">
       <Menu
         items={[
@@ -501,16 +501,16 @@
         {#snippet trigger()}無効{/snippet}
       </Menu>
     </Cluster>
-    <p>最後に選んだ操作: {lastAction}</p>
+    <Text as="p" variant="body-sm" muted>最後に選んだ操作: {lastAction}</Text>
   </section>
 
   <section>
-    <h2>Dialog</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Dialog</Text>
+    <Text as="p" variant="body-sm" muted>
       ビューポート中央の modal(native <code>&lt;dialog&gt;</code> + showModal)。focus trap・top-layer・scrim・
       Escape・背後 inert は標準が無償で満たす(憲法 第2条)。開閉はアプリが所有。light は Escape / 背後クリックで
       閉じ、explicit はボタンでのみ閉じる。
-    </p>
+    </Text>
     <Cluster gap="md">
       <Button onclick={() => (dlgLight = true)}>light を開く</Button>
       <Button variant="outlined" color="danger" onclick={() => (dlgExplicit = true)}>explicit(削除確認)</Button>
@@ -520,8 +520,8 @@
       {#snippet title()}お知らせ{/snippet}
       {#snippet content()}
         <Stack gap="sm">
-          <span>これは light dismiss の Dialog です。Escape か背後(scrim)クリックで閉じます。</span>
-          <span>フォーカスは中に捕捉され、閉じると開いたボタンへ戻ります。</span>
+          <Text variant="body-sm">これは light dismiss の Dialog です。Escape か背後(scrim)クリックで閉じます。</Text>
+          <Text variant="body-sm">フォーカスは中に捕捉され、閉じると開いたボタンへ戻ります。</Text>
         </Stack>
       {/snippet}
       {#snippet actions()}
@@ -541,11 +541,11 @@
   </section>
 
   <section>
-    <h2>Drawer</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Drawer</Text>
+    <Text as="p" variant="body-sm" muted>
       端に寄る modal(native <code>&lt;dialog&gt;</code>。Dialog と同じ土台、位置と入りの方向だけ違う)。side は
       論理方向(RTL 自動反転)。Sidebar(常設レイアウト)と違い一時的で scrim が背後を封じる。
-    </p>
+    </Text>
     <Cluster gap="md">
       <Button onclick={() => { drawerSide = 'inline-end'; drawerOpen = true; }}>右から開く</Button>
       <Button variant="outlined" color="plain" onclick={() => { drawerSide = 'inline-start'; drawerOpen = true; }}>左から</Button>
@@ -555,8 +555,8 @@
       {#snippet title()}フィルタ{/snippet}
       {#snippet content()}
         <Stack gap="md">
-          <span>side={drawerSide} の Drawer。Escape / 背後クリックで閉じます(light)。その端からスライドします。</span>
-          <span>Dialog と同じ土台(native &lt;dialog&gt;)で、位置と入りの方向だけが違います。</span>
+          <Text variant="body-sm">side={drawerSide} の Drawer。Escape / 背後クリックで閉じます(light)。その端からスライドします。</Text>
+          <Text variant="body-sm">Dialog と同じ土台(native &lt;dialog&gt;)で、位置と入りの方向だけが違います。</Text>
         </Stack>
       {/snippet}
       {#snippet actions()}
@@ -567,11 +567,11 @@
   </section>
 
   <section>
-    <h2>Tooltip</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Tooltip</Text>
+    <Text as="p" variant="body-sm" muted>
       アンカーに添える短い補助ラベル。hover と focus の両方で開き、離脱と Escape で閉じる。フォーカスを受け取らず
       必須情報は置かない(補強)。native popover(top-layer)+ Anchor Positioning で切れない。
-    </p>
+    </Text>
     <Cluster gap="lg">
       <Tooltip>
         {#snippet trigger()}<Button variant="outlined" color="plain">保存</Button>{/snippet}
@@ -585,8 +585,8 @@
   </section>
 
   <section>
-    <h2>Box</h2>
-    <p>内在スタイルの器。inset は段(sm/md/lg)と大域の原始 X(8〜24)。</p>
+    <Text as="h2" variant="title-lg">Box</Text>
+    <Text as="p" variant="body-sm" muted>内在スタイルの器。inset は段(sm/md/lg)と大域の原始 X(8〜24)。</Text>
     <Cluster gap="sm">
       {#each ['sm', 'md', 'lg', '12'] as inset (inset)}
         <div class="pg-outline">
@@ -597,8 +597,8 @@
   </section>
 
   <section>
-    <h2>Stack</h2>
-    <p>間隔を所有する縦/横の並び(中身は外側 margin を持たない)。</p>
+    <Text as="h2" variant="title-lg">Stack</Text>
+    <Text as="p" variant="body-sm" muted>間隔を所有する縦/横の並び(中身は外側 margin を持たない)。</Text>
     <div class="pg-row">
       <code class="pg-tag">stack / gap=sm</code>
       <div class="pg-outline">
@@ -622,11 +622,11 @@
   </section>
 
   <section>
-    <h2>Icon</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Icon</Text>
+    <Text as="p" variant="body-sm" muted>
       語彙を絵で示す描画器。色は currentColor(文字色を継承)、寸法は 1em(font-size に追従)。
       既定は装飾で支援技術から隠れ、label を付けると意味を運ぶ。
-    </p>
+    </Text>
     <div class="pg-row">
       <code class="pg-tag">currentColor</code>
       <Cluster gap="md" align="center">
@@ -666,17 +666,17 @@
       <code class="pg-tag">glyph 渡し</code>
       <Cluster gap="md" align="center">
         <Icon glyph={checkGlyph} label="完了(静的・ツリーシェイク)" />
-        <span>name(全束)と glyph(使う分だけ)の二口。iconography.md §6</span>
+        <Text variant="body-sm">name(全束)と glyph(使う分だけ)の二口。iconography.md §6</Text>
       </Cluster>
     </div>
   </section>
 
   <section>
-    <h2>RadioGroup / Radio</h2>
-    <p>
+    <Text as="h2" variant="title-lg">RadioGroup / Radio</Text>
+    <Text as="p" variant="body-sm" muted>
       相互排他の集合。値はグループが1つ持つ(項目は checked を持たない)。矢印キーで移動=選択、
       Tab はグループに1つ(選択済みへ)。矢印キー・roving tabindex は native radio に任せる。
-    </p>
+    </Text>
     <RadioGroup
       value={size}
       required
@@ -698,8 +698,8 @@
         {#snippet label()}large(在庫切れ){/snippet}
       </Radio>
     </RadioGroup>
-    <p>選択中: {size ?? '(未選択)'}</p>
-    <p>選択済みかつ invalid(不正な組み合わせ。枠は danger・塗りは primary):</p>
+    <Text as="p" variant="body-sm" muted>選択中: {size ?? '(未選択)'}</Text>
+    <Text as="p" variant="body-sm" muted>選択済みかつ invalid(不正な組み合わせ。枠は danger・塗りは primary):</Text>
     <RadioGroup value="m" invalid>
       {#snippet label()}選択済み × invalid{/snippet}
       {#snippet error()}この組み合わせは不正です{/snippet}
@@ -709,8 +709,8 @@
   </section>
 
   <section>
-    <h2>Textarea</h2>
-    <p>複数行入力。TextField を継承(extends)し、start / end は持たない。縦リサイズ可。</p>
+    <Text as="h2" variant="title-lg">Textarea</Text>
+    <Text as="p" variant="body-sm" muted>複数行入力。TextField を継承(extends)し、start / end は持たない。縦リサイズ可。</Text>
     <Textarea bind:value={bio} rows={4} invalid={bio.length > 20}>
       {#snippet label()}自己紹介{/snippet}
       {#snippet description()}20字以内(現在 {bio.length}字){/snippet}
@@ -719,8 +719,8 @@
   </section>
 
   <section>
-    <h2>Switch</h2>
-    <p>独立した設定の on / off(即時反映。field.md §7)。invalid / required を持たない。</p>
+    <Text as="h2" variant="title-lg">Switch</Text>
+    <Text as="p" variant="body-sm" muted>独立した設定の on / off(即時反映。field.md §7)。invalid / required を持たない。</Text>
     <Stack gap="sm">
       <Switch bind:checked={notify}>
         {#snippet label()}通知を受け取る{/snippet}
@@ -736,12 +736,12 @@
   </section>
 
   <section>
-    <h2>Checkbox</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Checkbox</Text>
+    <Text as="p" variant="body-sm" muted>
       集合からの選択・同意(field.md §7)。リッチ label(リンク内包)の二重発火防止と、
       親の indeterminate(集計表示)を実演する。checked は primary の塗り、未チェックの hover は
       plain のウォッシュ。
-    </p>
+    </Text>
     <Stack gap="md">
       <!-- invalid は操作後(離脱)にだけ立てる。field.md §3: エラー判定は入力完了まで待つ -->
       <Checkbox
@@ -787,11 +787,11 @@
   </section>
 
   <section>
-    <h2>Grid</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Grid</Text>
+    <Text as="p" variant="body-sm" muted>
       内在的な格子。列は min({gridMin})を下回らず、器に応じて増減する
       (メディアクエリなし)。右下の掴みで器をドラッグして確認する。
-    </p>
+    </Text>
     <label class="pg-field">
       min
       <input bind:value={gridMin} />
@@ -806,11 +806,11 @@
   </section>
 
   <section>
-    <h2>Sidebar</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Sidebar</Text>
+    <Text as="p" variant="body-sm" muted>
       2カラム。脇は内容幅(または sideWidth)で立ち、本体は fill。本体が contentMin
       (50%)を割ると縦へ折れる(条件は本体の窮屈さで、画面幅ではない)。
-    </p>
+    </Text>
     <label class="pg-field">
       side
       <select bind:value={sidebarSide}>
@@ -829,8 +829,8 @@
   </section>
 
   <section>
-    <h2>Cluster</h2>
-    <p>項目ごとに流れる折返し(全体の一斉切替は Switcher)。器を狭めると行送りされる。</p>
+    <Text as="h2" variant="title-lg">Cluster</Text>
+    <Text as="p" variant="body-sm" muted>項目ごとに流れる折返し(全体の一斉切替は Switcher)。器を狭めると行送りされる。</Text>
     <div class="pg-resizable">
       <Cluster gap="sm">
         {#each ['設計', 'トークン', '契約', '散文', '適合', '実測', 'レビュー', '裁定', '配信'] as t (t)}
@@ -841,12 +841,12 @@
   </section>
 
   <section>
-    <h2>Form participation</h2>
-    <p>
+    <Text as="h2" variant="title-lg">Form participation</Text>
+    <Text as="p" variant="body-sm" muted>
       name を与えると native の <code>&lt;form&gt;</code> 送信・FormData・reset に参加する(controlled と両立。
       field.md §5)。TextField は keyboard=email で native <code>type="email"</code>、RadioGroup は required を各
       radio へ配線。
-    </p>
+    </Text>
     <form id="pg-form" onsubmit={(e) => e.preventDefault()}>
       <Stack gap="md">
         <TextField name="email" keyboard="email" bind:value={fEmail}>
@@ -885,20 +885,12 @@
     flex-direction: column;
     gap: var(--spacing-gap-lg);
   }
-  .pg-header p,
-  section > p {
-    color: var(--color-app-fg-muted, inherit);
-    margin: 0.25rem 0 0.75rem;
-  }
-  h1 {
-    font-size: var(--typography-title-lg-font-size, 1.5rem);
-    margin: 0;
-  }
-  h2 {
-    font-size: var(--typography-title-sm-font-size, 1.125rem);
-    margin: 0 0 0.25rem;
-    border-block-end: 1px solid var(--color-semantic-plain-border, currentColor);
-    padding-block-end: 0.25rem;
+  /* Text はレイアウトに余白を委ねる(自身は margin:0)。playground の section / header 直下の見出し・説明の
+     縦余白は :global で Text の要素へ戻す(scoped セレクタは別スコープの Text 要素へ届かないため)。
+     見出しの typography は Text の variant が持つので、ここでは余白だけを扱う。 */
+  .pg-header > :global(.sc-text),
+  section > :global(.sc-text) {
+    margin-block-end: var(--spacing-stack-sm);
   }
   .pg-controls,
   .pg-field {
