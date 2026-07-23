@@ -3,10 +3,10 @@
   import { META } from './meta';
   import type { Snippet } from 'svelte';
 
-  // アンカーに添える短い補助ラベル(overlay の tooltip 類。Tooltip.md)。hover と focus の両方で開き、離脱と
-  // Escape で閉じる。フォーカスを受け取らない(受け取れば popover)。必須情報を置かない(overlay.md §4)。
+  // アンカーに添える短い補助ラベル(overlay の tooltip 類。Tooltip.md)。hover と focus の両方で開き、両方の
+  // 終了と Escape で閉じる。フォーカスを受け取らない(受け取れば popover)。必須情報を置かない(overlay.md §4)。
   // Web は native popover(top-layer。切れない)+ CSS Anchor Positioning で描く(憲法 第2条 / 第7条。Popover と
-  // 同じ機構)。ただし popover は manual で持ち、hover / focus を自前で拾う(auto の light dismiss には乗らない)。
+  // 同じ機構)。popover は manual で持ち hover / focus を自前で拾う(auto の light dismiss には乗らない)。
   interface Props {
     /** 優先の開き方向(論理方向)。既定は block-start(上)。衝突で反転しうる。 */
     placement?: (typeof META.props.placement.values)[number];
@@ -27,25 +27,42 @@
 
   let wrapperEl: HTMLElement;
   let tipEl = $state<HTMLElement>();
-  let open = $state(false);
-  // JS フォールバック時の反転
-  let flipped = $state(false);
+  // hover と focus は独立に持ち、両方が終わって初めて閉じる(片方の偶発的な終了で消さない。overlay.md §4)。
+  let hovering = $state(false);
+  let focused = $state(false);
+  const open = $derived(hovering || focused);
+  let flipped = $state(false); // JS フォールバック時の反転
   const effectivePlacement = $derived(
     flipped ? (placement === 'block-start' ? 'block-end' : 'block-start') : placement,
   );
 
-  // aria-describedby を、トリガーの最初の対話要素(無ければラッパー)へ配線する。tooltip 本体(role=tooltip・
-  // 非対話)は対象にしない。トリガーの中身は消費者が与えるので、機構は実装が拾う(field.md の配線と同型)。
+  // aria-describedby を trigger の最初の実フォーカス可能要素へ配線する。tooltip 本体(role=tooltip・非対話)の
+  // サブツリーと tabindex=-1(実タブ移動しない管理用)は除く。trigger の中身が差し替わっても追う(MutationObserver)。
+  let describedTarget: HTMLElement | undefined;
+  function wireDescribedby() {
+    if (!wrapperEl) return;
+    const next =
+      [...wrapperEl.querySelectorAll<HTMLElement>('button, a[href], input, select, textarea, [tabindex]')].find(
+        (el) => !tipEl?.contains(el) && el.getAttribute('tabindex') !== '-1',
+      ) ?? wrapperEl;
+    if (next === describedTarget) return;
+    describedTarget?.removeAttribute('aria-describedby');
+    next.setAttribute('aria-describedby', tipId);
+    describedTarget = next;
+  }
   $effect(() => {
-    const focusable = wrapperEl.querySelector<HTMLElement>(
-      'button, a[href], input, select, textarea, [tabindex]',
-    );
-    const target = focusable ?? wrapperEl;
-    target.setAttribute('aria-describedby', tipId);
-    return () => target.removeAttribute('aria-describedby');
+    wireDescribedby();
+    const mo = new MutationObserver(() => wireDescribedby());
+    mo.observe(wrapperEl, { childList: true, subtree: true });
+    return () => {
+      mo.disconnect();
+      describedTarget?.removeAttribute('aria-describedby');
+      describedTarget = undefined;
+    };
   });
 
-  // JS フォールバック(anchor 非対応時のみ)。アンカー矩形から fixed 位置を決める。衝突で反転。
+  // JS フォールバック(anchor 非対応時のみ)。アンカー矩形から fixed 位置を決める。衝突で反転。left はアンカー中央で、
+  // CSS の translateX(-50%) が箱を中央に寄せる。
   function position() {
     if (!tipEl || !wrapperEl) return;
     const a = wrapperEl.getBoundingClientRect();
@@ -76,15 +93,41 @@
       el.hidePopover();
     }
   });
+  // anchor 非対応時のみ、開いている間はスクロール / リサイズでアンカーへ追従する(対応時は CSS が自動追従。
+  // Popover と同じ。open の瞬間だけ計算して固定すると、フォールバックでアンカーからずれる)。
+  $effect(() => {
+    if (!open || supportsAnchor) return;
+    const onScroll = () => position();
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onScroll);
+    };
+  });
 
-  function show() {
-    open = true;
+  // hover は touch を除く(タップの合成 pointerenter で居座らせない。focus 経路がキーボードを担う)。
+  function onEnter(e: PointerEvent) {
+    if (e.pointerType !== 'touch') hovering = true;
   }
-  function hide() {
-    open = false;
+  function onLeave(e: PointerEvent) {
+    if (e.pointerType !== 'touch') hovering = false;
+  }
+  function onFocusin() {
+    focused = true;
+  }
+  function onFocusout() {
+    // フォーカスがラッパーの外へ出たときだけ閉じる(trigger 内の要素間移動でちらつかせない。Popover と同型)
+    queueMicrotask(() => {
+      if (!wrapperEl.contains(document.activeElement)) focused = false;
+    });
   }
   function onKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') hide();
+    // Escape は両チャンネルを落として即座に閉じる(再 hover / 再 focus で開き直せる)
+    if (e.key === 'Escape') {
+      hovering = false;
+      focused = false;
+    }
   }
 </script>
 
@@ -95,10 +138,10 @@
   class="sc-tooltip"
   bind:this={wrapperEl}
   style:anchor-name={anchorName}
-  onpointerenter={show}
-  onpointerleave={hide}
-  onfocusin={show}
-  onfocusout={hide}
+  onpointerenter={onEnter}
+  onpointerleave={onLeave}
+  onfocusin={onFocusin}
+  onfocusout={onFocusout}
   onkeydown={onKeydown}
 >
   {@render trigger()}

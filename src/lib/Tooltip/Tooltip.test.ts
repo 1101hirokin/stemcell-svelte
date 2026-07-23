@@ -38,3 +38,15 @@ it('対話要素が無ければラッパーへ配線する(退化)', () => {
   const tip = q(container, '.sc-tooltip-content');
   expect(wrapper.getAttribute('aria-describedby')).toBe(tip.id);
 });
+
+it('tabindex=-1(実タブ移動しない管理用)は飛ばし、実フォーカス可能要素へ配線する', () => {
+  const nested = createRawSnippet(() => ({
+    render: () => '<span tabindex="-1"><button>実操作</button></span>',
+  }));
+  const { container } = render(Tooltip, { props: { trigger: nested, content } });
+  const btn = q(container, 'button');
+  const span = container.querySelector('span[tabindex="-1"]') as HTMLElement;
+  const tip = q(container, '.sc-tooltip-content');
+  expect(btn.getAttribute('aria-describedby')).toBe(tip.id);
+  expect(span.hasAttribute('aria-describedby')).toBe(false);
+});
