@@ -185,15 +185,27 @@ try {
           }
         })()
       : false;
+    const tr = t.getBoundingClientRect();
+    const cr = content?.getBoundingClientRect();
     return {
       expanded: t.getAttribute('aria-expanded'),
       topLayer, // native popover の top-layer に出ている = overflow:hidden で切れない
       domFocusOnTrigger: document.activeElement === t, // 仮想 focus: DOM focus はトリガー据置
       ad: t.getAttribute('aria-activedescendant'),
+      // CSS Anchor Positioning(Popover)が効いているか: dropdown がトリガーへ左揃え・同幅で錨る
+      anchorSupported: CSS.supports('anchor-name: --x'),
+      leftDelta: cr ? Math.abs(cr.left - tr.left) : 999,
+      widthDelta: cr ? Math.abs(cr.width - tr.width) : 999,
     };
   });
   if (selOpen.expanded !== 'true' || !selOpen.topLayer)
     throw new Error(`Select: listbox が top-layer popover に開かない(${JSON.stringify(selOpen)})`);
+  // Popover の位置決めが CSS Anchor Positioning(anchor()/anchor-size())でトリガーへ錨っているか。
+  // 実 Chromium は anchor 対応なので、JS 計測を張らずに CSS だけで左揃え・同幅になることを守る(憲法 第2条)。
+  if (!selOpen.anchorSupported)
+    throw new Error('Select: 実ブラウザで CSS Anchor Positioning 非対応と報告された(前提が崩れている)');
+  if (selOpen.leftDelta > 1.5 || selOpen.widthDelta > 1.5)
+    throw new Error(`Select: dropdown がトリガーへ錨っていない(anchor 位置決め。left差 ${selOpen.leftDelta.toFixed(1)} / 幅差 ${selOpen.widthDelta.toFixed(1)})`);
   if (!selOpen.domFocusOnTrigger)
     throw new Error('Select: 開いても DOM focus はトリガーに留まるべき(activedescendant。overlay.md §4)');
   if (!selOpen.ad) throw new Error('Select: ArrowDown で aria-activedescendant が立たない(仮想 focus)');

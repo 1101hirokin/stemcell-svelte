@@ -1,8 +1,9 @@
 /* アンカー従属の一時面(popover 類。Popover.md)。native popover API(top-layer)で描く。
    面/影/角は elevation.popover・shape.popover、層は layer.popover、出入りは motion.entrance/exit。
-   位置(top/left)と幅の基準(--sc-popover-anchor-inline-size)は JS がアンカー矩形から与える。 */
+   位置・幅・衝突反転は CSS Anchor Positioning(anchor()/anchor-size()/position-try)に委ねる(憲法 第2条)。
+   非対応環境では JS がアンカー矩形から top/left と --sc-popover-anchor-inline-size を与える(第7条)。 */
 .sc-popover {
-  /* トリガーを包むだけ。矩形計測の器(getBoundingClientRect)。位置は content が top-layer で持つ */
+  /* トリガーを包むだけ。位置は content が top-layer で持つ。anchor-name はインスタンスごとに JS が付ける */
   display: block;
 }
 
@@ -26,6 +27,27 @@
   /* 出現(overlay.md §2: entrance)。退場のトークンは transition で参照(opacity 変化に効く) */
   animation: sc-popover-in var(--motion-entrance-duration) var(--motion-entrance-easing);
   transition: opacity var(--motion-exit-duration) var(--motion-exit-easing);
+}
+
+/* CSS Anchor Positioning 対応時(Baseline 2026)。位置・幅・反転を native の機構に委ねる。
+   アンカー矩形の追従(スクロール・リサイズ・再配置)はブラウザが自動で行う = JS の scroll/resize 追従が不要。 */
+@supports (anchor-name: --x) {
+  .sc-popover-content {
+    /* 幅はアンカー幅に一致(anchor-size)。消費者が --sc-popover-inline-size を与えればそちらが勝つ */
+    inline-size: var(--sc-popover-inline-size, anchor-size(width));
+    /* 衝突時は block 方向へ反転(反転は Expressive。overlay.md §5) */
+    position-try-fallbacks: flip-block;
+  }
+  .sc-popover-content[data-placement='block-end'] {
+    inset-block-start: anchor(bottom);
+    inset-inline-start: anchor(left);
+    margin-block-start: var(--spacing-inline-md);
+  }
+  .sc-popover-content[data-placement='block-start'] {
+    inset-block-end: anchor(top);
+    inset-inline-start: anchor(left);
+    margin-block-end: var(--spacing-inline-md);
+  }
 }
 
 @keyframes sc-popover-in {
