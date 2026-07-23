@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -91,6 +91,23 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - disabled は3つの要求すべてを満たすこと（foundations/state.md §5）: 活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる。属性か aria-disabled かは Web の表現であり第2条により固有。
 - 活性化のキーは本契約が定めない。role が意味論を運び、キーはその表現である（第2条）。Web の APG Button Pattern は Enter と Space、Link Pattern は Enter のみと定めるが、Compose の Modifier.clickable は Role に関わらず両方で発火する。キーを中立の契約に書けば Web の慣習を全プラットフォームへ漏らす。Web の規範層は未着手（component-contract.schema.json の $webKeys）。
+
+### Card(契約 0.0.0-alpha.0)
+
+地の上の面。内容をまとめて一枚に見せる器であり、それ自体は何もしない。押せる Card は作らない(裁定): 全面クリックは中のリンクや操作と当たり判定が入れ子になり、リンクの責任は中の要素(リンクテキスト・押せる要素)が担う。
+
+props:
+
+- `outlined`: boolean(既定 false) — false(既定)は影の面(elevation surface の 2-facet)、true は枠の面(影を消し border で縁取る)。prop 名が variant でないのは variant が emphasis の4段に予約済みだからである(elevated は集合に無く、面の見た目の切替は強調度の観念でもない。Skeleton の form と同じ回避)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default`(必須) — 内容。器は中身を選ばない。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 意味を持たない器である。landmark や見出しは中身の仕事で、Card 自体は支援技術に構造を主張しない。
+- 押せない(裁定)。states を持たず、全面クリックの口も無い。素朴な全面リンクは対話要素の入れ子で成立せず、業界の代替(stretched-link)も採らない: 操作対象が2つ以上あるとき「全面」がどの操作かは読めない(Card.md §2)。
 
 ### Checkbox(契約 0.0.0-alpha.1)
 
@@ -271,6 +288,27 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 名前は label prop が運ぶ。中のアイコンは装飾(iconography.md §5)であり、名前を二重に運ばない。
 - disabled の3要求と当たり判定の門/目標は Button と同じ(state.md §5 / size.md §4)。視覚が絵1つでも当たり判定は縮まない。
+
+### Link(契約 0.0.0-alpha.1)
+
+場所が変わる。行動(Button)ではなく移動。native の <a> と <button> が分かれているのと同じ線で Button と分かれる。
+
+props:
+
+- `href`: string — 行き先(必須)。名前は Web の属性と一致するが観念は「遷移先」であり、SwiftUI の Link(destination:) / Compose の相当機構へ写像される。
+- `external`: boolean(既定 false) — 別文脈への遷移(新しいタブ・アプリ外)を視覚と支援技術に示すオプトイン(裁定: 機構は持つが、href からの自動判定はしない。判定はアプリの知識である)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default`(必須) — ラベル。 typography の束縛が無いのは書き落としではない: Link は文字の一種であり、周囲の文字の役を継承する(Link.md §2。大きさを自分で主張しない)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- disabled を持たない。native <a> に無効化は存在せず、無効な遷移は描画しない(href を外した瞬間、それはもうリンクではない)。
+- visited を採らない(裁定。state.md §6): 概念が Web にしか無く、ブラウザが偽装防止のためスタイルを厳しく制限し、アプリ指向の DS は採っていない。必要が浮上したら RFC。
+- 本文中では色だけで示さない(WCAG 2.2 SC 1.4.1)。下線か何かの非色手がかりを持つ。手がかりの形は Web の表現であり、要求は「色以外にあること」。
+- 活性化のキーは role が導く(web-keys.rules.json: link は Enter のみ。native <a href> に一致)。
+- フォーカスリングの色は intent を持たないので既定の app.system を引く(focus-ring.md §4)。tokensRequired の color.app.system がそれである。文字色の color.app.link は全 elevation 面で 4.5:1 を CI が強制している(focus-ring.md §6)。
 
 ### Menu(契約 0.0.0-alpha.1)
 

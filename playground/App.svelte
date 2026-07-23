@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -159,6 +159,46 @@
       </Stack>
     </Cluster>
     <div style="inline-size: 14rem; block-size: 6rem;"><Skeleton form="box" /></div>
+  </section>
+
+  <section>
+    <h2>Card</h2>
+    <p>
+      地の上の面(elevation surface の最初の消費者)。器であって意味を持たない(role なし)。押せない(裁定):
+      リンクや操作は中身が担う。既定は影の面、outlined は影を消し中立 border で縁取る。
+    </p>
+    <Grid min="14rem" gap="md">
+      <Card>
+        <Stack gap="sm">
+          <strong>影の面(既定)</strong>
+          <span>関係のある内容を一枚に載せる。中の要素の角は同心角丸に従う。</span>
+          <Cluster gap="sm">
+            <Button size="sm">操作</Button>
+            <Link href="/docs">詳細を見る</Link>
+          </Cluster>
+        </Stack>
+      </Card>
+      <Card outlined>
+        <Stack gap="sm">
+          <strong>枠の面(outlined)</strong>
+          <span>影を消し、中立 border で縁取る。intent を持たないので variant は使わない。</span>
+        </Stack>
+      </Card>
+    </Grid>
+  </section>
+
+  <section>
+    <h2>Link</h2>
+    <p>
+      場所が変わる(native <code>&lt;a href&gt;</code>)。文字の一種で、大きさ・字面は周囲を継承する
+      (variant/size/typography を持たない)。下線は非色手がかり(WCAG 1.4.1)。external は新文脈遷移を
+      target=_blank と rel=noopener(native の防御)で得て、非色アイコン ＋ 隠し告知で示す。
+    </p>
+    <Stack gap="sm">
+      <span>本文の中に <Link href="/docs">こういうリンク</Link> が現れる(周囲の文字サイズを継承する)。</span>
+      <span style="font-size: 1.4rem">大きな文でも <Link href="/docs">自分の大きさを主張しない</Link>。</span>
+      <Link href="https://example.com" external>外部サイトへ(新しいタブ)</Link>
+    </Stack>
   </section>
 
   <section>

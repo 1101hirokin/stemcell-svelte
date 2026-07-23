@@ -1,0 +1,17 @@
+/* 地の上の面(Card.md §1)。既定は elevation surface(面色+影)、outlined は影を消し中立 border で縁取る。
+   角は shape.semantic.card、内側は inset-md 固定(§2)。外側 margin は持たない(間隔は layout が所有。layout.md §1)。 */
+.sc-card {
+  /* BFC を作り、中身の float や margin が器の境界を越えないよう内に閉じ込める(器としての面を保つ) */
+  display: flow-root;
+  background: var(--elevation-surface-surface);
+  box-shadow: var(--elevation-surface-shadow);
+  /* border は常に確保し、outlined 切替で寸法が動かないようにする(resting は透明) */
+  border: var(--shape-border-width) solid transparent;
+  border-radius: var(--shape-semantic-card);
+  padding: var(--spacing-inset-md);
+}
+/* 枠の面: 影を消し、中立 border を可視にする。中立 border の較正(コントラスト)は author 案件(Card.md §2 / color.md §10) */
+.sc-card[data-outlined='true'] {
+  box-shadow: none;
+  border-color: var(--color-app-border);
+}

@@ -1,0 +1,39 @@
+/* 文字の一種としてのリンク(Link.md §2)。font 系を宣言しない = 周囲の字面を継承する(大きさを自分で
+   主張しない)。色は color.app.link ひとつ(全 elevation 面で 4.5:1 を CI が強制。focus-ring.md §6)。
+   フォーカスリング色は intent を持たないので app.system(§3 / focus-ring.md §4)。 */
+.sc-link {
+  color: var(--color-app-link);
+  /* 非色手がかり(WCAG 1.4.1)。本文でも安全な既定として常に下線を引く(§3) */
+  text-decoration-line: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+/* hover は下線の太さで示す(色トークンを増やさない。Expressive。§2) */
+.sc-link:hover {
+  text-decoration-thickness: max(2px, 0.08em);
+}
+.sc-link:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: 1px; /* outline が字面の角を回り込むときの見栄え。offset の効きは変えない */
+}
+
+/* 外部遷移アイコン(§2: 示し方は Expressive)。中身は house の Icon(1em)。リンク文字より一回り小さく
+   添え、字間を少し空ける。寸法・整列・currentColor は Icon が持つ(sc-icon) */
+.sc-link-external {
+  margin-inline-start: 0.15em;
+  font-size: 0.85em;
+}
+
+/* 視覚的に隠す(external の AT 告知専用。標準の clip 技法) */
+.sc-link-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

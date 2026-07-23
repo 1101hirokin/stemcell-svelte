@@ -22,3 +22,5 @@ export { default as Menu } from './Menu/Menu.svelte';
 export { default as Dialog } from './Dialog/Dialog.svelte';
 export { default as Drawer } from './Drawer/Drawer.svelte';
 export { default as Tooltip } from './Tooltip/Tooltip.svelte';
+export { default as Card } from './Card/Card.svelte';
+export { default as Link } from './Link/Link.svelte';
