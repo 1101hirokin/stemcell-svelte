@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Avatar, Badge, Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -47,6 +47,47 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
   ツリーシェイク)。バンドルを絞りたいときは glyph 渡しを使う
 
 ## 部品
+
+### Avatar(契約 0.0.0-alpha.1)
+
+人(主体)の顔。src の画像 → name のイニシャル → 既定グリフ、の順で退避する(第7条)。退避しても寸法・形・名前は不変で、壊れてよいのは絵だけである。
+
+props:
+
+- `src`: string((省略可)) — 画像の場所。観念は「主体の画像への参照」であり、URL か native のリソース参照かは各プラットフォームの表現。
+- `name`: string — 主体の名前(必須)。イニシャルの源であり、意味を運ぶときのアクセシブルネーム。画像があっても必須: 画像が落ちた瞬間に名前が要る(第7条の退避先を常に持つ)。
+- `size`: "sm" | "md" | "lg"(既定 "md") — size.md §2 の avatar チャンネル(裁定)。段が引くのは avatar.{size} トークン(24/32/40px。rem 建て)。
+- `decorative`: boolean(既定 false) — 支援技術から隠すか(§3)。既定 false は意味を持つ(role=img で name が届く)。隣に可視の名前があるとき true にして装飾へ落とし、名前の二重読みを避ける。境界は Icon の label と同じ(消したとき情報が失われるか。iconography.md §5)。既定を false にするのは第1条の側に倒すためで、指定漏れは冗長(名前の二重読み)にはなるが名前を失わない。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 隣に名前のテキストがあるときは装飾(decorative=true で支援技術から隠す)。単独で主体を示すときは name が届く(decorative=false。既定)。境界は Icon と同じ「消したとき情報が失われるか」(iconography.md §5)。既定を meaningful に倒すのは、指定漏れが情報損失でなく冗長で済む側だから(第1条)。
+- 相互作用しない。押せる形を Avatar 自身は提供せず、当たり判定の門(size.md §4)の対象外である根拠はそれに尽きる。押せる顔の合成経路は未提供(Avatar.md §5)。
+- イニシャルの文字は avatar 寸法から導く内部表現であり、typography 役割の系に乗らない(size.md §2「段は文字を引かない」を破らない)。切り出し規則は Normative な共有アルゴリズム(未確定。Avatar.md §5): 同じ name から実装ごとに違うイニシャルが出れば共通言語が割れる。
+
+### Badge(契約 0.0.0-alpha.1)
+
+状態や数の小さな印。読むものであって、押すものではない。数(count)と存在(dot)だけを扱う: 文字の札は Tag、文の報告は Alert / Toast の仕事。
+
+props:
+
+- `count`: number((省略可)) — 量の報告。非負整数を期待する(スキーマは数値範囲を表現できないので、これは散文の契約である)。dot=true のときは使われない。
+- `max`: number(既定 99) — count がこれを超えたら「max+」に丸める。丸めは部品の仕事(全実装で同じ見た目=共通言語)。丸めても量の意味は保ち、存在(dot)へ自動降格はしない(導出と裁定は Badge.md)。
+- `dot`: boolean(既定 false) — 存在の報告。数を出さない明示のモード。count の桁あふれから自動で dot になることはない: 量と存在は違う意味であり、意味の降格を部品が勝手に行わない(state.md §6「状態と値を混ぜない」と同じ線)。
+- `label`: string((省略可)) — 印の意味を支援技術へ届ける文字列(「新着あり」等)。dot のとき事実上必須である: 点は視覚でしか語らないので、これが無いと見える人にだけ通知がある状態になる(第1条)。機械は付け忘れを捕まえられない(Icon の label と同型)。count のときは省略してよい(数自体が届く)。
+- `color`: "danger" | "warning" | "success" | "info"(既定 "info") — 報告の intent。primary と plain を含まない: どちらも行動にしか使わない語彙である(color.md §5「行動の intent と報告の intent」。plain を含めれば同じ名前が Button では行動・Badge では報告を意味し、共通言語が割れる)。中立な数の報告は info が担う。
+- `variant`: "filled" | "soft"(既定 "filled") — 既定は filled。Badge は注意を導く印であり(第3条: 強弱で注意を導く)、soft の印は印にならない。常時そこにあってよい分類の札(soft 既定)は Tag。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default` — 印を重ねる相手(anchor)。IconButton 等を包み、隅に印が乗る。省略時は行内に単独で並ぶ。重なりの z は部品内部の関心で layering の層ではない。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 押せない。states を持たず、当たり判定の門(size.md §4)も適用外。押せる印が要るなら IconButton + Badge の合成である。
+- count は数として支援技術に届く。「max+」の読み上げ表現(「99以上」等)は各実装の表現。
+- dot の存在情報は Badge 自身の label prop が運ぶ(視覚に隠したテキスト等、機構は各プラットフォームの表現)。anchor 側の名前に合成することを要求しない: anchor が名前を持つ契約とは限らず、機構の無い要求は書かない。
+- count が無く dot も false のとき、Badge は何も描画しない(空の Badge は無を意味する)。空のピルを描く実装と何も出さない実装が割れれば仕様の穴になる(GOVERNANCE §7)ので、ここで定める。
 
 ### Box(契約 0.0.0-alpha.0)
 

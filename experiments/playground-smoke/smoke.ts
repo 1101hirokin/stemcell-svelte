@@ -56,6 +56,8 @@ try {
     radio: document.querySelectorAll('.sc-radio').length,
     card: document.querySelectorAll('.sc-card').length,
     link: document.querySelectorAll('.sc-link').length,
+    badge: document.querySelectorAll('.sc-badge').length,
+    avatar: document.querySelectorAll('.sc-avatar').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -772,6 +774,61 @@ try {
   if (!link.iconHidden) throw new Error('Link(external): 視覚アイコンが aria-hidden でない');
   if (!link.srClipped || !link.srText.includes('opens in new tab'))
     throw new Error(`Link(external): 告知が視覚的に隠されていない/文言が無い(${JSON.stringify(link)})`);
+
+  // Badge: count>max の「99+」丸め(全実装で同じ見た目)、dot は数を出さず label を視覚的に隠した文字で
+  // 支援技術へ届ける、anchor を包むと block-start/inline-end の隅へ絶対配置で重なる。
+  const badge = await page.evaluate(() => {
+    const badges = [...document.querySelectorAll('.sc-badge')] as HTMLElement[];
+    const dot = document.querySelector('.sc-badge[data-dot="true"]') as HTMLElement | null;
+    const dotSr = dot?.querySelector('.sc-badge-sr') as HTMLElement | null;
+    const anchor = document.querySelector('.sc-badge-anchor') as HTMLElement | null;
+    const anchored = anchor?.querySelector(':scope > .sc-badge') as HTMLElement | null;
+    let overlaps = false;
+    if (anchor && anchored) {
+      const ar = anchor.getBoundingClientRect(), br = anchored.getBoundingClientRect();
+      overlaps = br.top < ar.top + ar.height / 2 && br.right > ar.right - 2;
+    }
+    return {
+      hasRounded: badges.some((b) => b.textContent === '99+'),
+      dotClipped: dotSr ? Math.round(dotSr.getBoundingClientRect().width) <= 1 : false,
+      dotSrText: dotSr?.textContent ?? '',
+      anchoredPos: anchored ? getComputedStyle(anchored).position : null,
+      overlaps,
+    };
+  });
+  if (!badge.hasRounded) throw new Error('Badge: count>max の「99+」丸めが描かれない');
+  if (!badge.dotClipped || !badge.dotSrText)
+    throw new Error(`Badge: dot の label が視覚的に隠された文字で届かない(${JSON.stringify(badge)})`);
+  if (badge.anchoredPos !== 'absolute' || !badge.overlaps)
+    throw new Error(`Badge: anchor の block-start/inline-end の隅へ重ならない(${JSON.stringify(badge)})`);
+
+  // Avatar: 器が role=img + name、寸法は avatar 段(lg=40px 相当。rem 建て)、src 無しは name のイニシャルへ
+  // 退避し装飾(aria-hidden)。壊れた src → イニシャルの退避は unit(native onerror)で検査済み。
+  const avatar = await page.evaluate(() => {
+    const avatars = [...document.querySelectorAll('.sc-avatar')] as HTMLElement[];
+    const lg = avatars.find((a) => a.dataset.size === 'lg');
+    const noSrc = avatars.find((a) => a.querySelector('.sc-avatar-initials'));
+    const ini = noSrc?.querySelector('.sc-avatar-initials') as HTMLElement | undefined;
+    // meaningful(既定)は role=img + name、decorative は器ごと aria-hidden(role/aria-label なし)
+    const meaningful = avatars.filter((a) => a.getAttribute('aria-hidden') !== 'true');
+    const deco = avatars.find((a) => a.getAttribute('aria-hidden') === 'true');
+    return {
+      meaningfulRoleImg: meaningful.every((a) => a.getAttribute('role') === 'img' && !!a.getAttribute('aria-label')),
+      hasDecorative: !!deco,
+      decoHasNoName: deco ? deco.getAttribute('role') === null && deco.getAttribute('aria-label') === null : false,
+      lgSize: lg ? Math.round(lg.getBoundingClientRect().width) : 0,
+      lgSquare: lg ? Math.round(lg.getBoundingClientRect().width) === Math.round(lg.getBoundingClientRect().height) : false,
+      initialsText: ini?.textContent ?? '',
+      initialsHidden: ini?.getAttribute('aria-hidden') === 'true',
+    };
+  });
+  if (!avatar.meaningfulRoleImg) throw new Error('Avatar: 意味を持つ既定で role=img + aria-label(name)が無い');
+  if (!avatar.hasDecorative || !avatar.decoHasNoName)
+    throw new Error(`Avatar: decorative が器ごと支援技術から隠れていない(${JSON.stringify(avatar)})`);
+  if (avatar.lgSize < 36 || avatar.lgSize > 44 || !avatar.lgSquare)
+    throw new Error(`Avatar: lg の実寸が avatar-lg(40px 相当の正方)でない(${avatar.lgSize}px square=${avatar.lgSquare})`);
+  if (!avatar.initialsHidden || !avatar.initialsText)
+    throw new Error('Avatar: src 無しで name のイニシャル退避(aria-hidden の文字)が無い');
 
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
