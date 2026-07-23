@@ -117,3 +117,11 @@
 .sc-textarea-error {
   color: var(--color-semantic-danger-soft-fg);
 }
+
+/* iOS(WebKit)は font-size<16px の入力に focus するとページをズームする。触覚ポインタでは入力文字を最低
+   16px にして回避(Web/iOS 固有。field.md。TextField と同じ)。fine ポインタは設計寸法を保つ。 */
+@media (pointer: coarse) {
+  .sc-textarea-input {
+    font-size: max(16px, var(--typography-body-md-font-size));
+  }
+}

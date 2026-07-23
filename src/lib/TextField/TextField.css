@@ -147,3 +147,13 @@
 .sc-textfield-error {
   color: var(--color-semantic-danger-soft-fg);
 }
+
+/* iOS(Safari / Chrome とも WebKit)は font-size<16px の入力に focus するとページをズームする。触覚ポインタ
+   では入力文字を最低 16px にしてその挙動を回避する(Web/iOS 固有。field.md)。fine ポインタ(desktop)は
+   設計どおり(14px)を保つ。padding は不変だが line-height が比率(1.334)なので、タッチ時は行高が伴って
+   約 2px 高くなる(タッチの的が少し大きくなる方向で許容)。 */
+@media (pointer: coarse) {
+  .sc-textfield-input {
+    font-size: max(16px, var(--typography-body-md-font-size));
+  }
+}

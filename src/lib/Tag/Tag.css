@@ -99,7 +99,12 @@ button.sc-tag:focus-visible,
   border-end-start-radius: inherit;
 }
 .sc-tag[data-dismissible] .sc-tag-dismiss {
-  padding-inline: 0.25rem var(--_inset);
+  /* × は正方形の当たり: タグの高さいっぱいに伸ばし、幅を高さに合わせる(左右非対称の padding をやめる)。
+     アイコンは justify/align center で中央に置く。門(24px)は本体の min-block-size がタグ高を担保する */
+  padding-inline: 0;
+  min-inline-size: 0;
+  align-self: stretch;
+  aspect-ratio: 1;
   border-start-end-radius: inherit;
   border-end-end-radius: inherit;
 }

@@ -217,3 +217,11 @@
 .sc-select-error {
   color: var(--color-semantic-danger-soft-fg);
 }
+
+/* iOS(WebKit)は font-size<16px の form control に focus するとページをズームする。触覚ポインタ(touch=
+   native <select> 経路)では文字を最低 16px にして回避(Web/iOS 固有。field.md)。fine ポインタは設計寸法。 */
+@media (pointer: coarse) {
+  .sc-select-input {
+    font-size: max(16px, var(--typography-body-md-font-size));
+  }
+}

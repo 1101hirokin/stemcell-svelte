@@ -10,26 +10,31 @@
   font-family: var(--typography-body-md-font-family);
   font-size: var(--typography-body-md-font-size);
   line-height: var(--typography-body-md-line-height);
+  /* 面/文字/外縁を intent チャンネルへ束ねる。外縁は intent border を薄めて(color-mix で透過寄りに)soft の
+     報告面と馴染ませる(強い枠が soft 面で目立ちすぎるのを抑える。§5 の裁定で薄い側へ) */
+  background: var(--_soft-bg);
+  color: var(--_soft-fg);
+  border: var(--shape-border-width) solid color-mix(in srgb, var(--_border) 45%, transparent);
 }
 .sc-alert[data-color='danger'] {
-  background: var(--color-semantic-danger-soft-bg);
-  color: var(--color-semantic-danger-soft-fg);
-  border: var(--shape-border-width) solid var(--color-semantic-danger-border);
+  --_soft-bg: var(--color-semantic-danger-soft-bg);
+  --_soft-fg: var(--color-semantic-danger-soft-fg);
+  --_border: var(--color-semantic-danger-border);
 }
 .sc-alert[data-color='warning'] {
-  background: var(--color-semantic-warning-soft-bg);
-  color: var(--color-semantic-warning-soft-fg);
-  border: var(--shape-border-width) solid var(--color-semantic-warning-border);
+  --_soft-bg: var(--color-semantic-warning-soft-bg);
+  --_soft-fg: var(--color-semantic-warning-soft-fg);
+  --_border: var(--color-semantic-warning-border);
 }
 .sc-alert[data-color='success'] {
-  background: var(--color-semantic-success-soft-bg);
-  color: var(--color-semantic-success-soft-fg);
-  border: var(--shape-border-width) solid var(--color-semantic-success-border);
+  --_soft-bg: var(--color-semantic-success-soft-bg);
+  --_soft-fg: var(--color-semantic-success-soft-fg);
+  --_border: var(--color-semantic-success-border);
 }
 .sc-alert[data-color='info'] {
-  background: var(--color-semantic-info-soft-bg);
-  color: var(--color-semantic-info-soft-fg);
-  border: var(--shape-border-width) solid var(--color-semantic-info-border);
+  --_soft-bg: var(--color-semantic-info-soft-bg);
+  --_soft-fg: var(--color-semantic-info-soft-fg);
+  --_border: var(--color-semantic-info-border);
 }
 
 /* intent の絵。本文より一回り大きく、見出し/一行目の高さに寄せる。色は currentColor(intent の soft-fg) */
