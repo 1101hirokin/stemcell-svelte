@@ -46,8 +46,10 @@
 .sc-dialog::backdrop {
   background: var(--color-app-scrim);
   opacity: 0;
+  /* background も遷らせる: 多重時に data-under で透過へ切り替わるのを瞬間ジャンプさせない(scrim のフラッシュ回避) */
   transition:
     opacity var(--motion-exit-duration) var(--motion-exit-easing),
+    background-color var(--motion-exit-duration) var(--motion-exit-easing),
     display var(--motion-exit-duration) allow-discrete,
     overlay var(--motion-exit-duration) allow-discrete;
 }

@@ -342,7 +342,8 @@ try {
   // 多重 modal の単一 scrim(RFC 0009)。light の中から確認を重ねて開くと、下の light に data-under が付き
   // ::backdrop が透過になる(見える scrim は最上位の一段だけ。native ::backdrop の積算を抑える)。
   await page.locator('button', { hasText: '確認を重ねて開く' }).click();
-  await page.waitForTimeout(200);
+  // data-under の ::backdrop 透過は瞬間でなく遷移する(scrim のフラッシュ回避。entrance 240ms)。完了を待つ
+  await page.waitForTimeout(450);
   const stacked = await page.evaluate(() => {
     const ds = [...document.querySelectorAll('.sc-dialog')] as HTMLDialogElement[];
     const openDs = ds.filter((d) => d.open);

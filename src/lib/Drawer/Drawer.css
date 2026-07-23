@@ -7,9 +7,10 @@
   border: 0;
   margin: 0;
   box-sizing: border-box;
-  /* UA の <dialog>:modal は max-width/height を calc(100% - 余白)で絞る。端いっぱいに貼るため解く */
-  max-inline-size: 100vw;
-  max-block-size: 100dvh;
+  /* UA の <dialog>:modal は max-width/height を calc(100% - 余白)で絞る。端いっぱいに貼るため解く。
+     論理ビューポート単位(dvi/dvb)で書き、縦書きでも軸が入れ替わらない(位置は論理。layout.md §7) */
+  max-inline-size: 100dvi;
+  max-block-size: 100dvb;
   background: var(--elevation-modal-surface);
   box-shadow: var(--elevation-modal-shadow);
   color: var(--color-app-foreground);
@@ -39,8 +40,8 @@
 .sc-drawer[data-side='inline-start'] {
   inset-block: 0;
   inset-inline: 0 auto;
-  inline-size: min(90vw, 22rem);
-  block-size: 100dvh;
+  inline-size: min(90dvi, 22rem);
+  block-size: 100dvb;
   border-start-end-radius: var(--shape-semantic-dialog);
   border-end-end-radius: var(--shape-semantic-dialog);
   --_slide: -100% 0;
@@ -48,8 +49,8 @@
 .sc-drawer[data-side='inline-end'] {
   inset-block: 0;
   inset-inline: auto 0;
-  inline-size: min(90vw, 22rem);
-  block-size: 100dvh;
+  inline-size: min(90dvi, 22rem);
+  block-size: 100dvb;
   border-start-start-radius: var(--shape-semantic-dialog);
   border-end-start-radius: var(--shape-semantic-dialog);
   --_slide: 100% 0;
@@ -57,8 +58,8 @@
 .sc-drawer[data-side='block-start'] {
   inset-inline: 0;
   inset-block: 0 auto;
-  inline-size: 100vw;
-  block-size: min(85dvh, 28rem);
+  inline-size: 100dvi;
+  block-size: min(85dvb, 28rem);
   border-end-start-radius: var(--shape-semantic-dialog);
   border-end-end-radius: var(--shape-semantic-dialog);
   --_slide: 0 -100%;
@@ -66,13 +67,15 @@
 .sc-drawer[data-side='block-end'] {
   inset-inline: 0;
   inset-block: auto 0;
-  inline-size: 100vw;
-  block-size: min(85dvh, 28rem);
+  inline-size: 100dvi;
+  block-size: min(85dvb, 28rem);
   border-start-start-radius: var(--shape-semantic-dialog);
   border-start-end-radius: var(--shape-semantic-dialog);
   --_slide: 0 100%;
 }
-/* translate は物理方向なので、inline 端だけ RTL で退避方向を反転する(位置は inset が既に反転済み) */
+/* 位置(inset)とサイズ(dvi/dvb)は論理で、RTL / 縦書きに自動追従する。--_slide の translate だけは物理
+   プロパティなので、inline 端の水平反転を :dir(rtl) で補う(縦書きの slide 方向は物理 translate の制約で
+   追従しない — 位置は正しく、入りの方向のアニメだけ Expressive に留まる。Drawer.md §2/§3) */
 :dir(rtl) .sc-drawer[data-side='inline-start'] {
   --_slide: 100% 0;
 }
@@ -84,8 +87,11 @@
 .sc-drawer::backdrop {
   background: var(--color-app-scrim);
   opacity: 1;
+  /* background も遷らせる: 多重時に data-under で透過へ切り替わるのを瞬間ジャンプさせない(scrim の一瞬の
+     フラッシュを避ける。下の modal の scrim が消えるのと上の modal のフェードインを均す) */
   transition:
     opacity var(--motion-exit-duration) var(--motion-exit-easing),
+    background-color var(--motion-exit-duration) var(--motion-exit-easing),
     display var(--motion-exit-duration) allow-discrete,
     overlay var(--motion-exit-duration) allow-discrete;
 }
