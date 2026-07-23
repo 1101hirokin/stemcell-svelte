@@ -20,3 +20,4 @@ export { default as Skeleton } from './Skeleton/Skeleton.svelte';
 export { default as Popover } from './Popover/Popover.svelte';
 export { default as Menu } from './Menu/Menu.svelte';
 export { default as Dialog } from './Dialog/Dialog.svelte';
+export { default as Drawer } from './Drawer/Drawer.svelte';

@@ -408,6 +408,39 @@ try {
   if (await explicitDlg())
     throw new Error('Dialog(explicit): ボタンでも閉じない');
 
+  // Drawer(端寄せ modal。Dialog と同じ native <dialog>。位置と入りの方向だけ違う)。inline-end で右端に貼り、
+  // showModal で top-layer(:modal)・focus trap・Escape の light dismiss・閉じたらトリガーへ復帰を実機検証。
+  const openDrawer = page.locator('button', { hasText: '右から開く' });
+  await openDrawer.scrollIntoViewIfNeeded();
+  await openDrawer.click();
+  await page.waitForTimeout(300); // スライドの entrance
+  const drawer = await page.evaluate(() => {
+    const d = document.querySelector('.sc-drawer') as HTMLDialogElement;
+    const r = d.getBoundingClientRect();
+    return {
+      open: d?.open ?? false,
+      isModal: (() => { try { return d.matches(':modal'); } catch { return false; } })(),
+      side: d.dataset.side,
+      focusInside: d.contains(document.activeElement),
+      atInlineEnd: Math.abs(r.right - window.innerWidth) < 2, // 右端に貼っている
+      bounded: r.width < window.innerWidth, // 全幅でなく側パネル幅
+      fullHeight: Math.abs(r.height - window.innerHeight) < 2, // inline 端は縦いっぱい
+    };
+  });
+  if (!drawer.open || !drawer.isModal)
+    throw new Error(`Drawer: showModal で top-layer(:modal)に開かない(${JSON.stringify(drawer)})`);
+  if (drawer.side !== 'inline-end' || !drawer.atInlineEnd || !drawer.bounded || !drawer.fullHeight)
+    throw new Error(`Drawer: inline-end で右端に縦いっぱい・側パネル幅で貼らない(${JSON.stringify(drawer)})`);
+  if (!drawer.focusInside) throw new Error('Drawer: 開いてもフォーカスが中に入らない(focus trap)');
+  await page.keyboard.press('Escape'); // light dismiss
+  await page.waitForTimeout(300);
+  const drawerAfter = await page.evaluate(() => ({
+    open: (document.querySelector('.sc-drawer') as HTMLDialogElement)?.open ?? false,
+    focusOnTrigger: (document.activeElement as HTMLElement)?.textContent?.includes('右から開く') ?? false,
+  }));
+  if (drawerAfter.open) throw new Error('Drawer(light): Escape で閉じない');
+  if (!drawerAfter.focusOnTrigger) throw new Error('Drawer: 閉じてもフォーカスがトリガーへ戻らない');
+
   // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
   // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)
   const cb = await page.evaluate(() => {

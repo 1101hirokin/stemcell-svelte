@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -21,6 +21,8 @@
   let lastAction = $state('(なし)');
   let dlgLight = $state(false);
   let dlgExplicit = $state(false);
+  let drawerOpen = $state(false);
+  let drawerSide = $state<'inline-start' | 'inline-end' | 'block-start' | 'block-end'>('inline-end');
 
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
@@ -308,6 +310,32 @@
         <Button color="danger" onclick={() => (dlgExplicit = false)}>削除</Button>
       {/snippet}
     </Dialog>
+  </section>
+
+  <section>
+    <h2>Drawer</h2>
+    <p>
+      端に寄る modal(native <code>&lt;dialog&gt;</code>。Dialog と同じ土台、位置と入りの方向だけ違う)。side は
+      論理方向(RTL 自動反転)。Sidebar(常設レイアウト)と違い一時的で scrim が背後を封じる。
+    </p>
+    <Cluster gap="md">
+      <Button onclick={() => { drawerSide = 'inline-end'; drawerOpen = true; }}>右から開く</Button>
+      <Button variant="outlined" color="plain" onclick={() => { drawerSide = 'inline-start'; drawerOpen = true; }}>左から</Button>
+      <Button variant="outlined" color="plain" onclick={() => { drawerSide = 'block-end'; drawerOpen = true; }}>下から</Button>
+    </Cluster>
+    <Drawer bind:open={drawerOpen} side={drawerSide} onopenchange={(o) => (drawerOpen = o)}>
+      {#snippet title()}フィルタ{/snippet}
+      {#snippet content()}
+        <Stack gap="md">
+          <span>side={drawerSide} の Drawer。Escape / 背後クリックで閉じます(light)。その端からスライドします。</span>
+          <span>Dialog と同じ土台(native &lt;dialog&gt;)で、位置と入りの方向だけが違います。</span>
+        </Stack>
+      {/snippet}
+      {#snippet actions()}
+        <Button variant="text" color="plain" onclick={() => (drawerOpen = false)}>閉じる</Button>
+        <Button onclick={() => (drawerOpen = false)}>適用</Button>
+      {/snippet}
+    </Drawer>
   </section>
 
   <section>
