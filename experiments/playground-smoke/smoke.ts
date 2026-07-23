@@ -744,22 +744,18 @@ try {
   // 装飾(aria-hidden)、告知は視覚的に隠した文字(clip されて幅ゼロ)が担う。
   const link = await page.evaluate(() => {
     const links = [...document.querySelectorAll('.sc-link')] as HTMLAnchorElement[];
-    const inBig = links.find((a) => {
-      const p = a.closest('span');
-      return p && parseFloat(getComputedStyle(p).fontSize) > 20;
-    });
-    const inNormal = links.find((a) => a.getAttribute('href') === '/docs' && a !== inBig);
-    const ext = links.find((a) => a.target === '_blank') as HTMLAnchorElement;
+    // 継承の証拠は Link 自身の実効 font-size の広がり(周囲の Text 役割を受け継ぐので文脈で変わる)。
+    // 大きな役割(title-lg)の中の Link は本文(body)の中の Link より明確に大きい。
+    const linkSizes = links.map((a) => parseFloat(getComputedStyle(a).fontSize));
+    const inet = links.find((a) => a.target === '_blank') as HTMLAnchorElement;
+    const ext = inet;
     // house の Icon SSOT を使う(グリフ直書きでない)。装飾なので Icon 自身が aria-hidden を付ける
     const icon = ext?.querySelector('.sc-link-external .sc-icon') as SVGElement;
     const sr = ext?.querySelector('.sc-link-sr-only') as HTMLElement;
     return {
       isAnchor: links.every((a) => a.tagName === 'A'),
       underlined: getComputedStyle(links[0]).textDecorationLine.includes('underline'),
-      inheritsSize:
-        inBig && inNormal
-          ? parseFloat(getComputedStyle(inBig).fontSize) > parseFloat(getComputedStyle(inNormal).fontSize) + 4
-          : false,
+      inheritsSize: Math.max(...linkSizes) > Math.min(...linkSizes) + 4,
       extTarget: ext?.target,
       extRel: ext?.getAttribute('rel') ?? '',
       iconIsHouseIcon: !!icon,
