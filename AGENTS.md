@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Avatar, Badge, Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, Tag, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, Tag, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -47,6 +47,32 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
   ツリーシェイク)。バンドルを絞りたいときは glyph 渡しを使う
 
 ## 部品
+
+### Alert(契約 0.0.0-alpha.1)
+
+文での報告。その場に留まり、状況が続く限り読める。勝手に消えてよい報告は Toast の仕事。
+
+props:
+
+- `color`: "danger" | "warning" | "success" | "info"(既定 "info") — 報告の intent(color.md §5)。Badge と同じ4値・同じ既定。primary / plain を含まない理由も同じ(行動の語彙を報告に使わない)。
+- `dismissible`: boolean(既定 false) — 閉じられる報告。既定は閉じられない: 報告する状況が続く限り読めるべきで(第1条)、状況が真のまま消せる既定は情報の喪失である(導出は Alert.md §2。Tag と同語彙)。
+
+events(Svelte では callback prop):
+
+- `ondismiss`: (payload: void) => void — 閉じる操作。取り除くのはアプリ(Alert は自分を消さない。Tag の dismiss と同じ向き)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `title` — 見出し。短い要約。
+- `default`(必須) — 本文。何が起きているか、どうすればよいか。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 報告は支援技術へ割り込みの度合いつきで届く。即時の割り込み(Web の表現は role=alert 相当)は danger だけに絞り、warning / success / info は穏当な告知(role=status 相当)とする。これは Stemcell 独自の規範である: 業界に intent からの自動連動の前例は無く(MUI は severity に関わらず role=alert 固定で、穏当なものへの手動上書きを案内する)、role=alert は乱用への警告が実務に定着している。warning を穏当側に置くのは color.md §5 の定義(進めるが、進む前に読むべきことがある — 緊急ではない)から。
+- 割り込みは Alert が動的に挿入されたときにだけ起きる。初期描画から存在する Alert は読み上げ順で届き、割り込まない(ARIA の実務: 静的な内容への role=alert は期待した告知を起こさない)。実装はこの条件を契約の一部として扱う。
+- 閉じる操作(dismissible)は内部の押せる要素であり、focus を受け、フォーカスリングが必須で、当たり判定の門の対象である。ルートの focusRing: false は Alert 自身が focus を受けないという意味で、内部要素を免除しない(条件付きで生える部分要素の a11y をスキーマは表現できない。Tag と同じ限界の認識)。リング色は既定の app.system(tokensRequired に束縛)。名前は「閉じる」+ 文脈で合成し、title 内のリンク等と入れ子にせず兄弟として構成する(Tag の × と同じ規範)。
+- intent の絵(先頭のアイコン)は色に頼らない識別の手がかりでもある(WCAG 1.4.1: 色だけで報告の種類を伝えない)。絵の意味名はアイコンセット受領時に確定(iconography.md §6)。
+- title は Alert 自身の名前にしない(aria-labelledby 相当の配線をしない)。Alert は名前を持つ部品ではなく、内容が読み上げ順そのままに届く領域である。
 
 ### Avatar(契約 0.0.0-alpha.1)
 

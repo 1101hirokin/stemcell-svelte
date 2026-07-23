@@ -59,6 +59,7 @@ try {
     badge: document.querySelectorAll('.sc-badge').length,
     avatar: document.querySelectorAll('.sc-avatar').length,
     tag: document.querySelectorAll('.sc-tag').length,
+    alert: document.querySelectorAll('.sc-alert').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -901,6 +902,49 @@ try {
     if (tagDisabled.childOpacity !== '1')
       throw new Error('Tag(disabled): 中身に減衰(opacity<1)が残っている(state.md §7 は token 差し替え)');
   }
+
+  // Alert: 割り込みの度合いを intent から(danger=role=alert、他=role=status。§3)、先頭に intent の絵
+  // (色に頼らない識別。装飾=aria-hidden)、root は名前を持たない(title を aria-labelledby にしない)、
+  // × は 文脈 + 閉じる語 を合成し門(24px)を割らない。
+  const alert = await page.evaluate(() => {
+    const alerts = [...document.querySelectorAll('.sc-alert')] as HTMLElement[];
+    const roleOf = (c: string) => {
+      const a = alerts.find((x) => x.dataset.color === c && !x.querySelector('.sc-alert-dismiss'));
+      return a?.getAttribute('role');
+    };
+    const danger = alerts.find((a) => a.dataset.color === 'danger');
+    const icon = danger?.querySelector('.sc-alert-icon');
+    const dismissible = alerts.find((a) => a.querySelector('.sc-alert-dismiss'));
+    const x = dismissible?.querySelector('.sc-alert-dismiss') as HTMLElement | null;
+    const ids = (x?.getAttribute('aria-labelledby') ?? '').split(' ');
+    const titleEl = dismissible?.querySelector('.sc-alert-title') as HTMLElement | null;
+    const r = x?.getBoundingClientRect();
+    return {
+      dangerRole: roleOf('danger'),
+      statusRole: roleOf('info'),
+      iconHidden: icon?.getAttribute('aria-hidden') === 'true',
+      iconIsHouseIcon: !!icon?.querySelector('.sc-icon'),
+      rootUnnamed: alerts.every((a) => a.getAttribute('aria-labelledby') === null),
+      xContextFirst: !!titleEl && ids[0] === titleEl.id, // × の名の先頭が文脈(title)
+      xSiblingNotNested: !!titleEl && !!x && !titleEl.contains(x),
+      gate: r ? Math.min(Math.round(r.width), Math.round(r.height)) : 0,
+    };
+  });
+  if (alert.dangerRole !== 'alert' || alert.statusRole !== 'status')
+    throw new Error(`Alert: 割り込みの度合いが intent から導かれない(danger=${alert.dangerRole} info=${alert.statusRole}。§3)`);
+  if (!alert.iconHidden || !alert.iconIsHouseIcon)
+    throw new Error('Alert: 先頭の intent の絵(house Icon・装飾)が無い(色に頼らない識別。1.4.1)');
+  if (!alert.rootUnnamed) throw new Error('Alert: root が名前を持ってしまう(title を aria-labelledby にしない。§3)');
+  if (!alert.xContextFirst || !alert.xSiblingNotNested)
+    throw new Error(`Alert: × の名が 文脈(title)+ 閉じる語 の兄弟合成でない(${JSON.stringify(alert)})`);
+  if (alert.gate < 24) throw new Error(`Alert: × が当たり判定の門(24px)を割る(${alert.gate}px)`);
+
+  // 消せる Alert の × を実クリックして取り除かれる(取り除くのはアプリ。Alert は自分を消さない)
+  const alertBefore = await page.locator('.sc-alert-dismiss').count();
+  await page.locator('.sc-alert-dismiss').first().click();
+  await page.waitForTimeout(60);
+  if ((await page.locator('.sc-alert-dismiss').count()) >= alertBefore)
+    throw new Error('Alert: × クリックで報告が取り除かれない(dismiss イベントが配線されていない)');
 
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');

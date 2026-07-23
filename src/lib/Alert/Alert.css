@@ -1,0 +1,80 @@
+/* 文での報告(Alert.md)。soft 面 + intent の border + 先頭に intent の絵(色だけで種類を伝えない。1.4.1)。
+   角は card、内側は inset-md、文字は body-md(本文)/ title-sm(見出し)。縁は全周枠(Expressive。§5)。 */
+.sc-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-inline-md);
+  box-sizing: border-box;
+  padding: var(--spacing-inset-md);
+  border-radius: var(--shape-semantic-card);
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+}
+.sc-alert[data-color='danger'] {
+  background: var(--color-semantic-danger-soft-bg);
+  color: var(--color-semantic-danger-soft-fg);
+  border: var(--shape-border-width) solid var(--color-semantic-danger-border);
+}
+.sc-alert[data-color='warning'] {
+  background: var(--color-semantic-warning-soft-bg);
+  color: var(--color-semantic-warning-soft-fg);
+  border: var(--shape-border-width) solid var(--color-semantic-warning-border);
+}
+.sc-alert[data-color='success'] {
+  background: var(--color-semantic-success-soft-bg);
+  color: var(--color-semantic-success-soft-fg);
+  border: var(--shape-border-width) solid var(--color-semantic-success-border);
+}
+.sc-alert[data-color='info'] {
+  background: var(--color-semantic-info-soft-bg);
+  color: var(--color-semantic-info-soft-fg);
+  border: var(--shape-border-width) solid var(--color-semantic-info-border);
+}
+
+/* intent の絵。本文より一回り大きく、見出し/一行目の高さに寄せる。色は currentColor(intent の soft-fg) */
+.sc-alert-icon {
+  flex: none;
+  display: inline-flex;
+  font-size: 1.25em;
+  line-height: 1;
+}
+
+.sc-alert-content {
+  flex: 1 1 auto;
+  min-inline-size: 0; /* 長い語で器を押し広げない(はみ出しは折り返す) */
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.sc-alert-title {
+  font-family: var(--typography-title-sm-font-family);
+  font-size: var(--typography-title-sm-font-size);
+  font-weight: var(--typography-title-sm-font-weight);
+  line-height: var(--typography-title-sm-line-height);
+  letter-spacing: var(--typography-title-sm-letter-spacing);
+}
+
+/* 閉じる(dismissible)。focus を受け、リング色は app.system(§3)。当たり判定の門(24px)を割らない。
+   hover は控えめに減光(押下・無効ではないので opacity で足りる) */
+.sc-alert-dismiss {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  border-radius: var(--shape-semantic-control);
+}
+.sc-alert-dismiss:hover { opacity: 0.7; }
+.sc-alert-dismiss:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+}
