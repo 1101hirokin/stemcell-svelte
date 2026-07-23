@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -28,6 +28,8 @@
   let fNotify = $state(true);
   let fShip = $state('exp');
   let fPlan = $state('pro');
+  let tagFilters = $state<Record<string, boolean>>({ react: true, svelte: false, vue: false });
+  let tagChips = $state(['デザイン', 'トークン', '契約']);
 
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
@@ -264,6 +266,51 @@
         <!-- 隣に可視の名前があるので装飾へ落とす(名前の二重読みを避ける。§3) -->
         <Avatar name="佐藤一郎" decorative />
         <span>佐藤一郎</span>
+      </Cluster>
+    </div>
+  </section>
+
+  <section>
+    <h2>Tag</h2>
+    <p>
+      分類の名札。静的(読むだけ)・選べる(selected の値を持つ絞り込みチップ)・消せる(dismissible)の3形は同じ
+      部品。variant は soft(既定)/ outlined、色は plain 固定(分類は intent でない)。選択と削除は入れ子にせず
+      兄弟に置き、× の名は本体ラベル + 削除語で合成。sm/md とも当たり判定は門(24px)を割らない。
+    </p>
+    <div class="pg-row">
+      <code class="pg-tag">静的</code>
+      <Cluster gap="sm" align="center">
+        <Tag>デザイン</Tag>
+        <Tag variant="outlined">トークン</Tag>
+        <Tag size="sm">契約(sm)</Tag>
+        <Tag variant="outlined" size="sm">散文(sm)</Tag>
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">選べる(絞り込み)</code>
+      <Cluster gap="sm" align="center">
+        {#each [['react', 'React'], ['svelte', 'Svelte'], ['vue', 'Vue']] as [id, name] (id)}
+          <Tag selected={tagFilters[id]} onclick={() => (tagFilters[id] = !tagFilters[id])}>{name}</Tag>
+        {/each}
+        <span>選択中: {Object.entries(tagFilters).filter(([, v]) => v).map(([k]) => k).join(', ') || '(なし)'}</span>
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">消せる</code>
+      <Cluster gap="sm" align="center">
+        {#each tagChips as chip (chip)}
+          <Tag dismissible dismissLabel="{chip} を削除" ondismiss={() => (tagChips = tagChips.filter((c) => c !== chip))}>{chip}</Tag>
+        {/each}
+        {#if tagChips.length === 0}<span>(すべて削除済み)</span>{/if}
+        <Button size="sm" variant="text" onclick={() => (tagChips = ['デザイン', 'トークン', '契約'])}>戻す</Button>
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">選択+削除 / disabled</code>
+      <Cluster gap="sm" align="center">
+        <Tag selected={tagFilters.react} dismissible onclick={() => (tagFilters.react = !tagFilters.react)} ondismiss={() => (tagFilters.react = false)}>React(選択+×)</Tag>
+        <Tag selected={false} disabled>選べる disabled</Tag>
+        <Tag dismissible disabled>消せる disabled</Tag>
       </Cluster>
     </div>
   </section>
