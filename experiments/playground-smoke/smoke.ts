@@ -342,7 +342,8 @@ try {
   // 多重 modal の単一 scrim(RFC 0009)。light の中から確認を重ねて開くと、下の light に data-under が付き
   // ::backdrop が透過になる(見える scrim は最上位の一段だけ。native ::backdrop の積算を抑える)。
   await page.locator('button', { hasText: '確認を重ねて開く' }).click();
-  await page.waitForTimeout(200);
+  // data-under の ::backdrop 透過は瞬間でなく遷移する(scrim のフラッシュ回避。entrance 240ms)。完了を待つ
+  await page.waitForTimeout(450);
   const stacked = await page.evaluate(() => {
     const ds = [...document.querySelectorAll('.sc-dialog')] as HTMLDialogElement[];
     const openDs = ds.filter((d) => d.open);
@@ -407,6 +408,39 @@ try {
   await page.waitForTimeout(200);
   if (await explicitDlg())
     throw new Error('Dialog(explicit): ボタンでも閉じない');
+
+  // Drawer(端寄せ modal。Dialog と同じ native <dialog>。位置と入りの方向だけ違う)。inline-end で右端に貼り、
+  // showModal で top-layer(:modal)・focus trap・Escape の light dismiss・閉じたらトリガーへ復帰を実機検証。
+  const openDrawer = page.locator('button', { hasText: '右から開く' });
+  await openDrawer.scrollIntoViewIfNeeded();
+  await openDrawer.click();
+  await page.waitForTimeout(300); // スライドの entrance
+  const drawer = await page.evaluate(() => {
+    const d = document.querySelector('.sc-drawer') as HTMLDialogElement;
+    const r = d.getBoundingClientRect();
+    return {
+      open: d?.open ?? false,
+      isModal: (() => { try { return d.matches(':modal'); } catch { return false; } })(),
+      side: d.dataset.side,
+      focusInside: d.contains(document.activeElement),
+      atInlineEnd: Math.abs(r.right - window.innerWidth) < 2, // 右端に貼っている
+      bounded: r.width < window.innerWidth, // 全幅でなく側パネル幅
+      fullHeight: Math.abs(r.height - window.innerHeight) < 2, // inline 端は縦いっぱい
+    };
+  });
+  if (!drawer.open || !drawer.isModal)
+    throw new Error(`Drawer: showModal で top-layer(:modal)に開かない(${JSON.stringify(drawer)})`);
+  if (drawer.side !== 'inline-end' || !drawer.atInlineEnd || !drawer.bounded || !drawer.fullHeight)
+    throw new Error(`Drawer: inline-end で右端に縦いっぱい・側パネル幅で貼らない(${JSON.stringify(drawer)})`);
+  if (!drawer.focusInside) throw new Error('Drawer: 開いてもフォーカスが中に入らない(focus trap)');
+  await page.keyboard.press('Escape'); // light dismiss
+  await page.waitForTimeout(300);
+  const drawerAfter = await page.evaluate(() => ({
+    open: (document.querySelector('.sc-drawer') as HTMLDialogElement)?.open ?? false,
+    focusOnTrigger: (document.activeElement as HTMLElement)?.textContent?.includes('右から開く') ?? false,
+  }));
+  if (drawerAfter.open) throw new Error('Drawer(light): Escape で閉じない');
+  if (!drawerAfter.focusOnTrigger) throw new Error('Drawer: 閉じてもフォーカスがトリガーへ戻らない');
 
   // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
   // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)

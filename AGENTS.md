@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Dialog, Divider, Grid, Icon, IconButton, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -183,6 +183,36 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 既定は装飾: 支援技術から隠す。意味のある区切り(セクションの境界)は見出し構造が運ぶべきで、線に意味を載せない。
 - 集合の中の意味的な区切り(Menu 内の separator 等)はその集合の契約が定める。Divider 単体は意味を持たない。
+
+### Drawer(契約 0.0.0-alpha.1)
+
+画面の端に寄って開く modal(overlay の modal 類。Dialog が中央、Drawer は端。overlay.md §5)。背後を scrim で覆い操作を封じ、フォーカスを中に捕捉し、閉じたら開いた元へ戻す。アプリが開閉を所有する(open は値。overlay.md §6)。Web は Dialog と同じ native `<dialog>` + showModal() を土台にする: focus trap・top-layer・::backdrop・Escape・背後 inert が標準で無償(憲法 第2条 / 第7条)。位置と入りの方向だけが Dialog と違う(端に貼り付き、その端からスライドで入る)。退出は dismiss で選ぶ(既定 light。overlay.md §8。Dialog と同じ)。ナビゲーションやフィルタ等の側パネルが主用途。RFC 0009 の残課題として建てる。
+
+props:
+
+- `open`: boolean(既定 false) — 開いているか。アプリが所有する値(overlay.md §6)。true で showModal、false で close。light dismiss は openchange(false) を発火する。
+- `side`: "inline-start" | "inline-end" | "block-start" | "block-end"(既定 "inline-end") — 貼り付く端(論理方向。layout.md §7。RTL / 縦書きで自動的に反転する)。inline-end は行末側(LTR で右)、inline-start は行頭側(左)、block-start は上、block-end は下。既定は inline-end(詳細・設定の側パネルの通例)。この端からスライドして入る。
+- `dismiss`: "light" | "explicit"(既定 "light") — 退出の仕方(overlay.md §8 の裁定。既定 light。Dialog と同じ)。light は Escape と背後(scrim)クリックで閉じる。explicit はボタンでのみ閉じる(Escape と背後クリックを無効化)。
+
+events(Svelte では callback prop):
+
+- `onopenchange`: (payload: boolean) => void — 開閉の要求を伝える。light dismiss(Escape / 背後クリック。dismiss=light のとき)は false を発火する。アプリが open を更新する(overlay.md §6)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `title`(必須) — 見出し。modal のアクセシブルネーム(aria-labelledby で dialog に結ぶ)。無名の modal を許さない(第1条)。
+- `content`(必須) — 本体。パネルの内容。
+- `actions` — 脚の操作(ボタン群)。省略可。explicit の Drawer はここに閉じる手段を必ず置く。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- Web は Dialog と同じ native `<dialog>` + showModal() を土台にする。focus trap・top-layer・::backdrop(scrim)・Escape・背後 inert が標準で無償(overlay.md §7。第2条 / 第7条)。aria-modal と role=dialog は native が付ける。Drawer が Dialog と違うのは位置(端)と入りの方向(その端からスライド)だけで、振る舞い(捕捉・退出・封鎖)は modal 類として同じ。
+- アクセシブルネームは aria-labelledby で title スロットの id を指す(無名の modal を許さない)。
+- フォーカス: showModal が中へフォーカスを移し、閉じると開いた元(トリガー)へ戻す(native が復帰を所有。トリガー消失時は native 既定)。overlay.md §4 の modal 類。
+- 退出は dismiss で選ぶ(既定 light。Dialog と同じ)。Escape は最上位の1枚だけ(native の top-layer が LIFO を担う。overlay.md §3)。
+- 多重 modal の scrim は単一に保つ(重なっても一段相当。overlay.md §8 / elevation.md §6。native ::backdrop の累積を抑える)。多重 modal 自体を推奨しない(第1条)。
+- 背後スクロール封鎖(overlay.rules.json の modal.blocksScroll)。native showModal は背後を inert にし、body のスクロール固定は実装が併せて行う。
+- 側の方向は論理方向(side)である。位置(貼り付く端)とサイズは論理で持ち、RTL / 縦書きで自動反転する(視覚方向を直書きしない。layout.md §7)。入りの方向(スライドのアニメ)は Expressive で、Web の translate は物理プロパティのため RTL の水平反転までは追従するが、縦書きでの反転は範囲外(位置は正しく、入りの手触りだけが物理に留まる)。
 
 ### Grid(契約 0.0.0-alpha.2)
 
