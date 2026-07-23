@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -19,6 +19,8 @@
   let ship = $state('');
   let account = $state('personal');
   let lastAction = $state('(なし)');
+  let dlgLight = $state(false);
+  let dlgExplicit = $state(false);
 
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
@@ -270,6 +272,41 @@
       </Menu>
     </Cluster>
     <p>最後に選んだ操作: {lastAction}</p>
+  </section>
+
+  <section>
+    <h2>Dialog</h2>
+    <p>
+      ビューポート中央の modal(native <code>&lt;dialog&gt;</code> + showModal)。focus trap・top-layer・scrim・
+      Escape・背後 inert は標準が無償で満たす(憲法 第2条)。開閉はアプリが所有。light は Escape / 背後クリックで
+      閉じ、explicit はボタンでのみ閉じる。
+    </p>
+    <Cluster gap="md">
+      <Button onclick={() => (dlgLight = true)}>light を開く</Button>
+      <Button variant="outlined" color="danger" onclick={() => (dlgExplicit = true)}>explicit(削除確認)</Button>
+    </Cluster>
+
+    <Dialog bind:open={dlgLight} onopenchange={(o) => (dlgLight = o)}>
+      {#snippet title()}お知らせ{/snippet}
+      {#snippet content()}
+        <Stack gap="sm">
+          <span>これは light dismiss の Dialog です。Escape か背後(scrim)クリックで閉じます。</span>
+          <span>フォーカスは中に捕捉され、閉じると開いたボタンへ戻ります。</span>
+        </Stack>
+      {/snippet}
+      {#snippet actions()}
+        <Button variant="text" color="plain" onclick={() => (dlgLight = false)}>閉じる</Button>
+      {/snippet}
+    </Dialog>
+
+    <Dialog bind:open={dlgExplicit} dismiss="explicit" onopenchange={(o) => (dlgExplicit = o)}>
+      {#snippet title()}本当に削除しますか{/snippet}
+      {#snippet content()}この操作は取り消せません。explicit なので Escape / 背後クリックでは閉じません。{/snippet}
+      {#snippet actions()}
+        <Button variant="text" color="plain" onclick={() => (dlgExplicit = false)}>取消</Button>
+        <Button color="danger" onclick={() => (dlgExplicit = false)}>削除</Button>
+      {/snippet}
+    </Dialog>
   </section>
 
   <section>

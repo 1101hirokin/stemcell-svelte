@@ -1,0 +1,84 @@
+/* ビューポート中央の modal(overlay の modal 類。Dialog.md)。native `<dialog>` を土台にする。
+   面/影は elevation.modal、角は shape.semantic.dialog、層は layer.modal、scrim は color.app.scrim。
+   focus trap・top-layer・Escape・背後 inert は native showModal が無償で満たす(憲法 第2条)。 */
+.sc-dialog {
+  /* 器はパネルを包むだけ。背後クリック判定のため padding を持たない(target===dialog で背後を見分ける) */
+  padding: 0;
+  border: 0;
+  margin: auto; /* ビューポート中央 */
+  max-inline-size: min(92vw, 32rem);
+  inline-size: 100%;
+  box-sizing: border-box;
+  background: var(--elevation-modal-surface);
+  box-shadow: var(--elevation-modal-shadow);
+  border-radius: var(--shape-semantic-dialog);
+  color: var(--color-app-foreground);
+  /* top-layer なので通常 z は不要だが、非対応環境の保険として層トークンを引く */
+  z-index: var(--layer-modal-z);
+  overflow: hidden;
+  /* 出現(overlay.md §2: entrance)。reduced-motion で 0ms でも「現れる」意味は保つ(第7条) */
+  animation: sc-dialog-in var(--motion-entrance-duration) var(--motion-entrance-easing);
+}
+/* scrim(modal 背後。elevation.md §6。単一。多重でも一段相当=RFC 0009)。native ::backdrop に敷く */
+.sc-dialog::backdrop {
+  background: var(--color-app-scrim);
+  animation: sc-dialog-scrim-in var(--motion-entrance-duration) var(--motion-entrance-easing);
+}
+/* 退場のトークンを参照する transition(閉じる直前の opacity に効く。exit の手触りは Expressive) */
+.sc-dialog {
+  transition: opacity var(--motion-exit-duration) var(--motion-exit-easing);
+}
+
+.sc-dialog-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-md);
+  padding: var(--spacing-inset-lg);
+  max-block-size: min(88vh, 44rem);
+  overflow-y: auto;
+}
+.sc-dialog-title {
+  margin: 0;
+  font-family: var(--typography-title-md-font-family);
+  font-size: var(--typography-title-md-font-size);
+  font-weight: var(--typography-title-md-font-weight);
+  line-height: var(--typography-title-md-line-height);
+  letter-spacing: var(--typography-title-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-dialog-content {
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+  color: var(--color-app-foreground);
+}
+/* 脚の操作。既定は右寄せ(並びは Expressive) */
+.sc-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spacing-inline-md);
+}
+
+/* modal は背後スクロールを封じる(overlay.rules.json の modal.blocksScroll)。open のときルートを固定する */
+:root:has(.sc-dialog[open]) {
+  overflow: hidden;
+}
+
+@keyframes sc-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+}
+@keyframes sc-dialog-scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-dialog,
+  .sc-dialog::backdrop {
+    animation-duration: 0ms;
+  }
+}
