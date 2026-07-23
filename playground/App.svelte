@@ -295,6 +295,7 @@
         </Stack>
       {/snippet}
       {#snippet actions()}
+        <Button variant="outlined" color="plain" onclick={() => (dlgExplicit = true)}>確認を重ねて開く</Button>
         <Button variant="text" color="plain" onclick={() => (dlgLight = false)}>閉じる</Button>
       {/snippet}
     </Dialog>

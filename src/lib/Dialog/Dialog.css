@@ -1,6 +1,7 @@
 /* ビューポート中央の modal(overlay の modal 類。Dialog.md)。native `<dialog>` を土台にする。
    面/影は elevation.modal、角は shape.semantic.dialog、層は layer.modal、scrim は color.app.scrim。
-   focus trap・top-layer・Escape・背後 inert は native showModal が無償で満たす(憲法 第2条)。 */
+   focus trap・top-layer・Escape・背後 inert は native showModal が無償で満たす(憲法 第2条)。
+   出入りは native の [open] 遷移で表す(entrance/exit の transition。allow-discrete で display も遷移させる)。 */
 .sc-dialog {
   /* 器はパネルを包むだけ。背後クリック判定のため padding を持たない(target===dialog で背後を見分ける) */
   padding: 0;
@@ -16,17 +17,52 @@
   /* top-layer なので通常 z は不要だが、非対応環境の保険として層トークンを引く */
   z-index: var(--layer-modal-z);
   overflow: hidden;
-  /* 出現(overlay.md §2: entrance)。reduced-motion で 0ms でも「現れる」意味は保つ(第7条) */
-  animation: sc-dialog-in var(--motion-entrance-duration) var(--motion-entrance-easing);
+  /* 退場(overlay.md §2: exit)。閉じる = [open] が外れる遷移。display/overlay を allow-discrete で遷らせ、
+     opacity/transform が終わってから非表示にする。reduced-motion で 0ms でも「消える」意味は保つ(第7条) */
+  opacity: 0;
+  transform: translateY(0.5rem) scale(0.98);
+  transition:
+    opacity var(--motion-exit-duration) var(--motion-exit-easing),
+    transform var(--motion-exit-duration) var(--motion-exit-easing),
+    display var(--motion-exit-duration) allow-discrete,
+    overlay var(--motion-exit-duration) allow-discrete;
 }
-/* scrim(modal 背後。elevation.md §6。単一。多重でも一段相当=RFC 0009)。native ::backdrop に敷く */
+.sc-dialog[open] {
+  opacity: 1;
+  transform: none;
+  /* 出現は entrance の速さで(@starting-style の初期値 → この定常値へ遷移する) */
+  transition-duration: var(--motion-entrance-duration);
+  transition-timing-function: var(--motion-entrance-easing);
+}
+@starting-style {
+  .sc-dialog[open] {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+}
+
+/* scrim(modal 背後。elevation.md §6)。native ::backdrop に敷く。最上位以外(data-under)は透過にして
+   見える scrim を一段に保つ(単一。多重でも一段相当=RFC 0009。積算を抑える) */
 .sc-dialog::backdrop {
   background: var(--color-app-scrim);
-  animation: sc-dialog-scrim-in var(--motion-entrance-duration) var(--motion-entrance-easing);
+  opacity: 0;
+  transition:
+    opacity var(--motion-exit-duration) var(--motion-exit-easing),
+    display var(--motion-exit-duration) allow-discrete,
+    overlay var(--motion-exit-duration) allow-discrete;
 }
-/* 退場のトークンを参照する transition(閉じる直前の opacity に効く。exit の手触りは Expressive) */
-.sc-dialog {
-  transition: opacity var(--motion-exit-duration) var(--motion-exit-easing);
+.sc-dialog[open]::backdrop {
+  opacity: 1;
+  transition-duration: var(--motion-entrance-duration);
+  transition-timing-function: var(--motion-entrance-easing);
+}
+.sc-dialog[data-under]::backdrop {
+  background: transparent;
+}
+@starting-style {
+  .sc-dialog[open]::backdrop {
+    opacity: 0;
+  }
 }
 
 .sc-dialog-panel {
@@ -65,20 +101,11 @@
   overflow: hidden;
 }
 
-@keyframes sc-dialog-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.5rem) scale(0.98);
-  }
-}
-@keyframes sc-dialog-scrim-in {
-  from {
-    opacity: 0;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   .sc-dialog,
-  .sc-dialog::backdrop {
-    animation-duration: 0ms;
+  .sc-dialog[open],
+  .sc-dialog::backdrop,
+  .sc-dialog[open]::backdrop {
+    transition-duration: 0ms;
   }
 }

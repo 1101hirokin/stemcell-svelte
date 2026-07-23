@@ -25,18 +25,29 @@ it('actions は省略できる', () => {
   expect(container.querySelector('.sc-dialog-actions')).toBeNull();
 });
 
-it('light: 背後(scrim)クリック=target が dialog 自身なら openchange(false)', async () => {
+it('light: 背後(scrim)で押して背後で離すと openchange(false)', async () => {
   const onopenchange = vi.fn();
   const { container } = render(Dialog, { props: { open: true, title, content, onopenchange } });
   const d = dlg(container);
-  await fireEvent.click(d); // target === dialog(背後)
+  await fireEvent.pointerDown(d); // 押下も背後
+  await fireEvent.click(d); // 解放も背後
   expect(onopenchange).toHaveBeenCalledWith(false);
+});
+
+it('light: パネル内で押して背後で離すドラッグ選択では閉じない(誤爆防止)', async () => {
+  const onopenchange = vi.fn();
+  const { container } = render(Dialog, { props: { open: true, title, content, onopenchange } });
+  await fireEvent.pointerDown(container.querySelector('.sc-dialog-content')!); // 押下はパネル内
+  await fireEvent.click(dlg(container)); // click の target は共通祖先の dialog になる
+  expect(onopenchange).not.toHaveBeenCalled();
 });
 
 it('light: パネル内クリックは閉じない(target が子要素)', async () => {
   const onopenchange = vi.fn();
   const { container } = render(Dialog, { props: { open: true, title, content, onopenchange } });
-  await fireEvent.click(container.querySelector('.sc-dialog-panel')!);
+  const panel = container.querySelector('.sc-dialog-panel')!;
+  await fireEvent.pointerDown(panel);
+  await fireEvent.click(panel);
   expect(onopenchange).not.toHaveBeenCalled();
 });
 
@@ -45,7 +56,9 @@ it('explicit: 背後クリックでは閉じない', async () => {
   const { container } = render(Dialog, {
     props: { open: true, dismiss: 'explicit', title, content, onopenchange },
   });
-  await fireEvent.click(dlg(container));
+  const d = dlg(container);
+  await fireEvent.pointerDown(d);
+  await fireEvent.click(d);
   expect(onopenchange).not.toHaveBeenCalled();
 });
 

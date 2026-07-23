@@ -327,6 +327,39 @@ try {
     throw new Error(`Dialog: showModal で top-layer(:modal)に開かない(${JSON.stringify(dlgState)})`);
   if (!dlgState.labelled) throw new Error('Dialog: aria-labelledby が title を指さない');
   if (!dlgState.focusInside) throw new Error('Dialog: 開いてもフォーカスが中に入らない(focus trap)');
+  // 多重 modal の単一 scrim(RFC 0009)。light の中から確認を重ねて開くと、下の light に data-under が付き
+  // ::backdrop が透過になる(見える scrim は最上位の一段だけ。native ::backdrop の積算を抑える)。
+  await page.locator('button', { hasText: '確認を重ねて開く' }).click();
+  await page.waitForTimeout(200);
+  const stacked = await page.evaluate(() => {
+    const ds = [...document.querySelectorAll('.sc-dialog')] as HTMLDialogElement[];
+    const openDs = ds.filter((d) => d.open);
+    const under = ds.filter((d) => d.hasAttribute('data-under'));
+    const underTransparent = under.every((d) => {
+      const bg = getComputedStyle(d, '::backdrop').backgroundColor;
+      return bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent';
+    });
+    return {
+      openCount: openDs.length,
+      underCount: under.length,
+      topmostNotUnder: openDs.length > 0 && !openDs[openDs.length - 1].hasAttribute('data-under'),
+      underTransparent,
+    };
+  });
+  if (stacked.openCount !== 2)
+    throw new Error(`Dialog: 多重 modal が2枚開かない(${JSON.stringify(stacked)})`);
+  if (stacked.underCount !== 1 || !stacked.topmostNotUnder)
+    throw new Error(`Dialog: 単一 scrim の印(data-under)が最上位以外の1枚に付かない(${JSON.stringify(stacked)})`);
+  if (!stacked.underTransparent)
+    throw new Error('Dialog: 下の modal の ::backdrop が透過でない(scrim が積算する。RFC 0009 の単一に反する)');
+  await page.locator('button', { hasText: '取消' }).click(); // 重ねた explicit を閉じる
+  await page.waitForTimeout(200);
+  const afterUnstack = await page.evaluate(() => ({
+    openCount: [...document.querySelectorAll('.sc-dialog')].filter((d) => (d as HTMLDialogElement).open).length,
+    underCount: document.querySelectorAll('.sc-dialog[data-under]').length,
+  }));
+  if (afterUnstack.openCount !== 1 || afterUnstack.underCount !== 0)
+    throw new Error(`Dialog: 重ねた modal を閉じても data-under が残る(${JSON.stringify(afterUnstack)})`);
   // Escape で閉じ(light)、フォーカスがトリガーへ戻る
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);

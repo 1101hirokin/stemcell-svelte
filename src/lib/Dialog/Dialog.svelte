@@ -1,5 +1,15 @@
+<script module lang="ts">
+  // 開いている modal の重なり(単一 scrim。RFC 0009 / overlay.md §8)。native の ::backdrop は枚数ぶん積算する
+  // ので、最上位以外に data-under を付けて ::backdrop を透過にし、見える scrim を一段に保つ。
+  const modalStack: HTMLDialogElement[] = [];
+  function restackModals() {
+    modalStack.forEach((el, i) => el.toggleAttribute('data-under', i < modalStack.length - 1));
+  }
+</script>
+
 <script lang="ts">
   import './Dialog.css';
+  import { onDestroy } from 'svelte';
   import { META } from './meta';
   import type { Snippet } from 'svelte';
 
@@ -17,7 +27,7 @@
     title: Snippet;
     /** 本体。 */
     content: Snippet;
-    /** 脚の操作(ボタン群)。省略可。explicit の Dialog はここに閉じる手段を置く。 */
+    /** 脚の操作(ボタン群)。省略可。explicit の Dialog はここに閉じる手段を必ず置く。 */
     actions?: Snippet;
   }
   let {
@@ -38,24 +48,54 @@
   $effect(() => {
     const el = dialogEl;
     if (!el || typeof el.showModal !== 'function') return;
-    if (open && !el.open) el.showModal();
-    else if (!open && el.open) el.close();
+    if (open && !el.open) {
+      el.showModal();
+      if (!modalStack.includes(el)) modalStack.push(el);
+      restackModals();
+    } else if (!open && el.open) {
+      el.close();
+    }
   });
+
+  // explicit なのに閉じる手段(actions)が無いと、Escape も背後も効かず閉じ込められる(Dialog.md §3)。
+  // title を required で型強制したのと対に、actions は light では省略可なので型では縛れない。実バグなので警告する。
+  $effect(() => {
+    if (dismiss === 'explicit' && !actions) {
+      console.warn(
+        '[stemcell] Dialog: dismiss="explicit" は Escape / 背後クリックで閉じません。actions に閉じる手段を必ず置いてください。',
+      );
+    }
+  });
+
+  function unstack(el: HTMLDialogElement | undefined) {
+    if (!el) return;
+    const i = modalStack.indexOf(el);
+    if (i >= 0) modalStack.splice(i, 1);
+    el.removeAttribute('data-under');
+    restackModals();
+  }
+  onDestroy(() => unstack(dialogEl));
 
   // native の cancel(Escape)。explicit では閉じない(cancel を握りつぶす)。light は既定に任せ、native が
   // 閉じて close が飛ぶ。
   function onCancel(e: Event) {
     if (dismiss === 'explicit') e.preventDefault();
   }
-  // native が閉じたら所有者へ橋渡し。自分で close したときは open が既に false なので二重発火しない。
+  // native が閉じたら重なりから外し、所有者へ橋渡し。自分で close したときは open が既に false なので二重発火しない。
   function onClose() {
+    unstack(dialogEl);
     if (open) onopenchange?.(false);
   }
-  // 背後(scrim)クリックで閉じる(light のみ)。::backdrop クリックの event.target は <dialog> 自身になる
-  // (パネルは子要素なので区別できる)。dialog に padding を持たせず、パネルが器を満たすので、この判定で足りる。
+  // 背後(scrim)クリックで閉じる(light のみ)。::backdrop の event.target は <dialog> 自身になる(パネルは子)。
+  // 押下と解放の両方が背後だったときだけ閉じる(パネル内の文字をドラッグ選択して外で離す誤爆を防ぐ)。
+  let pressedOnBackdrop = false;
+  function onDialogPointerdown(e: PointerEvent) {
+    pressedOnBackdrop = e.target === dialogEl;
+  }
   function onDialogClick(e: MouseEvent) {
-    if (dismiss !== 'light') return;
-    if (e.target === dialogEl) onopenchange?.(false);
+    const onBackdrop = e.target === dialogEl && pressedOnBackdrop;
+    pressedOnBackdrop = false;
+    if (dismiss === 'light' && onBackdrop) onopenchange?.(false);
   }
 </script>
 
@@ -65,6 +105,7 @@
   aria-labelledby={titleId}
   oncancel={onCancel}
   onclose={onClose}
+  onpointerdown={onDialogPointerdown}
   onclick={onDialogClick}
 >
   <div class="sc-dialog-panel">
