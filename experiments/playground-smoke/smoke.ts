@@ -54,6 +54,8 @@ try {
     icon: document.querySelectorAll('.sc-icon').length,
     radiogroup: document.querySelectorAll('.sc-radiogroup').length,
     radio: document.querySelectorAll('.sc-radio').length,
+    card: document.querySelectorAll('.sc-card').length,
+    link: document.querySelectorAll('.sc-link').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -709,6 +711,67 @@ try {
     return before !== input.checked || input.checked; // クリックで選択される(label 機構)
   });
   if (!labelToggle) throw new Error('Radio: label のクリックで選択されない(label 機構が死んでいる)');
+
+  // Card: 既定は影の面(box-shadow あり・border 透明で寸法確保)、outlined は影を消し中立 border を可視化。
+  // 切替で寸法が動かない(base の透明 border と outlined の可視 border が同幅)を実機で守る。
+  const card = await page.evaluate(() => {
+    const plain = document.querySelector('.sc-card:not([data-outlined="true"])') as HTMLElement;
+    const outlined = document.querySelector('.sc-card[data-outlined="true"]') as HTMLElement;
+    const cs = (el: HTMLElement) => getComputedStyle(el);
+    const transparent = (c: string) => c === 'rgba(0, 0, 0, 0)' || c === 'transparent';
+    return {
+      plainHasShadow: cs(plain).boxShadow !== 'none',
+      plainBorderTransparent: transparent(cs(plain).borderTopColor),
+      outlinedNoShadow: cs(outlined).boxShadow === 'none',
+      outlinedBorderVisible: !transparent(cs(outlined).borderTopColor),
+      sameBorderWidth: cs(plain).borderTopWidth === cs(outlined).borderTopWidth,
+    };
+  });
+  if (!card.plainHasShadow || !card.plainBorderTransparent)
+    throw new Error(`Card: 既定が影の面(box-shadow + 透明 border)でない(${JSON.stringify(card)})`);
+  if (!card.outlinedNoShadow || !card.outlinedBorderVisible)
+    throw new Error(`Card: outlined が影を消して中立 border を可視化しない(${JSON.stringify(card)})`);
+  if (!card.sameBorderWidth)
+    throw new Error('Card: 影の面と枠の面で border 幅が違う(切替で寸法が動く。透明 border で揃えていない)');
+
+  // Link: native <a> で下線(非色手がかり。WCAG 1.4.1)、大きさは周囲を継承(自分で主張しない。Link.md §2)。
+  // external は target=_blank + rel=noopener(native の新文脈遷移と reverse-tabnabbing 防御)、視覚アイコンは
+  // 装飾(aria-hidden)、告知は視覚的に隠した文字(clip されて幅ゼロ)が担う。
+  const link = await page.evaluate(() => {
+    const links = [...document.querySelectorAll('.sc-link')] as HTMLAnchorElement[];
+    const inBig = links.find((a) => {
+      const p = a.closest('span');
+      return p && parseFloat(getComputedStyle(p).fontSize) > 20;
+    });
+    const inNormal = links.find((a) => a.getAttribute('href') === '/docs' && a !== inBig);
+    const ext = links.find((a) => a.target === '_blank') as HTMLAnchorElement;
+    // house の Icon SSOT を使う(グリフ直書きでない)。装飾なので Icon 自身が aria-hidden を付ける
+    const icon = ext?.querySelector('.sc-link-external .sc-icon') as SVGElement;
+    const sr = ext?.querySelector('.sc-link-sr-only') as HTMLElement;
+    return {
+      isAnchor: links.every((a) => a.tagName === 'A'),
+      underlined: getComputedStyle(links[0]).textDecorationLine.includes('underline'),
+      inheritsSize:
+        inBig && inNormal
+          ? parseFloat(getComputedStyle(inBig).fontSize) > parseFloat(getComputedStyle(inNormal).fontSize) + 4
+          : false,
+      extTarget: ext?.target,
+      extRel: ext?.getAttribute('rel') ?? '',
+      iconIsHouseIcon: !!icon,
+      iconHidden: icon?.getAttribute('aria-hidden') === 'true',
+      srClipped: sr ? Math.round(sr.getBoundingClientRect().width) <= 1 : false,
+      srText: sr?.textContent ?? '',
+    };
+  });
+  if (!link.isAnchor) throw new Error('Link: native <a> で描画されていない');
+  if (!link.underlined) throw new Error('Link: 下線(非色手がかり。WCAG 1.4.1)を持たない');
+  if (!link.inheritsSize) throw new Error('Link: 周囲の文字サイズを継承しない(自分で大きさを主張している。Link.md §2)');
+  if (link.extTarget !== '_blank' || !link.extRel.includes('noopener'))
+    throw new Error(`Link(external): target=_blank / rel=noopener が無い(${JSON.stringify(link)})`);
+  if (!link.iconIsHouseIcon) throw new Error('Link(external): 視覚アイコンが house の Icon(.sc-icon)でない(グリフ直書き)');
+  if (!link.iconHidden) throw new Error('Link(external): 視覚アイコンが aria-hidden でない');
+  if (!link.srClipped || !link.srText.includes('opens in new tab'))
+    throw new Error(`Link(external): 告知が視覚的に隠されていない/文言が無い(${JSON.stringify(link)})`);
 
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
