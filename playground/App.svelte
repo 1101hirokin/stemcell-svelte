@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -199,6 +199,73 @@
       <span style="font-size: 1.4rem">大きな文でも <Link href="/docs">自分の大きさを主張しない</Link>。</span>
       <Link href="https://example.com" external>外部サイトへ(新しいタブ)</Link>
     </Stack>
+  </section>
+
+  <section>
+    <h2>Badge</h2>
+    <p>
+      状態や数の小さな印。読むもので押せない。数(count)と存在(dot)だけ。max(既定99)超は「{'{max}'}+」へ丸め、
+      量の意味は保つ(存在へ降格しない)。色は報告の intent(danger/warning/success/info)、既定 info/filled。
+      anchor を包むと隅へ重なる。
+    </p>
+    <div class="pg-row">
+      <code class="pg-tag">count / 丸め</code>
+      <Cluster gap="md" align="center">
+        <Badge count={3} />
+        <Badge count={0} />
+        <Badge count={120} max={99} color="danger" />
+        <Badge count={8} color="success" variant="soft" />
+        <Badge count={5} color="warning" />
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">dot / anchor</code>
+      <Cluster gap="lg" align="center">
+        <Badge dot label="新着あり" color="danger" />
+        <Badge count={12} color="danger">
+          <IconButton label="通知"><Icon name="bookmark" /></IconButton>
+        </Badge>
+        <Badge dot label="未読メッセージあり" color="info">
+          <IconButton label="メッセージ" variant="soft"><Icon name="menu" /></IconButton>
+        </Badge>
+      </Cluster>
+    </div>
+  </section>
+
+  <section>
+    <h2>Avatar</h2>
+    <p>
+      主体の顔。src 画像 → name のイニシャル、と退避しても寸法・全円・名前は不変(第7条)。寸法は avatar 段
+      (24/32/40px。rem 建て)。イニシャルの切り出しは暫定規則(§5 の Normative 共有規則は ratify 待ち)。
+      壊れた src はイニシャルへ退く実演を含む。
+    </p>
+    <div class="pg-row">
+      <code class="pg-tag">size / イニシャル</code>
+      <Cluster gap="md" align="center">
+        <Avatar name="山田太郎" size="sm" />
+        <Avatar name="田中花子" size="md" />
+        <Avatar name="Ada Lovelace" size="lg" />
+        <Avatar name="Grace Hopper" />
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">画像 / 退避</code>
+      <Cluster gap="md" align="center">
+        <Avatar name="Octocat" src="https://github.com/github.png" size="lg" />
+        <Avatar name="退避 太郎" src="https://x.example/broken-404.png" size="lg" />
+        <Badge dot label="オンライン" color="success">
+          <Avatar name="在席 花子" size="lg" />
+        </Badge>
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">decorative</code>
+      <Cluster gap="sm" align="center">
+        <!-- 隣に可視の名前があるので装飾へ落とす(名前の二重読みを避ける。§3) -->
+        <Avatar name="佐藤一郎" decorative />
+        <span>佐藤一郎</span>
+      </Cluster>
+    </div>
   </section>
 
   <section>
