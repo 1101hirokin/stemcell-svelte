@@ -200,7 +200,7 @@
     </Text>
     <Stack gap="sm">
       <Text variant="body-sm">本文の中に <Link href="/docs">こういうリンク</Link> が現れる(周囲の文字サイズを継承する)。</Text>
-      <Text as="p" variant="title-lg">大きな文でも <Link href="/docs">自分の大きさを主張しない</Link>。</Text>
+      <Text as="p" variant="title-md">大きな文でも <Link href="/docs">自分の大きさを主張しない</Link>。</Text>
       <Link href="https://example.com" external>外部サイトへ(新しいタブ)</Link>
     </Stack>
   </section>
