@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -18,6 +18,7 @@
   let notify = $state(true);
   let ship = $state('');
   let account = $state('personal');
+  let lastAction = $state('(なし)');
 
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
@@ -233,6 +234,42 @@
         </Select>
       </Stack>
     </Stack>
+  </section>
+
+  <section>
+    <h2>Menu</h2>
+    <p>
+      アクションの集合を畳んで出す(APG の menu button + menu)。トリガーは Menu が所有し、中への移動は実 DOM
+      フォーカスの roving。選ぶと活性化して閉じ、フォーカスはトリガーへ戻る。値は持たない(行為であって選択でない)。
+    </p>
+    <Cluster gap="md">
+      <Menu
+        items={[
+          { id: 'edit', label: '編集', icon: 'pencil' },
+          { id: 'duplicate', label: '複製', icon: 'clipboard' },
+          { id: 'share', label: '共有', icon: 'share', description: 'リンクを発行して渡す' },
+          { id: 'archive', label: 'アーカイブ', disabled: true },
+          { id: 'delete', label: '削除', icon: 'delete' },
+        ]}
+        onselect={(id) => (lastAction = id)}
+      >
+        {#snippet trigger()}操作<Icon name="chevron.down" />{/snippet}
+      </Menu>
+      <Menu
+        size="sm"
+        items={[
+          { id: 'rename', label: '名前を変更' },
+          { id: 'move', label: '移動' },
+        ]}
+        onselect={(id) => (lastAction = id)}
+      >
+        {#snippet trigger()}<Icon name="dots.horizontal" />{/snippet}
+      </Menu>
+      <Menu disabled items={[{ id: 'x', label: 'なし' }]} onselect={() => {}}>
+        {#snippet trigger()}無効{/snippet}
+      </Menu>
+    </Cluster>
+    <p>最後に選んだ操作: {lastAction}</p>
   </section>
 
   <section>

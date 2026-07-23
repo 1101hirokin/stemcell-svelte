@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Divider, Grid, Icon, IconButton, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Divider, Grid, Icon, IconButton, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -211,6 +211,37 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 名前は label prop が運ぶ。中のアイコンは装飾(iconography.md §5)であり、名前を二重に運ばない。
 - disabled の3要求と当たり判定の門/目標は Button と同じ(state.md §5 / size.md §4)。視覚が絵1つでも当たり判定は縮まない。
+
+### Menu(契約 0.0.0-alpha.1)
+
+アクションの集合を畳んで出す一時的なメニュー(APG の menu button + menu パターン)。トリガー(button, aria-haspopup=menu)を押すと menuitem の列がポップオーバーで開き、選ぶと活性化して閉じる。値を持たない: menuitem は選択(selected)でなく行為(state.md §6。Select は値を持つが Menu は持たない)。Popover を合成する(overlay の popover 類。面/影/角/層/出入りは Popover が所有)。中への移動は実 DOM フォーカスの roving(overlay.md §4 の二形態のうち Menu 側。Select の listbox は仮想フォーカスで対を成す)。トリガーは Menu が所有し ARIA を配線する(RFC 0008。Button が閉じた契約なので asChild 型に寄せず、逃げ道は Popover プリミティブが担う。第4条)。サブメニュー(menu-in-menu)と menuitemcheckbox / menuitemradio は初版の範囲外・将来 RFC。
+
+props:
+
+- `items`: array — メニュー項目の列。データとして渡す(Select の options と同じ理由: 4プラットフォーム中立の契約はデータが安い。Select.md §3 / RFC 0008)。区切り(separator)と節(section)は初版で持たず、items の構造拡張で後から足せる(非破壊)。
+- `disabled`: boolean(既定 false) — トリガー全体を無効化する(state.md §3.1 / §5)。開けない。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段(TextField / Select と同じ)。トリガーの inset に効く。項目の密度は size 非依存で固定(Select の option が段によらず一定なのと同じ。ドロップダウンの中身は器の寸法に追従しない)。
+- `placement`: "block-end" | "block-start"(既定 "block-end") — トリガーに対する優先の開き方向(論理方向)。Popover へ委譲する(Popover.placement)。画面端での反転は Expressive(overlay.md §5)。
+
+events(Svelte では callback prop):
+
+- `onselect`: (payload: string) => void — menuitem が活性化されたことを伝える。payload は項目の id。行為の起動であって値の変化ではない(Select の change と別物: Menu は値を持たない)。活性化するとメニューは閉じ、フォーカスはトリガーへ戻る。change でのページ遷移禁止(WCAG 3.2.2)は Select と異なり当てはまらない: Menu の select はユーザの明示的な起動であって探索中の副作用ではない。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `trigger`(必須) — トリガー button の中身(ラベル・アイコン)。Menu が button 要素と ARIA(aria-haspopup=menu / aria-expanded / aria-controls)を所有し、中身だけを消費者が与える(Select が combobox トリガーを所有するのと同型)。アイコンのみのトリガー(オーバーフローの ⋯ 等)もここにアイコンを置いて作る。自前の button を持ち込みたい escape は Popover プリミティブへ降りる(第4条)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- APG の menu button + menu パターン。トリガーは role=button + aria-haspopup=menu + aria-expanded(open に追従)+ aria-controls(メニューの id)。ポップアップは role=menu、各項目は role=menuitem。キーは web-keys.rules.json の arrows.menu(RFC 0008)。
+- 配線は双方向。トリガーからメニューへは aria-controls、メニューからトリガーへは aria-labelledby(menu 容器がトリガーの id を指し、どのトリガーに属すかを支援技術へ伝える。APG menu button の正準実装)。
+- 項目の description(副文)は menuitem の accessible name に label と連結して読まれる(補足は名前の一部。aria-describedby で分離しない — 初版の決定。分離が要る事由が立てば将来 RFC)。
+- 中への移動は実 DOM フォーカスの roving(overlay.md §4 の二形態のうち Menu 側。role=menuitem を実フォーカスする。Select / Combobox の listbox が DOM フォーカスをトリガーに留めて aria-activedescendant で仮想的に指すのと対を成す)。開くと先頭 menuitem(ArrowUp なら末尾)へ実フォーカスする。
+- activate は Enter と Space の両方(APG menu。listbox が Enter のみで Space を type-ahead に割いたのと異なる — menuitem は活性化が主で Space も活性化に割く。web-keys arrows.menu)。活性化するとメニューを閉じ、フォーカスをトリガーへ戻す。Escape も閉じてトリガーへ戻す。
+- disabled の menuitem は roving を飛ばし、aria-disabled で伝える(活性化しない。state.md §5)。
+- 開閉(open)を prop に持たないのは書き落としではない。Menu は Popover を合成してコンポーネント内部が open を所有する(overlay.md §6: Select / Tooltip と同じく開閉をアプリに管理させるのは実用に反する)。open は値であって契約の面(prop)に現れない。
+- トリガーを Menu が所有するのは a11y の保証のため(RFC 0008)。ARIA の配線を消費者の任意要素へ委ねると穴が生じうる。Button が閉じた契約(rest を転送しない)であることとも整合する。自前トリガーが要るときは Popover プリミティブ + arrows.menu を消費者が合成する(第4条の逃げ道)。
+- 標的の門: size.md §4。
 
 ### Popover(契約 0.0.0-alpha.0)
 
