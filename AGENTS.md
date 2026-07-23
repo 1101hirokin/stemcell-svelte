@@ -98,6 +98,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。controlled の checked と両立する非破壊の上乗せ。Web は native の name 属性(checked のとき値が送信に載る)。
 - `checked`: boolean(既定 false) — 値であって状態ではない(state.md §6)。アプリが所有し、部品は change で通知するだけ(field.md §5)。語彙は Switch と同一(field.md §7: 同じ観念が二つの名を持てば共通言語が壊れる。第2条)。
 - `indeterminate`: boolean(既定 false) — 第三の値であり状態ではない(state.md §6: aria-checked は tristate で、mixed は第三の値)。見た目と支援技術への伝達を上書きするが、checked の値は変えない(HTML の checked 属性と indeterminate プロパティの分離と同じモデル。M3 / Carbon / Base UI / Compose の TriState も同型)。反例併記: Radix / Chakra / Polaris は checked='indeterminate' の三値で表す。boolean の checked を三値化すると Switch との語彙統一(checked は boolean)が崩れるため採らない。主用途は親子リストの集計表示。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。
@@ -211,7 +212,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 退出は dismiss で選ぶ(既定 light。Dialog と同じ)。Escape は最上位の1枚だけ(native の top-layer が LIFO を担う。overlay.md §3)。
 - 多重 modal の scrim は単一に保つ(重なっても一段相当。overlay.md §8 / elevation.md §6。native ::backdrop の累積を抑える)。多重 modal 自体を推奨しない(第1条)。
 - 背後スクロール封鎖(overlay.rules.json の modal.blocksScroll)。native showModal は背後を inert にし、body のスクロール固定は実装が併せて行う。
-- 側の方向は論理方向(side)であり、RTL / 縦書きで自動反転する(視覚方向を直書きしない。layout.md §7)。
+- 側の方向は論理方向(side)である。位置(貼り付く端)とサイズは論理で持ち、RTL / 縦書きで自動反転する(視覚方向を直書きしない。layout.md §7)。入りの方向(スライドのアニメ)は Expressive で、Web の translate は物理プロパティのため RTL の水平反転までは追従するが、縦書きでの反転は範囲外(位置は正しく、入りの手触りだけが物理に留まる)。
 
 ### Grid(契約 0.0.0-alpha.2)
 
@@ -358,6 +359,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
+- `name`: string((省略可)) — グループのフォーム名(native の radio が同一 name で相互排他とグループ送信を得る。field.md §5)。各 Radio へ配られ、項目は自分の name を持たない(値の所有がグループなのと同型)。Web は native の name 属性。
 - `value`: string((省略可)) — 選択中の Radio の value。アプリが所有する(field.md §5)。未指定は未選択であり、契約は未選択を許す。既定選択を置くべきかは業界が割れており(GOV.UK: 誘導を避けるため置くな / NN/g: 最頻値を置け)、アプリの文脈判断である — 契約は両方を表現できる形を取る。
 - `disabled`: boolean(既定 false) — グループ全体の無効。項目へ降りる(state.md §3.1 / §5 の3要求は各項目で満たされる)。
 - `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2)。集合への判定(未選択・不正な組み合わせ)であり、特定の項目に帰属しない(field.md §2「グループの解剖」)。intent の danger 差し替え(state.md §7)は項目の描画へ実装の文脈で降りる。
@@ -388,6 +390,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。pointer 経路は combobox が button で送信対象にならないため、value をミラーする隠し input(または ElementInternals)で参加を補う。touch 経路は native select が name をそのまま持つ。Web は native の name 属性。
 - `value`: string(既定 "") — 選択中の選択肢の value。空文字は未選択。アプリが所有する(field.md §5)。
 - `options`: array — 選択肢の列。データとして渡す(裁定: native select は文字列 label のみ。リッチは name/文字列駆動の追加欄で、任意内容の option は範囲外・将来 RFC。Select.md §3 / RFC 0007)。
 - `placeholder`: string((省略可)) — 未選択時の表示文。label の代替ではない(field.md §2)。Web の表現は「無効化された未選択の先頭 option」(選ばれ得ない)。
@@ -487,6 +490,7 @@ props:
 
 props:
 
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。controlled の checked と両立する非破壊の上乗せ。Web は native の name 属性(checked のとき値が送信に載る)。
 - `checked`: boolean(既定 false) — 値であって状態ではない(state.md §6)。アプリが所有する。語彙は Checkbox と同一(field.md §7: 業界は同一 DS 内でも checked / selected / toggled と割れているが、Stemcell は checked に統一する。第2条)。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。
 
@@ -533,6 +537,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。controlled の value と両立する非破壊の上乗せ。Web は native の name 属性。
 - `value`: string(既定 "") — 現在値。アプリが所有する(field.md §5: SwiftUI の Binding も Compose の value+onValueChange も単方向で、Web の controlled と同型)。部品は change で新しい値を通知するだけで、自分では保持しない。uncontrolled は土地の便宜であり契約外。
 - `placeholder`: string((省略可)) — 入力例のヒント。label の代替ではない(field.md §2: 入力した瞬間に消える名前は、名前ではない)。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
@@ -570,6 +575,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。controlled の value と両立する非破壊の上乗せ。Web は native の name 属性。
 - `value`: string(既定 "") — 現在値。アプリが所有する(field.md §5: SwiftUI の Binding も Compose の value+onValueChange も単方向で、Web の controlled と同型)。部品は change で新しい値を通知するだけで、自分では保持しない。uncontrolled は土地の便宜であり契約外。
 - `placeholder`: string((省略可)) — 入力例のヒント。label の代替ではない(field.md §2: 入力した瞬間に消える名前は、名前ではない)。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。

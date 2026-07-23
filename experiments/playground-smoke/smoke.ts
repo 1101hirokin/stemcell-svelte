@@ -697,6 +697,35 @@ try {
   if (sb.order.join(',') !== 'sc-sidebar-side,sc-sidebar-content')
     throw new Error(`Sidebar の DOM 順が視覚順と食い違う: ${sb.order.join(',')}`);
 
+  // フォーム参加(name。field.md §5 / RFC 0011)。name を与えた form 部品が native の <form> 送信へ載る。
+  // FormData を実機で組み、controlled の値がその名前で参加していること・Select の pointer 経路が隠し input で
+  // 補われること・TextField の keyboard=email が native type=email になること・RadioGroup の required が各 radio
+  // input へ配線されることを守る(第2条 / RFC 0010 の充足の実機検証。jsdom では form 送信の実挙動を測れない)。
+  const form = await page.evaluate(() => {
+    const f = document.getElementById('pg-form') as HTMLFormElement;
+    const fd = new FormData(f);
+    const emailInput = f.querySelector('.sc-textfield-input') as HTMLInputElement;
+    const radios = [...f.querySelectorAll('.sc-radio-input')] as HTMLInputElement[];
+    return {
+      entries: Object.fromEntries(fd.entries()),
+      emailType: emailInput?.type,
+      radiosRequired: radios.length > 0 && radios.every((r) => r.required),
+    };
+  });
+  // controlled の初期値(email=a@b.com / subscribe=on / notify=on / ship=exp(隠し input) / plan=pro)が名前で載る
+  if (form.entries.email !== 'a@b.com')
+    throw new Error(`Form: TextField の値が name=email で送信に載らない(${JSON.stringify(form.entries)})`);
+  if (form.entries.subscribe !== 'on' || form.entries.notify !== 'on')
+    throw new Error(`Form: Checkbox/Switch が checked のとき name で載らない(${JSON.stringify(form.entries)})`);
+  if (form.entries.ship !== 'exp')
+    throw new Error(`Form: Select(pointer 経路)の値が隠し input で name=ship に載らない(${JSON.stringify(form.entries)})`);
+  if (form.entries.plan !== 'pro')
+    throw new Error(`Form: RadioGroup の選択が name=plan で載らない(${JSON.stringify(form.entries)})`);
+  if (form.emailType !== 'email')
+    throw new Error(`Form: TextField keyboard=email が native type=email にならない(type=${form.emailType})`);
+  if (!form.radiosRequired)
+    throw new Error('Form: RadioGroup の required が各 radio input へ配線されていない(native 検証が効かない)');
+
   await browser.close();
   console.log(
     `smoke green: 部品描画 ${JSON.stringify(counts)} / dark 切替 ${bgLight} → ${bgDark} / 360px で縦(3行) / エラー文 = danger.soft-fg(light ${errLight.got} / dark ${errDark.got}) / 中立 border ${borderContrast.toFixed(2)}:1 / TextField fill・affix 非膨張(内包則) / Select custom: popover 開閉・activedescendant・light dismiss / Checkbox 二重発火防止・indeterminate・disabled 抑制 / Switch トグル・disabled・サム余白全周均一 / Textarea 複数行 / Icon currentColor・1em・RTL 反転 / Radio 矢印移動=選択・disabled スキップ`,

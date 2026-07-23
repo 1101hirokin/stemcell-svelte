@@ -46,6 +46,7 @@
       {value}
       {checked}
       disabled={isDisabled}
+      required={group?.required}
       aria-describedby={description ? descriptionId : undefined}
       onchange={() => group?.select(value)}
     />

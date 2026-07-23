@@ -23,6 +23,11 @@
   let dlgExplicit = $state(false);
   let drawerOpen = $state(false);
   let drawerSide = $state<'inline-start' | 'inline-end' | 'block-start' | 'block-end'>('inline-end');
+  let fEmail = $state('a@b.com');
+  let fSubscribe = $state(true);
+  let fNotify = $state(true);
+  let fShip = $state('exp');
+  let fPlan = $state('pro');
 
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
@@ -592,6 +597,41 @@
         {/each}
       </Cluster>
     </div>
+  </section>
+
+  <section>
+    <h2>Form participation</h2>
+    <p>
+      name を与えると native の <code>&lt;form&gt;</code> 送信・FormData・reset に参加する(controlled と両立。
+      field.md §5)。TextField は keyboard=email で native <code>type="email"</code>、RadioGroup は required を各
+      radio へ配線。
+    </p>
+    <form id="pg-form" onsubmit={(e) => e.preventDefault()}>
+      <Stack gap="md">
+        <TextField name="email" keyboard="email" bind:value={fEmail}>
+          {#snippet label()}メール(name=email, type=email){/snippet}
+        </TextField>
+        <Checkbox name="subscribe" bind:checked={fSubscribe}>
+          {#snippet label()}購読する(name=subscribe){/snippet}
+        </Checkbox>
+        <Switch name="notify" bind:checked={fNotify}>
+          {#snippet label()}通知(name=notify){/snippet}
+        </Switch>
+        <Select
+          name="ship"
+          bind:value={fShip}
+          placeholder="配送を選択"
+          options={[{ value: 'std', label: '通常' }, { value: 'exp', label: '速達' }]}
+        >
+          {#snippet label()}配送(name=ship){/snippet}
+        </Select>
+        <RadioGroup name="plan" required bind:value={fPlan}>
+          {#snippet label()}プラン(name=plan, required){/snippet}
+          <Radio value="free">{#snippet label()}無料{/snippet}</Radio>
+          <Radio value="pro">{#snippet label()}Pro{/snippet}</Radio>
+        </RadioGroup>
+      </Stack>
+    </form>
   </section>
 </main>
 

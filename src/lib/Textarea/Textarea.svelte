@@ -7,6 +7,8 @@
   // TextField を継承する複数行入力(契約 extends。Textarea.md §1)。start / end は持たない
   // (複数行の器にアイコンの行内配置は成立しない。契約が意図的に再宣言しない)。
   interface Props {
+    /** フォーム名(native の <form> 送信・FormData・reset に参加。field.md §5)。 */
+    name?: string;
     value?: string;
     placeholder?: string;
     disabled?: boolean;
@@ -24,6 +26,7 @@
     error?: Snippet;
   }
   let {
+    name,
     value = $bindable(META.props.value.default),
     placeholder,
     disabled = META.props.disabled.default,
@@ -72,6 +75,7 @@
     <textarea
       class="sc-textarea-input"
       id={inputId}
+      {name}
       {rows}
       bind:value
       {placeholder}

@@ -18,6 +18,8 @@ export interface RadioGroupContext {
   readonly disabled: boolean;
   /** グループの invalid(danger が項目の描画へ降りる。Radio は invalid prop を持たない)。 */
   readonly invalid: boolean;
+  /** グループが必須(各 radio input に required を配り、native の submit 阻止・:invalid を無償で得る)。 */
+  readonly required: boolean;
   /** 項目が選ばれたときに呼ぶ。グループが change を発火し、value の更新はアプリが行う。 */
   select(value: string): void;
 }
