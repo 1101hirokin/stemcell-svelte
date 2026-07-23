@@ -5,6 +5,8 @@
   import type { FullAutoFill } from 'svelte/elements';
 
   interface Props {
+    /** フォーム名(native の <form> 送信・FormData・reset に参加。field.md §5)。 */
+    name?: string;
     value?: string;
     placeholder?: string;
     disabled?: boolean;
@@ -24,6 +26,7 @@
     end?: Snippet;
   }
   let {
+    name,
     value = $bindable(META.props.value.default),
     placeholder,
     disabled = META.props.disabled.default,
@@ -57,6 +60,11 @@
     }
   });
 
+  // keyboard=email/url は native の type にも反映して format validation(:invalid / typeMismatch / 送信時の
+  // 標準エラー)を無償で得る(憲法 第2条 / RFC 0010)。numeric/decimal は type=number のスピナーを避けるため
+  // text に留め(TextField.md §1)、tel は format validation が無いので inputmode だけで足りる。
+  const inputType = $derived(keyboard === 'email' ? 'email' : keyboard === 'url' ? 'url' : 'text');
+
   // description と error は両方が「説明」として届く(field.md §3。並置の裁定)
   const describedby = $derived(
     [description ? descriptionId : null, effectiveInvalid && error ? errorId : null]
@@ -81,7 +89,8 @@
     <input
       class="sc-textfield-input"
       id={inputId}
-      type="text"
+      type={inputType}
+      {name}
       bind:value
       {placeholder}
       {disabled}

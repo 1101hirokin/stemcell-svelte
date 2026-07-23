@@ -4,6 +4,8 @@
   import type { Snippet } from 'svelte';
 
   interface Props {
+    /** フォーム名(native の <form> 送信・FormData・reset に参加。checked のとき値が載る。field.md §5)。 */
+    name?: string;
     checked?: boolean;
     /** 第三の値(state.md §6)。見た目と aria-checked=mixed を上書きするが checked は変えない。 */
     indeterminate?: boolean;
@@ -17,6 +19,7 @@
     error?: Snippet;
   }
   let {
+    name,
     checked = $bindable(META.props.checked.default),
     indeterminate = $bindable(META.props.indeterminate.default),
     disabled = META.props.disabled.default,
@@ -61,6 +64,7 @@
       class="sc-checkbox-input"
       id={inputId}
       type="checkbox"
+      {name}
       bind:checked
       {disabled}
       {required}

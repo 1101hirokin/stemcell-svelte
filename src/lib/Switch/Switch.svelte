@@ -6,6 +6,8 @@
   // 独立した設定の on/off(field.md §7)。invalid / indeterminate / required を持たない
   // (部分集合の選択。state.md §4)。Space で切り替わる(role=switch を native checkbox に載せる)。
   interface Props {
+    /** フォーム名(native の <form> 送信・FormData・reset に参加。checked のとき値が載る。field.md §5)。 */
+    name?: string;
     checked?: boolean;
     disabled?: boolean;
     /** 契約の change(payload は新しい checked。即時反映が前提。field.md §5/§7)。 */
@@ -14,6 +16,7 @@
     description?: Snippet;
   }
   let {
+    name,
     checked = $bindable(META.props.checked.default),
     disabled = META.props.disabled.default,
     onchange,
@@ -35,6 +38,7 @@
       id={inputId}
       type="checkbox"
       role="switch"
+      {name}
       bind:checked
       {disabled}
       aria-describedby={description ? descriptionId : undefined}

@@ -7,6 +7,8 @@
   // 相互排他の選択肢の集合。値はグループがひとつ持つ(field.md §5)。グループ名は集合の名前で
   // fieldset / legend が運ぶ(WCAG 1.3.1)。矢印キー・roving tabindex は native radio に任せる。
   interface Props {
+    /** グループのフォーム名(native の <form> 送信に参加。各 Radio へ配る。未指定なら内部名で束ねる。field.md §5)。 */
+    name?: string;
     value?: string;
     disabled?: boolean;
     invalid?: boolean;
@@ -20,6 +22,7 @@
     children: Snippet;
   }
   let {
+    name,
     value = $bindable(undefined),
     disabled = META.props.disabled.default,
     invalid = META.props.invalid.default,
@@ -32,7 +35,8 @@
   }: Props = $props();
 
   const uid = $props.id();
-  const name = `${uid}-radio`;
+  // native radio を束ねる共有 name。消費者が name を与えれば送信に使い、無ければ内部名で束ねるだけ。
+  const autoName = `${uid}-radio`;
   const labelId = `${uid}-label`;
   const descriptionId = `${uid}-description`;
   const errorId = `${uid}-error`;
@@ -43,9 +47,11 @@
       .join(' ') || undefined,
   );
 
-  // 項目へ渡す文脈。getter で反応的に読ませる(value / disabled / invalid の変化が項目へ伝わる)。
+  // 項目へ渡す文脈。getter で反応的に読ませる(name / value / disabled / invalid / required の変化が項目へ伝わる)。
   setRadioGroupContext({
-    name,
+    get name() {
+      return name ?? autoName;
+    },
     get value() {
       return value;
     },
@@ -54,6 +60,9 @@
     },
     get invalid() {
       return invalid;
+    },
+    get required() {
+      return required;
     },
     select(v: string) {
       value = v; // bind:value の土地の便宜。非 bind でも onchange でアプリが更新する

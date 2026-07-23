@@ -5,6 +5,7 @@
  */
 export const META = {
   props: {
+    name: {},
     value: { default: '' },
     placeholder: {},
     disabled: { default: false },

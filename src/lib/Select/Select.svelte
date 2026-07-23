@@ -15,6 +15,8 @@
     disabled?: boolean;
   }
   interface Props {
+    /** フォーム名(native の <form> 送信・FormData・reset に参加。field.md §5)。 */
+    name?: string;
     value?: string;
     options: Option[];
     placeholder?: string;
@@ -28,6 +30,7 @@
     error?: Snippet;
   }
   let {
+    name,
     value = $bindable(META.props.value.default),
     options,
     placeholder,
@@ -172,6 +175,7 @@
       <select
         class="sc-select-input"
         id={inputId}
+        {name}
         bind:value
         {disabled}
         {required}
@@ -190,6 +194,9 @@
     </div>
   {:else}
     <!-- pointer: カスタム combobox + listbox(APG select-only。DOM focus はトリガー、option は activedescendant) -->
+    <!-- combobox は button で送信対象にならないため、value をミラーする隠し input で form 参加を補う(field.md §5)。
+         required の native 検証は hidden では効かない(制約検証の対象外)ので、必須は aria-required に留まる -->
+    {#if name}<input type="hidden" {name} {value} />{/if}
     <Popover {open} onopenchange={(o) => (o ? openList() : closeList())}>
       {#snippet anchor()}
         <button

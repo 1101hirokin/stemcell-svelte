@@ -98,6 +98,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。controlled の checked と両立する非破壊の上乗せ。Web は native の name 属性(checked のとき値が送信に載る)。
 - `checked`: boolean(既定 false) — 値であって状態ではない(state.md §6)。アプリが所有し、部品は change で通知するだけ(field.md §5)。語彙は Switch と同一(field.md §7: 同じ観念が二つの名を持てば共通言語が壊れる。第2条)。
 - `indeterminate`: boolean(既定 false) — 第三の値であり状態ではない(state.md §6: aria-checked は tristate で、mixed は第三の値)。見た目と支援技術への伝達を上書きするが、checked の値は変えない(HTML の checked 属性と indeterminate プロパティの分離と同じモデル。M3 / Carbon / Base UI / Compose の TriState も同型)。反例併記: Radix / Chakra / Polaris は checked='indeterminate' の三値で表す。boolean の checked を三値化すると Switch との語彙統一(checked は boolean)が崩れるため採らない。主用途は親子リストの集計表示。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。
@@ -164,7 +165,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - Web は native `<dialog>` + showModal() を土台にする。これで focus trap(Tab が中で一周)・top-layer(overflow / transform 祖先で切れない)・::backdrop(scrim)・Escape・背後 inert が標準で無償になる(overlay.md §7: trap の実現は表現。native が無償で満たす側)。aria-modal と role=dialog は native が付ける。
 - アクセシブルネームは aria-labelledby で title スロットの id を指す(無名の modal を許さない)。
-- フォーカス: showModal が中へフォーカスを移し(最初の focusable。autofocus 指定があればそれ)、閉じると開いた元(トリガー)へ戻す。overlay.md §4 の modal 類(中に捕捉・元へ戻す)。復帰先が消えていれば overlay.rules.json の $orphanReturn。
+- フォーカス: showModal が中へフォーカスを移し(最初の focusable。autofocus 指定があればそれ)、閉じると開いた元(トリガー)へ戻す。overlay.md §4 の modal 類(中に捕捉・元へ戻す)。復帰は native `<dialog>` が所有する(showModal 時に控えた previouslyFocused へ戻す)。トリガーが消えている場合は native の既定(document/body)に委ねる。overlay.rules.json の $orphanReturn は focus.interactiveEntersOrVirtual(popover の仮想フォーカス。RFC 0007)側の規則で、focus.trap(modal)には射程が無い(modal は native が復帰を握るため、決定的アルゴリズムを自前で挿す余地が無い)。
 - 退出は dismiss で選ぶ(overlay.md §8 の裁定。既定 light)。light は Escape(native の cancel)と背後 scrim クリックで閉じ、openchange(false) を発火。explicit は cancel を preventDefault し背後クリックも閉じない(ボタンのみ)。Escape は最上位の1枚だけ(native の top-layer が LIFO を担う。overlay.md §3)。
 - 多重 modal の scrim は単一に保つ(重なっても一段相当。overlay.md §8 / elevation.md §6 の単一 --scrim 前提。native ::backdrop の累積を抑える)。ただし多重 modal 自体を推奨しない(第1条: 利用者を何枚も埋めない)。
 - 背後スクロール封鎖(overlay.rules.json の modal.blocksScroll)。native showModal は背後を inert にするが、body のスクロール固定は実装が併せて行う。
@@ -328,6 +329,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
+- `name`: string((省略可)) — グループのフォーム名(native の radio が同一 name で相互排他とグループ送信を得る。field.md §5)。各 Radio へ配られ、項目は自分の name を持たない(値の所有がグループなのと同型)。Web は native の name 属性。
 - `value`: string((省略可)) — 選択中の Radio の value。アプリが所有する(field.md §5)。未指定は未選択であり、契約は未選択を許す。既定選択を置くべきかは業界が割れており(GOV.UK: 誘導を避けるため置くな / NN/g: 最頻値を置け)、アプリの文脈判断である — 契約は両方を表現できる形を取る。
 - `disabled`: boolean(既定 false) — グループ全体の無効。項目へ降りる(state.md §3.1 / §5 の3要求は各項目で満たされる)。
 - `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2)。集合への判定(未選択・不正な組み合わせ)であり、特定の項目に帰属しない(field.md §2「グループの解剖」)。intent の danger 差し替え(state.md §7)は項目の描画へ実装の文脈で降りる。
@@ -358,6 +360,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。pointer 経路は combobox が button で送信対象にならないため、value をミラーする隠し input(または ElementInternals)で参加を補う。touch 経路は native select が name をそのまま持つ。Web は native の name 属性。
 - `value`: string(既定 "") — 選択中の選択肢の value。空文字は未選択。アプリが所有する(field.md §5)。
 - `options`: array — 選択肢の列。データとして渡す(裁定: native select は文字列 label のみ。リッチは name/文字列駆動の追加欄で、任意内容の option は範囲外・将来 RFC。Select.md §3 / RFC 0007)。
 - `placeholder`: string((省略可)) — 未選択時の表示文。label の代替ではない(field.md §2)。Web の表現は「無効化された未選択の先頭 option」(選ばれ得ない)。
@@ -457,6 +460,7 @@ props:
 
 props:
 
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。controlled の checked と両立する非破壊の上乗せ。Web は native の name 属性(checked のとき値が送信に載る)。
 - `checked`: boolean(既定 false) — 値であって状態ではない(state.md §6)。アプリが所有する。語彙は Checkbox と同一(field.md §7: 業界は同一 DS 内でも checked / selected / toggled と割れているが、Stemcell は checked に統一する。第2条)。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。
 
@@ -503,6 +507,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。controlled の value と両立する非破壊の上乗せ。Web は native の name 属性。
 - `value`: string(既定 "") — 現在値。アプリが所有する(field.md §5: SwiftUI の Binding も Compose の value+onValueChange も単方向で、Web の controlled と同型)。部品は change で新しい値を通知するだけで、自分では保持しない。uncontrolled は土地の便宜であり契約外。
 - `placeholder`: string((省略可)) — 入力例のヒント。label の代替ではない(field.md §2: 入力した瞬間に消える名前は、名前ではない)。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
@@ -540,6 +545,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。controlled の value と両立する非破壊の上乗せ。Web は native の name 属性。
 - `value`: string(既定 "") — 現在値。アプリが所有する(field.md §5: SwiftUI の Binding も Compose の value+onValueChange も単方向で、Web の controlled と同型)。部品は change で新しい値を通知するだけで、自分では保持しない。uncontrolled は土地の便宜であり契約外。
 - `placeholder`: string((省略可)) — 入力例のヒント。label の代替ではない(field.md §2: 入力した瞬間に消える名前は、名前ではない)。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
