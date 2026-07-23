@@ -307,6 +307,95 @@ try {
   if ((await menuTrigger.getAttribute('aria-expanded')) !== 'false')
     throw new Error('Menu: 外側クリックで閉じない(native light dismiss)');
 
+  // Dialog(native <dialog> + showModal): top-layer(:modal)・focus trap・Escape/背後クリックの light dismiss・
+  // explicit は Escape/背後で閉じない・閉じたらトリガーへフォーカス復帰。jsdom は showModal を持たないので
+  // これらは実 Chromium でしか測れない層(憲法 第2条 native の機構)。
+  const openLight = page.locator('button', { hasText: 'light を開く' });
+  await openLight.scrollIntoViewIfNeeded();
+  await openLight.click();
+  await page.waitForTimeout(200);
+  const dlgState = await page.evaluate(() => {
+    const d = document.querySelector('.sc-dialog') as HTMLDialogElement;
+    return {
+      open: d?.open ?? false,
+      isModal: (() => { try { return d.matches(':modal'); } catch { return false; } })(),
+      labelled: d?.getAttribute('aria-labelledby') === document.querySelector('.sc-dialog-title')?.id,
+      focusInside: d?.contains(document.activeElement),
+    };
+  });
+  if (!dlgState.open || !dlgState.isModal)
+    throw new Error(`Dialog: showModal で top-layer(:modal)に開かない(${JSON.stringify(dlgState)})`);
+  if (!dlgState.labelled) throw new Error('Dialog: aria-labelledby が title を指さない');
+  if (!dlgState.focusInside) throw new Error('Dialog: 開いてもフォーカスが中に入らない(focus trap)');
+  // 多重 modal の単一 scrim(RFC 0009)。light の中から確認を重ねて開くと、下の light に data-under が付き
+  // ::backdrop が透過になる(見える scrim は最上位の一段だけ。native ::backdrop の積算を抑える)。
+  await page.locator('button', { hasText: '確認を重ねて開く' }).click();
+  await page.waitForTimeout(200);
+  const stacked = await page.evaluate(() => {
+    const ds = [...document.querySelectorAll('.sc-dialog')] as HTMLDialogElement[];
+    const openDs = ds.filter((d) => d.open);
+    const under = ds.filter((d) => d.hasAttribute('data-under'));
+    const underTransparent = under.every((d) => {
+      const bg = getComputedStyle(d, '::backdrop').backgroundColor;
+      return bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent';
+    });
+    return {
+      openCount: openDs.length,
+      underCount: under.length,
+      topmostNotUnder: openDs.length > 0 && !openDs[openDs.length - 1].hasAttribute('data-under'),
+      underTransparent,
+    };
+  });
+  if (stacked.openCount !== 2)
+    throw new Error(`Dialog: 多重 modal が2枚開かない(${JSON.stringify(stacked)})`);
+  if (stacked.underCount !== 1 || !stacked.topmostNotUnder)
+    throw new Error(`Dialog: 単一 scrim の印(data-under)が最上位以外の1枚に付かない(${JSON.stringify(stacked)})`);
+  if (!stacked.underTransparent)
+    throw new Error('Dialog: 下の modal の ::backdrop が透過でない(scrim が積算する。RFC 0009 の単一に反する)');
+  await page.locator('button', { hasText: '取消' }).click(); // 重ねた explicit を閉じる
+  await page.waitForTimeout(200);
+  const afterUnstack = await page.evaluate(() => ({
+    openCount: [...document.querySelectorAll('.sc-dialog')].filter((d) => (d as HTMLDialogElement).open).length,
+    underCount: document.querySelectorAll('.sc-dialog[data-under]').length,
+  }));
+  if (afterUnstack.openCount !== 1 || afterUnstack.underCount !== 0)
+    throw new Error(`Dialog: 重ねた modal を閉じても data-under が残る(${JSON.stringify(afterUnstack)})`);
+  // Escape で閉じ(light)、フォーカスがトリガーへ戻る
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  const afterEsc = await page.evaluate(() => ({
+    open: (document.querySelector('.sc-dialog') as HTMLDialogElement)?.open ?? false,
+    focusOnTrigger: (document.activeElement as HTMLElement)?.textContent?.includes('light を開く') ?? false,
+  }));
+  if (afterEsc.open) throw new Error('Dialog(light): Escape で閉じない');
+  if (!afterEsc.focusOnTrigger) throw new Error('Dialog: 閉じてもフォーカスがトリガーへ戻らない');
+  // 再度開いて背後(scrim)クリックで閉じる(light)
+  await openLight.click();
+  await page.waitForTimeout(200);
+  await page.mouse.click(5, 5); // パネル外 = 背後
+  await page.waitForTimeout(200);
+  if ((await page.evaluate(() => (document.querySelector('.sc-dialog') as HTMLDialogElement)?.open)) === true)
+    throw new Error('Dialog(light): 背後クリックで閉じない');
+
+  // explicit: Escape も背後クリックも閉じない。ボタンでのみ閉じる
+  const openExplicit = page.locator('button', { hasText: 'explicit(削除確認)' });
+  await openExplicit.click();
+  await page.waitForTimeout(200);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(150);
+  await page.mouse.click(5, 5);
+  await page.waitForTimeout(150);
+  const explicitDlg = () => page.evaluate(() => {
+    const ds = [...document.querySelectorAll('.sc-dialog')] as HTMLDialogElement[];
+    return ds.some((d) => d.open);
+  });
+  if (!(await explicitDlg()))
+    throw new Error('Dialog(explicit): Escape/背後クリックで閉じてしまう(explicit は握りつぶすべき)');
+  await page.locator('button', { hasText: '取消' }).click(); // ボタンで閉じる
+  await page.waitForTimeout(200);
+  if (await explicitDlg())
+    throw new Error('Dialog(explicit): ボタンでも閉じない');
+
   // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
   // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)
   const cb = await page.evaluate(() => {
