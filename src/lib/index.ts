@@ -27,3 +27,4 @@ export { default as Link } from './Link/Link.svelte';
 export { default as Badge } from './Badge/Badge.svelte';
 export { default as Avatar } from './Avatar/Avatar.svelte';
 export { default as Tag } from './Tag/Tag.svelte';
+export { default as Alert } from './Alert/Alert.svelte';

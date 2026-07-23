@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -30,6 +30,8 @@
   let fPlan = $state('pro');
   let tagFilters = $state<Record<string, boolean>>({ react: true, svelte: false, vue: false });
   let tagChips = $state(['デザイン', 'トークン', '契約']);
+  let alertShown = $state(true);
+  let alertLive = $state(false);
 
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
@@ -313,6 +315,49 @@
         <Tag dismissible disabled>消せる disabled</Tag>
       </Cluster>
     </div>
+  </section>
+
+  <section>
+    <h2>Alert</h2>
+    <p>
+      文での報告。その場に留まり状況が続く限り読める(勝手に消えるのは Toast)。intent の4色、先頭に intent の
+      絵(色だけで種類を伝えない。1.4.1)。割り込みの度合いは intent から: danger だけ即時(role=alert)、他は
+      穏当(role=status)。既定は閉じられない(dismissible で × を出す。× の名は 文脈 + 閉じる語 を合成)。
+    </p>
+    <Stack gap="md">
+      <Alert color="info">
+        {#snippet title()}お知らせ{/snippet}
+        新しいバージョンが利用できます。設定から更新してください。
+      </Alert>
+      <Alert color="success">保存しました。</Alert>
+      <Alert color="warning">
+        {#snippet title()}下書きのまま{/snippet}
+        公開する前に、未入力の項目があります。
+      </Alert>
+      <Alert color="danger">
+        {#snippet title()}保存に失敗しました{/snippet}
+        ネットワークを確認して <Link href="/retry" onclick={(e) => e.preventDefault()}>再試行</Link> してください。
+      </Alert>
+      {#if alertShown}
+        <Alert color="warning" dismissible dismissLabel="閉じる" ondismiss={() => (alertShown = false)}>
+          {#snippet title()}消せる報告{/snippet}
+          × で閉じられます(取り除くのはアプリ。Alert は自分を消さない)。
+        </Alert>
+      {:else}
+        <Button size="sm" variant="text" onclick={() => (alertShown = true)}>消せる報告を戻す</Button>
+      {/if}
+      <div class="pg-row">
+        <code class="pg-tag">動的挿入(割り込み)</code>
+        <Cluster gap="sm" align="center">
+          <Button size="sm" onclick={() => (alertLive = !alertLive)}>
+            {alertLive ? '消す' : 'エラーを出す(role=alert が割り込む)'}
+          </Button>
+          {#if alertLive}
+            <Alert color="danger">初期描画に無い Alert は挿入時に読み上げへ割り込む(role=alert)。</Alert>
+          {/if}
+        </Cluster>
+      </div>
+    </Stack>
   </section>
 
   <section>
