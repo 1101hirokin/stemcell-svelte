@@ -442,6 +442,55 @@ try {
   if (drawerAfter.open) throw new Error('Drawer(light): Escape で閉じない');
   if (!drawerAfter.focusOnTrigger) throw new Error('Drawer: 閉じてもフォーカスがトリガーへ戻らない');
 
+  // Tooltip(補助ラベル。native popover top-layer + Anchor Positioning)。hover と focus の両方で開き、離脱と
+  // Escape で閉じる。フォーカスを受け取らない(pointer-events:none)。aria-describedby がトリガーへ配線される。
+  // jsdom では popover の表示を測れないので実 Chromium で見る(憲法 第2条 の native の機構)。
+  const tipTrigger = page.locator('.sc-tooltip', { hasText: '保存' }).first();
+  await tipTrigger.scrollIntoViewIfNeeded();
+  await tipTrigger.hover(); // hover で開く
+  await page.waitForTimeout(200);
+  const tipState = await page.evaluate(() => {
+    const wrap = [...document.querySelectorAll('.sc-tooltip')].find((w) => w.textContent?.includes('保存')) as HTMLElement;
+    const tip = wrap?.querySelector('.sc-tooltip-content') as HTMLElement;
+    const btn = wrap?.querySelector('button') as HTMLElement;
+    const wr = wrap.getBoundingClientRect();
+    const tr = tip.getBoundingClientRect();
+    return {
+      shown: (() => { try { return tip.matches(':popover-open'); } catch { return false; } })(),
+      role: tip.getAttribute('role'),
+      describedby: btn?.getAttribute('aria-describedby') === tip.id,
+      noPointerEvents: getComputedStyle(tip).pointerEvents === 'none',
+      above: tr.bottom <= wr.top + 2, // block-start は上に出る
+    };
+  });
+  if (!tipState.shown) throw new Error(`Tooltip: hover で top-layer popover に開かない(${JSON.stringify(tipState)})`);
+  if (tipState.role !== 'tooltip' || !tipState.describedby)
+    throw new Error(`Tooltip: role=tooltip / aria-describedby の配線が無い(${JSON.stringify(tipState)})`);
+  if (!tipState.noPointerEvents) throw new Error('Tooltip: pointer-events:none でない(フォーカス/操作を受け取ってしまう)');
+  if (!tipState.above) throw new Error('Tooltip: block-start でトリガーの上に出ない(anchor 位置決め)');
+  await page.mouse.move(5, 5); // hover を外す
+  await page.waitForTimeout(200);
+  const tipAfterLeave = await page.evaluate(() => {
+    const tip = [...document.querySelectorAll('.sc-tooltip')].find((w) => w.textContent?.includes('保存'))?.querySelector('.sc-tooltip-content') as HTMLElement;
+    try { return tip.matches(':popover-open'); } catch { return false; }
+  });
+  if (tipAfterLeave) throw new Error('Tooltip: hover を外しても閉じない');
+  // focus 経路でも開く(タッチに hover が無いため。overlay.md §4)
+  await page.locator('.sc-tooltip button', { hasText: '保存' }).focus();
+  await page.waitForTimeout(200);
+  const tipOnFocus = await page.evaluate(() => {
+    const tip = [...document.querySelectorAll('.sc-tooltip')].find((w) => w.textContent?.includes('保存'))?.querySelector('.sc-tooltip-content') as HTMLElement;
+    try { return tip.matches(':popover-open'); } catch { return false; }
+  });
+  if (!tipOnFocus) throw new Error('Tooltip: focus で開かない(タッチのための focus 経路。overlay.md §4)');
+  await page.keyboard.press('Escape'); // Escape で閉じる
+  await page.waitForTimeout(150);
+  const tipAfterEsc = await page.evaluate(() => {
+    const tip = [...document.querySelectorAll('.sc-tooltip')].find((w) => w.textContent?.includes('保存'))?.querySelector('.sc-tooltip-content') as HTMLElement;
+    try { return tip.matches(':popover-open'); } catch { return false; }
+  });
+  if (tipAfterEsc) throw new Error('Tooltip: Escape で閉じない');
+
   // Checkbox: 二重発火防止(リッチ label 内のリンククリックがトグルを発火させない)・disabled 抑制・
   // indeterminate=mixed。実 Chromium の native label 挙動でしか確認できない層(契約 a11y の核心)
   const cb = await page.evaluate(() => {

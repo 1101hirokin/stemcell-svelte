@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -341,6 +341,24 @@
         <Button onclick={() => (drawerOpen = false)}>適用</Button>
       {/snippet}
     </Drawer>
+  </section>
+
+  <section>
+    <h2>Tooltip</h2>
+    <p>
+      アンカーに添える短い補助ラベル。hover と focus の両方で開き、離脱と Escape で閉じる。フォーカスを受け取らず
+      必須情報は置かない(補強)。native popover(top-layer)+ Anchor Positioning で切れない。
+    </p>
+    <Cluster gap="lg">
+      <Tooltip>
+        {#snippet trigger()}<Button variant="outlined" color="plain">保存</Button>{/snippet}
+        {#snippet content()}変更をサーバーへ保存します{/snippet}
+      </Tooltip>
+      <Tooltip placement="block-end">
+        {#snippet trigger()}<IconButton label="設定"><Icon name="dots.horizontal" /></IconButton>{/snippet}
+        {#snippet content()}設定(下に出る tooltip){/snippet}
+      </Tooltip>
+    </Cluster>
   </section>
 
   <section>

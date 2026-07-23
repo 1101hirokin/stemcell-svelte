@@ -1,0 +1,64 @@
+/* アンカーに添える短い補助ラベル(tooltip 類。Tooltip.md)。native popover(top-layer)で描き overflow /
+   transform 祖先でも切れない。面/影は elevation.popover(tooltip 層は elevation が popover 相当。layering.md)、
+   角は shape.semantic.popover、層は layer.tooltip。位置は CSS Anchor Positioning、非対応は JS が left/top を与える。 */
+.sc-tooltip {
+  /* anchor-name の箱 + hover 判定の範囲。トリガーを shrink-wrap する */
+  display: inline-block;
+}
+
+.sc-tooltip-content {
+  /* [popover] の UA 既定(inset:0; margin:auto で中央寄せ・border)を打ち消し、アンカーへ寄せる */
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  border: 0;
+  z-index: var(--layer-tooltip-z);
+  max-inline-size: 18rem;
+  /* 空白の無い長い語(URL 等)が面の外へはみ出さない(背景/影の中で折る) */
+  overflow-wrap: anywhere;
+  padding: var(--spacing-inset-sm);
+  background: var(--elevation-popover-surface);
+  box-shadow: var(--elevation-popover-shadow);
+  border-radius: var(--shape-semantic-popover);
+  color: var(--color-app-foreground);
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+  /* tooltip はフォーカスも操作も受け取らない(受け取れば popover。overlay.md §4) */
+  pointer-events: none;
+  /* left(=アンカー中央)に対して水平中央寄せ。anchor / JS フォールバックの両方でこの transform が効く */
+  transform: translateX(-50%);
+  /* 出現は fade(entrance)。退場のトークンは transition で参照 */
+  animation: sc-tooltip-in var(--motion-entrance-duration) var(--motion-entrance-easing);
+  transition: opacity var(--motion-exit-duration) var(--motion-exit-easing);
+}
+
+/* CSS Anchor Positioning 対応時。水平はアンカー中央(anchor(center) + translateX(-50%))、
+   上下は placement で anchor(top)/anchor(bottom)。衝突時は block 方向へ反転(overlay.md §5) */
+@supports (anchor-name: --x) {
+  .sc-tooltip-content {
+    position-try-fallbacks: flip-block;
+  }
+  .sc-tooltip-content[data-placement='block-start'] {
+    inset-block-end: anchor(top);
+    inset-inline-start: anchor(center);
+    margin-block-end: var(--spacing-inline-md);
+  }
+  .sc-tooltip-content[data-placement='block-end'] {
+    inset-block-start: anchor(bottom);
+    inset-inline-start: anchor(center);
+    margin-block-start: var(--spacing-inline-md);
+  }
+}
+
+@keyframes sc-tooltip-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-tooltip-content {
+    animation: none;
+  }
+}
