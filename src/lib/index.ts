@@ -21,3 +21,4 @@ export { default as Popover } from './Popover/Popover.svelte';
 export { default as Menu } from './Menu/Menu.svelte';
 export { default as Dialog } from './Dialog/Dialog.svelte';
 export { default as Drawer } from './Drawer/Drawer.svelte';
+export { default as Tooltip } from './Tooltip/Tooltip.svelte';

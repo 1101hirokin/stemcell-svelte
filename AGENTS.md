@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Box, Button, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -602,4 +602,25 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - TextField の notes がすべて当てはまる。複数行であることが支援技術に届く(Web の表現は native textarea 要素、または aria-multiline)。
 - keyboard prop は継承される。Compose は複数行でも keyboardType を持つ。iOS の複数行(TextEditor)で同様に効くかは未確認である(一次情報が bot 遮断で未達、二次情報は割れている。下敷きの UITextView は UITextInputTraits に準拠し keyboardType を持つため、効く可能性がむしろ高い — 独立レビューの指摘で当初の「対応物が無い」という断定を訂正)。swiftui 実装の実験で決着する。効かないと実証された場合の器は第7条(技術の普及の時間軸)ではなく ceded(removes。GOVERNANCE §4 の構造差の器)を検討する。
 - Enter は改行であり、暗黙送信は起きない(HTML の挙動。本契約の関心ではないが、TextField との違いとして記録)。
+
+### Tooltip(契約 0.0.0-alpha.1)
+
+アンカー(トリガー)に添える短い補助ラベル(overlay の tooltip 類)。hover と focus の両方で開き、hover / focus の終了と Escape で閉じる。フォーカスを受け取らない(受け取れば popover。overlay.md §4)。必須情報を置いてはならない: タッチには hover が無く、focus 滞在も細いので、tooltip は補強であって唯一の経路ではない(overlay.md §4「hover でしか開けないものを作らない」)。位置はアンカー従属で、Web は CSS Anchor Positioning + native popover の top-layer で描く(切れない。憲法 第2条 / 第7条。Popover と同じ機構)。開閉は内部が所有する(hover / focus 駆動。アプリに管理させるのは実用に反する。overlay.md §6)。RFC 0007 D で Popover を建てたとき、Tooltip も安くなると予告した消費者。
+
+props:
+
+- `placement`: "block-start" | "block-end"(既定 "block-start") — アンカーに対する優先の開き方向(論理方向。layout.md §7)。block-start は上、block-end は下。既定は block-start(tooltip の通例は上)。画面端での反転は Expressive(overlay.md §5)。横(inline)側は初版で持たない(将来。まず上下)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `trigger`(必須) — tooltip が説明する対象(トリガー)。ここに置いた対話要素へ aria-describedby で tooltip を結ぶ。トリガー自身が単独で使えること(必須情報を tooltip に逃さない)。
+- `content`(必須) — 補助ラベルの中身(短い文)。role=tooltip で描き、trigger の aria-describedby が指す。対話要素を置かない(置けば popover であって tooltip ではない)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- content は role=tooltip + id を持ち、trigger の対話要素に aria-describedby=その id を配線する(Web の表現。SwiftUI / Compose では accessibilityHint 相当)。Normative なのは「補助説明が支援技術へ届く」ことで、機構は実装が選ぶ(field.md の disabled と同型)。
+- hover と focus の両方で開く。タッチには hover が無いため focus 経路を必ず持つ(overlay.md §4)。閉じるのは hover / focus の終了と Escape(overlay.rules.json の tooltip.dismiss = triggerHoverFocusEnd)。
+- tooltip 自身はフォーカスを受け取らない(pointer-events を切り、tabindex を持たない)。フォーカス可能にした時点でそれは tooltip でなく popover である(overlay.md §4)。scrim も背後スクロール封鎖も無い(tooltip 類)。
+- 必須情報を tooltip に置かない。trigger は tooltip 無しでも意味が通ること(第1条。タッチと focus 経路の細さの帰結)。
+- Web は native popover(top-layer)で描き、overflow / transform 祖先でも切れない。位置は CSS Anchor Positioning(anchor() / anchor-size は使わず内容幅)。非対応環境は JS の矩形計測で補う(第7条。Popover と同型)。
 
