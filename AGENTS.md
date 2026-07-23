@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, Tag, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -664,6 +664,27 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - states は相互作用がある形でのみ現れる。静的な Tag はホバーに応えない: 押せないものに反応を返すのは嘘である(state.md §3.2 と同じ第1条)。
 - dismissible と selected が同居するとき、ルートを単一の対話要素にしない。対話要素の入れ子(role=button の中に押せる×)は WAI-ARIA の既知のアンチパターンであり、選択領域と削除領域は同じ階層の兄弟として構成する(MUI Chip が同じ構造で長年の a11y issue を抱えている)。フォーカス順は本体(選択)→ ×(削除)。× のアクセシブルネームは「{ラベル} を削除」の形で合成する(合成の言語表現は各実装)。
 - 相互作用がある形は当たり判定の門(size.md §4)の対象。sm の名札でも判定は 24px を割らず、本体と × の判定の重なりは SC 2.5.8 の間隔条件(size.md §4.4)にかかる。
+
+### Text(契約 0.0.0-alpha.0)
+
+content に typography 役割を当てる原始。typography.md の役割語彙(display/headline/title/body/label/mono ×L/M/S)を、アプリが書く見出し・本文・キャプションへ当てる消費者 API。Box/Stack が layout の原始であるのと同じ位置の typography 版。視覚の役割(variant)は普遍だが、a11y の意味要素(見出しの階層・段落)は各プラットフォームの表現であり、Web では要素(as)で与える。両者は分離する: variant が意味要素を含意すると、同じ見た目の役割を別の階層で使った瞬間に見出し構造が壊れる。
+
+props:
+
+- `variant`: "display-lg" | "display-md" | "headline-lg" | "headline-md" | "headline-sm" | "title-lg" | "title-md" | "title-sm" | "body-lg" | "body-md" | "body-sm" | "label-lg" | "label-md" | "label-sm" | "mono-md" | "mono-sm"(既定 "body-md") — typography の合成役割(typography.md §4)。値は実在する16トークンに1:1で写り、display-sm / mono-lg のような役割とサイズの無効な組は列挙に存在しない(役割×サイズは完全な格子ではない)。variant を予約 prop に使うのは、これが Text を統べる foundation(typography)の変種軸だからである。予約 prop variant の許容値は、その部品が統べる foundation から来る: tokenBinding が指すトークン群の成員(ここでは typography の役割)で、tokenBinding を持たない variant は既定で emphasis(filled/soft/outlined/text)に束ねられる(GOVERNANCE §6-1。RFC 0012。裁定 2026-07-23)。
+- `truncate`: boolean(既定 false) — はみ出す文字を1行で省略する(末尾を切り、省略記号で示す)。視覚の省略であり、全文は DOM に残って支援技術へ届く(切るのは見た目だけ)。複数行のクランプは初版に含めない(必要が立証されたら足す)。
+- `muted`: boolean(既定 false) — 副次の文字色(app.fg-muted)へ落とす。既定(false)は色を宣言せず周囲を継承する(StemcellProvider が地の本文色 app.foreground を敷く)。fg-subtle 等のさらなる段が要ると立証されたら、boolean を tone 列挙へ広げる(Text.md §5)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default`(必須) — 文字の内容。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 視覚の役割(variant)と a11y の意味要素は分離する。variant は見た目(サイズ・weight・字間)だけを決め、見出しの階層(h1..h6)や段落・インラインの意味は与えない。同じ title-lg を主見出しにも小見出しにも使えるが、階層の正しさは意味要素の側(Web では as)が担う。混ぜると『大きい文字＝見出し』の誤りで構造が壊れる。
+- 意味要素は各プラットフォームの a11y 表現である。Web では要素(as: h1..h6 / p / span 等)で与える。既定は中立のインライン(span 相当)で、構造を主張しない。見出し階層の管理(h1 は1つ、飛ばさない)はアプリの責務で、Text は水準を自動で管理しない(将来 Heading 相当の薄い器を検討する余地。Text.md §5)。
+- truncate は視覚だけの省略で、要素の文字内容は全文のまま残る(text-overflow の実務: DOM のテキストは完全で、支援技術は全文を読む)。省略された全文を別途 title 属性等で見せるかは実装の表現。
+- Text は相互作用しない。role を持たず、フォーカスを受けない(意味要素が持つ既定の意味論だけが残る)。
 
 ### TextField(契約 0.0.0-alpha.2)
 

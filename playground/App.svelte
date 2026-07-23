@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -356,6 +356,30 @@
             <Alert color="danger">初期描画に無い Alert は挿入時に読み上げへ割り込む(role=alert)。</Alert>
           {/if}
         </Cluster>
+      </div>
+    </Stack>
+  </section>
+
+  <section>
+    <h2>Text</h2>
+    <p>
+      content に typography 役割を当てる原始。多相 as(意味要素)と視覚役割 variant を分離する。既定は
+      中立の span。muted は副次色、truncate は1行省略(全文は DOM に残る)。
+    </p>
+    <Stack gap="sm">
+      <Text as="h3" variant="headline-md">見出し(as=h3, variant=headline-md)</Text>
+      <Text as="p" variant="body-md">
+        本文(as=p, variant=body-md)。段落として読みやすさを最優先する役割。
+      </Text>
+      <Text as="p" variant="body-sm" muted>副次の本文(muted)。補助的な説明に。</Text>
+      <Text as="span" variant="label-sm" muted>ラベル / キャプション(label-sm, muted)</Text>
+      <Text variant="mono-md">const code = "mono-md";</Text>
+      <!-- 同じ variant を別の階層に当てられる(見た目と意味の分離) -->
+      <Text as="h4" variant="body-lg">同じ body-lg を見出し要素(h4)に当てた例</Text>
+      <div style="inline-size: 16rem; border: 1px dashed var(--color-semantic-plain-border);">
+        <Text as="p" variant="body-md" truncate>
+          truncate は長い一行を器の幅で省略する。この文は器より長いので末尾が … で切れる。
+        </Text>
       </div>
     </Stack>
   </section>

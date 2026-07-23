@@ -60,6 +60,7 @@ try {
     avatar: document.querySelectorAll('.sc-avatar').length,
     tag: document.querySelectorAll('.sc-tag').length,
     alert: document.querySelectorAll('.sc-alert').length,
+    text: document.querySelectorAll('.sc-text').length,
   }));
   for (const [k, v] of Object.entries(counts)) {
     if (v === 0) throw new Error(`描画されていない: ${k}`);
@@ -945,6 +946,45 @@ try {
   await page.waitForTimeout(60);
   if ((await page.locator('.sc-alert-dismiss').count()) >= alertBefore)
     throw new Error('Alert: × クリックで報告が取り除かれない(dismiss イベントが配線されていない)');
+
+  // Text: variant が typography トークンへ写る(実効 font-size がトークンと一致)、as が意味要素になる、
+  // as と variant が独立(body-lg を H4 に当てても font は body-lg)、muted=app.fg-muted、truncate は1行省略。
+  const text = await page.evaluate(() => {
+    const texts = [...document.querySelectorAll('.sc-text')] as HTMLElement[];
+    const cssVar = (decl: string, prop: 'fontSize' | 'color') => {
+      const s = document.createElement('span');
+      (s.style as any)[prop === 'fontSize' ? 'font-size' : prop] = `var(${decl})`;
+      document.body.appendChild(s);
+      const v = (getComputedStyle(s) as any)[prop];
+      s.remove();
+      return v;
+    };
+    const headline = texts.find((t) => t.dataset.variant === 'headline-md');
+    const bodyLgHeading = texts.find((t) => t.tagName === 'H4' && t.dataset.variant === 'body-lg');
+    const muted = texts.find((t) => t.hasAttribute('data-muted'));
+    const trunc = texts.find((t) => t.hasAttribute('data-truncate'));
+    const ts = trunc ? getComputedStyle(trunc) : null;
+    return {
+      headlineTag: headline?.tagName,
+      headlineFsMatch: headline
+        ? getComputedStyle(headline).fontSize === cssVar('--typography-headline-md-font-size', 'fontSize')
+        : false,
+      sepTag: bodyLgHeading?.tagName,
+      sepFsMatch: bodyLgHeading
+        ? getComputedStyle(bodyLgHeading).fontSize === cssVar('--typography-body-lg-font-size', 'fontSize')
+        : false,
+      mutedMatch: muted ? getComputedStyle(muted).color === cssVar('--color-app-fg-muted', 'color') : false,
+      truncEllipsis: !!ts && ts.textOverflow === 'ellipsis' && ts.overflow.includes('hidden'),
+      truncClipped: trunc ? trunc.scrollWidth > trunc.clientWidth + 1 : false,
+    };
+  });
+  if (text.headlineTag !== 'H3' || !text.headlineFsMatch)
+    throw new Error(`Text: variant が typography トークンに写らない / as が要素にならない(${JSON.stringify(text)})`);
+  if (text.sepTag !== 'H4' || !text.sepFsMatch)
+    throw new Error(`Text: variant と as が独立でない(body-lg を H4 に当てても font は body-lg。${JSON.stringify(text)})`);
+  if (!text.mutedMatch) throw new Error('Text: muted が app.fg-muted にならない');
+  if (!text.truncEllipsis || !text.truncClipped)
+    throw new Error(`Text: truncate が1行省略にならない(${JSON.stringify(text)})`);
 
   const bgLight = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.selectOption('select >> nth=0', 'standard-dark');
