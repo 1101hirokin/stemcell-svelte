@@ -1,0 +1,45 @@
+/* 通知の領域(Toaster.md)。視野角の隅に固定し、通知層に置く。領域自体はクリックを透過し(pointer-events:
+   none)、個々の Toast だけが対話可能(auto)。積みは stack-sm、端との隙間は inset-md。位置は論理方向で RTL /
+   縦書きに追従する。新しい通知が寄せた端に近い側に出る。 */
+.sc-toaster {
+  position: fixed;
+  z-index: var(--layer-notification-z);
+  display: flex;
+  gap: var(--spacing-stack-sm);
+  max-inline-size: min(100dvi, 24rem);
+  /* 領域はクリックを透過。中の Toast だけが受ける */
+  pointer-events: none;
+}
+.sc-toaster-item {
+  pointer-events: auto;
+  display: flex;
+}
+
+/* 縦の寄せ。新しいものが寄せた端に近い側へ出るよう flex 方向を変える */
+.sc-toaster[data-block='block-start'] {
+  inset-block-start: var(--spacing-inset-md);
+  inset-block-end: auto;
+  flex-direction: column-reverse;
+}
+.sc-toaster[data-block='block-end'] {
+  inset-block-end: var(--spacing-inset-md);
+  inset-block-start: auto;
+  flex-direction: column;
+}
+
+/* 横の寄せ */
+.sc-toaster[data-inline='inline-start'] {
+  inset-inline-start: var(--spacing-inset-md);
+  inset-inline-end: auto;
+  align-items: flex-start;
+}
+.sc-toaster[data-inline='inline-end'] {
+  inset-inline-end: var(--spacing-inset-md);
+  inset-inline-start: auto;
+  align-items: flex-end;
+}
+.sc-toaster[data-inline='inline-center'] {
+  inset-inline: 0;
+  margin-inline: auto;
+  align-items: center;
+}

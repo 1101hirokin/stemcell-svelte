@@ -29,3 +29,7 @@ export { default as Avatar } from './Avatar/Avatar.svelte';
 export { default as Tag } from './Tag/Tag.svelte';
 export { default as Alert } from './Alert/Alert.svelte';
 export { default as Text } from './Text/Text.svelte';
+export { default as Toast } from './Toast/Toast.svelte';
+export { default as Toaster } from './Toaster/Toaster.svelte';
+export { toast } from './internal/toast-store.svelte';
+export type { ToastOptions, ToastColor, ToastApi } from './internal/toast-store.svelte';

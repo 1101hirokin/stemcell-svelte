@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -757,6 +757,48 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - TextField の notes がすべて当てはまる。複数行であることが支援技術に届く(Web の表現は native textarea 要素、または aria-multiline)。
 - keyboard prop は継承される。Compose は複数行でも keyboardType を持つ。iOS の複数行(TextEditor)で同様に効くかは未確認である(一次情報が bot 遮断で未達、二次情報は割れている。下敷きの UITextView は UITextInputTraits に準拠し keyboardType を持つため、効く可能性がむしろ高い — 独立レビューの指摘で当初の「対応物が無い」という断定を訂正)。swiftui 実装の実験で決着する。効かないと実証された場合の器は第7条(技術の普及の時間軸)ではなく ceded(removes。GOVERNANCE §4 の構造差の器)を検討する。
 - Enter は改行であり、暗黙送信は起きない(HTML の挙動。本契約の関心ではないが、TextField との違いとして記録)。
+
+### Toast(契約 0.0.0-alpha.0)
+
+勝手に消えてよい報告(overlay の notification 類)。その場に留まる報告は Alert の仕事。Toast は fire-and-forget の出来事で、ツリー上の置き場所に現れず、アプリが任意の場所から命令的に enqueue する(Stemcell 文脈のホストへ。RFC 0013)。呼び出しの形は各プラットフォームの表現(Compose の SnackbarHostState、SwiftUI の environment、Web の provider context)だが、召喚が命令形であること自体は notification 類の Normative(overlay.md §6 の carve-out)。生存時間と退去はホストが所有し(自律退去。Toaster / StemcellProvider が establish する)、アプリは open を値として握らない。内容は data(message は文字列)で、リッチ内容(任意マークアップ)は将来 RFC(Select の option リッチ化と同型)。フォーカスを奪わない(overlay.md §4)。単一の任意アクションを持て、アクションがあれば自律退去しない(第1条: 消える前に届く)。
+
+props:
+
+- `message`: string — 通知の本文。data として渡す(スロットでない): 召喚が命令形で、置き場所を持たない出来事だから(RFC 0013)。支援技術へ届く核。リッチ内容は将来 RFC。
+- `color`: "danger" | "warning" | "success" | "info"(既定 "info") — 報告の intent(color.md §5)。Alert / Badge と同じ4値・同じ既定。primary / plain を含まない理由も同じ(行動の語彙を報告に使わない)。intent は割り込みの度合いにも連動する(a11y。Alert と同規範)。
+- `duration`: number((省略可)) — 自律退去までの時間(ミリ秒)。省略時はホストの既定(seed)。SC 2.2.1: 調整可能で、hover / focus 中は一時停止する(a11y)。actionLabel があるときは無視され、自律退去しない(消える前にアクションへ届くため。RFC 0013)。ミリ秒は中立の時間量であり、これは motion の遷移(entrance / exit)とは別の量(motion トークンは ~150–300ms、自律退去は桁が違う)。既定値の置き場所は Toaster(overlay.md §8 の open TODO をここで閉じる)。
+- `dismissible`: boolean(既定 true) — 明示的に閉じられるか。Alert(既定 false: 状況が続く限り読める)と逆で、Toast の既定は true: 一時的で自律退去する報告は、利用者が待たずに閉じられるべき(第1条)。actionLabel があり自律退去しないときも、閉じる口が利用者の逃げ道になる。
+- `actionLabel`: string((省略可)) — 単一の任意アクションのラベル(Undo / Retry 等)。与えると action イベントを発火する押せる要素が現れ、その通知は自律退去しなくなる(RFC 0013。第1条: キーボード / 支援技術がアクションへ届く前に消えない)。複数アクション・アイコン付きは範囲外(将来 RFC)。
+
+events(Svelte では callback prop):
+
+- `ondismiss`: (payload: void) => void — 通知がホストから取り除かれたときに通知する(自律退去・明示クローズ・アクション後のいずれでも)。取り除く主体はホストであってアプリではない(Alert の dismiss はアプリが取り除く向きだったが、Toast はライフサイクルをホストが所有する。RFC 0013)。アプリはこの契機で副作用の後始末をする。
+- `onaction`: (payload: void) => void — 単一アクション(actionLabel)が活性化されたことを伝える。命令形で enqueue する経路では、アプリが渡したハンドラがこのイベントに結線される。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 報告は支援技術へ割り込みの度合いつきで届く。即時の割り込み(Web の表現は role=alert 相当)は danger だけに絞り、warning / success / info は穏当な告知(role=status 相当)とする。Alert と同一の Stemcell 規範(color.md §5 / Alert.md)。Toast は常に動的に挿入されるため、この告知は必ず起きる(初期描画から在る Alert と違い、静的挿入の例外は無い)。
+- フォーカスを奪わない(overlay.md §4 notification 類)。通知が現れてもフォーカスは移らない。ゆえに actionLabel / dismissible の押せる要素へポインタ無しで届くには、通知の領域がキーボードで到達可能でなければならない(領域を landmark にし、F6 相当で巡回できる。到達性はホスト = Toaster が担う。overlay.md §4 の notification 到達性)。
+- 自律退去は SC 2.2.1 に従う: hover / focus 中は一時停止し、duration は調整可能(prop)。actionLabel があるときは自律退去せず、アクションが到達される前に消えない(第1条)。
+- actionLabel / dismissible(閉じる)は内部の押せる要素であり、focus を受け、フォーカスリングが必須で、当たり判定の門(size.md §4)の対象。ルートの focusRing: false は Toast 自身が focus を受けないという意味で、内部要素を免除しない(条件付きで生える部分要素の a11y をスキーマは表現できない。Alert / Tag と同じ限界の認識)。リング色は既定の app.system(tokensRequired に束縛)。閉じるの名前は「閉じる」+ message から合成し、兄弟として構成する(Alert の dismiss と同規範)。
+- intent の絵(先頭のアイコン)は色に頼らない識別の手がかり(WCAG 1.4.1)。絵の意味名はアイコンセット受領時に確定(iconography.md §6)。
+- message は通知の内容であって Toast の名前配線(aria-labelledby 相当)はしない。内容が読み上げ順で届く領域である(Alert と同型)。
+
+### Toaster(契約 0.0.0-alpha.0)
+
+通知(Toast)のホスト。キュー・タイマー・自律退去のライフサイクルを所有し、隅の領域に Toast を積んで描く状態を持つユニット(RFC 0013)。子孫へ命令形の enqueue 能力を各プラットフォームの文脈 / 環境機構で提供する(Web は context、Compose は hoist した host state、SwiftUI は environment)。この enqueue 能力は props / events / slots に収まらない新種の契約表面であり、機構は表現・「文脈のルートがホストを提供し各所が環境機構で enqueue する」構造が Normative(第2条・overlay.md §6)。StemcellProvider が既定の Toaster を1つ establish するのでゼロ設定で enqueue が動く(第4条-1)。アプリが Toaster を明示的に置けば位置 / safe-area / scope を上書きできる(第4条 逃げ道)。StemcellProvider の無状態(契約 §5)は保たれる: 状態を持つのはこの Toaster であって provider ではない。
+
+props:
+
+- `position`: "block-start inline-start" | "block-start inline-center" | "block-start inline-end" | "block-end inline-start" | "block-end inline-center" | "block-end inline-end"(既定 "block-end inline-end") — 領域を寄せる隅(論理方向。layout.md §7。RTL / 縦書きで自動反転)。既定 block-end inline-end は seed。safe-area(ノッチ / ホームインジケータ)への内側寄せは実装が担う(第1条)。
+- `max`: number(既定 3) — 同時に見せる Toast の最大数。超えた分は畳む / 待たせる(overflow の見せ方は Expressive)。既定 3 は seed。多重に積み上げて画面を埋めない(第1条 / 第3条)。
+- `defaultDuration`: number(既定 5000) — Toast が duration を省いたときの既定の自律退去時間(ミリ秒)。既定 5000 は seed(overlay.md §8 の「自律退去時間の値と置き場所」をここで閉じる: 値は Toaster が持つ)。SC 2.2.1 に従い、hover / focus 中は一時停止し、個々の Toast の duration で上書きできる。actionLabel を持つ Toast はこの既定に関わらず自律退去しない(Toast 契約)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 領域は landmark にし、キーボードで到達可能にする(Web の表現は role=region + aria-label。F6 相当の巡回で入れる)。通知はフォーカスを奪わない(overlay.md §4)ので、actionLabel / 閉じるの押せる要素へポインタ無しで届く唯一の道がこの到達性である(第1条)。SwiftUI / Compose では対応する到達機構に写す。
+- 領域自体は告知しない(aria-live は個々の Toast が持つ。role=status / alert は Toast 側)。領域は器であって内容ではない。
+- 自律退去のタイマーは hover / focus 中は一時停止する(SC 2.2.1)。ホストがキューとタイマーを所有し、Toast の追加 / 退去 / 上限超過を決定的に扱う(svelte / lit が食い違わないため。GOVERNANCE §7)。
 
 ### Tooltip(契約 0.0.0-alpha.1)
 

@@ -1,0 +1,124 @@
+/* 勝手に消えてよい報告(Toast.md)。任意コンテンツの上に浮くので、solid な notification 面 + 影で浮かせ、
+   intent は先頭の絵(色だけで種類を伝えない。WCAG 1.4.1)で担う。角は card、内側は inset-md、文字は body-md。
+   出入りは motion.entrance / exit(退去の手触りは Expressive)。 */
+.sc-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-inline-md);
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 22rem; /* 読みやすい上限 */
+  padding: var(--spacing-inset-md);
+  border-radius: var(--shape-semantic-card);
+  background: var(--elevation-notification-surface);
+  box-shadow: var(--elevation-notification-shadow);
+  color: var(--color-app-foreground);
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+  /* 追加ごとに entrance で現れる(reduced-motion で 0ms でも「現れる」意味は保つ。第7条) */
+  animation: sc-toast-in var(--motion-entrance-duration) var(--motion-entrance-easing);
+}
+/* intent の絵の色(neutral 面の上で見える intent 色 = border 段)。文字は app.foreground を保つ */
+.sc-toast[data-color='danger'] {
+  --_accent: var(--color-semantic-danger-border);
+}
+.sc-toast[data-color='warning'] {
+  --_accent: var(--color-semantic-warning-border);
+}
+.sc-toast[data-color='success'] {
+  --_accent: var(--color-semantic-success-border);
+}
+.sc-toast[data-color='info'] {
+  --_accent: var(--color-semantic-info-border);
+}
+
+/* 退去アニメ。leaving の間だけ効き、ホストが motion.exit 経過後にキューから外す */
+.sc-toast[data-leaving] {
+  animation: sc-toast-out var(--motion-exit-duration) var(--motion-exit-easing) forwards;
+}
+
+@keyframes sc-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+@keyframes sc-toast-out {
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+.sc-toast-icon {
+  flex: none;
+  display: inline-flex;
+  font-size: 1.25em;
+  line-height: 1;
+  color: var(--_accent);
+}
+
+.sc-toast-message {
+  flex: 1 1 auto;
+  min-inline-size: 0; /* 長い語で器を押し広げない(折り返す) */
+  overflow-wrap: anywhere;
+}
+
+/* アクション(単一)。intent 色の text ボタン。focus を受け、リング色は app.system。文字は label-md */
+.sc-toast-action {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--_accent);
+  cursor: pointer;
+  flex: none;
+  align-self: center;
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  border-radius: var(--shape-semantic-control);
+}
+.sc-toast-action:hover {
+  opacity: 0.7;
+}
+.sc-toast-action:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* 閉じる。当たり判定の門(24px)を割らない。リング色は app.system(Alert の × と同型) */
+.sc-toast-dismiss {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  border-radius: var(--shape-semantic-control);
+}
+.sc-toast-dismiss:hover {
+  opacity: 0.7;
+}
+.sc-toast-dismiss:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-toast,
+  .sc-toast[data-leaving] {
+    animation-duration: 0ms;
+  }
+}
