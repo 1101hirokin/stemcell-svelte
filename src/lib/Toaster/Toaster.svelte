@@ -45,13 +45,47 @@
   // 二重描画を避ける(既定+差し替え可): active なホストだけが描く。
   const active = $derived(isActiveToaster(uid));
 
+  // active なホストだけが共有 config を設定する(既定ホストが app 指定の max/defaultDuration を後勝ちで
+  // 上書きしないため。登録調整の「active だけが effective」の意図に揃える)。
   $effect(() => {
-    setConfig({ max, defaultDuration });
+    if (active) setConfig({ max, defaultDuration });
   });
 
-  // "block-end inline-end" → data-block / data-inline(CSS が隅へ寄せる)
-  const block = $derived(position.split(' ')[0]);
-  const inline = $derived(position.split(' ')[1]);
+  // "block-end inline-end" → data-block / data-inline(CSS が隅へ寄せる)。split は一度だけ。
+  const pos = $derived(position.split(' '));
+
+  // 領域(landmark)。閉じたときフォーカスをここで受け止め、body へ落とさない(第1条・overlay.md §4)。
+  let regionEl: HTMLDivElement | undefined = $state();
+
+  // hover と focus は独立の一時停止経路。両方が終わって初めて再開する(overlay.md §4 の tooltip と同型・
+  // SC 2.2.1)。片方だけの終了ではタイマーを再始動しない。
+  let hovering = false;
+  let focused = false;
+  function onPointerEnter() {
+    hovering = true;
+    pause();
+  }
+  function onPointerLeave() {
+    hovering = false;
+    if (!focused) resume();
+  }
+  function onFocusIn() {
+    focused = true;
+    pause();
+  }
+  function onFocusOut(e: FocusEvent) {
+    if (regionEl?.contains(e.relatedTarget as Node)) return; // 領域内の移動は「終了」ではない
+    focused = false;
+    if (!hovering) resume();
+  }
+
+  // 閉じる/アクションで通知を退去させる。除去でフォーカスが body へ落ちないよう、領域内に focus があれば
+  // 領域へ移す(overlay.md §4 の到達性の帰結。キーボードで閉じても現在地を失わない)。
+  function close(id: string) {
+    const hadFocus = regionEl?.contains(document.activeElement);
+    dismiss(id);
+    if (hadFocus) regionEl?.focus();
+  }
 </script>
 
 {#if active}
@@ -60,26 +94,27 @@
        タイマーは hover / focus 中は一時停止する(SC 2.2.1)。 -->
   <div
     class="sc-toaster"
-    data-block={block}
-    data-inline={inline}
+    bind:this={regionEl}
+    data-block={pos[0]}
+    data-inline={pos[1]}
     role="region"
     aria-label={regionLabel}
-    onpointerenter={pause}
-    onpointerleave={resume}
-    onfocusin={pause}
-    onfocusout={resume}
+    tabindex="-1"
+    onpointerenter={onPointerEnter}
+    onpointerleave={onPointerLeave}
+    onfocusin={onFocusIn}
+    onfocusout={onFocusOut}
   >
     {#each toasts as t (t.id)}
       <div class="sc-toaster-item">
         <Toast
-          id={t.id}
           message={t.message}
           color={t.color}
           dismissible={t.dismissible}
           actionLabel={t.actionLabel}
           leaving={t.leaving}
           onaction={t.onAction}
-          ondismiss={() => dismiss(t.id)}
+          ondismiss={() => close(t.id)}
         />
       </div>
     {/each}

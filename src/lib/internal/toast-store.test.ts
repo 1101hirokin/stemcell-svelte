@@ -76,3 +76,28 @@ it('dismiss: onDismiss を一度だけ呼び、二重 dismiss で再発火しな
   dismiss(id);
   expect(onDismiss).toHaveBeenCalledTimes(1);
 });
+
+it('onDismiss が throw しても除去は走り、例外は系へ伝播しない(ゴースト化しない)', () => {
+  const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const id = toast('危険', {
+    onDismiss: () => {
+      throw new Error('boom');
+    },
+  });
+  expect(() => dismiss(id)).not.toThrow();
+  vi.advanceTimersByTime(EXIT);
+  expect(toasts.length).toBe(0); // leaving のまま残らない
+  expect(err).toHaveBeenCalled();
+  err.mockRestore();
+});
+
+it('setConfig: NaN / 負の max は無視して既定を保つ(上限が壊れない)', () => {
+  setConfig({ max: NaN });
+  setConfig({ max: -3 });
+  toast('a');
+  toast('b');
+  toast('c');
+  toast('d');
+  // 既定 max=3 のまま。live は 3 に収まる(NaN/負で無効化されていない)。
+  expect(toasts.filter((t) => !t.leaving).length).toBe(3);
+});

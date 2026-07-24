@@ -33,9 +33,11 @@
   --_accent: var(--color-semantic-info-border);
 }
 
-/* 退去アニメ。leaving の間だけ効き、ホストが motion.exit 経過後にキューから外す */
+/* 退去アニメ。leaving の間だけ効き、ホストが motion.exit 経過後にキューから外す。退去中は不可視なので
+   操作を受けない(reduced-motion で残る場合も含め、消えつつある通知を押せないように) */
 .sc-toast[data-leaving] {
   animation: sc-toast-out var(--motion-exit-duration) var(--motion-exit-easing) forwards;
+  pointer-events: none;
 }
 
 @keyframes sc-toast-in {
@@ -65,12 +67,19 @@
   overflow-wrap: anywhere;
 }
 
-/* アクション(単一)。intent 色の text ボタン。focus を受け、リング色は app.system。文字は label-md */
+/* アクション(単一)。intent 色の text ボタン。focus を受け、リング色は app.system。文字は label-md。
+   当たり判定の門(24px。SC 2.5.8 / size.md §4)を満たす: 短い label でも縦横 1.5rem を確保する */
 .sc-toast-action {
   appearance: none;
   border: 0;
   margin: 0;
-  padding: 0;
+  padding-block: 0;
+  padding-inline: 0.5rem;
+  min-block-size: 1.5rem;
+  min-inline-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   color: var(--_accent);
   cursor: pointer;

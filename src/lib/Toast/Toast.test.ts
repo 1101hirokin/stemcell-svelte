@@ -3,7 +3,7 @@ import { render } from '@testing-library/svelte';
 import { vi } from 'vitest';
 import Toast from './Toast.svelte';
 
-const base = { id: 't1', message: '保存しました' };
+const base = { message: '保存しました' };
 
 it('message を描き、intent の絵は装飾(aria-hidden)', () => {
   const { getByText, container } = render(Toast, { props: base });

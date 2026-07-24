@@ -3,16 +3,11 @@
   import { META, WEB } from './meta';
   import Icon from '../Icon/Icon.svelte';
   import closeGlyph from '@stemcell/icons/close';
-  import noticeError from '@stemcell/icons/notice.error';
-  import noticeAlert from '@stemcell/icons/notice.alert';
-  import noticeOk from '@stemcell/icons/notice.ok';
-  import noticeInfo from '@stemcell/icons/notice.info';
+  import { noticeRole, noticeGlyph } from '../internal/notice-intent';
 
   // 勝手に消えてよい報告(overlay の notification 類。Toast.md)。Toaster がキュー data から描く。
   // 内容は data(message は文字列。命令形召喚ゆえスロットでない。RFC 0013)。
   interface Props {
-    /** 通知の識別子(ストアのキュー id)。 */
-    id: string;
     /** 本文。 */
     message: string;
     /** 報告の intent(color.md §5。既定 info)。 */
@@ -31,7 +26,6 @@
     leaving?: boolean;
   }
   let {
-    id,
     message,
     color = META.props.color.default,
     dismissible = META.props.dismissible.default,
@@ -42,20 +36,11 @@
     leaving = false,
   }: Props = $props();
 
-  // 割り込みの度合いを intent から導く(Alert と同一の Stemcell 規範。§3): 即時(role=alert)は danger
-  // だけ、warning/success/info は穏当(role=status)。Toast は常に動的挿入なので必ず告知する。
-  const role = $derived(color === 'danger' ? 'alert' : 'status');
-
-  // intent の絵(色に頼らない識別。WCAG 1.4.1)。Alert と同じ notice 一族。
-  const intentGlyph = $derived(
-    color === 'danger'
-      ? noticeError
-      : color === 'warning'
-        ? noticeAlert
-        : color === 'success'
-          ? noticeOk
-          : noticeInfo,
-  );
+  // 割り込みの度合いと intent の絵は Alert と同一規範(internal/notice-intent へ集約)。danger のみ即時
+  // (role=alert)、他は穏当(role=status)。Toast は常に動的挿入なので必ず告知する。絵は色に頼らない識別
+  // (WCAG 1.4.1)。
+  const role = $derived(noticeRole(color));
+  const intentGlyph = $derived(noticeGlyph(color));
 
   const uid = $props.id();
   const messageId = `${uid}-message`;

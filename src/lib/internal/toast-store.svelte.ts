@@ -78,14 +78,18 @@ export function pause(): void {
   }
 }
 
-/** hover/focus を離れたら残り時間で再開する。 */
+/** hover/focus を離れたら残り時間で再開する。停止中に時間切れになっていたものは即退去へ。 */
 export function resume(): void {
-  for (const [id, t] of timers) {
-    if (!t.handle && t.remaining > 0) {
-      t.startedAt = Date.now();
-      const remaining = t.remaining;
-      t.handle = setTimeout(() => dismiss(id), remaining);
+  // dismiss が iterate 中の timers を変異させるのでスナップショットで回す。
+  for (const [id, t] of [...timers]) {
+    if (t.handle) continue;
+    if (t.remaining <= 0) {
+      dismiss(id); // 停止解除 = 時間切れの確定(取りこぼして残り続けるのを防ぐ)
+      continue;
     }
+    t.startedAt = Date.now();
+    const remaining = t.remaining;
+    t.handle = setTimeout(() => dismiss(id), remaining);
   }
 }
 
@@ -116,13 +120,18 @@ export function enqueue(message: string, opts: ToastOptions = {}): string {
   return id;
 }
 
-/** ルート要素から motion.exit の時間(ms)を読む(退去アニメの後にキューから外すため)。 */
+/**
+ * 退去アニメの後にキューから外すまでの時間(ms)。reduced-motion では CSS が animation を 0ms にするので
+ * 0 を返し、可視と実体のズレ(不可視要素が残る)を無くす。トークン値は変わらないのでキャッシュする。
+ */
+let cachedExitMs: number | null = null;
 function exitMs(): number {
   if (typeof window === 'undefined') return 0;
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return 0;
+  if (cachedExitMs != null) return cachedExitMs;
   const v = getComputedStyle(document.documentElement).getPropertyValue('--motion-exit-duration').trim();
-  if (v.endsWith('ms')) return parseFloat(v);
-  if (v.endsWith('s')) return parseFloat(v) * 1000;
-  return 200;
+  cachedExitMs = v.endsWith('ms') ? parseFloat(v) : v.endsWith('s') ? parseFloat(v) * 1000 : 200;
+  return cachedExitMs;
 }
 
 /**
@@ -136,8 +145,14 @@ export function dismiss(id: string): void {
   const t = timers.get(id);
   if (t?.handle) clearTimeout(t.handle);
   timers.delete(id);
-  item.onDismiss?.();
+  // 除去の予約を onDismiss の成否から独立させる: コールバックが throw しても通知は残さず、
+  // 例外が enqueue の上限退去ループや click ハンドラへ伝播して系を壊さないようにする。
   setTimeout(() => remove(id), exitMs());
+  try {
+    item.onDismiss?.();
+  } catch (e) {
+    console.error('[stemcell] toast onDismiss threw', e);
+  }
 }
 
 function remove(id: string): void {
@@ -145,10 +160,15 @@ function remove(id: string): void {
   if (i >= 0) toasts.splice(i, 1);
 }
 
-/** Toaster がキュー上限と既定時間を設定する。 */
+/** Toaster がキュー上限と既定時間を設定する。異常値(NaN・負)は無視して既定を保つ(上限が丸ごと無効化
+    されたり負数で while が暴れるのを防ぐ)。 */
 export function setConfig(next: Partial<{ defaultDuration: number; max: number }>): void {
-  if (next.defaultDuration != null) config.defaultDuration = next.defaultDuration;
-  if (next.max != null) config.max = next.max;
+  if (next.defaultDuration != null && Number.isFinite(next.defaultDuration) && next.defaultDuration >= 0) {
+    config.defaultDuration = next.defaultDuration;
+  }
+  if (next.max != null && Number.isFinite(next.max) && next.max >= 1) {
+    config.max = Math.floor(next.max);
+  }
 }
 
 /**
@@ -159,10 +179,15 @@ export function setConfig(next: Partial<{ defaultDuration: number; max: number }
 const registry = $state<{ id: string; isDefault: boolean }[]>([]);
 
 export function registerToaster(id: string, isDefault: boolean): void {
+  // client 専用(enqueue と同じ防御線)。SSR では registry を触らない: 既定ホストは provider の
+  // client 副作用でしか mount されず、SSR 中の登録調整は不要で、ストリーミング SSR での跨リクエスト
+  // 混入も避ける(module docstring の無漏洩主張を registry にも成立させる)。
+  if (typeof window === 'undefined') return;
   registry.push({ id, isDefault });
 }
 
 export function unregisterToaster(id: string): void {
+  if (typeof window === 'undefined') return;
   const i = registry.findIndex((r) => r.id === id);
   if (i >= 0) registry.splice(i, 1);
 }
