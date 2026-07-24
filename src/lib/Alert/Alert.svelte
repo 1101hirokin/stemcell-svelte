@@ -3,10 +3,7 @@
   import { META, WEB } from './meta';
   import Icon from '../Icon/Icon.svelte';
   import closeGlyph from '@stemcell/icons/close';
-  import noticeError from '@stemcell/icons/notice.error';
-  import noticeAlert from '@stemcell/icons/notice.alert';
-  import noticeOk from '@stemcell/icons/notice.ok';
-  import noticeInfo from '@stemcell/icons/notice.info';
+  import { noticeRole, noticeGlyph } from '../internal/notice-intent';
   import type { Snippet } from 'svelte';
 
   // 文での報告(Alert.md §1)。その場に留まり、状況が続く限り読める(勝手に消える報告は Toast の仕事)。
@@ -33,21 +30,11 @@
     children,
   }: Props = $props();
 
-  // 割り込みの度合いを intent から導く(Stemcell 独自の規範。§3): 即時(role=alert)は danger だけ、
-  // warning/success/info は穏当(role=status)。割り込みは動的挿入時にだけ起きる(live region の実務。
-  // 静的な内容は読み上げ順で届く)。role を置けば native の live region がこの条件を無償で満たす(第2条)。
-  const role = $derived(color === 'danger' ? 'alert' : 'status');
-
-  // intent の絵(色に頼らない識別。WCAG 1.4.1)。notice 一族が用途どおり(暫定の対応。Alert.md §5 で ratify)。
-  const intentGlyph = $derived(
-    color === 'danger'
-      ? noticeError
-      : color === 'warning'
-        ? noticeAlert
-        : color === 'success'
-          ? noticeOk
-          : noticeInfo,
-  );
+  // 割り込みの度合いと intent の絵は internal/notice-intent へ集約(Toast と共有)。即時(role=alert)は
+  // danger だけ、他は穏当(role=status)。割り込みは動的挿入時だけ起きる(live region の実務)。絵は色に
+  // 頼らない識別(WCAG 1.4.1。notice 一族。Alert.md §5 で ratify)。
+  const role = $derived(noticeRole(color));
+  const intentGlyph = $derived(noticeGlyph(color));
 
   const uid = $props.id();
   const titleId = `${uid}-title`;

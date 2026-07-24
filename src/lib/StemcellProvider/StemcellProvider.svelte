@@ -1,6 +1,8 @@
 <script lang="ts">
   import './StemcellProvider.css';
   import { META } from './meta';
+  import { mount, unmount } from 'svelte';
+  import Toaster from '../Toaster/Toaster.svelte';
 
   interface CustomThemeDefinition {
     key: string;
@@ -29,6 +31,13 @@
     const root = document.documentElement;
     if (density === 'comfortable') root.removeAttribute('data-density');
     else root.setAttribute('data-density', density);
+  });
+  $effect(() => {
+    // 既定の通知ホストを body へ立てる(RFC 0013)。DOM を出さない自己完結の provider は tree context を
+    // 配れないため、既定 Toaster を body へ mount する。app が <Toaster> を置けばそちらが active になり、
+    // 既定は描画しない(ストアの登録調整。二重描画を避ける)。SSR では $effect は走らないので client のみ。
+    const host = mount(Toaster, { target: document.body, props: { isDefault: true } });
+    return () => unmount(host);
   });
   $effect(() => {
     // HOLES #5: themes(カスタムテーマの色→CSS 変換)は実装保留。
