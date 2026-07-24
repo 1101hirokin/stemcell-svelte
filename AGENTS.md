@@ -83,13 +83,13 @@ props:
 - `src`: string((省略可)) — 画像の場所。観念は「主体の画像への参照」であり、URL か native のリソース参照かは各プラットフォームの表現。
 - `name`: string — 主体の名前(必須)。イニシャルの源であり、意味を運ぶときのアクセシブルネーム。画像があっても必須: 画像が落ちた瞬間に名前が要る(第7条の退避先を常に持つ)。
 - `size`: "sm" | "md" | "lg"(既定 "md") — size.md §2 の avatar チャンネル(裁定)。段が引くのは avatar.{size} トークン(24/32/40px。rem 建て)。
-- `decorative`: boolean(既定 false) — 支援技術から隠すか(§3)。既定 false は意味を持つ(role=img で name が届く)。隣に可視の名前があるとき true にして装飾へ落とし、名前の二重読みを避ける。境界は Icon の label と同じ(消したとき情報が失われるか。iconography.md §5)。既定を false にするのは第1条の側に倒すためで、指定漏れは冗長(名前の二重読み)にはなるが名前を失わない。
+- `decorative`: boolean(既定 false) — 支援技術から隠すか(§3)。既定 false は意味を持つ(支援技術に画像として認識され name が届く。Web の表現は role=img)。隣に可視の名前があるとき true にして装飾へ落とし、名前の二重読みを避ける。境界は Icon の label と同じ(消したとき情報が失われるか。iconography.md §5)。既定を false にするのは第1条の側に倒すためで、指定漏れは冗長(名前の二重読み)にはなるが名前を失わない。
 
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 隣に名前のテキストがあるときは装飾(decorative=true で支援技術から隠す)。単独で主体を示すときは name が届く(decorative=false。既定)。境界は Icon と同じ「消したとき情報が失われるか」(iconography.md §5)。既定を meaningful に倒すのは、指定漏れが情報損失でなく冗長で済む側だから(第1条)。
 - 相互作用しない。押せる形を Avatar 自身は提供せず、当たり判定の門(size.md §4)の対象外である根拠はそれに尽きる。押せる顔の合成経路は未提供(Avatar.md §5)。
-- イニシャルの文字は avatar 寸法から導く内部表現であり、typography 役割の系に乗らない(size.md §2「段は文字を引かない」を破らない)。切り出し規則は Normative な共有アルゴリズム(未確定。Avatar.md §5): 同じ name から実装ごとに違うイニシャルが出れば共通言語が割れる。
+- イニシャルの文字は avatar 寸法から導く内部表現であり、typography 役割の系に乗らない(size.md §2「段は文字を引かない」を破らない)。切り出し規則は Normative な共有アルゴリズム(2026-07-23 確定。Avatar.md §5: 2語以上=先頭語と末尾語の頭字、1語=ラテンは先頭2字・非ラテンは先頭1字、いずれも書記素単位で大文字化): 同じ name から実装ごとに違うイニシャルが出れば共通言語が割れる。
 
 ### Badge(契約 0.0.0-alpha.1)
 
@@ -115,13 +115,13 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - dot の存在情報は Badge 自身の label prop が運ぶ(視覚に隠したテキスト等、機構は各プラットフォームの表現)。anchor 側の名前に合成することを要求しない: anchor が名前を持つ契約とは限らず、機構の無い要求は書かない。
 - count が無く dot も false のとき、Badge は何も描画しない(空の Badge は無を意味する)。空のピルを描く実装と何も出さない実装が割れれば仕様の穴になる(GOVERNANCE §7)ので、ここで定める。
 
-### Box(契約 0.0.0-alpha.0)
+### Box(契約 0.0.0-alpha.1)
 
 内在スタイルの器。唯一の最高自由度の逃げ道(layout.md §6)。ただし逃げ道(自由 style の受け口)は契約に無い(裁定): プラットフォーム中立に定義できないため、契約はトークン値の中立表面だけを持ち、生 style の口は各実装の土地の声である。
 
 props:
 
-- `inset`: string((省略可)) — 内側余白。spacing の語彙。段(sm / md / lg)または大域の原始 X(8〜24 の整数の文字列。32px〜)。小域の原始(0〜7)は受けない(spacing.md §6: 小域は意味層で。layout.md §6)。生の px は受けない。混合型のため string であり、値の照合は実装側の適合テストの仕事。 省略時は余白なし。
+- `inset`: string((省略可)) — 内側余白。spacing の語彙。段(sm / md / lg)または大域の原始 X(8〜24 の整数の文字列。32px〜)。小域の原始(0〜7)は受けない(spacing.md §6: 小域は意味層で。layout.md §6)。生の px は受けない。1値は全周に、2値「block inline」(空白区切り。block=縦 / inline=横 の論理軸)は軸別に与える。padding は本来2軸を持ち、軸別指定は全プラットフォーム共通の普遍(layout.md §6)。各値は上の語彙に従い、段と原始の混在も可。2値で片方が語彙外なら部分適用せず余白なしへ退避する。混合型のため string であり、値の照合は実装側の適合テストの仕事。 省略時は余白なし。
 
 slots(Svelte では snippet。default は子要素をそのまま):
 
@@ -226,7 +226,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 
-### Dialog(契約 0.0.0-alpha.1)
+### Dialog(契約 0.0.0-alpha.2)
 
 ビューポート中央に開く modal(overlay の modal 類)。背後を scrim で覆い操作を封じ、フォーカスを中に捕捉し、閉じたら開いた元へ戻す。アプリが開閉を所有する(Menu / Select と違い、いつ出すかはアプリの領分。open は値。overlay.md §6)。Web は native `<dialog>` + showModal() を土台にする: focus trap・top-layer・::backdrop・Escape・背後 inert が標準で無償(自前の focus trap を持たない。第7条 progressive enhancement)。退出は dismiss で選ぶ(light=Escape+背後クリック、explicit=ボタンのみ。既定 light。overlay.md §8 の裁定を本契約が解く)。端に寄せる Drawer は別契約(同じ modal 類)。RFC 0009。
 
@@ -268,7 +268,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 既定は装飾: 支援技術から隠す。意味のある区切り(セクションの境界)は見出し構造が運ぶべきで、線に意味を載せない。
 - 集合の中の意味的な区切り(Menu 内の separator 等)はその集合の契約が定める。Divider 単体は意味を持たない。
 
-### Drawer(契約 0.0.0-alpha.1)
+### Drawer(契約 0.0.0-alpha.2)
 
 画面の端に寄って開く modal(overlay の modal 類。Dialog が中央、Drawer は端。overlay.md §5)。背後を scrim で覆い操作を封じ、フォーカスを中に捕捉し、閉じたら開いた元へ戻す。アプリが開閉を所有する(open は値。overlay.md §6)。Web は Dialog と同じ native `<dialog>` + showModal() を土台にする: focus trap・top-layer・::backdrop・Escape・背後 inert が標準で無償(憲法 第2条 / 第7条)。位置と入りの方向だけが Dialog と違う(端に貼り付き、その端からスライドで入る)。退出は dismiss で選ぶ(既定 light。overlay.md §8。Dialog と同じ)。ナビゲーションやフィルタ等の側パネルが主用途。RFC 0009 の残課題として建てる。
 
