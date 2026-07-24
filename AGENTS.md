@@ -226,7 +226,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 
-### Dialog(契約 0.0.0-alpha.1)
+### Dialog(契約 0.0.0-alpha.2)
 
 ビューポート中央に開く modal(overlay の modal 類)。背後を scrim で覆い操作を封じ、フォーカスを中に捕捉し、閉じたら開いた元へ戻す。アプリが開閉を所有する(Menu / Select と違い、いつ出すかはアプリの領分。open は値。overlay.md §6)。Web は native `<dialog>` + showModal() を土台にする: focus trap・top-layer・::backdrop・Escape・背後 inert が標準で無償(自前の focus trap を持たない。第7条 progressive enhancement)。退出は dismiss で選ぶ(light=Escape+背後クリック、explicit=ボタンのみ。既定 light。overlay.md §8 の裁定を本契約が解く)。端に寄せる Drawer は別契約(同じ modal 類)。RFC 0009。
 
@@ -268,7 +268,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 既定は装飾: 支援技術から隠す。意味のある区切り(セクションの境界)は見出し構造が運ぶべきで、線に意味を載せない。
 - 集合の中の意味的な区切り(Menu 内の separator 等)はその集合の契約が定める。Divider 単体は意味を持たない。
 
-### Drawer(契約 0.0.0-alpha.1)
+### Drawer(契約 0.0.0-alpha.2)
 
 画面の端に寄って開く modal(overlay の modal 類。Dialog が中央、Drawer は端。overlay.md §5)。背後を scrim で覆い操作を封じ、フォーカスを中に捕捉し、閉じたら開いた元へ戻す。アプリが開閉を所有する(open は値。overlay.md §6)。Web は Dialog と同じ native `<dialog>` + showModal() を土台にする: focus trap・top-layer・::backdrop・Escape・背後 inert が標準で無償(憲法 第2条 / 第7条)。位置と入りの方向だけが Dialog と違う(端に貼り付き、その端からスライドで入る)。退出は dismiss で選ぶ(既定 light。overlay.md §8。Dialog と同じ)。ナビゲーションやフィルタ等の側パネルが主用途。RFC 0009 の残課題として建てる。
 
