@@ -85,8 +85,9 @@
 
 /* scrim(modal 背後)。Dialog と同じ。最上位以外(data-under)は透過にして見える scrim を一段に保つ(RFC 0009) */
 .sc-drawer::backdrop {
-  /* scrim は半透明で背面を残す(文脈維持)。Dialog と同じく color-mix で透過寄りに薄める */
-  background: color-mix(in srgb, var(--color-app-scrim) 40%, transparent);
+  /* scrim は半透明で背面を残す(文脈維持)。Dialog と同じく SSOT の --scrim(alpha 込み・現状 0.4)を引く。
+     color-mix は使わない(非対応で scrim が消えると第7条。elevation.md §8) */
+  background: var(--scrim);
   opacity: 1;
   /* background も遷らせる: 多重時に data-under で透過へ切り替わるのを瞬間ジャンプさせない(scrim の一瞬の
      フラッシュを避ける。下の modal の scrim が消えるのと上の modal のフェードインを均す) */

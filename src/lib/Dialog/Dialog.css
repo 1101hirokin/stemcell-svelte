@@ -44,9 +44,10 @@
 /* scrim(modal 背後。elevation.md §6)。native ::backdrop に敷く。最上位以外(data-under)は透過にして
    見える scrim を一段に保つ(単一。多重でも一段相当=RFC 0009。積算を抑える) */
 .sc-dialog::backdrop {
-  /* scrim は半透明で背面を残す(利用者の文脈維持)。scrim トークンは不透明色で「~0.5 opacity で使う」
-     前提(token コメント)なので、color-mix で透過寄りに薄める。opacity は出入りのフェード専用に残す */
-  background: color-mix(in srgb, var(--color-app-scrim) 40%, transparent);
+  /* scrim は半透明で背面を残す(利用者の文脈維持。elevation.md §6)。値は SSOT の --scrim(alpha 込み。
+     現状 0.4)を引く。color-mix は使わない(非対応環境で scrim が消えると第7条。elevation.md §8)。
+     opacity は出入りのフェード専用に残す */
+  background: var(--scrim);
   opacity: 0;
   /* background も遷らせる: 多重時に data-under で透過へ切り替わるのを瞬間ジャンプさせない(scrim のフラッシュ回避) */
   transition:
