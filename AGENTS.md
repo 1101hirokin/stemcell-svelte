@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, CircularLoader, CircularProgress, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -209,6 +209,39 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - label は control の後ろ(論理方向)に置く。位置を構造層として凍結するかは field.md §8 の未決のまま、初版は業界の一致(全系統が後置)に従う。
 - 標的の門: sm の見た目でも当たり判定は size.md §4 の下限を下回らない。
 
+### CircularLoader(契約 0.0.0-alpha.1)
+
+円形・不確定。いつ終わるか分からない待ちを告げる。終わりの割合が分かるなら CircularProgress。
+
+props:
+
+- `label`: string — 何を待っているか(必須)。回る輪は視覚でしか語らないので、意味は名前が運ぶ(IconButton の label と同型)。
+- `size`: "sm" | "md" | "lg"(既定 "md") — size.md §2 の loader チャンネル(裁定: avatar と同型)。径は loader.{size}(16/24/32px)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 待ちの状態が支援技術に届く(Web の表現は role=status / aria-busy 相当)。label が「何を」を運ぶ。
+- reduced-motion では回転を止めるか沈静化する(motion.md §6 の loop 特例)。待っているという意味は保つ(第7条: 壊れてよいのは感触だけ)。
+- 相互作用しない。当たり判定の門(size.md §4)の対象外。
+
+### CircularProgress(契約 0.0.0-alpha.2)
+
+円形・確定。終わりの割合が分かる進みを見せる。分からないなら CircularLoader。
+
+props:
+
+- `label`: string — 何の進捗か(必須)。
+- `value`: number — 現在値(必須)。state.md §6 の予約語彙。0 ≤ value ≤ max を期待する(スキーマは数値範囲を表現できないので散文の契約である。Badge の count と同型)。範囲外は呼び出し側の契約違反だが、実装は伝達の整合のため clamp する(aria-valuenow 相当を範囲外にしない。ARIA 上、min/max の外は不正である)。
+- `max`: number(既定 100) — 上限。native <progress> の max と同じ観念。正の数を期待する(同上、散文の契約)。
+- `showValue`: boolean(既定 false) — 可視の数値表示。既定は出さない(第3条の抑制。Ant の既定表示は採らない)。出すときの視覚の正準は「{n}%」で全実装同一、ロケール写像は表現(Badge の max+ と同型)。支援技術への値の伝達はこの prop と無関係に常に行う(第1条・Normative)。
+- `size`: "sm" | "md" | "lg"(既定 "md") — size.md §2 の loader チャンネル。CircularLoader と同じ径の体系。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- value / max は常に支援技術へ届く(Web の表現は role=progressbar + aria-valuenow 相当)。バーの長さだけなら見えない人に進捗が無い(第1条)。showValue はその可視化であって伝達の条件ではない。
+- reduced-motion でも値そのもの(aria-valuenow 相当と showValue の数字)は即座に正しく更新・伝達される。ただし視覚的な補間は他の transition と同じく --motion-scale に従い、reduced 時は瞬時(0ms)の切り替えになる(motion.md §6。loop のような特例は無く、コンポーネントは分岐しない)。消えるのは飾りの滑らかさであって、情報ではない。
+- 相互作用しない。当たり判定の門の対象外。
+
 ### Cluster(契約 0.0.0-alpha.0)
 
 折り返す横並び。タグの列・ボタンの列など、行に収まらなければ次の行へ流れる。全体が一斉に切り替わるのは Switcher(第2波)。
@@ -355,6 +388,37 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 名前は label prop が運ぶ。中のアイコンは装飾(iconography.md §5)であり、名前を二重に運ばない。
 - disabled の3要求と当たり判定の門/目標は Button と同じ(state.md §5 / size.md §4)。視覚が絵1つでも当たり判定は縮まない。
+
+### LinearLoader(契約 0.0.0-alpha.0)
+
+線形・不確定。いつ終わるか分からない待ちを、領域の幅で告げる。終わりの割合が分かるなら LinearProgress。
+
+props:
+
+- `label`: string — 何を待っているか(必須)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 待ちの状態が支援技術に届く(CircularLoader と同じ要求)。
+- reduced-motion では流れを止めるか沈静化する(motion.md §6 の loop 特例)。
+- 相互作用しない。当たり判定の門の対象外。
+
+### LinearProgress(契約 0.0.0-alpha.1)
+
+線形・確定。終わりの割合が分かる進みを、領域の幅で見せる。分からないなら LinearLoader。
+
+props:
+
+- `label`: string — 何の進捗か(必須)。
+- `value`: number — 現在値(必須)。state.md §6 の予約語彙。0 ≤ value ≤ max を期待する(スキーマは数値範囲を表現できないので散文の契約である。Badge の count と同型)。範囲外は呼び出し側の契約違反だが、実装は伝達の整合のため clamp する(aria-valuenow 相当を範囲外にしない。ARIA 上、min/max の外は不正である)。
+- `max`: number(既定 100) — 上限。native <progress> の max と同じ観念。正の数を期待する(同上、散文の契約)。
+- `showValue`: boolean(既定 false) — 可視の数値表示。規則は CircularProgress と同一(視覚の正準「{n}%」・既定は抑制・支援技術への伝達は無条件)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- value / max は常に支援技術へ届く(CircularProgress と同じ要求・第1条)。
+- reduced-motion でも値そのもの(aria-valuenow 相当と showValue の数字)は即座に正しく更新・伝達される。ただし視覚的な補間は他の transition と同じく --motion-scale に従い、reduced 時は瞬時(0ms)の切り替えになる(motion.md §6。loop のような特例は無く、コンポーネントは分岐しない)。消えるのは飾りの滑らかさであって、情報ではない。
+- 相互作用しない。当たり判定の門の対象外。
 
 ### Link(契約 0.0.0-alpha.1)
 

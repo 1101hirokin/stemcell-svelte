@@ -1,0 +1,76 @@
+/* 円形・不確定(CircularLoader.md)。回る弧で待ちを告げる。
+   径は loader チャンネル(size.md §2)、太さは progress.track-thickness、色は中立の fg-muted。
+   軌道は描かない: 契約の tokensRequired に軌道色(plain.soft-bg)が無く、待ちは弧だけで足りる
+   (CircularProgress は軌道を持つ。あちらは「どこまで進んだか」を全体との比で見せるため)。 */
+.sc-circularloader {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.sc-circularloader[data-size='sm'] {
+  inline-size: var(--loader-sm);
+  block-size: var(--loader-sm);
+}
+.sc-circularloader[data-size='md'] {
+  inline-size: var(--loader-md);
+  block-size: var(--loader-md);
+}
+.sc-circularloader[data-size='lg'] {
+  inline-size: var(--loader-lg);
+  block-size: var(--loader-lg);
+}
+
+.sc-circularloader-figure {
+  inline-size: 100%;
+  block-size: 100%;
+  /* 回転そのもの。1周を loop の速さで回る(motion.md §5 の loop=無限反復)。
+     linear なのは回転が等速でないと引っかかって見えるため(loop の easing は linear) */
+  animation: sc-circularloader-spin var(--motion-loop-duration) var(--motion-loop-easing) infinite;
+}
+@keyframes sc-circularloader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sc-circularloader-arc {
+  stroke: var(--color-app-fg-muted);
+  /* viewBox(40)に対する太さ。実寸の径は loader トークンが決めるので、その比で写す */
+  stroke-width: calc(40 * var(--progress-track-thickness) / var(--loader-md));
+  /* 端は丸。円を線で描くので半径ではなく線の端の形で表す(契約 expressive の注記) */
+  stroke-linecap: round;
+  /* 全周の 1/4 だけを描く。伸縮させず固定弧にした(見せ方は Expressive。
+     CircularLoader.md §4 が「全実装で印象が割れすぎる場合は正準を決める」と留保している) */
+  stroke-dasharray: 25.13 75.4;
+}
+.sc-circularloader[data-size='sm'] .sc-circularloader-arc {
+  stroke-width: calc(40 * var(--progress-track-thickness) / var(--loader-sm));
+}
+.sc-circularloader[data-size='lg'] .sc-circularloader-arc {
+  stroke-width: calc(40 * var(--progress-track-thickness) / var(--loader-lg));
+}
+
+/* 待ちの意味を支援技術へ(視覚に隠したテキスト。標準の clip 技法。Badge の dot と同型) */
+.sc-circularloader-sr {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* reduced-motion では低速へ沈静させる(motion.md §6 の loop 特例。裁定 2026-07-25)。
+   止めない理由: 契約が「待っているという意味は保つ」と定める。聞く人には role=status が待ちを届けるが、
+   見る人には視覚しか手がかりが無く、静止した弧は待ちに見えない(壊れているようにも読める)。
+   motion.md §6 は spinner について「静止 or 低速」の両方を許しており、その低速側を採る。 */
+@media (prefers-reduced-motion: reduce) {
+  .sc-circularloader-figure {
+    animation-duration: calc(var(--motion-loop-duration) * 6);
+  }
+}

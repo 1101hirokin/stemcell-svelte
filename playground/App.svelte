@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -30,6 +30,7 @@
   let fPlan = $state('pro');
   let tagFilters = $state<Record<string, boolean>>({ react: true, svelte: false, vue: false });
   let tagChips = $state(['デザイン', 'トークン', '契約']);
+  let progressValue = $state(40);
   let alertShown = $state(true);
   let alertLive = $state(false);
   // 角の曲率の見比べ。既定は CSS 側の確定値と同じ
@@ -623,6 +624,53 @@
         {#snippet content()}設定(下に出る tooltip){/snippet}
       </Tooltip>
     </Cluster>
+  </section>
+
+  <section>
+    <Text as="h2" variant="title-lg">進行表示(4部品)</Text>
+    <Text as="p" variant="body-sm" muted>
+      終わりの割合が分かるなら Progress、分からない待ちなら Loader。円形と線形で4本になる。値は
+      showValue と無関係に常に支援技術へ届く(第1条)。可視の数字は既定で出さない(第3条の抑制)。
+    </Text>
+
+    <label class="pg-field">
+      value({progressValue})
+      <input type="range" min="0" max="100" bind:value={progressValue} />
+    </label>
+
+    <div class="pg-row">
+      <code class="pg-tag">確定・線形</code>
+      <Stack gap="md">
+        <LinearProgress label="アップロード" value={progressValue} />
+        <LinearProgress label="アップロード(数字あり)" value={progressValue} showValue />
+      </Stack>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">確定・円形</code>
+      <Cluster gap="lg" align="center">
+        <CircularProgress label="書き出し sm" value={progressValue} size="sm" />
+        <CircularProgress label="書き出し md" value={progressValue} />
+        <CircularProgress label="書き出し lg" value={progressValue} size="lg" />
+        <CircularProgress label="書き出し(数字あり)" value={progressValue} size="lg" showValue />
+      </Cluster>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">不確定・線形</code>
+      <LinearLoader label="検索中" />
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">不確定・円形</code>
+      <Cluster gap="lg" align="center">
+        <CircularLoader label="読み込み中 sm" size="sm" />
+        <CircularLoader label="読み込み中 md" />
+        <CircularLoader label="読み込み中 lg" size="lg" />
+      </Cluster>
+    </div>
+    <Text as="p" variant="body-sm" muted>
+      reduced-motion(OS の「視差効果を減らす」等)を入れると、Loader の2本は止まらず低速へ沈静する
+      (裁定。止めると見る人に待ちが伝わらないため)。Progress の2本は値の補間だけが瞬時になり、
+      値そのものは常に正しい。
+    </Text>
   </section>
 
   <section>

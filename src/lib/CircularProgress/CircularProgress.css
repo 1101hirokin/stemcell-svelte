@@ -1,0 +1,68 @@
+/* 円形・確定(CircularProgress.md)。弧の長さで進みを見せる。
+   径は loader チャンネル(size.md §2。CircularLoader と同じ体系)、太さは progress.track-thickness。
+   軌道は plain.soft-bg、弧は info.bg(量の中立な報告。Badge の既定が info なのと同じ観念)。 */
+.sc-circularprogress {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.sc-circularprogress[data-size='sm'] {
+  inline-size: var(--loader-sm);
+  block-size: var(--loader-sm);
+}
+.sc-circularprogress[data-size='md'] {
+  inline-size: var(--loader-md);
+  block-size: var(--loader-md);
+}
+.sc-circularprogress[data-size='lg'] {
+  inline-size: var(--loader-lg);
+  block-size: var(--loader-lg);
+}
+
+.sc-circularprogress-figure {
+  inline-size: 100%;
+  block-size: 100%;
+  /* 弧の起点を12時にする。SVG の円は3時から始まるため戻す */
+  transform: rotate(-90deg);
+}
+
+.sc-circularprogress-track,
+.sc-circularprogress-indicator {
+  /* viewBox(40)に対する太さ。実寸の径は上の loader トークンが決めるので、
+     track-thickness をその比で写す。径 24px・太さ 4px のとき 40 * 4 / 24 に当たる */
+  stroke-width: calc(40 * var(--progress-track-thickness) / var(--loader-md));
+}
+.sc-circularprogress[data-size='sm'] :is(.sc-circularprogress-track, .sc-circularprogress-indicator) {
+  stroke-width: calc(40 * var(--progress-track-thickness) / var(--loader-sm));
+}
+.sc-circularprogress[data-size='lg'] :is(.sc-circularprogress-track, .sc-circularprogress-indicator) {
+  stroke-width: calc(40 * var(--progress-track-thickness) / var(--loader-lg));
+}
+
+.sc-circularprogress-track {
+  stroke: var(--color-semantic-plain-soft-bg);
+}
+
+.sc-circularprogress-indicator {
+  stroke: var(--color-semantic-info-bg);
+  /* 端は丸(shape.md §6 が progress を pill に割り当てる。丸端の帯) */
+  stroke-linecap: round;
+  /* 値の変化の補間(motion.transition)。reduced-motion では --motion-scale が 0 になり
+     瞬時の切り替えになる(motion.md §6)。loop のような特例は無く、ここは分岐しない */
+  transition: stroke-dasharray calc(var(--motion-transition-duration) * var(--motion-scale))
+    var(--motion-transition-easing);
+}
+
+/* 数字は円の中央に置く(置き方は Expressive)。役は label-md(契約 tokensRequired)。
+   色は宣言せず周囲を継承する(Text の既定と同じ考え) */
+.sc-circularprogress-value {
+  position: absolute;
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: 1;
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  font-variant-numeric: tabular-nums;
+}
