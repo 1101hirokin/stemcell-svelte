@@ -46,6 +46,17 @@ body {
   }
 }
 
+/* reduced-motion を --motion-scale で受ける(motion.md §6 の Web 実装。JS は要らない)。
+   環境が報告する値であり、アプリの注入口は設けない(第1条。§6 の「アプリはこれを上書きしない」)。
+   duration を掛け算で殺す機構なので、これを引く部品は自分で分岐しなくてよい。
+   loop だけは特例で、0 にすると回転が止まって意味が落ちる。loop を使う部品は @media で沈静させる
+   (motion.md §6「loop は特例：reduced 時は停止/沈静」)。 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-scale: 0;
+  }
+}
+
 /* 等幅要素は UA の生 monospace ではなく DS の等幅スタックへ(StemcellProvider.md §6)。
    code/kbd/samp/pre は UA が font-family を要素へ直接当てるため body の継承が届かない。
    :where で詳細度を 0 に保ち、アプリの上書き余地を残す。font-size:1em は UA の縮小を打ち消す */

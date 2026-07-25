@@ -1,0 +1,47 @@
+/* 線形・確定(LinearProgress.md)。帯の伸びで進みを見せる。
+   地は plain.soft-bg、帯は info.bg(報告の intent。色の選択は契約 tokensRequired が縛る)。
+   角は pill(帯も溝も同じ)。太さは progress.track-thickness。 */
+.sc-linearprogress {
+  display: flex;
+  align-items: center;
+  /* 帯と数字の間隔。契約の tokensRequired にこの参照が無い(仕様へ還元する。HOLES #18 と同型) */
+  gap: var(--spacing-inline-md);
+  inline-size: 100%;
+}
+
+.sc-linearprogress-track {
+  flex: 1;
+  block-size: var(--progress-track-thickness);
+  background: var(--color-semantic-plain-soft-bg);
+  border-radius: var(--shape-semantic-pill);
+  /* 帯が溝の角からはみ出さないようにする。帯側にも同じ角を持たせているが、
+     端まで伸びたときの重なりをここで閉じる */
+  overflow: hidden;
+}
+
+.sc-linearprogress-indicator {
+  block-size: 100%;
+  background: var(--color-semantic-info-bg);
+  border-radius: var(--shape-semantic-pill);
+  /* 値の変化の補間(motion.transition)。reduced-motion では --motion-scale が 0 になり
+     瞬時の切り替えになる(motion.md §6)。loop のような特例は無く、ここは分岐しない。
+     消えるのは飾りの滑らかさであって、値そのものは常に正しい(契約 a11y) */
+  transition: inline-size calc(var(--motion-transition-duration) * var(--motion-scale))
+    var(--motion-transition-easing);
+}
+
+/* 数字は帯の脇に置く(配置は Expressive)。役は label-md(契約 tokensRequired) */
+.sc-linearprogress-value {
+  flex: none;
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  /* 色は宣言せず周囲を継承する(Text の既定と同じ考え。地の本文色は StemcellProvider が敷く)。
+     契約の tokensRequired に色が無いこととも整合する */
+  /* 数字の桁で帯の長さが動かないよう最小幅を確保する(0% と 100% で幅が変わる) */
+  min-inline-size: 3ch;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
