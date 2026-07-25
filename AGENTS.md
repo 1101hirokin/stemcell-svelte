@@ -624,7 +624,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - reduced-motion では shimmer を停止し、静止した面になる(motion.md §6 の loop 特例)。
 - 相互作用しない。当たり判定の門の対象外。
 
-### Slider(契約 0.0.0-alpha.1)
+### Slider(契約 0.0.0-alpha.2)
 
 範囲の中から値をひとつ、位置で選ぶ入力。おおよその値で足りる場面のための部品であり、正確な値が要るなら数値入力を使うか併設する(NN/g / Baymard の実証が一致。Slider.md §1)。二値(range)は初版で持たない(Slider.md §2)。GOV.UK が Slider を提供しない理由(ドラッグ依存)は、本契約では WCAG 2.5.7 の要求を Normative に持つことで応える。
 
@@ -654,6 +654,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - invalid / error を持たないのは部分集合の選択である(state.md §4。Switch と同じ形): 値は min..max に構造的に収まり、「不正な値」が生じる余地が薄い。React Aria / Radix / Ant / M3 Web も Slider にエラーを持たせない(4/7 多数派。反例: Base UI / Carbon / Polaris は持つ)。
 - disabled は3要求すべてを満たすこと(state.md §5)。
 - サムの標的は size.md §4 の門(見た目のサムが小さくても当たり判定は下限を割らない)。トラックのドラッグとページスクロールの干渉(タッチ)は実装の検証項目。
+- サムの標的(size.md §4)は見た目の径と別である。サムを小さく描いても、当たり判定は Web の下限 24px を割らない(size.rules.json の hit-region)。当たりを広げると隣接要素との間隔条件(SC 2.5.8)にかかるので、レンダリングして測る(size.md §6)。
 
 ### Stack(契約 0.0.0-alpha.0)
 
