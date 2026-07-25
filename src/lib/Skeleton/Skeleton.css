@@ -31,8 +31,6 @@
   block-size: 100%;
   aspect-ratio: 1;
   border-radius: var(--shape-semantic-pill);
-  /* pill / circular は曲率を別に取る(半径が振り切れており同じ引数でも見え方が違う。実機で決定) */
-  --_sc-corner-shape: var(--_sc-corner-shape-pill, superellipse(1.8));
 }
 
 /* reduced-motion では脈動を止め、静止した面になる(motion.md §6 の loop 特例。Skeleton.md §3) */

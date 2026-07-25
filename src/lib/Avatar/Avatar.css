@@ -8,8 +8,6 @@
   flex: none;
   overflow: hidden;
   border-radius: var(--shape-semantic-pill);
-  /* pill / circular は曲率を別に取る(半径が振り切れており同じ引数でも見え方が違う。実機で決定) */
-  --_sc-corner-shape: var(--_sc-corner-shape-pill, superellipse(1.8));
   background: var(--color-semantic-plain-soft-bg);
   color: var(--color-semantic-plain-soft-fg);
   user-select: none;

@@ -39,8 +39,6 @@
   block-size: 1.25rem;
   border: var(--shape-border-width) solid var(--_border);
   border-radius: var(--shape-semantic-pill);
-  /* pill / circular は曲率を別に取る(半径が振り切れており同じ引数でも見え方が違う。実機で決定) */
-  --_sc-corner-shape: var(--_sc-corner-shape-pill, superellipse(1.8));
   background: var(--_bg);
   transition:
     background-color var(--motion-feedback-duration) var(--motion-feedback-easing),
@@ -54,8 +52,6 @@
   inline-size: 0.5rem;
   block-size: 0.5rem;
   border-radius: var(--shape-semantic-pill);
-  /* pill / circular は曲率を別に取る(半径が振り切れており同じ引数でも見え方が違う。実機で決定) */
-  --_sc-corner-shape: var(--_sc-corner-shape-pill, superellipse(1.8));
   background: var(--_dot);
   transform: translate(-50%, -50%);
   transition: background-color var(--motion-feedback-duration) var(--motion-feedback-easing);

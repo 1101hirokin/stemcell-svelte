@@ -13,14 +13,15 @@ body {
    corner-shape は継承しないので、半径を持つ要素それぞれに当てる必要がある。一方 border-radius が 0 の
    要素では無効なので、部品の要素へ一括で当ててよい(28箇所の border-radius に個別注記する重複を避ける)。
    :where で詳細度 0 に保ち、アプリの上書き余地を残す(等幅の規則と同じ形)。
-   引数は実機で見て決めた(2026-07)。SSOT の正準は「Figma の corner smoothing 60% ≒ iOS の .continuous ≒
-   Compose 0.6f」(shape.tokens.json の canonicalSmoothing)だが、CSS の superellipse() の引数はそれとは別の
-   尺度である(round = superellipse(1)、squircle = superellipse(2)、上げるほど直角へ寄る)。換算の一次資料は
-   無いので、実機で見比べて選んだ。pill / circular は半径が振り切れており同じ引数でも見え方が違うため、
-   別の値を取る(各部品の CSS で --_sc-corner-shape を差し替える)。SSOT への還流は未了(shape.md §4 は
-   単一の正準スムージングしか持たない) */
+   引数は SSOT の正準スムージング(--shape-smoothing: 0.6)を Web の尺度へ換算した値である。正準は Figma の
+   corner smoothing 60% ≒ iOS の .continuous ≒ Compose 0.6f の尺度で、CSS の superellipse() の引数はそれとは
+   別物である(round = superellipse(1)、squircle = superellipse(2)、上げるほど直角へ寄る)。換算式の一次資料は
+   無いので、実機で見比べて 1.8 を選んだ(裁定 2026-07)。各プラットフォームが自分の尺度へ換算する形は
+   shape.md §4 が定める。正準の値が動いたら、この換算もやり直す。
+   半径のカテゴリでは分けない(裁定)。pill も control も同じ引数を使う。半径 6px 前後では引数を変えても
+   差が1px に満たず、分けるだけの実利が無いうえ、全プラットフォームに2系統を要求することになる */
 :where([class^='sc-'], [class*=' sc-']) {
-  corner-shape: var(--_sc-corner-shape, superellipse(1.6));
+  corner-shape: var(--_sc-corner-shape, superellipse(1.8));
 }
 
 /* 等幅要素は UA の生 monospace ではなく DS の等幅スタックへ(StemcellProvider.md §6)。

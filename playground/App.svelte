@@ -32,13 +32,10 @@
   let tagChips = $state(['デザイン', 'トークン', '契約']);
   let alertShown = $state(true);
   let alertLive = $state(false);
-  // 角の曲率の見比べ。既定は CSS 側の暫定値と同じ
-  let curvature = $state('1.6');
-  let curvaturePill = $state('1.8');
+  // 角の曲率の見比べ。既定は CSS 側の確定値と同じ
+  let curvature = $state('1.8');
   $effect(() => {
-    const root = document.documentElement.style;
-    root.setProperty('--_sc-corner-shape', `superellipse(${curvature})`);
-    root.setProperty('--_sc-corner-shape-pill', `superellipse(${curvaturePill})`);
+    document.documentElement.style.setProperty('--_sc-corner-shape', `superellipse(${curvature})`);
   });
 
 
@@ -606,7 +603,7 @@
       描いているので差が読み取れる。
     </Text>
 
-    <Text as="p" variant="body-sm">通常の角丸: <code>superellipse({curvature})</code></Text>
+    <Text as="p" variant="body-sm">いま効いている値: <code>superellipse({curvature})</code></Text>
     <Cluster gap="sm" align="center">
       {#each ['1', '1.4', '1.6', '1.8', '2', '2.4'] as k (k)}
         <button
@@ -621,24 +618,10 @@
       {/each}
     </Cluster>
 
-    <Text as="p" variant="body-sm">pill / circular: <code>superellipse({curvaturePill})</code></Text>
-    <Cluster gap="sm" align="center">
-      {#each ['1', '1.2', '1.5', '1.8', '2', '2.3'] as k (k)}
-        <button
-          type="button"
-          class="pg-curve pg-curve-pill"
-          class:pg-curve-on={curvaturePill === k}
-          style="corner-shape: superellipse({k})"
-          onclick={() => (curvaturePill = k)}
-        >
-          {k}{k === '1' ? '(round)' : k === '2' ? '(squircle)' : ''}
-        </button>
-      {/each}
-    </Cluster>
     <Text as="p" variant="body-sm" muted>
-      押すと部品全体へ適用する。pill / circular は Badge・Avatar・Radio・Switch・Skeleton(circle)・
-      IconButton(pill)に効く。下の各節を見比べて決める。値を上げるほど四角へ寄る(1=円弧、2=squircle、
-      ∞=直角)。円へ寄せたいなら 2 より下。
+      押すと部品全体へ適用する。値を上げるほど四角へ寄る(1=円弧、2=squircle、∞=直角)。半径の
+      カテゴリでは分けない(裁定)。差が読み取れるのは pill / circular と Dialog(10px)で、control と
+      card(6px)や tag(2px)ではどの値でも見た目が変わらない。
     </Text>
   </section>
 
@@ -1008,10 +991,5 @@
   .pg-curve-on {
     outline: 2px solid var(--color-app-system, currentColor);
     outline-offset: 2px;
-  }
-  /* pill の見本は半径を振り切って、実際の Badge / Avatar と同じ条件にする */
-  .pg-curve-pill {
-    border-radius: 999999px;
-    min-inline-size: 4.5rem;
   }
 </style>
