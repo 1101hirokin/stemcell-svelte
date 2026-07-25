@@ -7,6 +7,45 @@ body {
   line-height: var(--typography-body-md-line-height);
 }
 
+/* 連続曲率(shape.md §4 の MEME)。すべての非ゼロ半径に適用する。
+   Web の機構は corner-shape で、未対応環境(現状 Chromium 系以外)は宣言ごと無視して素朴な円弧へ退避する
+   (第7条 グレースフル・フォールバック。半径量は不変で、変わるのは質感だけ)。
+   corner-shape は継承しないので、半径を持つ要素それぞれに当てる必要がある。一方 border-radius が 0 の
+   要素では無効なので、部品の要素へ一括で当ててよい(28箇所の border-radius に個別注記する重複を避ける)。
+   :where で詳細度 0 に保ち、アプリの上書き余地を残す(等幅の規則と同じ形)。
+   引数は SSOT の正準スムージング(--shape-smoothing: 0.6)を Web の尺度へ換算した値である。正準は Figma の
+   corner smoothing 60% ≒ iOS の .continuous ≒ Compose 0.6f の尺度で、CSS の superellipse() の引数はそれとは
+   別物である(round = superellipse(1)、squircle = superellipse(2)、上げるほど直角へ寄る)。換算式の一次資料は
+   無いので、実機で見比べて 1.8 を選んだ(裁定 2026-07)。各プラットフォームが自分の尺度へ換算する形は
+   shape.md §4 が定める。正準の値が動いたら、この換算もやり直す。
+   半径のカテゴリでは分けない(裁定)。pill も control も同じ引数を使う。半径 6px 前後では引数を変えても
+   差が1px に満たず、分けるだけの実利が無いうえ、全プラットフォームに2系統を要求することになる */
+:where([class^='sc-'], [class*=' sc-']) {
+  corner-shape: var(--_sc-corner-shape, superellipse(1.8));
+}
+
+/* 連続曲率が出せる環境では半径を連続曲率段へ差し替える(shape.md §3 の二段構え。憲法 第7条・RFC 0015)。
+   素朴な円弧のままで半径だけ大きくすると膨れて見えるが、連続曲率が乗ると同じ量でも締まって見える。
+   つまり退避先は「質感だけを落とす」のでなく「その環境で成立する形」へ落ちる。
+   値は持たない。両段とも SSOT が定め @stemcell/tokens が配信する。ここが決めるのは「どちらの段か」だけで、
+   条件は環境の能力(corner-shape が使えるか)に限る。
+   angular と circular は両段で同値なので差し替えない。pill も circular 参照なので対象外。
+   カテゴリから原始への割当(shape.md §6)は両段で同一である。
+   差し替えるのは semantic だけにする。部品は semantic 経由でしか角丸を引いておらず、原始を据え置くことで
+   var() の退避先として使える。連続曲率段を持たない古い tokens に固定した消費者は、角丸が壊れるのでなく
+   退避段のままになる(未定義の変数を参照すると border-radius ごと無効になり 0 へ落ちるため、退避先が要る)。
+   もし原始を直接引く部品が出たら、この形を見直す */
+@supports (corner-shape: superellipse(1.8)) {
+  :root {
+    --shape-semantic-selection: var(--shape-continuous-semantic-selection, var(--shape-rounded-s));
+    --shape-semantic-tag: var(--shape-continuous-semantic-tag, var(--shape-rounded-s));
+    --shape-semantic-control: var(--shape-continuous-semantic-control, var(--shape-rounded-m));
+    --shape-semantic-card: var(--shape-continuous-semantic-card, var(--shape-rounded-m));
+    --shape-semantic-popover: var(--shape-continuous-semantic-popover, var(--shape-rounded-m));
+    --shape-semantic-dialog: var(--shape-continuous-semantic-dialog, var(--shape-rounded-l));
+  }
+}
+
 /* 等幅要素は UA の生 monospace ではなく DS の等幅スタックへ(StemcellProvider.md §6)。
    code/kbd/samp/pre は UA が font-family を要素へ直接当てるため body の継承が届かない。
    :where で詳細度を 0 に保ち、アプリの上書き余地を残す。font-size:1em は UA の縮小を打ち消す */
