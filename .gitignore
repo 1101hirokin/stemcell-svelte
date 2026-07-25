@@ -3,3 +3,6 @@ dist/
 conformance/generated/
 playground/dist/
 .svelte-kit/
+.env
+.env.*
+!.env.example
