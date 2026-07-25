@@ -7,6 +7,22 @@ body {
   line-height: var(--typography-body-md-line-height);
 }
 
+/* 連続曲率(shape.md §4 の MEME)。すべての非ゼロ半径に適用する。
+   Web の機構は corner-shape で、未対応環境(現状 Chromium 系以外)は宣言ごと無視して素朴な円弧へ退避する
+   (第7条 グレースフル・フォールバック。半径量は不変で、変わるのは質感だけ)。
+   corner-shape は継承しないので、半径を持つ要素それぞれに当てる必要がある。一方 border-radius が 0 の
+   要素では無効なので、部品の要素へ一括で当ててよい(28箇所の border-radius に個別注記する重複を避ける)。
+   :where で詳細度 0 に保ち、アプリの上書き余地を残す(等幅の規則と同じ形)。
+   引数は実機で見て決めた(2026-07)。SSOT の正準は「Figma の corner smoothing 60% ≒ iOS の .continuous ≒
+   Compose 0.6f」(shape.tokens.json の canonicalSmoothing)だが、CSS の superellipse() の引数はそれとは別の
+   尺度である(round = superellipse(1)、squircle = superellipse(2)、上げるほど直角へ寄る)。換算の一次資料は
+   無いので、実機で見比べて選んだ。pill / circular は半径が振り切れており同じ引数でも見え方が違うため、
+   別の値を取る(各部品の CSS で --_sc-corner-shape を差し替える)。SSOT への還流は未了(shape.md §4 は
+   単一の正準スムージングしか持たない) */
+:where([class^='sc-'], [class*=' sc-']) {
+  corner-shape: var(--_sc-corner-shape, superellipse(1.6));
+}
+
 /* 等幅要素は UA の生 monospace ではなく DS の等幅スタックへ(StemcellProvider.md §6)。
    code/kbd/samp/pre は UA が font-family を要素へ直接当てるため body の継承が届かない。
    :where で詳細度を 0 に保ち、アプリの上書き余地を残す。font-size:1em は UA の縮小を打ち消す */

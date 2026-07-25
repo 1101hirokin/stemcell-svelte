@@ -32,6 +32,14 @@
   let tagChips = $state(['デザイン', 'トークン', '契約']);
   let alertShown = $state(true);
   let alertLive = $state(false);
+  // 角の曲率の見比べ。既定は CSS 側の暫定値と同じ
+  let curvature = $state('1.6');
+  let curvaturePill = $state('1.8');
+  $effect(() => {
+    const root = document.documentElement.style;
+    root.setProperty('--_sc-corner-shape', `superellipse(${curvature})`);
+    root.setProperty('--_sc-corner-shape-pill', `superellipse(${curvaturePill})`);
+  });
 
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
@@ -585,6 +593,56 @@
   </section>
 
   <section>
+    <Text as="h2" variant="title-lg">角の曲率(superellipse)</Text>
+    <Text as="p" variant="body-sm" muted>
+      shape.md §4 の MEME。すべての非ゼロ半径に連続曲率を当てる。Web の機構は corner-shape で、未対応環境は
+      宣言ごと無視して素朴な円弧へ退避する(第7条。半径量は変わらず質感だけ変わる)。SSOT の正準は Figma 60% ≒
+      iOS .continuous ≒ Compose 0.6f だが、CSS の引数はそれとは別の尺度なので、実機で見て決める。
+      対応していない環境では下の見本がすべて同じ(円弧)に見える。
+    </Text>
+    <Text as="p" variant="body-sm" muted>
+      角丸の量そのものが小さい面(control と card は 6px、tag は 2px)では、曲率を変えても差は1px 未満で
+      ほぼ見えない。差が出るのは dialog(10px)と、pill / circular(999999px)である。下の見本は半径 20px で
+      描いているので差が読み取れる。
+    </Text>
+
+    <Text as="p" variant="body-sm">通常の角丸: <code>superellipse({curvature})</code></Text>
+    <Cluster gap="sm" align="center">
+      {#each ['1', '1.4', '1.6', '1.8', '2', '2.4'] as k (k)}
+        <button
+          type="button"
+          class="pg-curve"
+          class:pg-curve-on={curvature === k}
+          style="corner-shape: superellipse({k})"
+          onclick={() => (curvature = k)}
+        >
+          {k}{k === '1' ? '(round)' : k === '2' ? '(squircle)' : ''}
+        </button>
+      {/each}
+    </Cluster>
+
+    <Text as="p" variant="body-sm">pill / circular: <code>superellipse({curvaturePill})</code></Text>
+    <Cluster gap="sm" align="center">
+      {#each ['1', '1.2', '1.5', '1.8', '2', '2.3'] as k (k)}
+        <button
+          type="button"
+          class="pg-curve pg-curve-pill"
+          class:pg-curve-on={curvaturePill === k}
+          style="corner-shape: superellipse({k})"
+          onclick={() => (curvaturePill = k)}
+        >
+          {k}{k === '1' ? '(round)' : k === '2' ? '(squircle)' : ''}
+        </button>
+      {/each}
+    </Cluster>
+    <Text as="p" variant="body-sm" muted>
+      押すと部品全体へ適用する。pill / circular は Badge・Avatar・Radio・Switch・Skeleton(circle)・
+      IconButton(pill)に効く。下の各節を見比べて決める。値を上げるほど四角へ寄る(1=円弧、2=squircle、
+      ∞=直角)。円へ寄せたいなら 2 より下。
+    </Text>
+  </section>
+
+  <section>
     <Text as="h2" variant="title-lg">Box</Text>
     <Text as="p" variant="body-sm" muted>内在スタイルの器。inset は段(sm/md/lg)と大域の原始 X(8〜24)。1値で全周、2値「縦 横」で別指定。</Text>
     <Cluster gap="sm" align="center">
@@ -934,5 +992,26 @@
   }
   .pg-tall {
     padding-block: var(--spacing-inset-lg);
+  }
+  /* 曲率の見本。半径を大きめに取って差を見えやすくする。部品の class を持たせないのは、
+     StemcellProvider の一括適用(sc- 接頭辞)に上書きされないようにするため */
+  .pg-curve {
+    border: 2px solid var(--color-semantic-primary-border, currentColor);
+    background: var(--color-semantic-primary-soft-bg, #eef);
+    color: var(--color-semantic-primary-soft-fg, inherit);
+    border-radius: 1.25rem;
+    padding: var(--spacing-inset-md);
+    min-inline-size: 5.5rem;
+    font: inherit;
+    cursor: pointer;
+  }
+  .pg-curve-on {
+    outline: 2px solid var(--color-app-system, currentColor);
+    outline-offset: 2px;
+  }
+  /* pill の見本は半径を振り切って、実際の Badge / Avatar と同じ条件にする */
+  .pg-curve-pill {
+    border-radius: 999999px;
+    min-inline-size: 4.5rem;
   }
 </style>
