@@ -1,6 +1,10 @@
 /* 勝手に消えてよい報告(Toast.md)。任意コンテンツの上に浮くので、solid な notification 面 + 影で浮かせ、
    intent は先頭の絵(色だけで種類を伝えない。WCAG 1.4.1)で担う。角は card、内側は inset-md、文字は body-md。
    出入りは motion.entrance / exit(退去の手触りは Expressive)。 */
+/* 動きの量は --motion-scale の乗算で受ける(motion.md §6)。環境が reduced-motion を報告すると
+   StemcellProvider が :root の --motion-scale を 0 にし、全 duration が 0 になる。部品は分岐しない
+   (以前は @media で個別に 0ms を書いていた。HOLES #36)。loop を使う部品だけは特例で、0 にすると
+   動きが消えて意味が落ちるため @media で沈静させる。 */
 .sc-toast {
   display: flex;
   align-items: flex-start;
@@ -17,7 +21,7 @@
   font-size: var(--typography-body-md-font-size);
   line-height: var(--typography-body-md-line-height);
   /* 追加ごとに entrance で現れる(reduced-motion で 0ms でも「現れる」意味は保つ。第7条) */
-  animation: sc-toast-in var(--motion-entrance-duration) var(--motion-entrance-easing);
+  animation: sc-toast-in calc(var(--motion-entrance-duration) * var(--motion-scale)) var(--motion-entrance-easing);
 }
 /* intent の絵の色(neutral 面の上で見える intent 色 = border 段)。文字は app.foreground を保つ */
 .sc-toast[data-color='danger'] {
@@ -36,7 +40,7 @@
 /* 退去アニメ。leaving の間だけ効き、ホストが motion.exit 経過後にキューから外す。退去中は不可視なので
    操作を受けない(reduced-motion で残る場合も含め、消えつつある通知を押せないように) */
 .sc-toast[data-leaving] {
-  animation: sc-toast-out var(--motion-exit-duration) var(--motion-exit-easing) forwards;
+  animation: sc-toast-out calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing) forwards;
   pointer-events: none;
 }
 
@@ -125,9 +129,3 @@
   outline-offset: var(--focus-ring-offset);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .sc-toast,
-  .sc-toast[data-leaving] {
-    animation-duration: 0ms;
-  }
-}

@@ -2,6 +2,10 @@
    面/影/角は elevation.popover・shape.popover、層は layer.popover、出入りは motion.entrance/exit。
    位置・幅・衝突反転は CSS Anchor Positioning(anchor()/anchor-size()/position-try)に委ねる(憲法 第2条)。
    非対応環境では JS がアンカー矩形から top/left と --sc-popover-anchor-inline-size を与える(第7条)。 */
+/* 動きの量は --motion-scale の乗算で受ける(motion.md §6)。環境が reduced-motion を報告すると
+   StemcellProvider が :root の --motion-scale を 0 にし、全 duration が 0 になる。部品は分岐しない
+   (以前は @media で個別に 0ms を書いていた。HOLES #36)。loop を使う部品だけは特例で、0 にすると
+   動きが消えて意味が落ちるため @media で沈静させる。 */
 .sc-popover {
   /* トリガーを包むだけ。位置は content が top-layer で持つ。anchor-name はインスタンスごとに JS が付ける */
   display: block;
@@ -25,8 +29,8 @@
   /* 中身を角で切り抜く。端まで使う項目(余白なしの listbox 等)が丸角からはみ出さない */
   overflow: hidden;
   /* 出現(overlay.md §2: entrance)。退場のトークンは transition で参照(opacity 変化に効く) */
-  animation: sc-popover-in var(--motion-entrance-duration) var(--motion-entrance-easing);
-  transition: opacity var(--motion-exit-duration) var(--motion-exit-easing);
+  animation: sc-popover-in calc(var(--motion-entrance-duration) * var(--motion-scale)) var(--motion-entrance-easing);
+  transition: opacity calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing);
 }
 
 /* CSS Anchor Positioning 対応時(Baseline 2026)。位置・幅・反転を native の機構に委ねる。
@@ -54,10 +58,5 @@
   from {
     opacity: 0;
     transform: translateY(-0.25rem);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .sc-popover-content {
-    animation: none;
   }
 }

@@ -2,6 +2,10 @@
    面/影は elevation.modal、角は shape.semantic.dialog、層は layer.modal、scrim は color.app.scrim。
    focus trap・top-layer・Escape・背後 inert は native showModal が無償で満たす(憲法 第2条)。
    出入りは native の [open] 遷移で表す(entrance/exit の transition。allow-discrete で display も遷移させる)。 */
+/* 動きの量は --motion-scale の乗算で受ける(motion.md §6)。環境が reduced-motion を報告すると
+   StemcellProvider が :root の --motion-scale を 0 にし、全 duration が 0 になる。部品は分岐しない
+   (以前は @media で個別に 0ms を書いていた。HOLES #36)。loop を使う部品だけは特例で、0 にすると
+   動きが消えて意味が落ちるため @media で沈静させる。 */
 .sc-dialog {
   /* 器はパネルを包むだけ。背後クリック判定のため padding を持たない(target===dialog で背後を見分ける) */
   padding: 0;
@@ -31,10 +35,10 @@
   opacity: 0;
   transform: translateY(0.5rem) scale(0.98);
   transition:
-    opacity var(--motion-exit-duration) var(--motion-exit-easing),
-    transform var(--motion-exit-duration) var(--motion-exit-easing),
-    display var(--motion-exit-duration) allow-discrete,
-    overlay var(--motion-exit-duration) allow-discrete;
+    opacity calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing),
+    transform calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing),
+    display calc(var(--motion-exit-duration) * var(--motion-scale)) allow-discrete,
+    overlay calc(var(--motion-exit-duration) * var(--motion-scale)) allow-discrete;
 }
 .sc-dialog[open] {
   opacity: 1;
@@ -60,10 +64,10 @@
   opacity: 0;
   /* background も遷らせる: 多重時に data-under で透過へ切り替わるのを瞬間ジャンプさせない(scrim のフラッシュ回避) */
   transition:
-    opacity var(--motion-exit-duration) var(--motion-exit-easing),
-    background-color var(--motion-exit-duration) var(--motion-exit-easing),
-    display var(--motion-exit-duration) allow-discrete,
-    overlay var(--motion-exit-duration) allow-discrete;
+    opacity calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing),
+    background-color calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing),
+    display calc(var(--motion-exit-duration) * var(--motion-scale)) allow-discrete,
+    overlay calc(var(--motion-exit-duration) * var(--motion-scale)) allow-discrete;
 }
 .sc-dialog[open]::backdrop {
   opacity: 1;
@@ -117,11 +121,3 @@
   overflow: hidden;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .sc-dialog,
-  .sc-dialog[open],
-  .sc-dialog::backdrop,
-  .sc-dialog[open]::backdrop {
-    transition-duration: 0ms;
-  }
-}

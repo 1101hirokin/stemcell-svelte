@@ -1,6 +1,10 @@
 /* アンカーに添える短い補助ラベル(tooltip 類。Tooltip.md)。native popover(top-layer)で描き overflow /
    transform 祖先でも切れない。面/影は elevation.popover(tooltip 層は elevation が popover 相当。layering.md)、
    角は shape.semantic.popover、層は layer.tooltip。位置は CSS Anchor Positioning、非対応は JS が left/top を与える。 */
+/* 動きの量は --motion-scale の乗算で受ける(motion.md §6)。環境が reduced-motion を報告すると
+   StemcellProvider が :root の --motion-scale を 0 にし、全 duration が 0 になる。部品は分岐しない
+   (以前は @media で個別に 0ms を書いていた。HOLES #36)。loop を使う部品だけは特例で、0 にすると
+   動きが消えて意味が落ちるため @media で沈静させる。 */
 .sc-tooltip {
   /* anchor-name の箱 + hover 判定の範囲。トリガーを shrink-wrap する */
   display: inline-block;
@@ -30,8 +34,8 @@
   /* left(=アンカー中央)に対して水平中央寄せ。anchor / JS フォールバックの両方でこの transform が効く */
   transform: translateX(-50%);
   /* 出現は fade(entrance)。退場のトークンは transition で参照 */
-  animation: sc-tooltip-in var(--motion-entrance-duration) var(--motion-entrance-easing);
-  transition: opacity var(--motion-exit-duration) var(--motion-exit-easing);
+  animation: sc-tooltip-in calc(var(--motion-entrance-duration) * var(--motion-scale)) var(--motion-entrance-easing);
+  transition: opacity calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing);
 }
 
 /* CSS Anchor Positioning 対応時。水平はアンカー中央(anchor(center) + translateX(-50%))、
@@ -55,10 +59,5 @@
 @keyframes sc-tooltip-in {
   from {
     opacity: 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .sc-tooltip-content {
-    animation: none;
   }
 }

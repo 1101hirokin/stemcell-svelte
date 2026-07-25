@@ -121,17 +121,22 @@ export function enqueue(message: string, opts: ToastOptions = {}): string {
 }
 
 /**
- * 退去アニメの後にキューから外すまでの時間(ms)。reduced-motion では CSS が animation を 0ms にするので
- * 0 を返し、可視と実体のズレ(不可視要素が残る)を無くす。トークン値は変わらないのでキャッシュする。
+ * 退去アニメの後にキューから外すまでの時間(ms)。CSS 側と同じ計算(duration × --motion-scale)で出す。
+ * reduced-motion は --motion-scale が 0 になることで効くので、ここで prefers-reduced-motion を
+ * 読み直さない(機構の単一の源。motion.md §6。HOLES #36)。
+ * トークン値は変わらないのでキャッシュするが、--motion-scale は環境設定の切替で変わるため毎回読む。
  */
 let cachedExitMs: number | null = null;
 function exitMs(): number {
   if (typeof window === 'undefined') return 0;
-  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return 0;
-  if (cachedExitMs != null) return cachedExitMs;
-  const v = getComputedStyle(document.documentElement).getPropertyValue('--motion-exit-duration').trim();
-  cachedExitMs = v.endsWith('ms') ? parseFloat(v) : v.endsWith('s') ? parseFloat(v) * 1000 : 200;
-  return cachedExitMs;
+  const style = getComputedStyle(document.documentElement);
+  if (cachedExitMs == null) {
+    const v = style.getPropertyValue('--motion-exit-duration').trim();
+    cachedExitMs = v.endsWith('ms') ? parseFloat(v) : v.endsWith('s') ? parseFloat(v) * 1000 : 200;
+  }
+  const rawScale = style.getPropertyValue('--motion-scale').trim();
+  const scale = rawScale === '' ? 1 : Number(rawScale);
+  return cachedExitMs * (Number.isFinite(scale) ? scale : 1);
 }
 
 /**
