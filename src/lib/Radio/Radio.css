@@ -52,6 +52,8 @@
   inline-size: 0.5rem;
   block-size: 0.5rem;
   border-radius: var(--shape-semantic-pill);
+  /* 連続曲率は擬似要素へ個別に当てる(継承しないため。未対応環境は宣言ごと無視され円弧へ退避=第7条) */
+  corner-shape: var(--_sc-corner-shape);
   background: var(--_dot);
   transform: translate(-50%, -50%);
   transition: background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
