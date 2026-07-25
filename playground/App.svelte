@@ -38,6 +38,42 @@
     document.documentElement.style.setProperty('--_sc-corner-shape', `superellipse(${curvature})`);
   });
 
+  // 半径スケールの見比べ(shape.md §9「値 adjust」の検討用)。
+  // shape API の構造に沿う: 動かすのは原始5段の値だけで、カテゴリ→原始の割当(§6)は動かさない。
+  // 配信されている --shape-semantic-* は原始を参照せず実値なので、割当に従ってこちらも書き換える。
+  const RADIUS_SCALES = [
+    { name: '現行', s: 2, m: 6, l: 10 },
+    { name: '+1段', s: 4, m: 10, l: 14 },
+    { name: '+2段', s: 6, m: 14, l: 20 },
+    { name: '+3段', s: 8, m: 18, l: 26 },
+  ] as const;
+  // shape.md §6 のカテゴリ割当。pill は circular のままなので触らない
+  const SHAPE_CATEGORIES = {
+    control: 'm',
+    selection: 's',
+    card: 'm',
+    dialog: 'l',
+    popover: 'm',
+    tag: 's',
+  } as const;
+  // 既定は上書きせず実装のまま見せる(連続曲率が出せる環境なら +2段、出せなければ現行)
+  let radiusScale = $state('実装のまま');
+  $effect(() => {
+    const root = document.documentElement.style;
+    const scale = RADIUS_SCALES.find((r) => r.name === radiusScale);
+    if (!scale) {
+      for (const name of ['s', 'm', 'l']) root.removeProperty(`--shape-rounded-${name}`);
+      for (const category of Object.keys(SHAPE_CATEGORIES)) root.removeProperty(`--shape-semantic-${category}`);
+      return;
+    }
+    root.setProperty('--shape-rounded-s', `${scale.s}px`);
+    root.setProperty('--shape-rounded-m', `${scale.m}px`);
+    root.setProperty('--shape-rounded-l', `${scale.l}px`);
+    for (const [category, step] of Object.entries(SHAPE_CATEGORIES)) {
+      root.setProperty(`--shape-semantic-${category}`, `${scale[step]}px`);
+    }
+  });
+
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
   const colors = ['primary', 'danger', 'warning', 'plain'] as const;
@@ -590,7 +626,7 @@
   </section>
 
   <section>
-    <Text as="h2" variant="title-lg">角の曲率(superellipse)</Text>
+    <Text as="h2" variant="title-lg">角の丸みと曲率</Text>
     <Text as="p" variant="body-sm" muted>
       shape.md §4 の MEME。すべての非ゼロ半径に連続曲率を当てる。Web の機構は corner-shape で、未対応環境は
       宣言ごと無視して素朴な円弧へ退避する(第7条。半径量は変わらず質感だけ変わる)。SSOT の正準は Figma 60% ≒
@@ -598,9 +634,38 @@
       対応していない環境では下の見本がすべて同じ(円弧)に見える。
     </Text>
     <Text as="p" variant="body-sm" muted>
-      角丸の量そのものが小さい面(control と card は 6px、tag は 2px)では、曲率を変えても差は1px 未満で
-      ほぼ見えない。差が出るのは dialog(10px)と、pill / circular(999999px)である。下の見本は半径 20px で
-      描いているので差が読み取れる。
+      角丸の量そのものが小さい面(現行だと control と card が 6px、tag が 2px)では、曲率を変えても差は
+      1px 未満でほぼ見えない。曲率の MEME が読み取れるのは dialog(10px)と pill だけである。下の半径の
+      見比べで丸みを増すと、曲率の差も見えるようになる。見本のボタンは半径 20px で描いている。
+    </Text>
+
+    <Text as="p" variant="body-sm">半径スケール: <code>{radiusScale}</code></Text>
+    <Cluster gap="sm" align="center">
+      <button
+        type="button"
+        class="pg-curve pg-scale"
+        class:pg-curve-on={radiusScale === '実装のまま'}
+        onclick={() => (radiusScale = '実装のまま')}
+      >
+        実装のまま<br /><small>環境で決まる</small>
+      </button>
+      {#each RADIUS_SCALES as scale (scale.name)}
+        <button
+          type="button"
+          class="pg-curve pg-scale"
+          class:pg-curve-on={radiusScale === scale.name}
+          onclick={() => (radiusScale = scale.name)}
+        >
+          {scale.name}<br /><small>{scale.s} / {scale.m} / {scale.l}</small>
+        </button>
+      {/each}
+    </Cluster>
+    <Text as="p" variant="body-sm" muted>
+      連続曲率が出せる環境では +2段(6 / 14 / 20)、出せない環境では現行(2 / 6 / 10)が既定である(裁定)。
+      素朴な円弧のままで半径だけ大きくすると膨れて見えるが、連続曲率が乗ると同じ量でも締まって見えるため。
+      「実装のまま」はその既定を見る。以降のボタンは強制的に上書きして見比べる用で、動かすのは原始5段の
+      値だけ。カテゴリから原始への割当(shape.md §6)は動かさない。pill(circular)と angular(0px)は対象外。
+      同心角丸(§7)の効き方も一緒に変わるので、Card の中の Button の角も見ておく。
     </Text>
 
     <Text as="p" variant="body-sm">いま効いている値: <code>superellipse({curvature})</code></Text>
@@ -987,6 +1052,10 @@
     min-inline-size: 5.5rem;
     font: inherit;
     cursor: pointer;
+  }
+  .pg-scale {
+    border-radius: 0.75rem;
+    line-height: 1.3;
   }
   .pg-curve-on {
     outline: 2px solid var(--color-app-system, currentColor);

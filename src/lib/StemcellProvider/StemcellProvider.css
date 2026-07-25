@@ -24,6 +24,28 @@ body {
   corner-shape: var(--_sc-corner-shape, superellipse(1.8));
 }
 
+/* 連続曲率が出せる環境では半径を一段大きく取る(裁定 2026-07-25。実機で選定)。
+   素朴な円弧のままで半径だけ大きくすると膨れて見えるが、連続曲率が乗ると同じ量でも締まって見える。
+   つまり退避先は「質感だけを落とす」のでなく「その環境で成立する半径」へ落ちる。
+   動かすのは原始5段の値と、それに追従するカテゴリの実値だけで、カテゴリ→原始の割当(shape.md §6)は
+   動かさない。pill(circular)と angular(0px)は対象外。
+   注意: これは現在の shape.md と食い違う。§1 は半径量を Normative(全プラットフォーム同一)とし、
+   §4 は「退避しても半径量は不変で、変わるのは質感だけ」と書いている。還流で仕様側を直す必要がある
+   (未了)。トークンを実装が上書きする形も本来は SSOT の仕事で、ここは暫定の置き場所である */
+@supports (corner-shape: superellipse(1.8)) {
+  :root {
+    --shape-rounded-s: 6px;
+    --shape-rounded-m: 14px;
+    --shape-rounded-l: 20px;
+    --shape-semantic-selection: 6px;
+    --shape-semantic-tag: 6px;
+    --shape-semantic-control: 14px;
+    --shape-semantic-card: 14px;
+    --shape-semantic-popover: 14px;
+    --shape-semantic-dialog: 20px;
+  }
+}
+
 /* 等幅要素は UA の生 monospace ではなく DS の等幅スタックへ(StemcellProvider.md §6)。
    code/kbd/samp/pre は UA が font-family を要素へ直接当てるため body の継承が届かない。
    :where で詳細度を 0 に保ち、アプリの上書き余地を残す。font-size:1em は UA の縮小を打ち消す */
