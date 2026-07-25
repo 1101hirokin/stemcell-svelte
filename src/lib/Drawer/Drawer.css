@@ -1,6 +1,10 @@
 /* 端に寄る modal(overlay の modal 類。Drawer.md)。Dialog と同じ native `<dialog>` を土台にし、位置(端)と
    入りの方向(その端からスライド)だけが違う。面/影は elevation.modal、角は shape.semantic.dialog、層は
    layer.modal、scrim は color.app.scrim(Dialog と共有)。focus trap・top-layer・Escape・背後 inert は showModal。 */
+/* 動きの量は --motion-scale の乗算で受ける(motion.md §6)。環境が reduced-motion を報告すると
+   StemcellProvider が :root の --motion-scale を 0 にし、全 duration が 0 になる。部品は分岐しない
+   (以前は @media で個別に 0ms を書いていた。HOLES #36)。loop を使う部品だけは特例で、0 にすると
+   動きが消えて意味が落ちるため @media で沈静させる。 */
 .sc-drawer {
   position: fixed;
   padding: 0;
@@ -20,9 +24,9 @@
      allow-discrete で display も遷らせ、exit まで効かせる(標準機構。Dialog と同型。第2条 / 第7条) */
   translate: var(--_slide, 0 0);
   transition:
-    translate var(--motion-exit-duration) var(--motion-exit-easing),
-    display var(--motion-exit-duration) allow-discrete,
-    overlay var(--motion-exit-duration) allow-discrete;
+    translate calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing),
+    display calc(var(--motion-exit-duration) * var(--motion-scale)) allow-discrete,
+    overlay calc(var(--motion-exit-duration) * var(--motion-scale)) allow-discrete;
 }
 .sc-drawer[open] {
   translate: 0 0;
@@ -145,11 +149,3 @@
   overflow: hidden;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .sc-drawer,
-  .sc-drawer[open],
-  .sc-drawer::backdrop,
-  .sc-drawer[open]::backdrop {
-    transition-duration: 0ms;
-  }
-}
