@@ -1,6 +1,7 @@
 <script lang="ts">
   import './Badge.css';
   import { META } from './meta';
+  import Imposter from '../Imposter/Imposter.svelte';
   import type { Snippet } from 'svelte';
 
   // 状態や数の小さな印(Badge.md §1)。読むものであって押せない(states 無し・当たり判定の門の対象外)。
@@ -47,15 +48,27 @@
   });
 </script>
 
-<!-- anchor があるときだけ包む。印は隅へ絶対配置し、無いときは行内に単独で並ぶ(重複の無い単一の印マークアップ) -->
+<!-- anchor があるときだけ包む。重ねは Imposter に委ねる(部品内部の重なりも同じ原始で組む=自己利用)。
+     隅は Badge.md §5 が確定した block 軸 start × inline 軸 end で、半分はみ出す量だけが Badge の
+     Expressive として印自身に残る。行内モードなのは、anchor が行内の操作子(IconButton 等)だから。
+     anchor が無いときは印が行内に単独で並ぶ(重複の無い単一の印マークアップ) -->
 {#if children}
-  <span class="sc-badge-anchor">{@render children()}{#if visible}{@render badge()}{/if}</span>
+  <Imposter inline alignBlock="start" alignInline="end">
+    {#snippet base()}{@render children()}{/snippet}
+    {#if visible}{@render badge(true)}{/if}
+  </Imposter>
 {:else if visible}
-  {@render badge()}
+  {@render badge(false)}
 {/if}
 
-{#snippet badge()}
-  <span class="sc-badge" data-dot={dot} data-color={color} data-variant={variant}>
+{#snippet badge(anchored: boolean)}
+  <span
+    class="sc-badge"
+    data-anchored={anchored ? 'true' : undefined}
+    data-dot={dot}
+    data-color={color}
+    data-variant={variant}
+  >
     {#if dot}
       {#if label}<span class="sc-badge-sr">{label}</span>{/if}
     {:else}{shown}{/if}

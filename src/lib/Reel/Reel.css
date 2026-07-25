@@ -1,0 +1,43 @@
+/* 横に流す帯(Reel.md)。あふれても折り返さず、流れの方向へスクロールする。
+   snap や慣性、端のフェードは手触り(Expressive)なので持たない。
+   スクロールバーは隠さない: 隠すと「そこがスクロールする」ことが視覚から消え、Reel.md §2 が
+   a11y との緊張として挙げていた側に倒れる。 */
+.sc-reel {
+  box-sizing: border-box;
+  overflow-x: auto;
+  /* 横のスクロールが親やブラウザの戻る操作へ連鎖しないようにする(手触りの側の判断) */
+  overscroll-behavior-inline: contain;
+}
+
+/* 帯は中身に合わせて伸びる。器はそれを窓として見せる。この2枚構成は、あふれの検出を
+   器と帯の寸法変化だけで拾えるようにするためでもある(Reel.svelte の測定) */
+.sc-reel-track {
+  display: flex;
+  /* 中身の幅そのもの。器より広ければ器がスクロールし、狭ければ帯もそこで止まる。
+     100% で頭打ちにしてはならない(あふれの検出が器の幅で飽和して働かなくなる) */
+  inline-size: max-content;
+}
+.sc-reel-track > * {
+  flex: 0 0 auto;
+}
+
+/* 段は inline の意味層を引く(契約 gap description。並びの間隔) */
+.sc-reel-track[data-gap='sm'] {
+  gap: var(--spacing-inline-sm);
+}
+.sc-reel-track[data-gap='md'] {
+  gap: var(--spacing-inline-md);
+}
+.sc-reel-track[data-gap='lg'] {
+  gap: var(--spacing-inline-lg);
+}
+
+/* 焦点の輪郭(契約 focusRing: true)。色は intent を持たないので既定の app.system
+   (focus-ring.md §4。Link / Disclosure と同じ)。幾何3点は focusRing: true が暗黙に要求する */
+.sc-reel:focus {
+  outline: none;
+}
+.sc-reel:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+}

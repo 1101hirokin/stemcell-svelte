@@ -28,6 +28,8 @@ export { default as Center } from './Center/Center.svelte';
 export { default as Container } from './Container/Container.svelte';
 export { default as Cover } from './Cover/Cover.svelte';
 export { default as Frame } from './Frame/Frame.svelte';
+export { default as Imposter } from './Imposter/Imposter.svelte';
+export { default as Reel } from './Reel/Reel.svelte';
 export { default as Drawer } from './Drawer/Drawer.svelte';
 export { default as Tooltip } from './Tooltip/Tooltip.svelte';
 export { default as Card } from './Card/Card.svelte';

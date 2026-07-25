@@ -43,19 +43,34 @@ it('color / variant を data 属性で持つ', () => {
   expect(b.dataset.variant).toBe('soft');
 });
 
-it('anchor(children)があると隅へ重ねる器で包む。無ければ単独で並ぶ', () => {
+it('anchor(children)があると重ねの原始(Imposter)で包む。無ければ単独で並ぶ', () => {
   const anchor = createRawSnippet(() => ({ render: () => '<button>通知</button>' }));
   const { container } = render(Badge, { props: { count: 5, children: anchor } });
-  const wrap = container.querySelector('.sc-badge-anchor') as HTMLElement;
+  const wrap = container.querySelector('.sc-imposter') as HTMLElement;
   expect(wrap).not.toBeNull();
   expect(wrap.querySelector('button')).not.toBeNull();
   expect(wrap.querySelector('.sc-badge')).not.toBeNull();
+  const { container: solo } = render(Badge, { props: { count: 5 } });
+  expect(solo.querySelector('.sc-imposter')).toBeNull();
+  expect(solo.querySelector('.sc-badge')).not.toBeNull();
+});
+
+it('anchor の隅は block 軸 start × inline 軸 end(Badge.md §5。隅は Imposter が与える)', () => {
+  const anchor = createRawSnippet(() => ({ render: () => '<button>通知</button>' }));
+  const { container } = render(Badge, { props: { count: 5, children: anchor } });
+  const overlay = container.querySelector('.sc-imposter-overlay') as HTMLElement;
+  expect(overlay.dataset.alignBlock).toBe('start');
+  expect(overlay.dataset.alignInline).toBe('end');
+  // 行内の操作子に重ねるので外箱は行内モード(Imposter.md §3)
+  expect((container.querySelector('.sc-imposter') as HTMLElement).tagName).toBe('SPAN');
+  // 半分はみ出す量だけが Badge 側に残る
+  expect((container.querySelector('.sc-badge') as HTMLElement).dataset.anchored).toBe('true');
 });
 
 it('anchor があり印が無い(count 無し・dot 無し)ときは、anchor だけ描いて印は出さない', () => {
   const anchor = createRawSnippet(() => ({ render: () => '<button>通知</button>' }));
   const { container } = render(Badge, { props: { children: anchor } });
-  const wrap = container.querySelector('.sc-badge-anchor') as HTMLElement;
+  const wrap = container.querySelector('.sc-imposter') as HTMLElement;
   expect(wrap).not.toBeNull();
   expect(wrap.querySelector('button')).not.toBeNull();
   expect(wrap.querySelector('.sc-badge')).toBeNull();
