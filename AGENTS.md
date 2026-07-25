@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, CircularLoader, CircularProgress, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, CircularLoader, CircularProgress, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Slider, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -623,6 +623,37 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 支援技術から常に隠す。代役は情報ではなく、読み込み中であることは領域の側が伝える(aria-busy 相当は Skeleton を包む領域の関心。Skeleton 自身が「読み込み中」を連呼しない)。
 - reduced-motion では shimmer を停止し、静止した面になる(motion.md §6 の loop 特例)。
 - 相互作用しない。当たり判定の門の対象外。
+
+### Slider(契約 0.0.0-alpha.1)
+
+範囲の中から値をひとつ、位置で選ぶ入力。おおよその値で足りる場面のための部品であり、正確な値が要るなら数値入力を使うか併設する(NN/g / Baymard の実証が一致。Slider.md §1)。二値(range)は初版で持たない(Slider.md §2)。GOV.UK が Slider を提供しない理由(ドラッグ依存)は、本契約では WCAG 2.5.7 の要求を Normative に持つことで応える。
+
+props:
+
+- `value`: number — 現在値。アプリが所有する(field.md §5)。min..max に収まる。既定は持たない(基準の無い初期位置は嘘の既定になる。アプリが必ず与える)。
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。controlled の value と両立する非破壊の上乗せ。Web は native の name 属性。
+- `min`: number(既定 0) — 下限。
+- `max`: number(既定 100) — 上限。
+- `step`: number(既定 1) — 刻み幅。値そのもの(native の input[type=range] / SwiftUI の step と同じ意味論)。Compose の steps は「両端を除くノッチ数」という別の観念であり、写像は steps = (max - min) / step - 1 になる(オフバイワンの罠。2026-07 native 調査)。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: number) => void — 値が変わったことを伝える。逐次であり、ドラッグ中も発火する(field.md §5)。payload は新しい値。逐次値はプレビューの用途(表示の追従・軽い副作用)。
+- `onchangeEnd`: (payload: number) => void — 操作の一続き(ドラッグ・キー操作の列)が終わったことを伝える。payload は確定値。field.md §5 の例外(裁定済み 2026-07): ジェスチャーの解放は全プラットフォームにある観念で、SwiftUI(onEditingChanged false)/ Compose(onValueChangeFinished)/ Web 4系統(onChangeEnd / onValueCommit / onValueCommitted / onChangeComplete)の6/6が分離している。重い副作用(API 呼び出し・履歴)はこちらに掛ける。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 名前。無名は許さない(field.md §2)。
+- `description` — 説明。field.md §2。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- ドラッグだけで操作できてはならない(WCAG 2.2 SC 2.5.7 Dragging Movements。カスタムスライダーの典型的失敗 F108)。キーボード(web-keys.rules.json arrows.slider: 矢印 / Home / End / PageUp / PageDown)と、トラック上の単一ポインタ操作(クリック / タップで値設定)の両方が必須である。
+- 値は名前・範囲とともに届く(Web の表現は aria-valuenow / aria-valuemin / aria-valuemax)。値が数のままでは人に伝わらない場合(曜日・段階名)の読み上げ整形(aria-valuetext 相当)は、値の意味をアプリしか知らないため契約の未決に残す(field.md §8)。
+- invalid / error を持たないのは部分集合の選択である(state.md §4。Switch と同じ形): 値は min..max に構造的に収まり、「不正な値」が生じる余地が薄い。React Aria / Radix / Ant / M3 Web も Slider にエラーを持たせない(4/7 多数派。反例: Base UI / Carbon / Polaris は持つ)。
+- disabled は3要求すべてを満たすこと(state.md §5)。
+- サムの標的は size.md §4 の門(見た目のサムが小さくても当たり判定は下限を割らない)。トラックのドラッグとページスクロールの干渉(タッチ)は実装の検証項目。
 
 ### Stack(契約 0.0.0-alpha.0)
 

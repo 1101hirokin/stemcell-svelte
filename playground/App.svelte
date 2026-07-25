@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Slider, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -31,6 +31,8 @@
   let tagFilters = $state<Record<string, boolean>>({ react: true, svelte: false, vue: false });
   let tagChips = $state(['デザイン', 'トークン', '契約']);
   let progressValue = $state(40);
+  let volume = $state(40);
+  let volumeCommitted = $state(40);
   let alertShown = $state(true);
   let alertLive = $state(false);
   // 角の曲率の見比べ。既定は CSS 側の確定値と同じ
@@ -78,7 +80,13 @@
 
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
   const colors = ['primary', 'danger', 'warning', 'plain'] as const;
+
 </script>
+
+{#snippet sliderLabel()}音量{/snippet}
+{#snippet sliderDescription()}ドラッグ・クリック・矢印キーのどれでも動かせる{/snippet}
+{#snippet sliderStepLabel()}音量(step=10){/snippet}
+{#snippet sliderDisabledLabel()}音量(disabled){/snippet}
 
 <StemcellProvider {theme} {density} />
 
@@ -624,6 +632,26 @@
         {#snippet content()}設定(下に出る tooltip){/snippet}
       </Tooltip>
     </Cluster>
+  </section>
+
+  <section>
+    <Text as="h2" variant="title-lg">Slider</Text>
+    <Text as="p" variant="body-sm" muted>
+      範囲から値をひとつ位置で選ぶ。おおよその値で足りる場面のための部品で、正確な値が要るなら数値入力を
+      併設する。native の input[type=range] を土台にしており、キーボード(矢印 / Home / End / PageUp /
+      PageDown)とトラックのクリックが標準で効く(WCAG 2.5.7: ドラッグだけで操作できてはならない)。
+    </Text>
+    <Slider
+      label={sliderLabel}
+      description={sliderDescription}
+      bind:value={volume}
+      onchangeend={(v) => (volumeCommitted = v)}
+    />
+    <Text as="p" variant="body-sm" muted>
+      逐次 change: {volume} / 確定 changeEnd: {volumeCommitted}
+    </Text>
+    <Slider label={sliderStepLabel} bind:value={volume} min={0} max={100} step={10} />
+    <Slider label={sliderDisabledLabel} value={30} disabled />
   </section>
 
   <section>
