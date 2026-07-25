@@ -47,6 +47,8 @@
 .sc-slider-input::-webkit-slider-runnable-track {
   block-size: var(--slider-track-thickness);
   border-radius: var(--shape-semantic-pill);
+  /* 連続曲率は擬似要素へ個別に当てる(継承しないため。未対応環境は宣言ごと無視され円弧へ退避=第7条) */
+  corner-shape: var(--_sc-corner-shape);
   background: linear-gradient(
     to right,
     var(--color-semantic-primary-bg) var(--_percent),
@@ -56,6 +58,8 @@
 .sc-slider-input::-moz-range-track {
   block-size: var(--slider-track-thickness);
   border-radius: var(--shape-semantic-pill);
+  /* 連続曲率は擬似要素へ個別に当てる(継承しないため。未対応環境は宣言ごと無視され円弧へ退避=第7条) */
+  corner-shape: var(--_sc-corner-shape);
   background: linear-gradient(
     to right,
     var(--color-semantic-primary-bg) var(--_percent),
@@ -69,6 +73,8 @@
   inline-size: var(--slider-thumb-size);
   block-size: var(--slider-thumb-size);
   border-radius: var(--shape-semantic-pill);
+  /* 連続曲率は擬似要素へ個別に当てる(継承しないため。未対応環境は宣言ごと無視され円弧へ退避=第7条) */
+  corner-shape: var(--_sc-corner-shape);
   background: var(--color-app-surface);
   border: 2px solid var(--color-semantic-primary-bg);
   /* トラックの中心へ揃える(WebKit はサムの位置をトラックの上端基準で取るため) */
@@ -83,6 +89,8 @@
   inline-size: var(--slider-thumb-size);
   block-size: var(--slider-thumb-size);
   border-radius: var(--shape-semantic-pill);
+  /* 連続曲率は擬似要素へ個別に当てる(継承しないため。未対応環境は宣言ごと無視され円弧へ退避=第7条) */
+  corner-shape: var(--_sc-corner-shape);
   background: var(--color-app-surface);
   border: 2px solid var(--color-semantic-primary-bg);
   box-sizing: border-box;

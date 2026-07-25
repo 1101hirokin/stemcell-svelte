@@ -20,8 +20,13 @@ body {
    shape.md §4 が定める。正準の値が動いたら、この換算もやり直す。
    半径のカテゴリでは分けない(裁定)。pill も control も同じ引数を使う。半径 6px 前後では引数を変えても
    差が1px に満たず、分けるだけの実利が無いうえ、全プラットフォームに2系統を要求することになる */
+:root {
+  /* 値はここに一度だけ置く。部品と、部品の擬似要素(Slider のトラックとサム、Radio の点など)が
+     同じ値を引く。corner-shape は継承しないので、擬似要素には個別に当てる必要がある */
+  --_sc-corner-shape: superellipse(1.8);
+}
 :where([class^='sc-'], [class*=' sc-']) {
-  corner-shape: var(--_sc-corner-shape, superellipse(1.8));
+  corner-shape: var(--_sc-corner-shape);
 }
 
 /* 連続曲率が出せる環境では半径を連続曲率段へ差し替える(shape.md §3 の二段構え。憲法 第7条・RFC 0015)。
