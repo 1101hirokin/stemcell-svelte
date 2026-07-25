@@ -33,6 +33,26 @@
   let progressValue = $state(40);
   let volume = $state(40);
   let volumeCommitted = $state(40);
+  // Slider の幾何の見比べ(SSOT は種の値。実機で見て確定する)
+  const SLIDER_GEOMETRY = [
+    { name: '実装のまま', track: null, thumb: null },
+    { name: '細い', track: '0.125rem', thumb: '0.75rem' },
+    { name: '種(4/16px)', track: '0.25rem', thumb: '1rem' },
+    { name: '太い', track: '0.5rem', thumb: '1.25rem' },
+    { name: 'M3 寄り', track: '1rem', thumb: '1.5rem' },
+  ] as const;
+  let sliderGeometry = $state('実装のまま');
+  $effect(() => {
+    const g = SLIDER_GEOMETRY.find((x) => x.name === sliderGeometry);
+    const root = document.documentElement.style;
+    if (!g || !g.track) {
+      root.removeProperty('--slider-track-thickness');
+      root.removeProperty('--slider-thumb-size');
+      return;
+    }
+    root.setProperty('--slider-track-thickness', g.track);
+    root.setProperty('--slider-thumb-size', g.thumb);
+  });
   let alertShown = $state(true);
   let alertLive = $state(false);
   // 角の曲率の見比べ。既定は CSS 側の確定値と同じ
@@ -652,6 +672,25 @@
     </Text>
     <Slider label={sliderStepLabel} bind:value={volume} min={0} max={100} step={10} />
     <Slider label={sliderDisabledLabel} value={30} disabled />
+
+    <Text as="p" variant="body-sm">幾何の見比べ: <code>{sliderGeometry}</code></Text>
+    <Cluster gap="sm" align="center">
+      {#each SLIDER_GEOMETRY as g (g.name)}
+        <button
+          type="button"
+          class="pg-curve pg-scale"
+          class:pg-curve-on={sliderGeometry === g.name}
+          onclick={() => (sliderGeometry = g.name)}
+        >
+          {g.name}<br /><small>{g.track ? `${g.track} / ${g.thumb}` : 'SSOT の値'}</small>
+        </button>
+      {/each}
+    </Cluster>
+    <Text as="p" variant="body-sm" muted>
+      トラックの太さとサムの径(SSOT は種の値)。進行表示のトークンは流用していない。Material 3 は
+      進行表示のトラックを 4dp、Slider のトラックを 16dp と定めており、本 DS も溝の中立段を別に引いている。
+      当たり判定は見た目の径と別で、サムを小さくしても 24px の下限を割らない(size.rules.json)。
+    </Text>
   </section>
 
   <section>
