@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, CircularLoader, CircularProgress, Cluster, Dialog, Disclosure, Divider, Drawer, Grid, Icon, IconButton, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Slider, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Slider, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -176,6 +176,22 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 意味を持たない器である。landmark や見出しは中身の仕事で、Card 自体は支援技術に構造を主張しない。
 - 押せない(裁定)。states を持たず、全面クリックの口も無い。素朴な全面リンクは対話要素の入れ子で成立せず、業界の代替(stretched-link)も採らない: 操作対象が2つ以上あるとき「全面」がどの操作かは読めない(Card.md §2)。
 
+### Center(契約 0.0.0-alpha.0)
+
+測度(読める幅)の中で中央に置く。本文は器が広くても読める幅で頭打ちにする(layout.md §2: fill の唯一の明示的な例外)。
+
+props:
+
+- `max`: "sm" | "md" | "lg" | "xl" | "prose"(既定 "prose") — 幅の上限。container の段(rem 建て: 読者の文字拡大で一緒に広がる。layout.md §8)。既定 prose は測度(~66ch)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default`(必須) — 中身。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
+
 ### Checkbox(契約 0.0.0-alpha.1)
 
 集合からの選択、または同意。送信(確定ステップ)を伴いうる(field.md §7 の線引き。裁定済み 2026-07)。即時反映する単独の設定なら Switch を使う。label のリッチ内容(リンク内包)の検算器(field.md §6)。
@@ -254,6 +270,40 @@ props:
 slots(Svelte では snippet。default は子要素をそのまま):
 
 - `default`(必須) — 並べる中身。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
+
+### Container(契約 0.0.0-alpha.0)
+
+ページ幅の制約。app shell の外殻が持つ最大幅であり、本文の測度(Center)とは別物。
+
+props:
+
+- `max`: "sm" | "md" | "lg" | "xl"(既定 "xl") — 幅の上限。container の段。prose を含まないのは、ページの殻に測度は無関係だからである(測度は Center の仕事)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default`(必須) — 中身。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
+
+### Cover(契約 0.0.0-alpha.0)
+
+1画面ぶんの骨格。器の高さいっぱいに立ち、主役を中央に置き、頭と足(header / footer)を保つ。
+
+props:
+
+- `gap`: string(既定 "md") — 頭・主役・足の最小間隔。spacing の語彙。段(sm / md / lg)または大域の原始 X(8〜24 の整数の文字列。32px〜)。小域の原始(0〜7)は受けない(spacing.md §6: 小域は意味層で。layout.md §6)。生の px は受けない。混合型のため string であり、値の照合は実装側の適合テストの仕事。 段は spacing.stack の意味層を引く(縦の間隔)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `header` — 頭。上端に留まる。
+- `default`(必須) — 主役。残りの空間の中央に置かれる。
+- `footer` — 足。下端に留まる。
 
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
@@ -358,6 +408,23 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 多重 modal の scrim は単一に保つ(重なっても一段相当。overlay.md §8 / elevation.md §6。native ::backdrop の累積を抑える)。多重 modal 自体を推奨しない(第1条)。
 - 背後スクロール封鎖(overlay.rules.json の modal.blocksScroll)。native showModal は背後を inert にし、body のスクロール固定は実装が併せて行う。
 - 側の方向は論理方向(side)である。位置(貼り付く端)とサイズは論理で持ち、RTL / 縦書きで自動反転する(視覚方向を直書きしない。layout.md §7)。入りの方向(スライドのアニメ)は Expressive で、Web の translate は物理プロパティのため RTL の水平反転までは追従するが、縦書きでの反転は範囲外(位置は正しく、入りの手触りだけが物理に留まる)。
+
+### Frame(契約 0.0.0-alpha.0)
+
+比の窓。中身を指定した縦横比の枠に収める。
+
+props:
+
+- `ratio`: string(既定 "16/9") — 縦横比。「横/縦」の整数比の文字列(例 16/9・1/1・4/3)。長さではなく形なので、トークンの語彙の外にある(seed。比の既定集合を作るかは TODO)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default`(必須) — 中身(画像・動画・埋め込み)。はみ出しは枠が刈る。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
+- 中身の代替テキスト等は中身の仕事。枠は意味を持たない。
 
 ### Grid(契約 0.0.0-alpha.2)
 

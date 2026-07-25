@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Slider, Disclosure, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Slider, Disclosure, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text, Center, Container, Cover, Frame } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -674,6 +674,72 @@
   </section>
 
   <section>
+    <Text as="h2" variant="title-lg">Center / Container(幅の上限)</Text>
+    <Text as="p" variant="body-sm" muted>
+      同じ機構(論理方向の自動余白)で目的が違う二つ。Center は読める幅(既定 prose = 66ch)、Container は
+      ページの殻(既定 xl)。段は container のトークンで rem 建てなので、読者が文字を拡大すると幅も一緒に
+      広がる。破線は器の輪郭を見せるための playground の飾り。
+    </Text>
+    <div class="pg-outline">
+      <Center>
+        <Text as="p" variant="body-md">
+          測度の中に置かれた本文。器がどれだけ広くても、行の長さはおよそ66文字で頭打ちになる。
+          横いっぱいに広がろうとする既定(layout.md §2)の、唯一の明示的な例外がこれ。
+          文字揃えは持たない: 中央に置くのは箱であって文字ではない。
+        </Text>
+      </Center>
+    </div>
+    <div class="pg-outline">
+      <Center max="sm"><Text variant="body-sm">Center max=sm</Text></Center>
+    </div>
+    <div class="pg-outline">
+      <Container max="md"><Text variant="body-sm">Container max=md(ページの殻。測度は持たない)</Text></Container>
+    </div>
+  </section>
+
+  <section>
+    <Text as="h2" variant="title-lg">Cover(1画面ぶんの骨格)</Text>
+    <Text as="p" variant="body-sm" muted>
+      器の高さいっぱいに立ち、頭と足を端に残して主役を残りの空間の中央に置く。高さは 100dvh
+      (動くブラウザ UI を勘定に入れた画面の高さ)で、非対応環境は 100vh に残る。下の枠は1画面ぶんの
+      高さを持つので、枠の中がスクロールする。
+    </Text>
+    <div class="pg-scrollbox">
+      <Cover>
+        {#snippet header()}<Text variant="label-md">頭(上端に留まる)</Text>{/snippet}
+        <Stack gap="md">
+          <Text as="h3" variant="title-md">主役は中央</Text>
+          <Text variant="body-sm">頭と足があってもなくても、残りの空間の中央に置かれる。</Text>
+        </Stack>
+        {#snippet footer()}<Text variant="label-md">足(下端に留まる)</Text>{/snippet}
+      </Cover>
+    </div>
+  </section>
+
+  <section>
+    <Text as="h2" variant="title-lg">Frame(比の窓)</Text>
+    <Text as="p" variant="body-sm" muted>
+      中身を指定した縦横比の枠に収め、はみ出しは枠が刈る。比は「横/縦」の整数比で、長さではなく形なので
+      トークンの語彙の外にある。比でない値を渡すと警告して既定(16/9)へ退避する: 無効な値は
+      aspect-ratio の宣言ごと無効にして、比の窓が無警告で消えるため。
+    </Text>
+    <Grid min="16rem" gap="md">
+      <Stack gap="sm">
+        <Text variant="label-md">16/9</Text>
+        <Frame><div class="pg-fill">16/9</div></Frame>
+      </Stack>
+      <Stack gap="sm">
+        <Text variant="label-md">1/1</Text>
+        <Frame ratio="1/1"><div class="pg-fill">1/1</div></Frame>
+      </Stack>
+      <Stack gap="sm">
+        <Text variant="label-md">4/3</Text>
+        <Frame ratio="4/3"><div class="pg-fill">4/3</div></Frame>
+      </Stack>
+    </Grid>
+  </section>
+
+  <section>
     <Text as="h2" variant="title-lg">Slider</Text>
     <Text as="p" variant="body-sm" muted>
       範囲から値をひとつ位置で選ぶ。おおよその値で足りる場面のための部品で、正確な値が要るなら数値入力を
@@ -1154,6 +1220,25 @@
   .pg-tag {
     flex: 0 0 10rem;
     opacity: 0.7;
+  }
+  /* 器の輪郭を見せるための飾り(部品の一部ではない) */
+  .pg-outline {
+    border: 1px dashed var(--color-app-border);
+  }
+  /* Cover は1画面ぶんの高さを持つので、枠の中でスクロールさせて見せる */
+  .pg-scrollbox {
+    block-size: 20rem;
+    overflow: auto;
+    border: 1px dashed var(--color-app-border);
+    padding: var(--spacing-inset-md);
+  }
+  /* Frame の中身の代役(画像の代わり) */
+  .pg-fill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-semantic-primary-soft-bg);
+    color: var(--color-semantic-primary-soft-fg);
   }
   .pg-resizable {
     resize: horizontal;

@@ -1,0 +1,27 @@
+/* 1画面ぶんの骨格(Cover.md)。頭と足を端に残し、主役を残りの空間の中央に置く。
+   中央寄せの機構は自動余白で、頭や足の有無に関わらず同じ式で成り立つ(主役の上下の自由空間を
+   等分する)。契約は「器の高さいっぱい」の単位を Expressive として開けている。 */
+.sc-cover {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  /* 画面の高さ。dvh は動くブラウザ UI を勘定に入れた高さで、vh のままだと携帯で下端が
+     UI の裏に隠れる。非対応環境は後段の宣言を無視して vh に残る(第7条の退避) */
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+}
+
+/* 縦の間隔なので stack の意味層を引く(契約 gap description) */
+.sc-cover[data-gap='sm'] {
+  gap: var(--spacing-stack-sm);
+}
+.sc-cover[data-gap='md'] {
+  gap: var(--spacing-stack-md);
+}
+.sc-cover[data-gap='lg'] {
+  gap: var(--spacing-stack-lg);
+}
+
+.sc-cover-main {
+  margin-block: auto;
+}
