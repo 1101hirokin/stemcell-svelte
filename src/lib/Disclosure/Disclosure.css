@@ -1,0 +1,66 @@
+/* 開いたり閉じたりできる開示(Disclosure.md)。native の <details> / <summary> を土台にし、
+   見た目だけを引き取る。角の丸みは持たない: 器でなく本文の流れに置かれる部品で、契約の
+   tokensRequired にも shape が無い。 */
+.sc-disclosure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+}
+
+.sc-disclosure-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+  /* UA の三角マーカーを外し、自前の印を置く(印の造形は Expressive) */
+  list-style: none;
+  cursor: pointer;
+  /* 当たり判定の門(size.md §4。size.rules.json の hit-region は Web の下限を 24px と定める)。
+     見出しの文字が短くても判定が下限を割らないよう、行の高さで確保する */
+  min-block-size: 1.5rem;
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+/* WebKit は list-style では消えないので専用の擬似要素で外す */
+.sc-disclosure-summary::-webkit-details-marker {
+  display: none;
+}
+
+/* 開閉の印。閉じているとき inline 方向の先を指し、開くと block 方向の先へ回る(論理方向で書くので
+   RTL でも向きが破綻しない)。造形は Expressive で、ここでは三角を CSS で描く */
+.sc-disclosure-marker {
+  flex: none;
+  inline-size: 0;
+  block-size: 0;
+  border-block-start: 0.3rem solid transparent;
+  border-block-end: 0.3rem solid transparent;
+  border-inline-start: 0.4rem solid currentColor;
+  /* 高さの変化と同じ semantic で回す(accordion / collapse / disclosure の expand。motion.md §5)。
+     reduced-motion では --motion-scale が 0 になり瞬時に切り替わる(部品は分岐しない) */
+  transition: rotate calc(var(--motion-expand-duration) * var(--motion-scale))
+    var(--motion-expand-easing);
+}
+.sc-disclosure[open] .sc-disclosure-marker {
+  rotate: 90deg;
+}
+
+.sc-disclosure-summary-text {
+  min-inline-size: 0;
+}
+
+.sc-disclosure-content {
+  color: var(--color-app-foreground);
+}
+
+/* 焦点の輪郭はトリガーに立つ(契約 focusRing: true)。色は intent を持たないので既定の app.system
+   (focus-ring.md §4。Link と同じ)。幾何3点は focusRing:true が暗黙に要求する */
+.sc-disclosure-summary:focus {
+  outline: none;
+}
+.sc-disclosure-summary:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+}

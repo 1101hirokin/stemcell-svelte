@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, CircularLoader, CircularProgress, Cluster, Dialog, Divider, Drawer, Grid, Icon, IconButton, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Slider, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Checkbox, CircularLoader, CircularProgress, Cluster, Dialog, Disclosure, Divider, Drawer, Grid, Icon, IconButton, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Slider, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -288,6 +288,34 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 背後スクロール封鎖(overlay.rules.json の modal.blocksScroll)。native showModal は背後を inert にするが、body のスクロール固定は実装が併せて行う。
 - 確認・破壊の Dialog に role=alertdialog を割り当てるかは将来(初版は role=dialog。alertdialog は「応答を要する通知」で、explicit + 破壊の文脈に適するが、native `<dialog>` の既定写像は dialog。立証後に足す)。
 
+### Disclosure(契約 0.0.0-alpha.0)
+
+開いたり閉じたりできる開示。常に見える要約(summary)の下に内容(content)を持ち、open で現す。open はアプリが所有する値(state.md §6。canonical name は open。native の <details> が open 属性を持つのと同じ観念)。トリガー(summary)の操作は openchange を発火し、アプリが open を更新する(Dialog の open と同じ向き)。Web は native <details> / <summary> を土台にする: 開閉・トリガーの button 意味論・aria-expanded・折りたたみ時の非到達が標準で無償(第7条 progressive enhancement。Dialog が <dialog> を土台にするのと同型)。複数項目をまとめて排他に開く形(Accordion)は Collection の関心で本契約は扱わない(state.md §6 が Accordion 契約へ送る。クラスタ7)。
+
+props:
+
+- `open`: boolean(既定 false) — 開いているか。アプリが所有する値(state.md §6。native <details> の open 属性、Radix / MUI も open)。true で content を現し、false で畳む。トリガーの操作は openchange を発火し、アプリが open を更新する(値としての結線。Dialog の open と同型)。aria-expanded はこの値のトリガー側への射影で Web の表現。
+
+events(Svelte では callback prop):
+
+- `onopenchange`: (payload: boolean) => void — 開閉の要求を伝える。トリガー(summary)の活性化で発火し、アプリが open を更新する(open を値として扱う結線。native <details> の toggle に対応)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `summary`(必須) — 常に見えるトリガー兼見出し。開閉を起こし、開示のアクセシブルネームになる(無名の開閉を許さない。第1条)。Web は <summary>、SwiftUI は DisclosureGroup の label に写る。
+- `content`(必須) — open のとき現れる、折りたたみの対象の内容。閉じている間は支援技術からも到達不能(native <details> の既定)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 開示の相互作用の要素は button である(APG Disclosure Pattern: 内容の表示を制御する button)。role=button のトリガー(summary)に aria-expanded が open を射影し、aria-controls が content 領域を指す(Web の表現)。SwiftUI は DisclosureGroup、Compose は expandable の semantics が同じ観念を写す。Web は native <details> / <summary> が開閉・button 意味論・aria-expanded を標準で無償にする(第7条 progressive enhancement。Dialog の <dialog> と同型)。ただし summary と body を結ぶ aria-controls は native が自動では張らないので、必要なら実装が補う。native <details> は要素としては group を露出するが、活性化される観念は summary の button であり、role は活性化される側に立てる(focusRing と web-keys が一致する)。
+- open はアプリが所有する値(state.md §6)。トリガーは openchange を発火し、アプリが open を更新する(Dialog の open・Checkbox の checked と同じ向き)。UI が内部で勝手にトグルを確定しない。
+- summary は開示のアクセシブルネームで、常に見える(内容を畳んでも見出しは残る。無名の開閉を許さない。第1条)。必須。
+- focus とフォーカスリングはトリガー(button)に立つ。focusRing: true はこのリングを指す(色は intent を持たないので既定の app.system。Link と同じ)。活性化のキーは button の role が導く(Enter と Space。native <summary> は両方でトグル)。契約はキーを持たない($webKeys)。content は被制御領域で、それ自身は活性化されない。
+- role=button は単一のスカラーで、button のトリガーと、別に被制御の content 領域を同時には表せない。素朴に content を button の中へ入れると対話要素の入れ子(ARIA のアンチパターン)になる。summary と content は同じ階層の兄弟として構成する。契約スキーマの想定(単一の root role)の外にあり、機械検査は区別できない。スキーマの限界の認識で、Tag / Alert と同じ(Tag.md §5)。
+- トリガーは当たり判定の門(size.md §4)の対象。見出しの文字が短くても判定は 24px を割らない。
+- 畳まれた content は支援技術のツリーから外れ、到達できない(native <details> が隠す)。reduced-motion では現れ方が即時になる(全 duration に --motion-scale が乗る。motion.md §6。契約は分岐しない)。
+- 複数の開示をまとめ、排他に開く形(Accordion)は本契約の外(state.md §6 が Accordion 契約へ送る。開示の集合と選択の管理は Collection クラスタ7の語彙)。
+
 ### Divider(契約 0.0.0-alpha.0)
 
 区切る線。内容を持たない。余白(spacing)で区切りが足りるなら線を引かない、が既定の答えであり(第3条の抑制)、Divider は視覚的な線が要ると判断された場所にだけ現れる。
@@ -403,7 +431,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - reduced-motion では流れを止めるか沈静化する(motion.md §6 の loop 特例)。
 - 相互作用しない。当たり判定の門の対象外。
 
-### LinearProgress(契約 0.0.0-alpha.1)
+### LinearProgress(契約 0.0.0-alpha.2)
 
 線形・確定。終わりの割合が分かる進みを、領域の幅で見せる。分からないなら LinearLoader。
 
@@ -624,7 +652,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - reduced-motion では shimmer を停止し、静止した面になる(motion.md §6 の loop 特例)。
 - 相互作用しない。当たり判定の門の対象外。
 
-### Slider(契約 0.0.0-alpha.1)
+### Slider(契約 0.0.0-alpha.2)
 
 範囲の中から値をひとつ、位置で選ぶ入力。おおよその値で足りる場面のための部品であり、正確な値が要るなら数値入力を使うか併設する(NN/g / Baymard の実証が一致。Slider.md §1)。二値(range)は初版で持たない(Slider.md §2)。GOV.UK が Slider を提供しない理由(ドラッグ依存)は、本契約では WCAG 2.5.7 の要求を Normative に持つことで応える。
 
@@ -654,6 +682,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - invalid / error を持たないのは部分集合の選択である(state.md §4。Switch と同じ形): 値は min..max に構造的に収まり、「不正な値」が生じる余地が薄い。React Aria / Radix / Ant / M3 Web も Slider にエラーを持たせない(4/7 多数派。反例: Base UI / Carbon / Polaris は持つ)。
 - disabled は3要求すべてを満たすこと(state.md §5)。
 - サムの標的は size.md §4 の門(見た目のサムが小さくても当たり判定は下限を割らない)。トラックのドラッグとページスクロールの干渉(タッチ)は実装の検証項目。
+- サムの標的(size.md §4)は見た目の径と別である。サムを小さく描いても、当たり判定は Web の下限 24px を割らない(size.rules.json の hit-region)。当たりを広げると隣接要素との間隔条件(SC 2.5.8)にかかるので、レンダリングして測る(size.md §6)。
 
 ### Stack(契約 0.0.0-alpha.0)
 
