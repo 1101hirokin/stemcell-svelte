@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Slider, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Slider, Disclosure, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -32,6 +32,7 @@
   let tagChips = $state(['デザイン', 'トークン', '契約']);
   let progressValue = $state(40);
   let volume = $state(40);
+  let faqOpen = $state(false);
   let volumeCommitted = $state(40);
   // Slider の幾何の見比べ(SSOT は種の値。実機で見て確定する)
   const SLIDER_GEOMETRY = [
@@ -101,7 +102,13 @@
   const variants = ['filled', 'soft', 'outlined', 'text'] as const;
   const colors = ['primary', 'danger', 'warning', 'plain'] as const;
 
+
 </script>
+
+{#snippet faqSummary()}配送について{/snippet}
+{#snippet faqContent()}<p>注文から3営業日で発送します。地域により前後します。</p>{/snippet}
+{#snippet faqSummary2()}返品について{/snippet}
+{#snippet faqContent2()}<p>到着から14日以内であれば返品できます。</p>{/snippet}
 
 {#snippet sliderLabel()}音量{/snippet}
 {#snippet sliderDescription()}ドラッグ・クリック・矢印キーのどれでも動かせる{/snippet}
@@ -652,6 +659,18 @@
         {#snippet content()}設定(下に出る tooltip){/snippet}
       </Tooltip>
     </Cluster>
+  </section>
+
+  <section>
+    <Text as="h2" variant="title-lg">Disclosure</Text>
+    <Text as="p" variant="body-sm" muted>
+      要約の下に内容を畳む単体の開示。native の details / summary を土台にしており、開閉・button の
+      意味論・aria-expanded・畳んだ内容の非到達は標準が満たす。open はアプリが持つ値で、押すと
+      openchange の要求だけが出る(UI が勝手に確定しない)。複数を排他に開く形(Accordion)は別部品。
+    </Text>
+    <Disclosure summary={faqSummary} content={faqContent} bind:open={faqOpen} />
+    <Disclosure summary={faqSummary2} content={faqContent2} />
+    <Text as="p" variant="body-sm" muted>1つ目の open: {faqOpen}</Text>
   </section>
 
   <section>
