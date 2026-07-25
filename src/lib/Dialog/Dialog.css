@@ -6,8 +6,17 @@
   /* 器はパネルを包むだけ。背後クリック判定のため padding を持たない(target===dialog で背後を見分ける) */
   padding: 0;
   border: 0;
-  margin: auto; /* ビューポート中央 */
-  max-inline-size: min(92vw, 32rem);
+  /* ビューポート中央(overlay.md §5 の modal 類)。UA 任せにしない。
+     UA の中央寄せは dialog:modal(position: fixed + inset-block: 0)に載っているが、:modal は showModal で
+     開いている間しか一致しない。close() の瞬間に外れ、modal でない <dialog> の既定(絶対配置・横は中央・
+     縦は静的位置)へ戻る。一方 overlay の allow-discrete で要素は退場の間 top-layer に残るため、中央から
+     DOM 上の位置へ飛んでそこで消える(実機で確認)。位置は Normative なので自前で固定する。Drawer が
+     同じ理由で position を自分で持っているのと揃えた */
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  /* 論理ビューポート単位で書く(縦書きでも軸が入れ替わらない。layout.md §7。Drawer と揃えた) */
+  max-inline-size: min(92dvi, 32rem);
   inline-size: 100%;
   box-sizing: border-box;
   background: var(--elevation-modal-surface);
@@ -75,7 +84,9 @@
   flex-direction: column;
   gap: var(--spacing-stack-md);
   padding: var(--spacing-inset-lg);
-  max-block-size: min(88vh, 44rem);
+  /* dvb にするのは携帯の URL バーで可視領域が縮むため(vh は大きい方の viewport を指し、はみ出す)。
+     論理単位なのは縦書きで軸が入れ替わらないため(layout.md §7。Drawer と揃えた) */
+  max-block-size: min(88dvb, 44rem);
   overflow-y: auto;
 }
 .sc-dialog-title {
