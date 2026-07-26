@@ -17,7 +17,7 @@ it('anchor と content を描き、content は popover 要素で既定の開き�
   const c = container.querySelector('.sc-popover-content') as HTMLElement;
   expect(c).toBeTruthy();
   expect(c.getAttribute('popover')).toBe('auto'); // top-layer で light dismiss を native に委ねる
-  expect(c.dataset.placement).toBe('block-end');
+  expect(c.dataset.block).toBe('end'); // 測る前は placement が優先の向きになる
 });
 
 it('native の light dismiss(toggle=closed)で openchange(false) を橋渡しする', async () => {
@@ -53,7 +53,24 @@ it('フォーカスがラッパーの外へ出たら openchange(false)(Escape/�
   outside.remove();
 });
 
-it('placement=block-start を尊重する(反転は衝突時のみ。jsdom では反転しない)', () => {
+it('placement=block-start を尊重する(開くまでは測らないので位置に上書きされない)', () => {
   const { container } = render(Popover, { props: { open: false, placement: 'block-start', anchor, content } });
-  expect((container.querySelector('.sc-popover-content') as HTMLElement).dataset.placement).toBe('block-start');
+  expect((container.querySelector('.sc-popover-content') as HTMLElement).dataset.block).toBe('start');
+});
+
+// 開く向きはトリガーが描画領域のどちら側に居るかで決まる(面が入るかどうかでは測らない)。
+it.each([
+  { at: '左上', rect: { top: 10, left: 10 }, block: 'end', inline: 'start' },
+  { at: '右下', rect: { top: 700, left: 900 }, block: 'start', inline: 'end' },
+  { at: '右上', rect: { top: 10, left: 900 }, block: 'end', inline: 'end' },
+  { at: '左下', rect: { top: 700, left: 10 }, block: 'start', inline: 'start' },
+])('トリガーが$atなら block=$block / inline=$inline へ開く', async ({ rect, block, inline }) => {
+  const { container, rerender } = render(Popover, { props: { open: false, anchor, content } });
+  const wrapper = container.querySelector('.sc-popover') as HTMLElement;
+  wrapper.getBoundingClientRect = () =>
+    ({ ...rect, width: 40, height: 20, bottom: rect.top + 20, right: rect.left + 40 }) as DOMRect;
+  await rerender({ open: true });
+  const c = container.querySelector('.sc-popover-content') as HTMLElement;
+  expect(c.dataset.block).toBe(block);
+  expect(c.dataset.inline).toBe(inline);
 });

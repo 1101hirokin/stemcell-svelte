@@ -1,6 +1,7 @@
 /* アンカー従属の一時面(popover 類。Popover.md)。native popover API(top-layer)で描く。
    面/影/角は elevation.popover・shape.popover、層は layer.popover、出入りは motion.entrance/exit。
-   位置・幅・衝突反転は CSS Anchor Positioning(anchor()/anchor-size()/position-try)に委ねる(憲法 第2条)。
+   位置・幅は CSS Anchor Positioning(anchor()/anchor-size())に委ねる(憲法 第2条)。開く向きは、
+   トリガーが描画領域のどちら側に居るかを JS が測り data-block / data-inline で渡す。
    非対応環境では JS がアンカー矩形から top/left と --sc-popover-anchor-inline-size を与える(第7条)。 */
 /* 動きの量は --motion-scale の乗算で受ける(motion.md §6)。環境が reduced-motion を報告すると
    StemcellProvider が :root の --motion-scale を 0 にし、全 duration が 0 になる。部品は分岐しない
@@ -23,12 +24,7 @@
   /* 幅は消費者が変数で与える。既定はアンカー幅(fill)。overlay.md §5・第3条を popover まで */
   inline-size: var(--sc-popover-inline-size, var(--sc-popover-anchor-inline-size, max-content));
   min-inline-size: var(--sc-popover-min-inline-size, max-content);
-  /* 画面より広くならない。反転しても収まらない幅なら、そもそも見切れる(第1条)。
-     余白は左右に1つぶん残す */
-  max-inline-size: min(
-    var(--sc-popover-max-inline-size, 100vw),
-    calc(100vw - var(--spacing-inset-lg) * 2)
-  );
+  max-inline-size: var(--sc-popover-max-inline-size, none);
   background: var(--elevation-popover-surface);
   box-shadow: var(--elevation-popover-shadow);
   /* 浮かぶ面の縁(elevation.md §3)。影だけで地から浮かせる形は、強制配色で影が落とされたときに
@@ -49,19 +45,24 @@
   .sc-popover-content {
     /* 幅はアンカー幅に一致(anchor-size)。消費者が --sc-popover-inline-size を与えればそちらが勝つ */
     inline-size: var(--sc-popover-inline-size, anchor-size(width));
-    /* 衝突時に反転する(反転は Expressive。overlay.md §5)。block だけでなく inline 方向も試す:
-       画面の端に近いアンカーでは、下へ開いても横がはみ出す。両方を組んだ候補まで並べる */
-    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
   }
-  .sc-popover-content[data-placement='block-end'] {
+  /* 開く向きは JS が data-block / data-inline で渡す(トリガーが描画領域のどちら側に居るか)。
+     面が入るかどうかで測る position-try は使わない: 中身が伸び縮みするたびに向きが変わるうえ、
+     面の中を送れるようにすると溢れが消えて判定が働かなくなる(overlay.md §5 の反転は Expressive) */
+  .sc-popover-content[data-block='end'] {
     inset-block-start: anchor(bottom);
-    inset-inline-start: anchor(left);
     margin-block-start: var(--spacing-inline-md);
   }
-  .sc-popover-content[data-placement='block-start'] {
+  .sc-popover-content[data-block='start'] {
     inset-block-end: anchor(top);
-    inset-inline-start: anchor(left);
     margin-block-end: var(--spacing-inline-md);
+  }
+  /* トリガーが左半分なら左端を揃えて右へ、右半分なら右端を揃えて左へ伸ばす */
+  .sc-popover-content[data-inline='start'] {
+    inset-inline-start: anchor(left);
+  }
+  .sc-popover-content[data-inline='end'] {
+    inset-inline-end: anchor(right);
   }
 }
 

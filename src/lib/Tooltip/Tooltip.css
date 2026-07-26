@@ -1,6 +1,7 @@
 /* アンカーに添える短い補助ラベル(tooltip 類。Tooltip.md)。native popover(top-layer)で描き overflow /
    transform 祖先でも切れない。面/影は elevation.popover(tooltip 層は elevation が popover 相当。layering.md)、
-   角は shape.semantic.popover、層は layer.tooltip。位置は CSS Anchor Positioning、非対応は JS が left/top を与える。 */
+   角は shape.semantic.popover、層は layer.tooltip。位置は CSS Anchor Positioning、非対応は JS が left/top を
+   与える。開く向きはトリガーが描画領域のどちら側に居るかで決まる(data-block / data-inline)。 */
 /* 動きの量は --motion-scale の乗算で受ける(motion.md §6)。環境が reduced-motion を報告すると
    StemcellProvider が :root の --motion-scale を 0 にし、全 duration が 0 になる。部品は分岐しない
    (以前は @media で個別に 0ms を書いていた。HOLES #36)。loop を使う部品だけは特例で、0 にすると
@@ -17,8 +18,7 @@
   margin: 0;
   border: 0;
   z-index: var(--layer-tooltip-z);
-  /* 読める幅で頭打ちにしつつ、画面より広くならない(狭い画面で見切れない) */
-  max-inline-size: min(18rem, calc(100vw - var(--spacing-inset-lg) * 2));
+  max-inline-size: 18rem;
   /* 空白の無い長い語(URL 等)が面の外へはみ出さない(背景/影の中で折る) */
   overflow-wrap: anywhere;
   padding: var(--spacing-inset-sm);
@@ -34,29 +34,28 @@
   letter-spacing: var(--typography-body-sm-letter-spacing);
   /* tooltip はフォーカスも操作も受け取らない(受け取れば popover。overlay.md §4) */
   pointer-events: none;
-  /* left(=アンカー中央)に対して水平中央寄せ。anchor / JS フォールバックの両方でこの transform が効く */
-  transform: translateX(-50%);
   /* 出現は fade(entrance)。退場のトークンは transition で参照 */
   animation: sc-tooltip-in calc(var(--motion-entrance-duration) * var(--motion-scale)) var(--motion-entrance-easing);
   transition: opacity calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing);
 }
 
-/* CSS Anchor Positioning 対応時。水平はアンカー中央(anchor(center) + translateX(-50%))、
-   上下は placement で anchor(top)/anchor(bottom)。衝突時は block 方向へ反転(overlay.md §5) */
+/* CSS Anchor Positioning 対応時。開く向きは JS が data-block / data-inline で渡す(トリガーが描画領域の
+   どちら側に居るか)。面が入るかどうかで測る position-try は使わない(Popover と同じ理由) */
 @supports (anchor-name: --x) {
-  .sc-tooltip-content {
-    /* block だけでなく inline 方向も試す(画面の端のアンカーでは横がはみ出す) */
-    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
-  }
-  .sc-tooltip-content[data-placement='block-start'] {
+  .sc-tooltip-content[data-block='start'] {
     inset-block-end: anchor(top);
-    inset-inline-start: anchor(center);
     margin-block-end: var(--spacing-inline-md);
   }
-  .sc-tooltip-content[data-placement='block-end'] {
+  .sc-tooltip-content[data-block='end'] {
     inset-block-start: anchor(bottom);
-    inset-inline-start: anchor(center);
     margin-block-start: var(--spacing-inline-md);
+  }
+  /* トリガーが左半分なら左端を揃えて右へ、右半分なら右端を揃えて左へ伸ばす */
+  .sc-tooltip-content[data-inline='start'] {
+    inset-inline-start: anchor(left);
+  }
+  .sc-tooltip-content[data-inline='end'] {
+    inset-inline-end: anchor(right);
   }
 }
 
