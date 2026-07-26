@@ -1,0 +1,20 @@
+/* 畳んで開く項目の束(Accordion.md)。見出しの造形・開閉の印・開閉の動きは合成した Disclosure が持つので、
+   ここが持つのは束ねる縦の律動と項目の区切りだけである。 */
+.sc-accordion {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 項目のあいだの区切り。間を空けずに線で分けるのは、束が一つの塊として読めるようにするため
+   (離して並べると、束ねた意味が視覚から消えて Disclosure を並べたのと区別がつかなくなる) */
+.sc-accordion-item {
+  padding-block: var(--spacing-stack-sm);
+  border-block-end: var(--shape-border-width) solid var(--color-app-divider);
+}
+.sc-accordion-item:last-child {
+  border-block-end: 0;
+}
+
+.sc-accordion-label {
+  min-inline-size: 0;
+}

@@ -2,5 +2,6 @@
 export const META = {
   props: {
     open: { default: false },
+    disabled: { default: false },
   },
 } as const;
