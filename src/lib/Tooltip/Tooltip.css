@@ -17,7 +17,8 @@
   margin: 0;
   border: 0;
   z-index: var(--layer-tooltip-z);
-  max-inline-size: 18rem;
+  /* 読める幅で頭打ちにしつつ、画面より広くならない(狭い画面で見切れない) */
+  max-inline-size: min(18rem, calc(100vw - var(--spacing-inset-lg) * 2));
   /* 空白の無い長い語(URL 等)が面の外へはみ出さない(背景/影の中で折る) */
   overflow-wrap: anywhere;
   padding: var(--spacing-inset-sm);
@@ -44,7 +45,8 @@
    上下は placement で anchor(top)/anchor(bottom)。衝突時は block 方向へ反転(overlay.md §5) */
 @supports (anchor-name: --x) {
   .sc-tooltip-content {
-    position-try-fallbacks: flip-block;
+    /* block だけでなく inline 方向も試す(画面の端のアンカーでは横がはみ出す) */
+    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
   }
   .sc-tooltip-content[data-placement='block-start'] {
     inset-block-end: anchor(top);

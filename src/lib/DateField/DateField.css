@@ -1,26 +1,32 @@
-/* 配線の源は foundations/field.md(解剖)・size.rules.json(段→inset)・state.md §3.1(intent の差し替え)。 */
-.sc-textfield {
+/* 暦日を打ち込む欄(DateField.md)。欄としての床(面・枠・焦点・文字・間隔)は TextField と同じものを引く
+   (field.md §6: 8種の欄は同じ解剖を持つ)。違うのは中身が桁に分かれることだけで、桁の見た目と
+   区切りの造形は Expressive。 */
+.sc-datefield {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-stack-sm);
   /* フィールドは fill(横いっぱい)が既定。憲法第3条・field.md §2・layout.md §2(裁定 2026-07) */
   inline-size: 100%;
   min-inline-size: 0;
+  /* 中身の長さが決まっている欄なので、器いっぱいまでは広げない(layout.md §2 の例外)。
+     10文字の日付が 1400px の箱に入っても情報は増えず、桁が左端へ寄って押しにくくなる。
+     値は幅の段の閉じた集合(8/12/16/20/24/32rem。layout.md §9)から採る */
+  max-inline-size: 12rem;
   /* 中立の資材(TextField.md §2: resting の枠は color.app.border。hover 役が無いので hover を持たない) */
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);
 }
 /* invalid は intent を danger へ差し替える(state.md §3.1 / §7) */
-.sc-textfield[data-invalid='true'] {
+.sc-datefield[data-invalid='true'] {
   --_border: var(--color-semantic-danger-border);
   --_ring: var(--color-semantic-danger-focus-ring);
 }
 /* disabled が invalid に勝つ(state.md §3.1)。同詳細度の後勝ちで上書きする */
-.sc-textfield[data-disabled='true'] {
+.sc-datefield[data-disabled='true'] {
   --_border: var(--color-semantic-disabled-border);
 }
 
-.sc-textfield-label {
+.sc-datefield-label {
   font-family: var(--typography-label-md-font-family);
   font-size: var(--typography-label-md-font-size);
   font-weight: var(--typography-label-md-font-weight);
@@ -29,13 +35,13 @@
   color: var(--color-app-foreground);
 }
 /* 記号そのものは seed(field.md §4)。造形は expressive */
-.sc-textfield-required {
+.sc-datefield-required {
   margin-inline-start: 0.25em;
 }
 
 /* 内包時の高さは一次内容(入力)が決める(size.md §2 裁定)。縦 inset は入力に付き、器は横 inset だけを
    持つ。align-items:stretch で affix は器の行高へ従属する(器を押し上げない) */
-.sc-textfield-control {
+.sc-datefield-control {
   display: flex;
   align-items: stretch;
   gap: var(--spacing-inline-md);
@@ -48,27 +54,27 @@
     border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
     background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
-.sc-textfield[data-size='sm'] .sc-textfield-control {
+.sc-datefield[data-size='sm'] .sc-datefield-control {
   --_inset: var(--spacing-inset-sm);
 }
-.sc-textfield[data-size='lg'] .sc-textfield-control {
+.sc-datefield[data-size='lg'] .sc-datefield-control {
   --_inset: var(--spacing-inset-lg);
 }
 /* 付属が自前のコントロール(ボタン)を持つ辺では、そのボタンが縁と当たり判定を所有するので、
    フィールドの横 inset を手放す(size.md §2 の水平版。二重取りを避ける)。裸のアイコン/装飾の辺は
    inset を残し、内容が枠に触れないようにする */
-.sc-textfield-control:has(.sc-textfield-start button) {
+.sc-datefield-control:has(.sc-datefield-start button) {
   padding-inline-start: 0;
 }
-.sc-textfield-control:has(.sc-textfield-end button) {
+.sc-datefield-control:has(.sc-datefield-end button) {
   padding-inline-end: 0;
 }
-.sc-textfield[data-disabled='true'] .sc-textfield-control {
+.sc-datefield[data-disabled='true'] .sc-datefield-control {
   background: var(--color-semantic-disabled-soft-bg);
   cursor: not-allowed;
 }
 
-.sc-textfield-input {
+.sc-datefield-input {
   flex: 1 1 auto;
   min-inline-size: 0;
   border: none;
@@ -84,10 +90,10 @@
   letter-spacing: var(--typography-body-md-letter-spacing);
   color: var(--color-app-foreground);
 }
-.sc-textfield-input::placeholder {
+.sc-datefield-input::placeholder {
   color: var(--color-app-fg-muted);
 }
-.sc-textfield[data-disabled='true'] .sc-textfield-input {
+.sc-datefield[data-disabled='true'] .sc-datefield-input {
   color: var(--color-semantic-disabled-fg);
   cursor: not-allowed;
 }
@@ -95,27 +101,27 @@
 /* オートフィル: ブラウザは autofill 背景を input にだけ乗せる。input は横 inset のぶん狭く角も四角なので
    ハイライトが両端で切れ角が合わない。input の背景を box-shadow で同色に潰しつつ、control 全面に
    :has(:autofill) で同色を敷いて、角丸の全面でハイライトを一致させる。色は brand の淡い青(primary.soft-bg)。 */
-.sc-textfield-input:-webkit-autofill,
-.sc-textfield-input:-webkit-autofill:hover,
-.sc-textfield-input:-webkit-autofill:focus,
-.sc-textfield-input:-webkit-autofill:active {
+.sc-datefield-input:-webkit-autofill,
+.sc-datefield-input:-webkit-autofill:hover,
+.sc-datefield-input:-webkit-autofill:focus,
+.sc-datefield-input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 100px var(--color-semantic-primary-soft-bg) inset;
   -webkit-text-fill-color: var(--color-app-foreground);
   caret-color: var(--color-app-foreground);
 }
-.sc-textfield-control:has(.sc-textfield-input:autofill) {
+.sc-datefield-control:has(.sc-datefield-input:autofill) {
   background: var(--color-semantic-primary-soft-bg);
 }
 
 /* focus-ring.md: :focus-visible + outline + offset。ring は箱(control)に出す。
    :focus-within を使わないのは、end 内の対話要素(クリアボタン等)の focus で箱を光らせないため */
-.sc-textfield-control:has(.sc-textfield-input:focus-visible) {
+.sc-datefield-control:has(.sc-datefield-input:focus-visible) {
   outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
   outline-offset: var(--focus-ring-offset);
 }
 
-.sc-textfield-start,
-.sc-textfield-end {
+.sc-datefield-start,
+.sc-datefield-end {
   display: inline-flex;
   align-items: center;
   /* 器の行高に従属する(size.md §2 内包時の裁定)。行高いっぱいに広がり hit-target を器が満たす */
@@ -125,14 +131,14 @@
 /* affix の対話要素/装飾は器の行高に従い、自前の縦 inset で器を押し上げない(内包時の裁定)。
    詳細度は (0,2,1) にする: 中の button 自身の .sc-button/.sc-iconbutton[data-size](0,2,0)に
    padding-block:0 を勝たせるため(:where は詳細度 0 で負けていた。独立レビュー blocker) */
-.sc-textfield-control .sc-textfield-start > button,
-.sc-textfield-control .sc-textfield-end > button {
+.sc-datefield-control .sc-datefield-start > button,
+.sc-datefield-control .sc-datefield-end > button {
   align-self: stretch;
   padding-block: 0;
 }
 
-.sc-textfield-description,
-.sc-textfield-error {
+.sc-datefield-description,
+.sc-datefield-error {
   margin: 0;
   font-family: var(--typography-body-sm-font-family);
   font-size: var(--typography-body-sm-font-size);
@@ -140,11 +146,11 @@
   line-height: var(--typography-body-sm-line-height);
   letter-spacing: var(--typography-body-sm-letter-spacing);
 }
-.sc-textfield-description {
+.sc-datefield-description {
   color: var(--color-app-fg-muted);
 }
 /* エラー文は danger.soft-fg の転用(TextField.md §2。コントラストはレビュー実測済み 10.45:1 / 11.04:1) */
-.sc-textfield-error {
+.sc-datefield-error {
   color: var(--color-semantic-danger-soft-fg);
 }
 
@@ -153,7 +159,46 @@
    設計どおり(14px)を保つ。padding は不変だが line-height が比率(1.334)なので、タッチ時は行高が伴って
    約 2px 高くなる(タッチの的が少し大きくなる方向で許容)。 */
 @media (pointer: coarse) {
-  .sc-textfield-input {
+  .sc-datefield-input {
     font-size: max(16px, var(--typography-body-md-font-size));
   }
+}
+
+/* 桁。焦点は桁に立つ(根ではない)。等幅の字形で、値が変わっても幅が跳ねない */
+.sc-datefield-segment {
+  padding-inline: 0.125em;
+  border-radius: var(--shape-semantic-selection);
+  font-variant-numeric: tabular-nums;
+  cursor: text;
+  /* 桁は打てる場所なので、指を置いたときに面が薄く点く(state.md §3.2 の hover)。
+     動きは feedback の意味層で、reduced-motion では --motion-scale が 0 になり瞬時に切り替わる */
+  transition:
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+      var(--motion-feedback-easing),
+    color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+}
+.sc-datefield:not([data-disabled='true']) .sc-datefield-segment:hover {
+  background: var(--color-semantic-plain-soft-bg-hover);
+}
+/* 打っている桁を面で示す(どこを編集しているかが焦点の輪だけでは読みにくい) */
+.sc-datefield-segment:focus-visible {
+  background: var(--color-semantic-plain-soft-bg);
+}
+.sc-datefield-segment[data-empty='true'] {
+  color: var(--color-app-fg-muted);
+}
+.sc-datefield-segment:focus {
+  outline: none;
+}
+.sc-datefield-segment:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+.sc-datefield[data-disabled='true'] .sc-datefield-segment {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+.sc-datefield-separator {
+  color: var(--color-app-fg-muted);
+  padding-inline: 0.125em;
 }

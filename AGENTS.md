@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -203,6 +203,36 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - disabled は3つの要求すべてを満たすこと（foundations/state.md §5）: 活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる。属性か aria-disabled かは Web の表現であり第2条により固有。
 - 活性化のキーは本契約が定めない。role が意味論を運び、キーはその表現である（第2条）。Web の APG Button Pattern は Enter と Space、Link Pattern は Enter のみと定めるが、Compose の Modifier.clickable は Role に関わらず両方で発火する。キーを中立の契約に書けば Web の慣習を全プラットフォームへ漏らす。Web の規範層は未着手（component-contract.schema.json の $webKeys）。
 
+### Calendar(契約 0.0.0-alpha.0)
+
+月の格子。日を並べ、選ばれている日を示し、押された日を要求として返す。何を選択と見なすか(1つの日か、期間の端か)は持たない: 器は「今どこが選ばれているか」を受け取り、「この日が押された」を返すだけで、意味づけは束ねる側(DatePicker / DateRangePicker)が与える。これで単一の選択と期間の選択の両方が同じ格子に乗る。値は暦日で、地域の慣習(週の始まり・月名・曜日名)は環境から借りる(date.md §2 / §3)。date.md の seed の上に乗る(status: draft)。
+
+props:
+
+- `month`: string — 表示している月(中立の表記は ISO 8601 の年月。YYYY-MM)。アプリが所有する値で、UI は内部で移動を確定しない(monthchange を出す)。既定を持たない(required): どの月を見せるかは器が決められない。
+- `months`: number(既定 1) — 並べて見せる月数。期間の選択では2つ並べるのが常態である(Ant Design の RangePicker、MUI X、react-day-picker がいずれも既定で2つ)。月をまたぐ焦点の移動は並べた全体で連続する。
+- `start`: string((省略可)) — 選ばれている日、または期間の始まり(同じ表記)。1つの日を選ぶときはこれだけを与える。
+- `end`: string((省略可)) — 期間の終わり(同じ表記)。start と併せて与えると、その間の日が範囲として示される。start だけのときは1日だけが選ばれている。
+- `min`: string((省略可)) — 選べる下限(date.md §5)。
+- `max`: string((省略可)) — 選べる上限。
+- `unavailable`: array(既定 []) — 個別に選べない日(休業日・満室)。表示している範囲のぶんだけを与えればよい。理由の文言はアプリが持つ(DS は持たない。date.md §3)。
+
+events(Svelte では callback prop):
+
+- `onselect`: (payload: string) => void — 日が押された(またはキーで確定された)。何を意味するか(値の差し替えか、期間の始まりか、終わりか)は束ねる側が決める。器は押された日を返すだけである。
+- `onmonthchange`: (payload: string) => void — 表示する月の移動の要求(YYYY-MM)。アプリが month を更新する。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 格子は行と列を持ち、列に曜日の見出しが付く(Web の表現は grid / columnheader / gridcell。APG Date Picker Dialog)。契約の role には活性化される側(gridcell)を書く: 焦点と活性化のキーが立つのは日の升である(Tabs / Disclosure と同じ形)。
+- 焦点は格子の中に1つだけ載る(roving tabindex 相当)。矢印で日、上下で週、Home / End で週の両端、PageUp / PageDown で月、Shift+PageUp / PageDown で年を移る(web-keys.rules.json の arrows.calendar)。移動は選択ではない: 日は Enter / Space で選ぶ(activation.gridcell)。
+- 選ばれている日が届く(aria-selected)。今日が届く(aria-current="date")。期間のときは、両端だけでなく間の日も選ばれていることが届く。
+- 選べない日(min / max の外、unavailable)は、選べないことが届く。焦点からは外さない: そこに日があること自体が読める情報である(date.md §5)。
+- 月が移ったこと、日を選んだことが支援技術へ届く。焦点を奪わず、穏当に告げる(WCAG 2.2 SC 4.1.3。date.md §6)。
+- 月名・曜日名・日付の並びは環境の書式に従う(date.md §3)。DS はこれらの文字列を持たない。
+- 日の升は当たり判定の門(size.md §4)の対象である。7列で並ぶので詰まりやすい。
+- 選択・今日・選べない日の視覚の区別は、色の差だけに頼らず地に対して 3:1 を満たす(WCAG 2.2 SC 1.4.11。選べない日はこの項の除外に当たる)。
+
 ### Card(契約 0.0.0-alpha.0)
 
 地の上の面。内容をまとめて一枚に見せる器であり、それ自体は何もしない。押せる Card は作らない(裁定): 全面クリックは中のリンクや操作と当たり判定が入れ子になり、リンクの責任は中の要素(リンクテキスト・押せる要素)が担う。
@@ -352,6 +382,121 @@ slots(Svelte では snippet。default は子要素をそのまま):
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
+
+### DateField(契約 0.0.0-alpha.1)
+
+暦日を打ち込む欄。年・月・日を桁に分けて受け、桁ごとに増減できる(date.md §6)。値は暦日であって時刻でもタイムゾーンでもない(date.md §2)。欄としての解剖(名前・説明・エラー・無効・不正)は field.md §2 に従い、8種の欄と同じ形をとる。暦の格子は持たない: それは Calendar の仕事で、両方を束ねるのが DatePicker である。date.md の seed の上に乗る(status: draft)。
+
+props:
+
+- `name`: string((省略可)) — フォーム名(native の form 送信・FormData・reset に参加。field.md §5)。
+- `value`: string(既定 "") — 暦日。中立の表記は ISO 8601 の日付(YYYY-MM-DD)で、時刻もタイムゾーンも持たない(date.md §2)。空文字列は未入力を表す。各実装は土地の型(Swift の DateComponents、Kotlin の LocalDate、Web の Temporal.PlainDate 等)を追加の口として持ってよいが、中立の表記はこれである。値の所有はアプリにある(field.md §5)。
+- `min`: string((省略可)) — 選べる下限(同じ表記)。矢印での増減はこの外へ出ない。打ち込みは通す: native の <input type="date"> も範囲外を打てて不正になるだけであり、検証の時機はアプリが持つ(field.md §3)。範囲の外であることは invalid の宣言で示す(alpha.1 で言い回しを改めた)。
+- `max`: string((省略可)) — 選べる上限(同じ表記)。扱いは min と同じ。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。
+- `readonly`: boolean(既定 false) — 読めるが変えられない(field.md。invalid と同時に成立しない)。
+- `invalid`: boolean(既定 false) — 不正の宣言。アプリが持つ(検証の時機は field.md §3)。
+- `required`: boolean(既定 false) — 入力が要る。
+- `autocomplete`: string((省略可)) — 自動補完の語彙(WHATWG Autofill)。生年月日の欄では bday を与える。個人情報を集める欄で省かない(field.md §7)。
+- `size`: "sm" | "md" | "lg"(既定 "md") — size.rules.json の3段(inset を引く)。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: string) => void — 値が日として成立したときに発火する。桁を打っている途中(年だけ入った状態)では発火しない: 途中の並びは日ではなく、成立していない値を change で流すと、アプリが持つ値が一時的に嘘になる。主要な実装も同じ形である(React Aria は完成するまで null を保つ)。空へ戻したとき(全桁を消したとき)は空文字列で発火する。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 名前(必須。無名は許さない。field.md §2)。
+- `description` — 説明・入力条件(field.md §2)。
+- `error` — invalid のときのエラー文(field.md §3)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 欄は桁(年・月・日)に分かれ、焦点は桁に立つ。契約に role を書かないのは、根の器が活性化される要素ではないからである(Reel と同じ形。役割は桁の側に立つ)。Web の表現では各桁が spinbutton で、3つを group が束ねる(APG の Date Picker Spin Button の例)。
+- 桁ごとに名前(「年」「月」「日」)と、今の値・下限・上限が支援技術へ届く(Web は aria-valuenow / aria-valuemin / aria-valuemax)。桁が1つの日付としてまとまっていることも届く。
+- 上下でその桁を増減し、左右で桁を移る(web-keys.rules.json の arrows.date-segment。native の <input type="date"> の挙動に一致させる)。
+- 桁の並び(年/月/日か、月/日/年か)は地域の慣習に従う(date.md §3)。DS は並びを決めない。
+- 焦点とフォーカスリングは桁に立つ。当たり判定の門(size.md §4)も桁に生きる。
+- invalid のとき、何が不正かは error スロットの文が運ぶ(色だけに頼らない。field.md §3)。
+
+### DatePicker(契約 0.0.0-alpha.1)
+
+暦日をひとつ選ぶ。打ち込む欄(DateField)と月の格子(Calendar)を束ね、格子は一時面として開く。値は暦日で、時刻もタイムゾーンも持たない(date.md §2)。欄としての解剖は field.md §2 に従う。date.md の seed の上に乗る(status: draft)。
+
+props:
+
+- `name`: string((省略可)) — フォーム名(field.md §5)。
+- `value`: string(既定 "") — 暦日(ISO 8601 の日付。YYYY-MM-DD)。空文字列は未入力。アプリが所有する。
+- `min`: string((省略可)) — 選べる下限(date.md §5)。欄と格子の両方に効く。
+- `max`: string((省略可)) — 選べる上限。
+- `unavailable`: array(既定 []) — 個別に選べない日(休業日等)。格子と欄の両方に効く。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。
+- `readonly`: boolean(既定 false) — 読めるが変えられない。暦も開かない。
+- `invalid`: boolean(既定 false) — 不正の宣言(field.md §3)。
+- `required`: boolean(既定 false) — 入力が要る。
+- `size`: "sm" | "md" | "lg"(既定 "md") — size.rules.json の3段。
+- `calendarLabel`: string — 暦を開く操作の名前(絵だけの操作。無名を許さない)。DS は文言を持たない(i18n.md §1 の外側)。スロットではなく文字列で受ける: 名前は合成した操作へそのまま渡る値であり、Icon の label や CircularLoader の label と同じ形である(alpha.1 で改めた。スロットのままだと、名前を必要とする操作へ渡せない)。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: string) => void — 値が変わった(欄で打ち終えたとき、格子で日を選んだとき)。アプリが value を更新する。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 名前(必須。無名は許さない。field.md §2)。
+- `description` — 説明・入力条件(field.md §2)。
+- `error` — invalid のときのエラー文。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 暦は一時面として開く(overlay.md の popover 類)。開いているかは器が内部で持つ: トリガーに従属する一時面であり、アプリが所有する値ではない(Menu と Select が同じ形)。
+- 暦を開く操作には名前が要る(絵だけの操作。無名を許さない)。DS は文言を持たないので消費者が渡す(i18n.md §1 の外側に置く。Pagination の前後の名前と同じ扱い)。
+- 暦を開いたら焦点は格子へ移り、閉じたらトリガーへ戻る(overlay.md §4)。Escape で閉じる。
+- 欄と暦は同じ値を指す。片方で変えたことが他方へ届く(date.md §9 の宿題としていた同期を、束ねる側のNormative としてここで確定する。器が2つに割れて見えると、どちらが本当の値か分からなくなる)。
+- 欄だけで完結できる。暦を開かずキーボードだけで日付を入れられることが要求である(date.md §6 / 第1条)。
+- 暦を開くトリガーは器が所有する(Menu と Select が同じ形。alpha.1 で改めた)。開いているか(Web の aria-expanded)と、開く先が一時面であること(aria-haspopup)をトリガーが告げる。焦点とフォーカスリングと当たり判定の門(size.md §4)はトリガーに生きる。欄の桁と暦の升は、それぞれの契約が自分の焦点を持つ。
+
+### DateRangePicker(契約 0.0.0-alpha.1)
+
+期間(始まりと終わり)を選ぶ。打ち込む欄を2つと月の格子を束ね、格子は一時面として開く。格子は Calendar 1つで、並べる月数を渡して2ヶ月ぶん見せるのが常態である。値は暦日の対で、時刻もタイムゾーンも持たない(date.md §2)。プリセット(「過去7日間」等)は持たない: 何を候補に出すかはアプリの政策であり、固有の規範が無い(承認 UI と同じ判断。組み方は patterns/date-range.md が示す)。date.md の seed の上に乗る(status: draft)。
+
+props:
+
+- `name`: string((省略可)) — フォーム名(field.md §5)。
+- `start`: string(既定 "") — 期間の始まり(ISO 8601 の日付)。空文字列は未入力。アプリが所有する。
+- `end`: string(既定 "") — 期間の終わり(同じ表記)。始まりより前にはできない。
+- `min`: string((省略可)) — 選べる下限(date.md §5)。欄と格子の両方に効く。
+- `max`: string((省略可)) — 選べる上限。
+- `unavailable`: array(既定 []) — 個別に選べない日(休業日等)。格子と欄の両方に効く。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。
+- `readonly`: boolean(既定 false) — 読めるが変えられない。暦も開かない。
+- `invalid`: boolean(既定 false) — 不正の宣言(field.md §3)。
+- `required`: boolean(既定 false) — 入力が要る。
+- `size`: "sm" | "md" | "lg"(既定 "md") — size.rules.json の3段。
+- `calendarLabel`: string — 暦を開く操作の名前(絵だけの操作。無名を許さない)。DS は文言を持たない(i18n.md §1 の外側)。スロットではなく文字列で受ける: 名前は合成した操作へそのまま渡る値であり、Icon の label や CircularLoader の label と同じ形である(alpha.1 で改めた。スロットのままだと、名前を必要とする操作へ渡せない)。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: { start: string, end: string }) => void — 期間が変わった。始まりと終わりを対で渡す(片方だけ変わったときも対で渡す。アプリが持つのは1つの期間であり、2つの独立した値ではない)。終わりが未定の途中では、終わりは空文字列で渡す。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 期間全体の名前(必須。無名は許さない)。
+- `startLabel`(必須) — 始まりの欄の名前(「開始日」等)。欄はそれぞれ名前を持つ(field.md §2)。
+- `endLabel`(必須) — 終わりの欄の名前(「終了日」等)。
+- `description` — 説明・入力条件。
+- `error` — invalid のときのエラー文。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 暦は一時面として開く(overlay.md の popover 類)。開いているかは器が内部で持つ: トリガーに従属する一時面であり、アプリが所有する値ではない(Menu と Select が同じ形)。
+- 暦を開く操作には名前が要る(絵だけの操作。無名を許さない)。DS は文言を持たないので消費者が渡す(i18n.md §1 の外側に置く。Pagination の前後の名前と同じ扱い)。
+- 暦を開いたら焦点は格子へ移り、閉じたらトリガーへ戻る(overlay.md §4)。Escape で閉じる。
+- 欄と暦は同じ値を指す。片方で変えたことが他方へ届く(date.md §9 の宿題としていた同期を、束ねる側のNormative としてここで確定する。器が2つに割れて見えると、どちらが本当の値か分からなくなる)。
+- 2つの欄が1つの期間であることが支援技術へ届く(Web の表現は group と、期間全体の名前)。
+- 始まりだけが選ばれている途中の状態が届く。格子では、次に押した日が終わりになることが分かる形にする(見せ方は Expressive だが、途中であることが視覚と支援技術の両方へ届くのは Normative)。
+- 終わりが始まりより前にはならない。逆に選んだときは、実装が対を入れ替えるか、始まりを置き直す(どちらを採るかは Expressive。黙って不正な対を保持しない)。
+- 暦を開くトリガーは器が所有する(Menu と Select が同じ形。alpha.1 で改めた)。開いているか(Web の aria-expanded)と、開く先が一時面であること(aria-haspopup)をトリガーが告げる。焦点とフォーカスリングと当たり判定の門(size.md §4)はトリガーに生きる。欄の桁と暦の升は、それぞれの契約が自分の焦点を持つ。
 
 ### Dialog(契約 0.0.0-alpha.2)
 

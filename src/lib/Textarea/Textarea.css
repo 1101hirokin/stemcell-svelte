@@ -40,8 +40,8 @@
   border: var(--shape-border-width) solid var(--_border);
   border-radius: var(--shape-semantic-control);
   transition:
-    border-color var(--motion-feedback-duration) var(--motion-feedback-easing),
-    background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+    border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
 .sc-textarea[data-size='sm'] .sc-textarea-control {
   padding: var(--spacing-inset-sm);

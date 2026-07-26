@@ -47,8 +47,8 @@
   border-radius: var(--shape-semantic-selection);
   background: var(--_box-bg);
   transition:
-    background-color var(--motion-feedback-duration) var(--motion-feedback-easing),
-    border-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
+    border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
 /* チェックマーク(回転した2辺)。不確定は横棒。色は --_mark */
 .sc-checkbox-box::after {

@@ -5,7 +5,7 @@
     "": {
       "name": "@stemcell/svelte",
       "dependencies": {
-        "@stemcell/icons": "0.0.0-alpha.3",
+        "@stemcell/icons": "0.0.0-alpha.4",
       },
       "devDependencies": {
         "@stemcell/tokens": "0.0.0-alpha.8",
@@ -151,7 +151,7 @@
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.62.2", "", { "os": "win32", "cpu": "x64" }, "sha512-BfzEnDJOt9T8M989/lA37EcJgat01wLRnoi5dQf3QzOH7jzpqTAzdDbVfRljVr5r+jzKqpbHeyOfAaXxAd0PAA=="],
 
-    "@stemcell/icons": ["@stemcell/icons@0.0.0-alpha.3", "http://localhost:4873/@stemcell/icons/-/icons-0.0.0-alpha.3.tgz", {}, "sha512-DTDK7OvPI18V5EYhSF85bXr8HPzKAu9EI5FtZF/Hjo8NU82naiWUE6Xu854tPhwGXNegeKUv3WWbeh3o/zDAbQ=="],
+    "@stemcell/icons": ["@stemcell/icons@0.0.0-alpha.4", "http://localhost:4873/@stemcell/icons/-/icons-0.0.0-alpha.4.tgz", {}, "sha512-TDoXKEe3PNYdzAz0HgyrRbNtXhEmbUIXfaGf0AN4TgzljcqT6R9YenzBuNq7sgbVO0SdydAb/hdfnceUq/fCkw=="],
 
     "@stemcell/tokens": ["@stemcell/tokens@0.0.0-alpha.8", "http://localhost:4873/@stemcell/tokens/-/tokens-0.0.0-alpha.8.tgz", {}, "sha512-3hxqlY95szNEwzC7CdDc3m2NgILPMcFJwg9ZPNAEms4xXlWax5n7NR0Tqyg42XCZNWFIT4/TTOnQ7fqmp4cq2Q=="],
 

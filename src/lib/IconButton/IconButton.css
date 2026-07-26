@@ -13,8 +13,8 @@
   line-height: var(--typography-label-lg-line-height);
   cursor: pointer;
   transition:
-    background-color var(--motion-feedback-duration) var(--motion-feedback-easing),
-    border-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
+    border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
 /* shape.md §6 のカテゴリ(発明不可)。control は角丸、pill は全円 */
 .sc-iconbutton[data-shape='control'] {

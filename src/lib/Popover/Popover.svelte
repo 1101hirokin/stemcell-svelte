@@ -56,7 +56,11 @@
     const above = a.top;
     flipped = placement === 'block-end' ? below < h && above > below : above < h && below > above;
     const eff = flipped ? (placement === 'block-end' ? 'block-start' : 'block-end') : placement;
-    contentEl.style.left = `${a.left}px`;
+    // 画面の外へはみ出さないよう押し戻す(CSS 側の position-try に対応する退避)
+    const width = contentEl.offsetWidth;
+    const gutter = GAP * 2;
+    const left = Math.min(Math.max(a.left, gutter), Math.max(gutter, window.innerWidth - width - gutter));
+    contentEl.style.left = `${left}px`;
     contentEl.style.top = eff === 'block-end' ? `${a.bottom + GAP}px` : `${a.top - h - GAP}px`;
   }
 

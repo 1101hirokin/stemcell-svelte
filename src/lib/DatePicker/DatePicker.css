@@ -1,0 +1,60 @@
+/* 暦日をひとつ選ぶ(DatePicker.md)。器が持つのは欄と開く操作の並びだけで、
+   欄の床は DateField、格子は Calendar、一時面は Popover が持つ(参照が必須のトークンだけを引く)。 */
+.sc-datepicker {
+  display: flex;
+  align-items: end;
+  gap: var(--spacing-inline-md);
+}
+.sc-datepicker > :first-child {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+}
+/* 欄の名前の行のぶん、開く操作を下端へ揃える */
+.sc-datepicker-trigger {
+  padding-block-end: var(--spacing-stack-sm);
+}
+.sc-datepicker-panel {
+  padding: var(--spacing-inset-md);
+}
+
+/* 暦を開く操作。Popover はアンカーの ARIA を張らないので、トリガーは器が持つ(Menu と同じ形)。
+   自分で持つ以上、焦点の輪と当たり判定もここが担う */
+.sc-datepicker-trigger-button {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: var(--spacing-inset-sm);
+  /* 当たり判定の門(size.md §4。Web の下限は 24px) */
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  border-radius: var(--shape-semantic-control);
+  color: var(--color-app-fg-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.sc-datepicker-trigger-button {
+  transition:
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+      var(--motion-feedback-easing),
+    color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+}
+.sc-datepicker-trigger-button:hover:not(:disabled) {
+  background: var(--color-semantic-plain-soft-bg-hover);
+  color: var(--color-app-foreground);
+}
+.sc-datepicker-trigger-button:active:not(:disabled) {
+  background: var(--color-semantic-plain-soft-bg-pressed);
+}
+.sc-datepicker-trigger-button:disabled {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+.sc-datepicker-trigger-button:focus {
+  outline: none;
+}
+.sc-datepicker-trigger-button:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+}

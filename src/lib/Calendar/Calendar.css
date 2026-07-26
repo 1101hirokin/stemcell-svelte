@@ -1,0 +1,100 @@
+/* 月の格子(Calendar.md)。選択の塗り・今日の印・月の移り方は Expressive。
+   前後の月へ動かす操作は合成した IconButton が持つので、その床はここでは引かない。 */
+.sc-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  color: var(--color-app-foreground);
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+}
+
+.sc-calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inset-sm);
+}
+.sc-calendar-spacer {
+  flex: 1 1 auto;
+}
+.sc-calendar-month-label {
+  padding-block-end: var(--spacing-inset-sm);
+  text-align: center;
+  font-family: var(--typography-label-sm-font-family);
+  font-size: var(--typography-label-sm-font-size);
+  font-weight: var(--typography-label-sm-font-weight);
+  letter-spacing: var(--typography-label-sm-letter-spacing);
+}
+
+.sc-calendar-grids {
+  /* 器に入る数だけ月を並べ、入らなければ縦へ折る(内在の格子。layout.md §4)。
+     max-content で並べると、狭い画面で器からはみ出していた */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  gap: var(--spacing-inset-sm);
+}
+.sc-calendar-grid {
+  border-collapse: collapse;
+  /* 列は器の幅を分け合う。7列が固定幅だと、狭い器で溢れる */
+  inline-size: 100%;
+  table-layout: fixed;
+}
+.sc-calendar-grid th {
+  padding: var(--spacing-inset-sm);
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-label-sm-font-family);
+  font-size: var(--typography-label-sm-font-size);
+  font-weight: var(--typography-label-sm-font-weight);
+}
+
+/* 日の升。当たり判定の門(size.md §4)の対象で、7列で並ぶので詰まりやすい。
+   見た目を詰めても押せる範囲は下限(24px)を割らない */
+.sc-calendar-day {
+  /* 当たり判定の門(size.md §4。Web の下限は 24px)。列は器を分け合うので、
+     ここで指すのは「これ以上は縮まない」床である */
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  padding: var(--spacing-inset-sm);
+  text-align: center;
+  cursor: pointer;
+  border-radius: var(--shape-semantic-control);
+  font-variant-numeric: tabular-nums;
+  /* 指を置いたとき・選ばれたときの切替を滑らかにする(feedback の意味層)。
+     reduced-motion では --motion-scale が 0 になり瞬時に切り替わる(部品は分岐しない) */
+  transition:
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+      var(--motion-feedback-easing),
+    color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+}
+.sc-calendar-day:hover:not([aria-disabled='true']) {
+  background: var(--color-semantic-primary-soft-bg);
+}
+
+/* 期間の間。両端より薄い面で、どこからどこまでかが色の差で読める */
+.sc-calendar-day[data-in-range='true'] {
+  background: var(--color-semantic-primary-soft-bg);
+  border-radius: 0;
+}
+/* 選ばれている日(単一のときはこれだけ、期間のときは両端)。色だけに頼らず、
+   地に対して 3:1 を満たす面と文字の組で示す(WCAG 2.2 SC 1.4.11。date.md §6) */
+.sc-calendar-day[data-selected='true'] {
+  background: var(--color-semantic-primary-bg);
+  color: var(--color-semantic-primary-fg);
+}
+/* 今日。選ばれていなくても分かるよう、輪郭で示す(意味は aria-current が運ぶ) */
+.sc-calendar-day[data-today='true']:not([data-selected='true']) {
+  box-shadow: inset 0 0 0 var(--shape-border-width) var(--color-app-foreground);
+}
+.sc-calendar-day[aria-disabled='true'] {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+
+.sc-calendar-day:focus {
+  outline: none;
+}
+.sc-calendar-day:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+}

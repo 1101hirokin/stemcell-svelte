@@ -45,8 +45,8 @@
   border-radius: var(--shape-semantic-pill);
   background: var(--_bg);
   transition:
-    background-color var(--motion-feedback-duration) var(--motion-feedback-easing),
-    border-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
+    border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
 /* 選択マーク(内円) */
 .sc-radio-circle::after {
@@ -60,7 +60,7 @@
   corner-shape: var(--_sc-corner-shape);
   background: var(--_dot);
   transform: translate(-50%, -50%);
-  transition: background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+  transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
 
 /* 選択済み: primary の塗り + 白の内円 */
