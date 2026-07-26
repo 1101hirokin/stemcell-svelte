@@ -61,42 +61,44 @@
   let month = $state(formatMonth(parseISO(start) ?? today()));
   // 次に押した日が終わりになる途中の状態。視覚と支援技術の両方へ届ける(契約 a11y)
   let pending = $state(false);
+  // 暦の押下がどちらの端を動かすか。直近に動かした端が残る(欄を打てばその欄の側へ移る)
+  let edge = $state<'start' | 'end'>('end');
 
   $effect(() => {
     if (!open) return;
     month = formatMonth(parseISO(start) ?? today());
   });
 
-  const commit = (nextStart: string, nextEnd: string) => {
+  const commit = (nextStart: string, nextEnd: string, moved: 'start' | 'end' = edge) => {
     start = nextStart;
     end = nextEnd;
+    edge = moved;
     onchange?.({ start: nextStart, end: nextEnd });
   };
 
   // 格子は「この日が押された」しか返さない。意味づけはここが与える(Calendar.md §2)。
   // 対が揃っても閉じない: 期間は「選んで終わり」ではなく、両端を見比べながら詰める操作である。
-  // 揃った後に外を押したら近い側の端を伸ばし、中を押したときだけ取り直す(DateRangePicker.md)。
-  // 閉じるのは明示の退出(Escape・外側の押下)で、それは合成した Popover が持つ。
+  // 揃った後の押下は、伸ばすのも縮めるのも同じ一つの規則で受ける: 押した日を「直近に動かした端」へ
+  // 置き、それだと対が反転する押下では反対の端へ置く。始まりだけ置いた途中の状態も、対を
+  // [始まり, 始まり] とみなせば同じ規則になる。閉じるのは明示の退出(Escape・外側の押下)で、
+  // それは合成した Popover が持つ。DateRangePicker.md。
   const onselect = (value: string) => {
     const day = parseISO(value);
     if (!day) return;
     const from = parseISO(start);
-    const to = parseISO(end);
-    // 途中(始まりだけある)。終わりが始まりより前なら対を入れ替える(黙って不正な対を保持しない。契約 a11y)
-    if (pending && from) {
-      pending = false;
-      if (compare(day, from) < 0) commit(value, start);
-      else commit(start, value);
-      return;
+    if (!from) {
+      pending = true;
+      return commit(value, '', 'start');
     }
-    // 揃っているとき、期間の外なら近い側の端を伸ばす(取り直さない)
-    if (from && to) {
-      if (compare(day, from) < 0) return commit(value, end);
-      if (compare(day, to) > 0) return commit(start, value);
-    }
-    // 期間の中、または片端しか無いとき。そこから取り直す
-    pending = true;
-    commit(value, '');
+    const closing = pending || !end; // 次の押下で対が揃う(= 対を [始まり, 始まり] とみなす)
+    const to = closing ? from : parseISO(end)!;
+    const active = closing ? 'end' : edge;
+    // 直近に動かした端へ置く。ただし対が反転する押下(始まりより前 / 終わりより後)では反対の端へ
+    const inverts = active === 'end' ? compare(day, from) < 0 : compare(day, to) > 0;
+    const moved = inverts ? (active === 'end' ? 'start' : 'end') : active;
+    pending = false;
+    if (moved === 'start') commit(value, closing ? start : end, 'start');
+    else commit(start, value, 'end');
   };
 </script>
 
@@ -115,7 +117,7 @@
       {required}
       {size}
       label={startLabel}
-      onchange={(v) => commit(v, end)}
+      onchange={(v) => commit(v, end, 'start')}
     />
     <DateField
       value={end}
@@ -126,7 +128,7 @@
       {invalid}
       {size}
       label={endLabel}
-      onchange={(v) => commit(start, v)}
+      onchange={(v) => commit(start, v, 'end')}
     />
 
     <div class="sc-daterangepicker-trigger">

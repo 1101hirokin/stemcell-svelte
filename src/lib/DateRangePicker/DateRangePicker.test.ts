@@ -54,11 +54,15 @@ it('対が揃っても暦は閉じない(両端を見比べながら詰められ
   expect(trigger.getAttribute('aria-expanded')).toBe('true');
 });
 
-// 揃った後の押下は、外なら伸ばし、中なら取り直す(DateRangePicker.md)
+// 揃った後の押下は、伸ばすのも縮めるのも同じ規則で受ける(直近に動かした端。反転する押下では反対の端)。
+// 10 → 20 と押した直後に動くのは終わりである(DateRangePicker.md)。
 it.each([
-  { at: '手前', day: 5, want: { start: '-05', end: '-20' } },
-  { at: '先', day: 25, want: { start: '-10', end: '-25' } },
-])('揃った後に期間の$atを押すと端が伸びる', async ({ day, want }) => {
+  { at: '先(伸ばす)', days: [25], want: ['-10', '-25'] },
+  { at: '中(縮める)', days: [15], want: ['-10', '-15'] },
+  { at: '手前(始まりが動く)', days: [5], want: ['-05', '-20'] },
+  { at: '中を続けて2回', days: [15, 12], want: ['-10', '-12'] },
+  { at: '手前のあと中(始まりが動いたまま)', days: [5, 15], want: ['-15', '-20'] },
+])('揃った後に$atを押す', async ({ days, want }) => {
   const onchange = vi.fn();
   const { container } = render(DateRangePicker, { props: { ...props, onchange } });
   await fireEvent.click(container.querySelector('button') as HTMLElement);
@@ -66,23 +70,11 @@ it.each([
   const pick = (n: number) => cells.find((el) => el.textContent === String(n))!;
   await fireEvent.click(pick(10));
   await fireEvent.click(pick(20));
-  await fireEvent.click(pick(day));
+  for (const d of days) await fireEvent.click(pick(d));
   expect(onchange).toHaveBeenLastCalledWith({
-    start: expect.stringContaining(want.start),
-    end: expect.stringContaining(want.end),
+    start: expect.stringContaining(want[0]!),
+    end: expect.stringContaining(want[1]!),
   });
-});
-
-it('揃った後に期間の中を押すと、そこから取り直す', async () => {
-  const onchange = vi.fn();
-  const { container } = render(DateRangePicker, { props: { ...props, onchange } });
-  await fireEvent.click(container.querySelector('button') as HTMLElement);
-  const cells = [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')];
-  const pick = (n: number) => cells.find((el) => el.textContent === String(n))!;
-  await fireEvent.click(pick(10));
-  await fireEvent.click(pick(20));
-  await fireEvent.click(pick(15));
-  expect(onchange).toHaveBeenLastCalledWith({ start: expect.stringContaining('-15'), end: '' });
 });
 
 it('無効のときは暦を開けない', () => {
