@@ -383,7 +383,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 
-### DateField(契約 0.0.0-alpha.0)
+### DateField(契約 0.0.0-alpha.1)
 
 暦日を打ち込む欄。年・月・日を桁に分けて受け、桁ごとに増減できる(date.md §6)。値は暦日であって時刻でもタイムゾーンでもない(date.md §2)。欄としての解剖(名前・説明・エラー・無効・不正)は field.md §2 に従い、8種の欄と同じ形をとる。暦の格子は持たない: それは Calendar の仕事で、両方を束ねるのが DatePicker である。date.md の seed の上に乗る(status: draft)。
 
@@ -391,8 +391,8 @@ props:
 
 - `name`: string((省略可)) — フォーム名(native の form 送信・FormData・reset に参加。field.md §5)。
 - `value`: string(既定 "") — 暦日。中立の表記は ISO 8601 の日付(YYYY-MM-DD)で、時刻もタイムゾーンも持たない(date.md §2)。空文字列は未入力を表す。各実装は土地の型(Swift の DateComponents、Kotlin の LocalDate、Web の Temporal.PlainDate 等)を追加の口として持ってよいが、中立の表記はこれである。値の所有はアプリにある(field.md §5)。
-- `min`: string((省略可)) — 選べる下限(同じ表記)。これより前は入力できない(date.md §5)。
-- `max`: string((省略可)) — 選べる上限(同じ表記)。
+- `min`: string((省略可)) — 選べる下限(同じ表記)。矢印での増減はこの外へ出ない。打ち込みは通す: native の <input type="date"> も範囲外を打てて不正になるだけであり、検証の時機はアプリが持つ(field.md §3)。範囲の外であることは invalid の宣言で示す(alpha.1 で言い回しを改めた)。
+- `max`: string((省略可)) — 選べる上限(同じ表記)。扱いは min と同じ。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。
 - `readonly`: boolean(既定 false) — 読めるが変えられない(field.md。invalid と同時に成立しない)。
 - `invalid`: boolean(既定 false) — 不正の宣言。アプリが持つ(検証の時機は field.md §3)。
@@ -419,7 +419,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 焦点とフォーカスリングは桁に立つ。当たり判定の門(size.md §4)も桁に生きる。
 - invalid のとき、何が不正かは error スロットの文が運ぶ(色だけに頼らない。field.md §3)。
 
-### DatePicker(契約 0.0.0-alpha.0)
+### DatePicker(契約 0.0.0-alpha.1)
 
 暦日をひとつ選ぶ。打ち込む欄(DateField)と月の格子(Calendar)を束ね、格子は一時面として開く。値は暦日で、時刻もタイムゾーンも持たない(date.md §2)。欄としての解剖は field.md §2 に従う。date.md の seed の上に乗る(status: draft)。
 
@@ -435,6 +435,7 @@ props:
 - `invalid`: boolean(既定 false) — 不正の宣言(field.md §3)。
 - `required`: boolean(既定 false) — 入力が要る。
 - `size`: "sm" | "md" | "lg"(既定 "md") — size.rules.json の3段。
+- `calendarLabel`: string — 暦を開く操作の名前(絵だけの操作。無名を許さない)。DS は文言を持たない(i18n.md §1 の外側)。スロットではなく文字列で受ける: 名前は合成した操作へそのまま渡る値であり、Icon の label や CircularLoader の label と同じ形である(alpha.1 で改めた。スロットのままだと、名前を必要とする操作へ渡せない)。
 
 events(Svelte では callback prop):
 
@@ -443,20 +444,19 @@ events(Svelte では callback prop):
 slots(Svelte では snippet。default は子要素をそのまま):
 
 - `label`(必須) — 名前(必須。無名は許さない。field.md §2)。
-- `calendarLabel`(必須) — 暦を開く操作の名前(「暦を開く」等)。絵だけの操作なので名前が要る。DS は文言を持たない(i18n.md §1 の外側)。
 - `description` — 説明・入力条件(field.md §2)。
 - `error` — invalid のときのエラー文。
 
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
-- 暦は一時面として開く(overlay.md の popover 類)。開いているかは器が内部で持つ: トリガーに従属する一時面であり、アプリが所有する値ではない(Menu と Select が同じ形。Dialog / Drawer が open を値で持つのは、あちらが利用者の文脈そのものを止めるからである)。
+- 暦は一時面として開く(overlay.md の popover 類)。開いているかは器が内部で持つ: トリガーに従属する一時面であり、アプリが所有する値ではない(Menu と Select が同じ形)。
 - 暦を開く操作には名前が要る(絵だけの操作。無名を許さない)。DS は文言を持たないので消費者が渡す(i18n.md §1 の外側に置く。Pagination の前後の名前と同じ扱い)。
 - 暦を開いたら焦点は格子へ移り、閉じたらトリガーへ戻る(overlay.md §4)。Escape で閉じる。
 - 欄と暦は同じ値を指す。片方で変えたことが他方へ届く(date.md §9 の宿題としていた同期を、束ねる側のNormative としてここで確定する。器が2つに割れて見えると、どちらが本当の値か分からなくなる)。
-- 契約に role を書かないのは、根の器が活性化される要素ではないからである(欄の桁と暦の升と開く操作が、それぞれの契約で役割と焦点を持つ。Reel / DateField と同じ形)。焦点とフォーカスリングは合成した部品に立つ。
 - 欄だけで完結できる。暦を開かずキーボードだけで日付を入れられることが要求である(date.md §6 / 第1条)。
+- 暦を開くトリガーは器が所有する(Menu と Select が同じ形。alpha.1 で改めた)。開いているか(Web の aria-expanded)と、開く先が一時面であること(aria-haspopup)をトリガーが告げる。焦点とフォーカスリングと当たり判定の門(size.md §4)はトリガーに生きる。欄の桁と暦の升は、それぞれの契約が自分の焦点を持つ。
 
-### DateRangePicker(契約 0.0.0-alpha.0)
+### DateRangePicker(契約 0.0.0-alpha.1)
 
 期間(始まりと終わり)を選ぶ。打ち込む欄を2つと月の格子を束ね、格子は一時面として開く。格子は Calendar 1つで、並べる月数を渡して2ヶ月ぶん見せるのが常態である。値は暦日の対で、時刻もタイムゾーンも持たない(date.md §2)。プリセット(「過去7日間」等)は持たない: 何を候補に出すかはアプリの政策であり、固有の規範が無い(承認 UI と同じ判断。組み方は patterns/date-range.md が示す)。date.md の seed の上に乗る(status: draft)。
 
@@ -473,6 +473,7 @@ props:
 - `invalid`: boolean(既定 false) — 不正の宣言(field.md §3)。
 - `required`: boolean(既定 false) — 入力が要る。
 - `size`: "sm" | "md" | "lg"(既定 "md") — size.rules.json の3段。
+- `calendarLabel`: string — 暦を開く操作の名前(絵だけの操作。無名を許さない)。DS は文言を持たない(i18n.md §1 の外側)。スロットではなく文字列で受ける: 名前は合成した操作へそのまま渡る値であり、Icon の label や CircularLoader の label と同じ形である(alpha.1 で改めた。スロットのままだと、名前を必要とする操作へ渡せない)。
 
 events(Svelte では callback prop):
 
@@ -483,20 +484,19 @@ slots(Svelte では snippet。default は子要素をそのまま):
 - `label`(必須) — 期間全体の名前(必須。無名は許さない)。
 - `startLabel`(必須) — 始まりの欄の名前(「開始日」等)。欄はそれぞれ名前を持つ(field.md §2)。
 - `endLabel`(必須) — 終わりの欄の名前(「終了日」等)。
-- `calendarLabel`(必須) — 暦を開く操作の名前。DS は文言を持たない。
 - `description` — 説明・入力条件。
 - `error` — invalid のときのエラー文。
 
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
-- 暦は一時面として開く(overlay.md の popover 類)。開いているかは器が内部で持つ: トリガーに従属する一時面であり、アプリが所有する値ではない(Menu と Select が同じ形。Dialog / Drawer が open を値で持つのは、あちらが利用者の文脈そのものを止めるからである)。
+- 暦は一時面として開く(overlay.md の popover 類)。開いているかは器が内部で持つ: トリガーに従属する一時面であり、アプリが所有する値ではない(Menu と Select が同じ形)。
 - 暦を開く操作には名前が要る(絵だけの操作。無名を許さない)。DS は文言を持たないので消費者が渡す(i18n.md §1 の外側に置く。Pagination の前後の名前と同じ扱い)。
 - 暦を開いたら焦点は格子へ移り、閉じたらトリガーへ戻る(overlay.md §4)。Escape で閉じる。
 - 欄と暦は同じ値を指す。片方で変えたことが他方へ届く(date.md §9 の宿題としていた同期を、束ねる側のNormative としてここで確定する。器が2つに割れて見えると、どちらが本当の値か分からなくなる)。
-- 契約に role を書かないのは DatePicker と同じ理由である。2つの欄と暦の升と開く操作が、それぞれの契約で役割と焦点を持つ。
 - 2つの欄が1つの期間であることが支援技術へ届く(Web の表現は group と、期間全体の名前)。
 - 始まりだけが選ばれている途中の状態が届く。格子では、次に押した日が終わりになることが分かる形にする(見せ方は Expressive だが、途中であることが視覚と支援技術の両方へ届くのは Normative)。
 - 終わりが始まりより前にはならない。逆に選んだときは、実装が対を入れ替えるか、始まりを置き直す(どちらを採るかは Expressive。黙って不正な対を保持しない)。
+- 暦を開くトリガーは器が所有する(Menu と Select が同じ形。alpha.1 で改めた)。開いているか(Web の aria-expanded)と、開く先が一時面であること(aria-haspopup)をトリガーが告げる。焦点とフォーカスリングと当たり判定の門(size.md §4)はトリガーに生きる。欄の桁と暦の升は、それぞれの契約が自分の焦点を持つ。
 
 ### Dialog(契約 0.0.0-alpha.2)
 

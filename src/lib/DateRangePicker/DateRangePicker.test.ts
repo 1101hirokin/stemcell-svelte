@@ -35,6 +35,28 @@ it('終わりの欄は始まりより前を選べない(逆も同じ)', () => {
   expect(endDay).not.toBeNull();
 });
 
+it('対が揃っても暦は閉じない(両端を見比べながら詰められる)', async () => {
+  const onchange = vi.fn();
+  const { container } = render(DateRangePicker, { props: { ...props, onchange } });
+  const trigger = container.querySelector('button') as HTMLElement;
+  await fireEvent.click(trigger);
+  expect(trigger.getAttribute('aria-expanded')).toBe('true');
+  const cells = [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')];
+  const pick = (n: number) => cells.find((el) => el.textContent === String(n))!;
+  await fireEvent.click(pick(10));
+  expect(onchange).toHaveBeenLastCalledWith({ start: expect.stringContaining('-10'), end: '' });
+  await fireEvent.click(pick(20));
+  expect(onchange).toHaveBeenLastCalledWith({
+    start: expect.stringContaining('-10'),
+    end: expect.stringContaining('-20'),
+  });
+  // 揃っても開いたまま
+  expect(trigger.getAttribute('aria-expanded')).toBe('true');
+  // もう一度押すと、そこから取り直す
+  await fireEvent.click(pick(5));
+  expect(onchange).toHaveBeenLastCalledWith({ start: expect.stringContaining('-05'), end: '' });
+});
+
 it('無効のときは暦を開けない', () => {
   const { container } = render(DateRangePicker, { props: { ...props, disabled: true } });
   expect((container.querySelector('button') as HTMLButtonElement).disabled).toBe(true);
