@@ -8,7 +8,7 @@
   // Web は native popover(top-layer。切れない)+ CSS Anchor Positioning で描く(憲法 第2条 / 第7条。Popover と
   // 同じ機構)。popover は manual で持ち hover / focus を自前で拾う(auto の light dismiss には乗らない)。
   interface Props {
-    /** 優先の開き方向(論理方向)。既定は block-start(上)。衝突で反転しうる。 */
+    /** 優先の開き方向(論理方向)。既定は block-start(上)。トリガーの居場所で反転しうる。 */
     placement?: (typeof META.props.placement.values)[number];
     /** tooltip が説明する対象(トリガー)。中の対話要素へ aria-describedby を配線する。 */
     trigger: Snippet;
@@ -31,10 +31,22 @@
   let hovering = $state(false);
   let focused = $state(false);
   const open = $derived(hovering || focused);
-  let flipped = $state(false); // JS フォールバック時の反転
-  const effectivePlacement = $derived(
-    flipped ? (placement === 'block-start' ? 'block-end' : 'block-start') : placement,
-  );
+  // 開く向きは、トリガーが描画領域のどこに居るかで決める(Popover と同型。overlay.md §5: 反転は Expressive)。
+  // 面が入るかどうかで測る形は採らない: 中身の長さで向きが変わり、結果が読めない。
+  // 測る前は placement を優先の向きとして使い、開いた時点で位置が上書きする。
+  let measured = $state<{ block: 'start' | 'end'; inline: 'start' | 'end' }>();
+  const blockSide = $derived(measured?.block ?? (placement === 'block-end' ? 'end' : 'start'));
+  const inlineSide = $derived(measured?.inline ?? 'start');
+
+  /** トリガーの中心が上半分なら下へ、下半分なら上へ。左半分なら右へ伸び、右半分なら左へ伸びる。 */
+  function decideSides() {
+    if (!wrapperEl) return;
+    const a = wrapperEl.getBoundingClientRect();
+    measured = {
+      block: a.top + a.height / 2 < window.innerHeight / 2 ? 'end' : 'start',
+      inline: a.left + a.width / 2 < window.innerWidth / 2 ? 'start' : 'end',
+    };
+  }
 
   // aria-describedby を trigger の最初の実フォーカス可能要素へ配線する。tooltip 本体(role=tooltip・非対話)の
   // サブツリーと tabindex=-1(実タブ移動しない管理用)は除く。trigger の中身が差し替わっても追う(MutationObserver)。
@@ -61,23 +73,16 @@
     };
   });
 
-  // JS フォールバック(anchor 非対応時のみ)。アンカー矩形から fixed 位置を決める。衝突で反転。left はアンカー中央で、
-  // CSS の translateX(-50%) が箱を中央に寄せる。
+  // JS フォールバック(anchor 非対応時のみ)。決めた向きに合わせて fixed 位置を置く。
   function position() {
     if (!tipEl || !wrapperEl) return;
+    decideSides();
     const a = wrapperEl.getBoundingClientRect();
-    const h = tipEl.offsetHeight;
-    const above = a.top;
-    const below = window.innerHeight - a.bottom;
-    flipped = placement === 'block-start' ? above < h && below > above : below < h && above > below;
-    const eff = flipped ? (placement === 'block-start' ? 'block-end' : 'block-start') : placement;
     const GAP = 6;
-    // アンカー中央に置くが、画面の外へはみ出さないよう押し戻す(translateX(-50%) を見込んで幅の半分で挟む)
-    const half = tipEl.offsetWidth / 2;
-    const center = a.left + a.width / 2;
-    const gutter = 8;
-    tipEl.style.left = `${Math.min(Math.max(center, half + gutter), Math.max(half + gutter, window.innerWidth - half - gutter))}px`;
-    tipEl.style.top = eff === 'block-start' ? `${a.top - h - GAP}px` : `${a.bottom + GAP}px`;
+    tipEl.style.top =
+      blockSide === 'start' ? `${a.top - tipEl.offsetHeight - GAP}px` : `${a.bottom + GAP}px`;
+    tipEl.style.left =
+      inlineSide === 'start' ? `${a.left}px` : `${a.right - tipEl.offsetWidth}px`;
   }
 
   const isShown = (el: HTMLElement) => {
@@ -92,19 +97,28 @@
     if (!el || typeof el.showPopover !== 'function') return;
     if (open) {
       if (!isShown(el)) el.showPopover();
-      if (!supportsAnchor) position();
     } else if (isShown(el)) {
       el.hidePopover();
     }
   });
-  // anchor 非対応時のみ、開いている間はスクロール / リサイズでアンカーへ追従する(対応時は CSS が自動追従。
-  // Popover と同じ。open の瞬間だけ計算して固定すると、フォールバックでアンカーからずれる)。
+  // 開いた時点で向きを決め、スクロール / リサイズの間は決め直す(トリガーの居場所が変わるため)。位置
+  // そのものの追従は対応環境なら CSS が持ち、非対応環境では position() が両方をやる(Popover と同型)。
   $effect(() => {
-    if (!open || supportsAnchor) return;
-    const onScroll = () => position();
+    if (!open) return;
+    const update = () => (supportsAnchor ? decideSides() : position());
+    update();
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        update();
+      });
+    };
     window.addEventListener('scroll', onScroll, true);
     window.addEventListener('resize', onScroll);
     return () => {
+      if (frame) cancelAnimationFrame(frame);
       window.removeEventListener('scroll', onScroll, true);
       window.removeEventListener('resize', onScroll);
     };
@@ -155,7 +169,8 @@
     popover="manual"
     role="tooltip"
     id={tipId}
-    data-placement={effectivePlacement}
+    data-block={blockSide}
+    data-inline={inlineSide}
     style:position-anchor={anchorName}
   >
     {@render content()}
