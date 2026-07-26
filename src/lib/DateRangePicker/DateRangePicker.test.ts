@@ -54,15 +54,12 @@ it('対が揃っても暦は閉じない(両端を見比べながら詰められ
   expect(trigger.getAttribute('aria-expanded')).toBe('true');
 });
 
-// 揃った後の押下は、伸ばすのも縮めるのも同じ規則で受ける(直近に動かした端。反転する押下では反対の端)。
-// 10 → 20 と押した直後に動くのは終わりである(DateRangePicker.md)。
+// 揃った後の押下は、内も外も区別せず、その日を下限にして選び直す(DateRangePicker.md)。
 it.each([
-  { at: '先(伸ばす)', days: [25], want: ['-10', '-25'] },
-  { at: '中(縮める)', days: [15], want: ['-10', '-15'] },
-  { at: '手前(始まりが動く)', days: [5], want: ['-05', '-20'] },
-  { at: '中を続けて2回', days: [15, 12], want: ['-10', '-12'] },
-  { at: '手前のあと中(始まりが動いたまま)', days: [5, 15], want: ['-15', '-20'] },
-])('揃った後に$atを押す', async ({ days, want }) => {
+  { at: '先(外)', day: 25 },
+  { at: '中', day: 15 },
+  { at: '手前(外)', day: 5 },
+])('揃った後に$atを押すと、その日を下限に選び直す', async ({ day }) => {
   const onchange = vi.fn();
   const { container } = render(DateRangePicker, { props: { ...props, onchange } });
   await fireEvent.click(container.querySelector('button') as HTMLElement);
@@ -70,11 +67,29 @@ it.each([
   const pick = (n: number) => cells.find((el) => el.textContent === String(n))!;
   await fireEvent.click(pick(10));
   await fireEvent.click(pick(20));
-  for (const d of days) await fireEvent.click(pick(d));
+  await fireEvent.click(pick(day));
+  const two = String(day).padStart(2, '0');
+  expect(onchange).toHaveBeenLastCalledWith({ start: expect.stringContaining(`-${two}`), end: '' });
+  // 選び直した先は、次の押下で終わりが決まる
+  await fireEvent.click(pick(28));
   expect(onchange).toHaveBeenLastCalledWith({
-    start: expect.stringContaining(want[0]!),
-    end: expect.stringContaining(want[1]!),
+    start: expect.stringContaining(`-${two}`),
+    end: expect.stringContaining('-28'),
   });
+});
+
+it('対の端そのものを押したときは変えない(押し間違いで期間を失わせない)', async () => {
+  const onchange = vi.fn();
+  const { container } = render(DateRangePicker, { props: { ...props, onchange } });
+  await fireEvent.click(container.querySelector('button') as HTMLElement);
+  const cells = [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')];
+  const pick = (n: number) => cells.find((el) => el.textContent === String(n))!;
+  await fireEvent.click(pick(10));
+  await fireEvent.click(pick(20));
+  const calls = onchange.mock.calls.length;
+  await fireEvent.click(pick(10));
+  await fireEvent.click(pick(20));
+  expect(onchange.mock.calls.length).toBe(calls);
 });
 
 it('無効のときは暦を開けない', () => {
