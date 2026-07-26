@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Reel, Select, Sidebar, Skeleton, Slider, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -790,6 +790,25 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - サムの標的は size.md §4 の門(見た目のサムが小さくても当たり判定は下限を割らない)。トラックのドラッグとページスクロールの干渉(タッチ)は実装の検証項目。
 - サムの標的(size.md §4)は見た目の径と別である。サムを小さく描いても、当たり判定は Web の下限 24px を割らない(size.rules.json の hit-region)。当たりを広げると隣接要素との間隔条件(SC 2.5.8)にかかるので、レンダリングして測る(size.md §6)。
 
+### Sources(契約 0.0.0-alpha.1)
+
+回答の根拠(出典)の集合を一枚に集めて見せる有機体。各出典が支援技術とキーボードから到達可能で(source §2)、本文内の引用と出典の対応(citation ↔ source の相互参照)が支援技術に届く形で並べる(source §5)。conversation §3 の source part(型付き part。裁定 2026-07-24)の上に乗る。形(本文内引用 inline citation か末尾の出典リスト sources list か・折りたたみか常時表示か・番号/チップ/脚注の造形)は各実装の選択で Expressive(source §3 / §6)。各出典の中身の最小形(url / タイトル / 帰属者)は foundation で未決のため(source §8)、item をスキーマで固定せず slot に委ね、契約が縛るのは到達性と相互参照だけである。何を根拠に選ぶか(検索 / RAG / 引用生成)には触れない(source §1)。合成: 出典への遷移は Link、題や抜粋は Text。引用番号の印は Badge でない(Badge の count は量の報告で、押せない印である。引用番号は順序の識別子で、多くは押して出典へ飛ぶ。造形は Expressive)。RFC 0014 の seed(status: draft)。native 写像の一次確認まで暫定。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label` — 出典の集まりの領域名(「出典」「参照した情報源」等)。領域に名前があると支援技術の利用者が何のリストかを掴める。必須にはしない: source §2 の Normative の床は各出典のアクセシブルネームが届くこと(領域名ではない)であり、領域名を必須化すると foundation に無い要求を新設することになる。名前を持つときの機構は表現(Web の aria-labelledby、SwiftUI / Compose の見出しと semantics)。
+- `default`(必須) — 出典項目の列。ここへ差すのは各項目の中身であって、項目の器ではない: 器(list item 相当)は Sources が持つ(裁定 2026-07-25。a11y notes)。中身の構造(到達手段への Link・題や抜粋の Text・引用番号)は foundation で最小形が未決のため(source §8)、ここで prop スキーマに固定しない。Normative なのは各項目が到達可能で(§2)、その項目が source の持つ相互参照キーを帯びること(a11y notes)までである。並べ方(縦の間隔・区切り)はレイアウトの仕事で、リストは縦(spacing.stack)を既定とする。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- リストの構造は Sources が持つ(裁定 2026-07-25)。role=list を名乗る以上、その中に list item 相当の項目が並ぶことを器が保証する。アプリが差すのは各項目の中身だけで、項目の器を自分で用意する必要はない。アプリ側の作法に頼ると、守られなかったとき「項目が0件のリスト」として支援技術に届き、しかも機械検査で捕まえられない(守れない約束を増やさない)。機構は表現(Web は ul と li 相当、SwiftUI と Compose は各々のリストの semantics)。中身をどう受け取るか(項目ごとのスロット・スニペット・配列)も各実装の表現である。
+- 各出典への到達手段(引用・出典リンク)が支援技術とキーボードから到達可能であること(source §2。第1条の信頼に直結する)。到達の機構は表現(Web の <a> / aria、SwiftUI の Link / link trait、Compose の semantics)で、遷移そのものは合成した Link の契約が持つ。フォーカスとフォーカスリングは Link に立ち、リスト自身は focus を受けない(focusRing: false)。
+- 本文内の引用と、その出典の実体(リスト項目)の対応(cross-reference)が支援技術に届くこと(source §2 / §5)。これが本契約の要で、単なるラベルより一段強い構造的な相互参照である。相互参照キー(id)は UI が採番せず、source が持つ値を使う(source §3。裁定 2026-07-25。事実標準では採番がデータ側から降りてくる)。各出典項目はその id を帯び、本文内の引用の印は同じ id を参照する。機構は表現で、SwiftUI は専用 API(accessibilityLinkedGroup(id:in:))で離れた2要素を AT のナビゲーションで結ぶ(一次確認済み: 「アクセシビリティ階層上で近くにない要素どうしでも、素早く行き来できるように結ぶ」。iOS 14.0+)。Web と Compose の機構は各実装が選ぶ(source §7)。Web で aria-details を単独の手段にしない: 支援技術の対応が薄く、仕様の解説も唯一の伝達手段にするなと述べている。実際に届く形(出典へ飛べるリンクと、対応が分かるアクセシブルネーム)を優先する。Compose に相互参照専用 API があるかは foundation の native 一次確認が残る論点で(source §7 / §8)、実現手段に成熟度差がありうる。
+- 相互参照の一方の端(本文内の引用の印)は、本文(text part)の描画の中に置かれる。その造形(番号 / チップ / 脚注)と本文中の配置は Expressive で(source §6)、本組織はリスト側の端を持つ。両端はどちらも source が持つ id を参照するだけで、どちらの側も採番しない(source §3)。本文側の端の配線は、会話への埋め込みを扱う有機体 / パターン(未起草)で本契約と両側から確認する(Sources.md §5)。
+- どこからの情報かを視覚だけに頼らない(WCAG 1.4.1 の同型。番号や色だけでなく出典のアクセシブルネームが届く。source §2)。各出典は名前を持ち、無名の出典を許さない(第1条。Dialog の title・Icon の label と同型)。
+- 項目内に押せる要素(出典リンク等)があれば、focus とフォーカスリングと当たり判定の門(size.md §4)はその要素に生きる。ルートの focusRing: false は Sources 自身が focus を受けないという意味で、内部の Link を免除しない。項目ごとの相互参照キーや条件付き部分要素の a11y をスキーマは表現できない(Tag / Alert / ToolCall と同じ限界の認識)。同型の契約が増えたら表現をスキーマで扱う。
+- 誤りの可能性の告知(免責)は本組織の関心でない。source foundation がこれを扱うか会話全体の別の関心として切るかが未決のため(source §4 / §8)、先取りしない。告知の文言は DS 所有文字列で i18n の対象(source §9)。
+
 ### Stack(契約 0.0.0-alpha.0)
 
 縦または横の並び。間隔を所有する(layout.md §1: 中身は外側 margin を持たない)。
@@ -1029,6 +1048,30 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 領域は landmark にし、キーボードで到達可能にする(Web の表現は role=region + aria-label。F6 相当の巡回で入れる)。通知はフォーカスを奪わない(overlay.md §4)ので、actionLabel / 閉じるの押せる要素へポインタ無しで届く唯一の道がこの到達性である(第1条)。SwiftUI / Compose では対応する到達機構に写す。
 - 領域自体は告知しない(aria-live は個々の Toast が持つ。role=status / alert は Toast 側)。領域は器であって内容ではない。
 - 自律退去のタイマーは hover / focus 中は一時停止する(SC 2.2.1)。ホストがキューとタイマーを所有し、Toast の追加 / 退去 / 上限超過を決定的に扱う(svelte / lit が食い違わないため。GOVERNANCE §7)。
+
+### ToolCall(契約 0.0.0-alpha.0)
+
+ツール呼び出しの進行を1枚で見せる面。1つの呼び出しが busy →(result | error)を経る様を、各段階が支援技術と視覚へ届く形で描く(tool-call.md)。lifecycle は state.rules.json の相互作用状態ではないため states でなく status prop で持つ(busy は loading と同型の進行。tool-call §3)。アプリ / SDK が status を所有し駆動する(UI は与えられた段階を描くだけ。tool-call §6。Dialog の open と同じ向き)。ツールの実行・プロトコル(MCP / A2A / function-calling)・runtime には触れない(§6)。ツール名から結果描画への対応(Generative UI。§5)は result スロットの表現。承認待ち(requires-action)は必須集合外で HITL が持つ(§2)。conversation §3 の tool-call / tool-result part の上に乗る。RFC 0014 の seed(status: draft)。native 写像の一次確認まで暫定。
+
+props:
+
+- `status`: "busy" | "result" | "error" — 呼び出しの段階(tool-call §2 の必須集合。閉。暫定)。busy は進行中(引数の形成と実行を含む。native は内部段階を畳む)、result は完了して結果がある、error は失敗した。遷移は busy →(result | error)。states でなく prop なのは、これが state.rules.json の相互作用状態ではなく loading と同型の進行だからである(tool-call §3。発明できない相互作用状態と違い、進行はアプリが所有する値)。既定を持たない(required): status 無しのツール活動は無意味で、silent な既定は段階の主張になる。pending / running の区別は Expressive で、ここには持たない(§2)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `name`(必須) — ツールの識別。カードのアクセシブルネーム(何のツールか)。無名のツール活動を許さない(第1条。Dialog の title と同型)。
+- `input` — 呼び出しの引数の表示。busy の間の逐次生成は streaming の範囲であり、表示形式(整形 / 要約 / 隠す)は Expressive。
+- `result` — 完了した結果の本体。ツール固有のレンダラ(Generative UI。§5)がここに入る。status=result のとき示す。
+- `error` — 失敗の説明。status=error のとき示す。再試行可能 / 致命的の分類は畳んでおり、詳細は中身に委ねる(裁定 2026-07-25。tool-call §2。再試行してよいかは同じ失敗でもツールの性質で決まるアプリの知識で、どのフレームワークにも分類の型が無い)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- status(busy / result / error)の遷移が支援技術へ届く(tool-call §4)。遷移ごとに一度だけ告知し、busy の間の逐次(引数生成等)は洪水にしない。機構は表現(Web の aria-live / aria-busy、SwiftUI / Compose の accessibility announcement)。
+- 告知の割り込み度は段階に連動する規則を tool-call §4 が持ち、本契約はそれを読む(新設しない。裁定 2026-07-25。水平展開テスト通過)。error は即時割り込み(Web の role=alert 相当)、busy / result は穏当な告知(role=status 相当)。error だけを割り込みに絞るのは、失敗が読むべき報告(color.md §5 の danger)であり、busy / result の連続告知が洪水になるのを避けるため。割り込みは status が動的に遷移したときにだけ起き、初期描画から在る status は読み上げ順で届く(Alert と同じ ARIA 実務)。
+- busy は state.md §3.2(実行中に同じ呼び出しを再発火させない。aria-busy の領域)にだけ接地し、card=領域が aria-busy 相当を持つ(tool-call §3)。intent の差し替え・抑制の合成・チャンネルの解決には乗らない。busy の視覚(進行表示)は支援技術から隠す。実行中であることは領域が伝え、内部の進行表示自身が連呼しない(Skeleton と同型)。
+- name はカードのアクセシブルネーム(aria-labelledby 相当で結ぶ)。無名のツール活動を許さない(第1条。Dialog の title と同型)。
+- result / error スロットは status に応じて条件表示される内部領域である。その中に押せる要素(結果内のリンク等)があれば、focus とフォーカスリングと当たり判定の門はその要素に生きる。ルートの focusRing: false は ToolCall 自身が focus を受けないという意味で、内部要素を免除しない(条件付き部分要素の a11y をスキーマは表現できない。Alert / Tag と同じ限界の認識)。
+- 承認待ち(requires-action)は本組織の関心でない。承認の到達性・振る舞い(キーボードから承認でき、応答後に実行へ戻る等)は HITL foundation とその organism が持つ(tool-call §2 / §4。先取りしない)。
 
 ### Tooltip(契約 0.0.0-alpha.1)
 

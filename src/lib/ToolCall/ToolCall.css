@@ -1,0 +1,72 @@
+/* ツール呼び出しの進行を1枚で見せる面(ToolCall.md)。器は中立の枠付きの面で、失敗のときだけ
+   danger が乗る。busy と result を中立に置くのは契約の判断で、完了は成功の主張ではない
+   (結果が正しいかは result の中身が語る)。 */
+.sc-tool-call {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-md);
+  border: var(--shape-border-width) solid var(--color-app-border);
+  border-radius: var(--shape-semantic-card);
+  padding: var(--spacing-inset-md);
+  color: var(--color-app-foreground);
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+}
+
+/* ツール名は領域の名前。カードの中で最も強い文字の役(部品群の title 段の最小) */
+.sc-tool-call-name {
+  font-family: var(--typography-title-sm-font-family);
+  font-size: var(--typography-title-sm-font-size);
+  font-weight: var(--typography-title-sm-font-weight);
+  line-height: var(--typography-title-sm-line-height);
+  letter-spacing: var(--typography-title-sm-letter-spacing);
+}
+
+/* 空の live region は場所を取らない(遷移で中身が入ったときだけ現れる) */
+.sc-tool-call-result:empty,
+.sc-tool-call-error:empty {
+  display: none;
+}
+
+/* 失敗は読むべき報告(color.md §5 の danger)。器の枠も danger へ寄せて、視覚でも段階が分かる */
+.sc-tool-call[data-status='error'] {
+  border-color: var(--color-semantic-danger-border);
+}
+.sc-tool-call-error {
+  border-radius: var(--shape-semantic-card);
+  padding: var(--spacing-inset-md);
+  background: var(--color-semantic-danger-soft-bg);
+  color: var(--color-semantic-danger-soft-fg);
+}
+
+/* 待ちの図形。輪が回る(進行表現は Expressive。motion.loop の範囲)。
+   意味は領域の aria-busy が運ぶので、この図形は装飾(aria-hidden)。
+   寸法は文字に従わせる(1em): 待ちの印はカードの文字と釣り合うべきで、ここで独自の長さを
+   決めると SSOT の外の数値が増える。色と太さと速さはすべて契約が挙げるトークンで引く。 */
+.sc-tool-call-busy {
+  inline-size: 1em;
+  block-size: 1em;
+  border: var(--shape-border-width) solid var(--color-app-border);
+  /* 1辺だけを濃くして、回転が見える形にする */
+  border-block-start-color: var(--color-app-foreground);
+  /* 円の幾何が丸さを担う(線で描く輪に半径のトークンは要らない。円形の進行表示と同じ判断) */
+  border-radius: 50%;
+  animation: sc-tool-call-spin var(--motion-loop-duration) var(--motion-loop-easing) infinite;
+}
+@keyframes sc-tool-call-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* reduced-motion では低速へ沈静させる(motion.md §6 の loop 特例)。止めないのは Loader と同じ理由で、
+   見る人には視覚しか手がかりが無く、静止した点は待ちに見えないため */
+@media (prefers-reduced-motion: reduce) {
+  .sc-tool-call-busy {
+    animation-duration: calc(var(--motion-loop-duration) * 6);
+  }
+}
