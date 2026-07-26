@@ -50,14 +50,14 @@
   font-weight: var(--typography-label-sm-font-weight);
 }
 
-/* 日の升。当たり判定の門(size.md §4)の対象で、7列で並ぶので詰まりやすい。
+/* 日のセル。当たり判定の門(size.md §4)の対象で、7列で並ぶので詰まりやすい。
    見た目を詰めても押せる範囲は下限(24px)を割らない */
 .sc-calendar-day {
   /* 当たり判定の門(size.md §4。Web の下限は 24px)。列は器を分け合うので、
      ここで指すのは「これ以上は縮まない」床である */
   min-inline-size: 1.5rem;
   min-block-size: 1.5rem;
-  padding: 0; /* 余白は面(span)が持つ。面が升いっぱいに広がるようにするため */
+  padding: 0; /* 余白は面(span)が持つ。面がセルいっぱいに広がるようにするため */
   /* 列の幅は数字の箱(2桁ぶん)と内側の余白から決まる。表の指定幅は「好ましい幅」なので、
      器が狭ければ表が縮める。最小幅で書くと縮めなくなり、狭い画面で格子が器から飛び出す */
   inline-size: calc(2.25rem + var(--spacing-inset-sm) * 2);
@@ -65,8 +65,8 @@
   cursor: pointer;
   font-variant-numeric: tabular-nums;
   color: var(--color-app-foreground);
-  /* 帯(期間)は升そのものの面が描く。面(升の丸)は中の span が描く。
-     擬似要素の絶対配置と負の重ね順は使わない: 表の升に対する絶対配置は WebKit で升ではなく表を
+  /* 帯(期間)はセルそのものの面が描く。面(セルの丸)は中の span が描く。
+     擬似要素の絶対配置と負の重ね順は使わない: 表のセルに対する絶対配置は WebKit でセルではなく表を
      基準にすることがあり、iOS で選ばれた日の面が消えた(実機で確認)。背景と通常フローだけで組む */
   transition: color calc(var(--motion-feedback-duration) * var(--motion-scale))
     var(--motion-feedback-easing);
@@ -77,7 +77,7 @@
 .sc-calendar-day[data-band='true'] {
   background: var(--color-semantic-primary-soft-bg);
 }
-/* 端の升では帯を升の中央で止める。端の面は丸いので、帯が縁の外へ回り込んで角が飛び出て見える。
+/* 端のセルでは帯をセルの中央で止める。端の面は丸いので、帯が縁の外へ回り込んで角が飛び出て見える。
    始まりと終わりが同じ日なら両方が効いて帯は消える(帯の要らない状態)。
    grad の向きは物理なので、行の向きが逆の言語では :dir() で入れ替える */
 .sc-calendar-day[data-band-start='true'] {
@@ -96,7 +96,7 @@
   background: linear-gradient(to left, var(--color-semantic-primary-soft-bg) 50%, transparent 50%);
 }
 
-/* 升の面。丸みと連続曲率をここが持つ(shape.md §4)。通常フローの箱なので、帯の上・数字の下に立つ */
+/* セルの面。丸みと連続曲率をここが持つ(shape.md §4)。通常フローの箱なので、帯の上・数字の下に立つ */
 .sc-calendar-day-face {
   display: block;
   padding: var(--spacing-inset-sm);

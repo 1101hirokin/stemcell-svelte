@@ -143,7 +143,7 @@ export const weekdayNames = (
   return out;
 };
 
-/** 月の格子。週ごとの行に分け、前後の月にはみ出す升は undefined で埋める。 */
+/** 月の格子。週ごとの行に分け、前後の月にはみ出すセルは undefined で埋める。 */
 export const monthGrid = (year: number, month: number, start: number): (Day | undefined)[][] => {
   const first = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
   const lead = (first - start + 7) % 7;
