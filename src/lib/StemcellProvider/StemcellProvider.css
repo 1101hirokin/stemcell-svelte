@@ -16,6 +16,18 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'palt';
+  /* 和文と欧文・数字の境目に間合いを空ける。初期値と同じだが、UA リセットで no-autospace を
+     当てられても DS の組版が残るように明示する。対応していない環境では宣言ごと無視される */
+  text-autospace: normal;
+  /* 折り返しの規則(typography.md §5)。
+     欧文は語で折る(word-break: normal。break-all は語の途中で切れて読めなくなる)。
+     和文は禁則を厳格に守る(line-break: strict。行頭に小書きの仮名や長音符を置かない)。
+     どこでも折るのは最後の手段で、切れ目を持たない長い連なり(URL・識別子)が器を突き破るときだけ効く。
+     break-word ではなく anywhere を採るのは、器の最小幅にも反映させて器ごと溢れさせないため
+     (代わりに最小内容幅が1文字ぶんまで縮む。狭い器で意図より早く折れるようなら break-word へ落とす) */
+  word-break: normal;
+  line-break: strict;
+  overflow-wrap: anywhere;
 }
 
 /* 連続曲率(shape.md §4 の MEME)。すべての非ゼロ半径に適用する。
