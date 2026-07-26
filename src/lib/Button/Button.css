@@ -12,8 +12,8 @@
   line-height: var(--typography-label-lg-line-height);
   letter-spacing: var(--typography-label-lg-letter-spacing);
   cursor: pointer;
-  transition: background-color var(--motion-feedback-duration) var(--motion-feedback-easing),
-    border-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+  transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
+    border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
 .sc-button[data-block='true'] { display: flex; inline-size: 100%; }
 .sc-button[data-size='sm'] { padding: var(--spacing-inset-sm); }

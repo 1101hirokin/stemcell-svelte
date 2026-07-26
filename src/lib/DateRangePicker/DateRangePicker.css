@@ -46,8 +46,18 @@
   align-items: center;
   justify-content: center;
 }
+.sc-daterangepicker-trigger-button {
+  transition:
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+      var(--motion-feedback-easing),
+    color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+}
 .sc-daterangepicker-trigger-button:hover:not(:disabled) {
+  background: var(--color-semantic-plain-soft-bg-hover);
   color: var(--color-app-foreground);
+}
+.sc-daterangepicker-trigger-button:active:not(:disabled) {
+  background: var(--color-semantic-plain-soft-bg-pressed);
 }
 .sc-daterangepicker-trigger-button:disabled {
   color: var(--color-semantic-disabled-fg);

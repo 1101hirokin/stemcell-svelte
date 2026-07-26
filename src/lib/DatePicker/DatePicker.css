@@ -34,8 +34,18 @@
   align-items: center;
   justify-content: center;
 }
+.sc-datepicker-trigger-button {
+  transition:
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+      var(--motion-feedback-easing),
+    color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+}
 .sc-datepicker-trigger-button:hover:not(:disabled) {
+  background: var(--color-semantic-plain-soft-bg-hover);
   color: var(--color-app-foreground);
+}
+.sc-datepicker-trigger-button:active:not(:disabled) {
+  background: var(--color-semantic-plain-soft-bg-pressed);
 }
 .sc-datepicker-trigger-button:disabled {
   color: var(--color-semantic-disabled-fg);

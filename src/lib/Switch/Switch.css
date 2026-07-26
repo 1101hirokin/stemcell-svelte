@@ -47,14 +47,14 @@
   padding-block: 0;
   border-radius: var(--shape-semantic-pill);
   background: var(--_track);
-  transition: background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+  transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
 .sc-switch-thumb {
   inline-size: 1rem;
   block-size: 1rem;
   border-radius: var(--shape-semantic-pill);
   background: var(--color-app-surface);
-  transition: transform var(--motion-feedback-duration) var(--motion-feedback-easing);
+  transition: transform calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
 /* on: track を primary へ、thumb を右へ(論理方向。RTL で反転) */
 .sc-switch-input:checked + .sc-switch-track {

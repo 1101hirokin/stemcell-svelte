@@ -60,6 +60,12 @@
   cursor: pointer;
   border-radius: var(--shape-semantic-control);
   font-variant-numeric: tabular-nums;
+  /* 指を置いたとき・選ばれたときの切替を滑らかにする(feedback の意味層)。
+     reduced-motion では --motion-scale が 0 になり瞬時に切り替わる(部品は分岐しない) */
+  transition:
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+      var(--motion-feedback-easing),
+    color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
 .sc-calendar-day:hover:not([aria-disabled='true']) {
   background: var(--color-semantic-primary-soft-bg);

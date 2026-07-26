@@ -51,8 +51,8 @@
   border: var(--shape-border-width) solid var(--_border);
   border-radius: var(--shape-semantic-control);
   transition:
-    border-color var(--motion-feedback-duration) var(--motion-feedback-easing),
-    background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+    border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
 .sc-datefield[data-size='sm'] .sc-datefield-control {
   --_inset: var(--spacing-inset-sm);
@@ -170,6 +170,19 @@
   border-radius: var(--shape-semantic-selection);
   font-variant-numeric: tabular-nums;
   cursor: text;
+  /* 桁は打てる場所なので、指を置いたときに面が薄く点く(state.md §3.2 の hover)。
+     動きは feedback の意味層で、reduced-motion では --motion-scale が 0 になり瞬時に切り替わる */
+  transition:
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+      var(--motion-feedback-easing),
+    color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+}
+.sc-datefield:not([data-disabled='true']) .sc-datefield-segment:hover {
+  background: var(--color-semantic-plain-soft-bg-hover);
+}
+/* 打っている桁を面で示す(どこを編集しているかが焦点の輪だけでは読みにくい) */
+.sc-datefield-segment:focus-visible {
+  background: var(--color-semantic-plain-soft-bg);
 }
 .sc-datefield-segment[data-empty='true'] {
   color: var(--color-app-fg-muted);
