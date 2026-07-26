@@ -36,6 +36,9 @@
 .sc-checkbox-box {
   position: relative;
   flex: 0 0 auto;
+  /* トークンは外形の一辺を指す(枠を含む)。含めないと枠のぶんだけ実寸が大きくなり、
+     同じ値を指しているのに実装ごとに見た目が割れる */
+  box-sizing: border-box;
   /* 箱の寸法は SSOT が持つ(size.md §2 の例外列挙。内容から導けない箱)。
      見た目の寸法であって当たり判定ではない: 押せる範囲は包む label が担う */
   inline-size: var(--selection-size);
