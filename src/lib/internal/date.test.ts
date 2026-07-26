@@ -70,7 +70,7 @@ describe('暦日の道具', () => {
   });
 
   it('月の格子は週ごとの行に分かれ、前後の月は空で埋まる', () => {
-    // 2026年7月1日は水曜。日曜始まりなら先頭の3升が空
+    // 2026年7月1日は水曜。日曜始まりなら先頭の3セルが空
     const grid = monthGrid(2026, 7, 0);
     expect(grid[0]?.slice(0, 3)).toEqual([undefined, undefined, undefined]);
     expect(grid[0]?.[3]).toEqual({ year: 2026, month: 7, day: 1 });
