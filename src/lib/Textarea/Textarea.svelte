@@ -75,6 +75,7 @@
     <textarea
       class="sc-textarea-input"
       id={inputId}
+      style:--sc-textarea-rows={rows}
       {name}
       {rows}
       bind:value
