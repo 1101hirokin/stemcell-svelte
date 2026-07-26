@@ -47,15 +47,15 @@
 .sc-reasoning[data-status='busy'] .sc-reasoning-name-ghost {
   background-image: linear-gradient(
     100deg,
-    var(--color-app-fg-muted) 44%,
+    var(--color-app-fg-muted) 46%,
     var(--color-app-foreground) 50%,
-    var(--color-app-fg-muted) 56%
+    var(--color-app-fg-muted) 54%
   );
   background-size: 400% 100%;
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  animation: sc-reasoning-shimmer calc(var(--motion-loop-duration) * 3) var(--motion-loop-easing) infinite;
+  animation: sc-reasoning-shimmer calc(var(--motion-loop-duration) * 5) var(--motion-loop-easing) infinite;
 }
 @keyframes sc-reasoning-shimmer {
   from {
