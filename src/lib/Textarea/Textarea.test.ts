@@ -70,3 +70,18 @@ it('start / end を持たない(複数行の器に行内アイコンは成立し
   expect(container.querySelector('.sc-textarea-start')).toBeNull();
   expect(container.querySelector('.sc-textarea-end')).toBeNull();
 });
+
+// 高さの範囲は行数の対で決まる(rows が下限、maxRows が上限。Textarea.md §2)
+it('rows と maxRows を行数として渡す(上限は省略できる)', () => {
+  const { container } = render(Textarea, { props: { label, rows: 3, maxRows: 6 } });
+  const el = container.querySelector('.sc-textarea-input') as HTMLElement;
+  expect(el.style.getPropertyValue('--sc-textarea-rows')).toBe('3');
+  expect(el.style.getPropertyValue('--sc-textarea-max-rows')).toBe('6');
+  expect(el.getAttribute('rows')).toBe('3'); // field-sizing 非対応の環境はこちらで立つ
+});
+
+it('maxRows を省略すると上限を持たない', () => {
+  const { container } = render(Textarea, { props: { label } });
+  const el = container.querySelector('.sc-textarea-input') as HTMLElement;
+  expect(el.style.getPropertyValue('--sc-textarea-max-rows')).toBe('');
+});
