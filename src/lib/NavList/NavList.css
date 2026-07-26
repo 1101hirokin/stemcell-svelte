@@ -6,8 +6,10 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  /* 項目の縦の律動。器が間隔を所有する(layout.md §1) */
-  gap: var(--spacing-stack-sm);
+  /* 行は続けて置く(間を空けない)。脇の一覧は「並んだ行」であって、離れて浮かぶ札の列ではない。
+     行の高さは内側の余白(spacing の段)が作るので、密度を compact にすれば行そのものが詰まる。
+     意味層の縦の段は sm(8px)が最小で、行の律動にはそれでも広い(HOLES #73) */
+  gap: 0;
 }
 
 .sc-navlist-item {
