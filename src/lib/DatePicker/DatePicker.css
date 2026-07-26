@@ -6,7 +6,7 @@
   gap: var(--spacing-inline-md);
 }
 .sc-datepicker > :first-child {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-inline-size: 0;
 }
 /* 欄の名前の行のぶん、開く操作を下端へ揃える */

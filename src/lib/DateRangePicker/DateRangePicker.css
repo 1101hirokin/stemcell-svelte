@@ -12,7 +12,9 @@
   flex-wrap: wrap;
 }
 .sc-daterangepicker-fields > :global(.sc-datefield) {
-  flex: 1 1 10rem;
+  /* 欄は自分の上限まで伸びる。行を占めきらないので、暦を開く操作が同じ行に残る
+     (伸ばしきると次の行へ落ちて、2つの欄と暦の関係が読めなくなる) */
+  flex: 0 1 auto;
   min-inline-size: 0;
 }
 .sc-daterangepicker-trigger {
