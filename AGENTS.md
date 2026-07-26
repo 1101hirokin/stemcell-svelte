@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Select, Sidebar, Skeleton, Slider, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Reel, Select, Sidebar, Skeleton, Slider, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -484,6 +484,27 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 名前は label prop が運ぶ。中のアイコンは装飾(iconography.md §5)であり、名前を二重に運ばない。
 - disabled の3要求と当たり判定の門/目標は Button と同じ(state.md §5 / size.md §4)。視覚が絵1つでも当たり判定は縮まない。
 
+### Imposter(契約 0.0.0-alpha.1)
+
+下地の上への重ね。器は下地と重ねの両方を持ち、下地が器の大きさを決め、重ねはフローの外に出て下地の上に乗る。一時面の振る舞い(フォーカス・退出)は持たない: それは overlay の部品(Dialog / Popover)の仕事。
+
+props:
+
+- `layer`: "navigation" | "popover" | "modal" | "notification" | "tooltip"((省略可)) — layering.md の層を指定して重ね順を取る(--layer-*-z / native は rank)。省略時は文脈のスタッキングに従い、新しい層を作らない。層の付与は重ね順だけであり、scrim やフォーカス捕捉は付いてこない(それらは overlay の部品の仕事)。 scrim を含まない: scrim は単独で意味を持たず(モーダルの捕捉機構とセットの遮蔽)、Imposter の公開 API を通さない。modal は将来 Dialog 等が内部合成に用いるための値であり、単独の消費者が直接選ぶことは想定しない(選んでも捕捉も scrim も付いてこない=偽モーダルになる)。
+- `alignBlock`: "start" | "center" | "end"(既定 "center") — 重ねを下地のどこに置くか、block 軸(横書きでは縦)の位置。論理方向なので RTL / 縦書きで書字方向に従う(layout.md §7)。alignInline との組で3×3の位置を表す。段の集合が {start, center, end} なのは、この語彙が全プラットフォームで一致するからである(SwiftUI Alignment、Compose Alignment、CSS の place-self / position-area。Imposter.md §2)。2軸を1つの enum(9値)にせず prop を分けるのは、契約スキーマの enum で機械照合できる形を保つため。
+- `alignInline`: "start" | "center" | "end"(既定 "center") — 重ねを下地のどこに置くか、inline 軸(横書きでは横)の位置。論理方向なので RTL / 縦書きで書字方向に従う。alignBlock と同じ段の集合を採る。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `base`(必須) — 下地。器の大きさを決め、重ねの位置の基準になる。器が下地を持つ(重ねだけを受け取って周囲の環境に基準を求めない)ことが本部品の要である: 基準を外に求めると、重ねの位置が自分の所有しない祖先の性質で決まり、無関係な変更で黙って動く(導出は Imposter.md §2)。
+- `default`(必須) — 重ねる中身。フローの外に出るので下地の大きさには影響しない。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
+- 下地と重ねはどちらも支援技術から読める。重ねが下地を視覚的に覆っても、覆いに意味(モーダル性)は生まれない。それが要るなら Imposter ではなく Dialog を使う(overlay.md)。
+- 読み上げの順は下地が先、重ねが後である(視覚の重なりと DOM の順を入れ替えない。WCAG 1.3.2)。
+
 ### LinearLoader(契約 0.0.0-alpha.0)
 
 線形・不確定。いつ終わるか分からない待ちを、領域の幅で告げる。終わりの割合が分かるなら LinearProgress。
@@ -647,6 +668,24 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 矢印キーの規則は web-keys.rules.json の arrows.radiogroup が持つ(移動=選択、roving tabindex、disabled スキップ)。Tab はグループにひとつ: チェック済みがあればそこへ、なければ先頭へ。
 - invalid はグループの状態として届き(Web の表現は radiogroup への aria-invalid + aria-describedby)、error 文はグループの説明として届く。
 - 既定選択を置かない場合、Tab での進入先は先頭項目になる。未選択のまま送信された required グループが invalid の典型である。
+
+### Reel(契約 0.0.0-alpha.0)
+
+横に流す帯。あふれても折り返さず、流れの方向へスクロールする。折り返すのは Cluster。
+
+props:
+
+- `gap`: string(既定 "md") — 要素間の間隔。spacing の語彙。段(sm / md / lg)または大域の原始 X(8〜24 の整数の文字列。32px〜)。小域の原始(0〜7)は受けない(spacing.md §6: 小域は意味層で。layout.md §6)。生の px は受けない。混合型のため string であり、値の照合は実装側の適合テストの仕事。 段は spacing.inline の意味層を引く(並びの間隔)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default`(必須) — 流す中身。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 見た目と意味を持たない器である。states を持たず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
+- スクロール領域はフォーカスを受け、キーボードで操作可能でなければならない(第1条)。focusRing: true がその契約である: フォーカス可能である以上、リング(focus-ring.md)が必須になる。機構の無い規範を notes だけに書かない(Badge の label で学んだ形)。
+- スクロールのキー(矢印等)は role の活性化キーとは別の語彙であり、web-keys の $notYet(Collection)と同じ器で必要になったら扱う。role は立てない(スクロール領域の意味づけは Web の表現)。
 
 ### Select(契約 0.0.0-alpha.1)
 

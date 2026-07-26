@@ -45,19 +45,13 @@
   padding-inline: 0;
 }
 
-/* anchor に重ねる: 器を relative にし、印を block-start / inline-end の隅へ寄せて外側へ半分はみ出す。
-   位置は論理方向で RTL 反転(offset / 切り欠きは Expressive。Badge.md §5) */
-.sc-badge-anchor {
-  position: relative;
-  display: inline-flex;
-}
-.sc-badge-anchor > .sc-badge {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-end: 0;
+/* anchor に重ねるときの外側へのはみ出し。隅そのもの(block-start × inline-end)は Imposter が
+   与えるので、ここに残るのは Expressive の側だけである(はみ出す量。Badge.md §5)。
+   translate は物理軸なので RTL で反転させる */
+.sc-badge[data-anchored='true'] {
   transform: translate(50%, -50%);
 }
-:dir(rtl) .sc-badge-anchor > .sc-badge {
+:dir(rtl) .sc-badge[data-anchored='true'] {
   transform: translate(-50%, -50%);
 }
 

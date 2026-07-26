@@ -1,0 +1,59 @@
+/* 下地の上への重ね(Imposter.md)。器が基準を自分で作り(position: relative)、重ねだけを
+   フローの外へ出す。重ねの機構と下地を基準にする機構は契約が Expressive として開けている。 */
+.sc-imposter {
+  position: relative;
+  display: block;
+}
+/* 行内モード(Web 固有。Imposter.md §3)。行内の下地に重ねるとき、塊のままでは器が行幅まで
+   広がって隅の重ねが下地の隅ではなく行の端に着く */
+.sc-imposter[data-inline='true'] {
+  display: inline-flex;
+}
+
+.sc-imposter-overlay {
+  position: absolute;
+  /* 両側の inset を 0 にする中央寄せで箱が伸びないよう、大きさは中身に合わせる */
+  inline-size: fit-content;
+  block-size: fit-content;
+}
+
+/* 位置は論理の3×3。中央は「両端 0 + 自動余白」で表す。transform を使わないのは、
+   translate が物理軸(x / y)しか持たず、縦書きで論理の insets と食い違うため */
+.sc-imposter-overlay[data-align-block='start'] {
+  inset-block-start: 0;
+}
+.sc-imposter-overlay[data-align-block='center'] {
+  inset-block: 0;
+  margin-block: auto;
+}
+.sc-imposter-overlay[data-align-block='end'] {
+  inset-block-end: 0;
+}
+.sc-imposter-overlay[data-align-inline='start'] {
+  inset-inline-start: 0;
+}
+.sc-imposter-overlay[data-align-inline='center'] {
+  inset-inline: 0;
+  margin-inline: auto;
+}
+.sc-imposter-overlay[data-align-inline='end'] {
+  inset-inline-end: 0;
+}
+
+/* 層を指定したときだけ重ね順を取る(付いてくるのは順序だけで、scrim もフォーカス捕捉も
+   付いてこない)。省略時は宣言せず、文脈のスタッキングに従う */
+.sc-imposter-overlay[data-layer='navigation'] {
+  z-index: var(--layer-navigation-z);
+}
+.sc-imposter-overlay[data-layer='popover'] {
+  z-index: var(--layer-popover-z);
+}
+.sc-imposter-overlay[data-layer='modal'] {
+  z-index: var(--layer-modal-z);
+}
+.sc-imposter-overlay[data-layer='notification'] {
+  z-index: var(--layer-notification-z);
+}
+.sc-imposter-overlay[data-layer='tooltip'] {
+  z-index: var(--layer-tooltip-z);
+}

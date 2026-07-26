@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Slider, Disclosure, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text, Center, Container, Cover, Frame } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Slider, Disclosure, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text, Center, Container, Cover, Frame, Reel, Imposter } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -714,6 +714,49 @@
         {#snippet footer()}<Text variant="label-md">足(下端に留まる)</Text>{/snippet}
       </Cover>
     </div>
+  </section>
+
+  <section>
+    <Text as="h2" variant="title-lg">Reel(横に流す帯)</Text>
+    <Text as="p" variant="body-sm" muted>
+      あふれても折り返さず流れる(折り返すのは Cluster)。実際にあふれているときだけ焦点を受ける:
+      Tab で帯に入って矢印キーでスクロールできる。収まっている帯は中身の無い停留所を作らないので
+      Tab で素通りする。下の2つ目は器に収まる帯で、こちらは焦点を受けない。
+    </Text>
+    <Reel>
+      {#each ['契約', 'トークン', '適合検査', '門', '還流', '原始', '有機体', '層', '間隔', '曲率'] as word (word)}
+        <Card><Stack gap="sm"><Text variant="title-sm">{word}</Text><Text variant="body-sm">帯の項目</Text></Stack></Card>
+      {/each}
+    </Reel>
+    <Reel>
+      <Tag>短い</Tag>
+      <Tag>帯</Tag>
+    </Reel>
+  </section>
+
+  <section>
+    <Text as="h2" variant="title-lg">Imposter(下地の上への重ね)</Text>
+    <Text as="p" variant="body-sm" muted>
+      器が下地と重ねの両方を持つ。基準を祖先に求めないので、周囲に transform や container-type が
+      付いても重ねの位置は動かない。位置は論理の3×3(alignBlock × alignInline)。守らない・閉じない・
+      奪わない: 下も支援技術から読め、覆っても意味は生まれない。Badge の anchor はこの原始の自己利用。
+    </Text>
+    <Grid min="12rem" gap="md">
+      {#each [['start', 'start'], ['start', 'end'], ['center', 'center'], ['end', 'start'], ['end', 'end']] as [ab, ai] (ab + ai)}
+        <Stack gap="sm">
+          <Text variant="label-md">{ab} × {ai}</Text>
+          <Imposter alignBlock={ab} alignInline={ai}>
+            {#snippet base()}<Frame ratio="4/3"><div class="pg-fill">下地</div></Frame>{/snippet}
+            <Tag color="danger">重ね</Tag>
+          </Imposter>
+        </Stack>
+      {/each}
+    </Grid>
+    <Text as="p" variant="body-sm" muted>Badge の自己利用(行内モード + 隅):</Text>
+    <Cluster gap="md">
+      <Badge count={5}><IconButton label="通知"><Icon name="notification" /></IconButton></Badge>
+      <Badge dot label="新着あり"><IconButton label="メッセージ"><Icon name="mail" /></IconButton></Badge>
+    </Cluster>
   </section>
 
   <section>
