@@ -1,6 +1,12 @@
 <script lang="ts">
   import './Tooltip.css';
   import { META } from './meta';
+  import {
+    resolveSides,
+    resolvePosition,
+    inlineShift,
+    type OverlaySides,
+  } from '../internal/overlay-position';
   import type { Snippet } from 'svelte';
 
   // アンカーに添える短い補助ラベル(overlay の tooltip 類。Tooltip.md)。hover と focus の両方で開き、両方の
@@ -31,21 +37,27 @@
   let hovering = $state(false);
   let focused = $state(false);
   const open = $derived(hovering || focused);
-  // 開く向きは、トリガーが描画領域のどこに居るかで決める(Popover と同型。overlay.md §5: 反転は Expressive)。
-  // 面が入るかどうかで測る形は採らない: 中身の長さで向きが変わり、結果が読めない。
-  // 測る前は placement を優先の向きとして使い、開いた時点で位置が上書きする。
-  let measured = $state<{ block: 'start' | 'end'; inline: 'start' | 'end' }>();
+  // 開く向きは overlay-position.ts の規則で決める(Popover と共有。overlay.md §5: 反転は Expressive)。
+  // tooltip の揃えはトリガーの中心で、はみ出すときだけ端へ寄る。測る前は placement を優先の向きに使う。
+  let measured = $state<OverlaySides>();
   const blockSide = $derived(measured?.block ?? (placement === 'block-end' ? 'end' : 'start'));
-  const inlineSide = $derived(measured?.inline ?? 'start');
+  const inlineSide = $derived(measured?.inline ?? 'center');
 
-  /** トリガーの中心が上半分なら下へ、下半分なら上へ。左半分なら右へ伸び、右半分なら左へ伸びる。 */
-  function decideSides() {
+  // CSS が置いたあとに残るはみ出しを横へ押し戻す(anchor 対応時。非対応時は resolvePosition が同じことをする)
+  function shiftIntoView() {
+    if (!tipEl) return;
+    tipEl.style.setProperty('--sc-tooltip-shift', '0px'); // 押し戻す前の位置で測る
+    const r = tipEl.getBoundingClientRect();
+    const dx = inlineShift(r.left, r.width);
+    if (dx) tipEl.style.setProperty('--sc-tooltip-shift', `${dx}px`);
+  }
+
+  /** 向きを決めて返す。返り値を使うのは、書いた state を同じ effect で読み返さないため。 */
+  function decideSides(): OverlaySides | undefined {
     if (!wrapperEl) return;
-    const a = wrapperEl.getBoundingClientRect();
-    measured = {
-      block: a.top + a.height / 2 < window.innerHeight / 2 ? 'end' : 'start',
-      inline: a.left + a.width / 2 < window.innerWidth / 2 ? 'start' : 'end',
-    };
+    const sides = resolveSides(wrapperEl.getBoundingClientRect(), tipEl?.offsetWidth ?? 0, 'center');
+    measured = sides;
+    return sides;
   }
 
   // aria-describedby を trigger の最初の実フォーカス可能要素へ配線する。tooltip 本体(role=tooltip・非対話)の
@@ -74,15 +86,20 @@
   });
 
   // JS フォールバック(anchor 非対応時のみ)。決めた向きに合わせて fixed 位置を置く。
+  const GAP = 6; // トリガーと面の隙間(px。CSS 側は spacing.inline.md)
   function position() {
     if (!tipEl || !wrapperEl) return;
-    decideSides();
+    const sides = decideSides();
+    if (!sides) return;
     const a = wrapperEl.getBoundingClientRect();
-    const GAP = 6;
-    tipEl.style.top =
-      blockSide === 'start' ? `${a.top - tipEl.offsetHeight - GAP}px` : `${a.bottom + GAP}px`;
-    tipEl.style.left =
-      inlineSide === 'start' ? `${a.left}px` : `${a.right - tipEl.offsetWidth}px`;
+    const at = resolvePosition(
+      a,
+      { width: tipEl.offsetWidth, height: tipEl.offsetHeight },
+      sides,
+      GAP,
+    );
+    tipEl.style.top = `${at.top}px`;
+    tipEl.style.left = `${at.left}px`;
   }
 
   const isShown = (el: HTMLElement) => {
@@ -105,7 +122,15 @@
   // そのものの追従は対応環境なら CSS が持ち、非対応環境では position() が両方をやる(Popover と同型)。
   $effect(() => {
     if (!open) return;
-    const update = () => (supportsAnchor ? decideSides() : position());
+    const update = () => {
+      if (supportsAnchor) {
+        decideSides();
+        // 向きの反映(属性 → CSS)を待ってから、残ったはみ出しを測って押し戻す
+        requestAnimationFrame(shiftIntoView);
+      } else {
+        position();
+      }
+    };
     update();
     let frame = 0;
     const onScroll = () => {
