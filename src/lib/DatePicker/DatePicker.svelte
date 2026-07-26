@@ -4,6 +4,8 @@
   import DateField from '../DateField/DateField.svelte';
   import Calendar from '../Calendar/Calendar.svelte';
   import Popover from '../Popover/Popover.svelte';
+  import Drawer from '../Drawer/Drawer.svelte';
+  import { watchCompact } from '../internal/viewport';
   import Icon from '../Icon/Icon.svelte';
   import { formatMonth, parseISO, today } from '../internal/date';
   import type { Snippet } from 'svelte';
@@ -59,6 +61,11 @@
     value = next;
     onchange?.(next);
   };
+
+  // 狭い画面では暦を modal 類(下端のシート)で開く。アンカー従属のままだと面が画面より広くなる
+  // (RFC 0017 / overlay.md §5)。判定は環境の広さだけで、利用者の好みや消費者の裁量では動かない
+  let compact = $state(false);
+  $effect(() => watchCompact((v) => (compact = v)));
 </script>
 
 <div class="sc-datepicker" data-disabled={disabled}>
@@ -78,36 +85,46 @@
     onchange={commit}
   />
 
+  {#snippet trigger()}
+    <button
+      type="button"
+      class="sc-datepicker-trigger-button"
+      aria-label={calendarLabel}
+      aria-haspopup="dialog"
+      aria-expanded={open}
+      disabled={disabled || readonly}
+      onclick={() => (open = !open)}
+    >
+      <Icon name="calendar" />
+    </button>
+  {/snippet}
+  {#snippet panel()}
+    <div class="sc-datepicker-panel">
+      <Calendar
+        bind:month
+        start={value}
+        {min}
+        {max}
+        {unavailable}
+        onselect={(day) => {
+          commit(day);
+          open = false;
+        }}
+      />
+    </div>
+  {/snippet}
+
   <div class="sc-datepicker-trigger">
-    <Popover bind:open>
-      {#snippet anchor()}
-        <button
-          type="button"
-          class="sc-datepicker-trigger-button"
-          aria-label={calendarLabel}
-          aria-haspopup="dialog"
-          aria-expanded={open}
-          disabled={disabled || readonly}
-          onclick={() => (open = !open)}
-        >
-          <Icon name="calendar" />
-        </button>
-      {/snippet}
-      {#snippet content()}
-        <div class="sc-datepicker-panel">
-          <Calendar
-            bind:month
-            start={value}
-            {min}
-            {max}
-            {unavailable}
-            onselect={(day) => {
-              commit(day);
-              open = false;
-            }}
-          />
-        </div>
-      {/snippet}
-    </Popover>
+    {#if compact}
+      {@render trigger()}
+      <Drawer bind:open side="block-end" onopenchange={(o) => (open = o)} title={label}>
+        {#snippet content()}{@render panel()}{/snippet}
+      </Drawer>
+    {:else}
+      <Popover bind:open>
+        {#snippet anchor()}{@render trigger()}{/snippet}
+        {#snippet content()}{@render panel()}{/snippet}
+      </Popover>
+    {/if}
   </div>
 </div>

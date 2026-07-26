@@ -4,6 +4,8 @@
   import DateField from '../DateField/DateField.svelte';
   import Calendar from '../Calendar/Calendar.svelte';
   import Popover from '../Popover/Popover.svelte';
+  import Drawer from '../Drawer/Drawer.svelte';
+  import { watchCompact } from '../internal/viewport';
   import Icon from '../Icon/Icon.svelte';
   import { compare, formatMonth, parseISO, today } from '../internal/date';
   import type { Snippet } from 'svelte';
@@ -75,6 +77,11 @@
   // 選び直しで押した日は必ず期間の下限になる(内も外も区別しない。対の端そのものを押したときだけ変えない)。
   // 下限だけ置いた途中に下限より前を押したときも、対を入れ替えずに下限を置き直す。
   // 閉じるのは明示の退出(Escape・外側の押下)で、それは合成した Popover が持つ。DateRangePicker.md。
+  // 狭い画面では暦を modal 類(下端のシート)で開く(RFC 0017 / overlay.md §5)。2ヶ月ぶんの格子は
+  // アンカー従属のままだと画面に入りきらない
+  let compact = $state(false);
+  $effect(() => watchCompact((v) => (compact = v)));
+
   const onselect = (value: string) => {
     const day = parseISO(value);
     if (!day) return;
@@ -121,36 +128,37 @@
       onchange={(v) => commit(start, v)}
     />
 
+    {#snippet trigger()}
+      <button
+        type="button"
+        class="sc-daterangepicker-trigger-button"
+        aria-label={calendarLabel}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        disabled={disabled || readonly}
+        onclick={() => (open = !open)}
+      >
+        <Icon name="calendar" />
+      </button>
+    {/snippet}
+    {#snippet panel()}
+      <div class="sc-daterangepicker-panel" aria-live="polite">
+        <Calendar bind:month months={2} {start} {end} {min} {max} {unavailable} {onselect} />
+      </div>
+    {/snippet}
+
     <div class="sc-daterangepicker-trigger">
-      <Popover bind:open>
-        {#snippet anchor()}
-          <button
-          type="button"
-          class="sc-daterangepicker-trigger-button"
-          aria-label={calendarLabel}
-          aria-haspopup="dialog"
-          aria-expanded={open}
-          disabled={disabled || readonly}
-          onclick={() => (open = !open)}
-        >
-          <Icon name="calendar" />
-        </button>
-        {/snippet}
-        {#snippet content()}
-          <div class="sc-daterangepicker-panel" aria-live="polite">
-            <Calendar
-              bind:month
-              months={2}
-              {start}
-              {end}
-              {min}
-              {max}
-              {unavailable}
-              {onselect}
-            />
-          </div>
-        {/snippet}
-      </Popover>
+      {#if compact}
+        {@render trigger()}
+        <Drawer bind:open side="block-end" onopenchange={(o) => (open = o)} title={label}>
+          {#snippet content()}{@render panel()}{/snippet}
+        </Drawer>
+      {:else}
+        <Popover bind:open>
+          {#snippet anchor()}{@render trigger()}{/snippet}
+          {#snippet content()}{@render panel()}{/snippet}
+        </Popover>
+      {/if}
     </div>
   </div>
 
