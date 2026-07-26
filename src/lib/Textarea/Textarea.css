@@ -76,7 +76,7 @@
      つまみで高さを決めたら、そこで固定される(利用者が選んだ大きさを追従で上書きしない) */
   resize: vertical;
   font-family: var(--typography-body-md-font-family);
-  font-size: var(--typography-body-md-font-size);
+  font-size: var(--_sc-typed-font-size, var(--typography-body-md-font-size));
   font-weight: var(--typography-body-md-font-weight);
   line-height: var(--typography-body-md-line-height);
   letter-spacing: var(--typography-body-md-letter-spacing);
@@ -126,10 +126,3 @@
   color: var(--color-semantic-danger-soft-fg);
 }
 
-/* iOS(WebKit)は font-size<16px の入力に focus するとページをズームする。触覚ポインタでは入力文字を最低
-   16px にして回避(Web/iOS 固有。field.md。TextField と同じ)。fine ポインタは設計寸法を保つ。 */
-@media (pointer: coarse) {
-  .sc-textarea-input {
-    font-size: max(16px, var(--typography-body-md-font-size));
-  }
-}

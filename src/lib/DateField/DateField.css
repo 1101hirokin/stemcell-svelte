@@ -177,6 +177,8 @@
     background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
       var(--motion-feedback-easing),
     color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+  /* 打つ文字は触点で 16px を下回らない(StemcellProvider が値を持つ) */
+  font-size: var(--_sc-typed-font-size, var(--typography-body-md-font-size));
 }
 .sc-datefield:not([data-disabled='true']) .sc-datefield-segment:hover {
   background: var(--color-semantic-plain-soft-bg-hover);
@@ -200,16 +202,6 @@
   cursor: not-allowed;
 }
 
-/* iOS(Safari / Chrome とも WebKit)は font-size<16px の入力に焦点が乗るとページごと拡大する。触覚の
-   ポインタでは打つ文字を 16px 未満にしない(field.md §2。TextField / Textarea / Select と同じ形)。
-   拡大そのものを禁じる手は採らない(利用者から拡大縮小を奪う。WCAG 2.2 SC 1.4.4)。
-   細かいポインタ(desktop)は設計どおり 14px を保つ。行高は比率なので、触点では行が約 2px 高くなる
-   (的が大きくなる方向なので許容する) */
-@media (pointer: coarse) {
-  .sc-datefield-segment {
-    font-size: max(16px, var(--typography-body-md-font-size));
-  }
-}
 /* 選択の面は出さない(桁は常に全選択で置き換わるので、青い帯が出ると打つたびに点滅して見える) */
 .sc-datefield-segment::selection {
   background: transparent;
