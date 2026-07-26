@@ -166,6 +166,17 @@
 
 /* 桁。焦点は桁に立つ(根ではない)。等幅の字形で、値が変わっても幅が跳ねない */
 .sc-datefield-segment {
+  /* 桁は input なので、UA の枠と面と余白を落として器の中の文字として立たせる。
+     幅は中身(2桁 / 4桁)で決まる(field-sizing。未対応環境は size 属性が受け持つ) */
+  appearance: none;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: center;
+  field-sizing: content;
+  padding-block: 0;
   padding-inline: 0.125em;
   border-radius: var(--shape-semantic-selection);
   font-variant-numeric: tabular-nums;
@@ -197,6 +208,10 @@
 .sc-datefield[data-disabled='true'] .sc-datefield-segment {
   color: var(--color-semantic-disabled-fg);
   cursor: not-allowed;
+}
+/* 選択の面は出さない(桁は常に全選択で置き換わるので、青い帯が出ると打つたびに点滅して見える) */
+.sc-datefield-segment::selection {
+  background: transparent;
 }
 .sc-datefield-separator {
   color: var(--color-app-fg-muted);

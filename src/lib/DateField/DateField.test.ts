@@ -5,6 +5,10 @@ import DateField from './DateField.svelte';
 import { segmentName, segmentOrder } from '../internal/date';
 
 const label = createRawSnippet(() => ({ render: () => '<span>納品日</span>' }));
+/** 数字は入力イベントで打つ(ハードもソフトも同じ経路を通る) */
+const digit = (el: HTMLElement, ch: string) =>
+  fireEvent.input(el, { data: ch, inputType: 'insertText' });
+
 const segs = (c: HTMLElement) => [...c.querySelectorAll<HTMLElement>('[role="spinbutton"]')];
 const seg = (c: HTMLElement, type: string) => c.querySelector<HTMLElement>(`[data-segment="${type}"]`)!;
 
@@ -18,9 +22,9 @@ it('桁に分かれ、並びと名前は地域から借りる(DS は持たない
 
 it('値を桁へ写し、上下限が支援技術へ届く', () => {
   const { container } = render(DateField, { props: { label, value: '2026-07-20' } });
-  expect(seg(container, 'year').textContent).toBe('2026');
-  expect(seg(container, 'month').textContent).toBe('07');
-  expect(seg(container, 'day').textContent).toBe('20');
+  expect((seg(container, 'year') as HTMLInputElement).value).toBe('2026');
+  expect((seg(container, 'month') as HTMLInputElement).value).toBe('07');
+  expect((seg(container, 'day') as HTMLInputElement).value).toBe('20');
   expect(seg(container, 'month').getAttribute('aria-valuenow')).toBe('7');
   expect(seg(container, 'month').getAttribute('aria-valuemin')).toBe('1');
   expect(seg(container, 'month').getAttribute('aria-valuemax')).toBe('12');
@@ -51,14 +55,14 @@ it('左右で桁を移る(論理方向)', async () => {
 it('途中では change を出さない(成立した日だけを知らせる)', async () => {
   const onchange = vi.fn();
   const { container } = render(DateField, { props: { label, onchange } });
-  await fireEvent.keyDown(seg(container, 'year'), { key: '2' });
-  await fireEvent.keyDown(seg(container, 'year'), { key: '0' });
-  await fireEvent.keyDown(seg(container, 'year'), { key: '2' });
-  await fireEvent.keyDown(seg(container, 'year'), { key: '6' });
+  await digit(seg(container, 'year'), '2');
+  await digit(seg(container, 'year'), '0');
+  await digit(seg(container, 'year'), '2');
+  await digit(seg(container, 'year'), '6');
   expect(onchange).not.toHaveBeenCalled(); // 年だけでは日ではない
-  await fireEvent.keyDown(seg(container, 'month'), { key: '7' });
-  await fireEvent.keyDown(seg(container, 'day'), { key: '2' });
-  await fireEvent.keyDown(seg(container, 'day'), { key: '0' });
+  await digit(seg(container, 'month'), '7');
+  await digit(seg(container, 'day'), '2');
+  await digit(seg(container, 'day'), '0');
   expect(onchange).toHaveBeenCalledWith('2026-07-20');
 });
 
@@ -85,5 +89,23 @@ it('無効のときは桁が焦点を受けず、操作も効かない', async (
   const { container } = render(DateField, { props: { label, value: '2026-07-20', disabled: true, onchange } });
   expect(seg(container, 'day').tabIndex).toBe(-1);
   await fireEvent.keyDown(seg(container, 'day'), { key: 'ArrowUp' });
+  expect(onchange).not.toHaveBeenCalled();
+});
+
+// 触点の端末で鍵盤が出るのは、桁が打てる要素だからである(RFC 0017)
+it('桁は数字の鍵盤を呼べる入力要素である', () => {
+  const { container } = render(DateField, { props: { label } });
+  const year = seg(container, 'year') as HTMLInputElement;
+  expect(year.tagName).toBe('INPUT');
+  expect(year.getAttribute('inputmode')).toBe('numeric');
+  expect(year.getAttribute('role')).toBe('spinbutton'); // 意味は spinbutton のまま
+});
+
+it('readonly のときは打てない', async () => {
+  const onchange = vi.fn();
+  const { container } = render(DateField, { props: { label, readonly: true, onchange } });
+  const year = seg(container, 'year') as HTMLInputElement;
+  expect(year.readOnly).toBe(true);
+  await digit(year, '2');
   expect(onchange).not.toHaveBeenCalled();
 });
