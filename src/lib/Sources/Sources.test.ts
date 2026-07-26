@@ -49,6 +49,21 @@ it('id を持たない出典が複数あっても一覧は落ちない(逐次配
   warn.mockRestore();
 });
 
+it('同じ出典を何度も引いても落ちない。断片リンクの端は最初の1件だけ', () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  const repeated = [
+    { id: 's1', title: 'a', url: 'x' },
+    { id: 's1', title: 'a', url: 'x' },
+    { id: 's2', title: 'b', url: 'y' },
+  ];
+  const { container } = render(Sources, { props: { items: repeated, children: item } });
+  expect(container.querySelectorAll('li.sc-sources-item').length).toBe(3);
+  // 同じ id を2つ置くと断片リンクがどちらを指すか決まらない(HTML としても不正)
+  expect(container.querySelectorAll('#s1').length).toBe(1);
+  expect(warn.mock.calls.some((c) => String(c[0]).includes('同じ相互参照キー'))).toBe(true);
+  warn.mockRestore();
+});
+
 it('領域名を渡すとリストの名前になる。省略時は名前を持たない', () => {
   const { container } = render(Sources, { props: { items, children: item, label } });
   const list = container.querySelector('.sc-sources') as HTMLElement;

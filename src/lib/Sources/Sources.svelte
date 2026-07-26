@@ -22,16 +22,33 @@
   const uid = $props.id();
   const labelId = `${uid}-label`;
 
-  // 相互参照キーは UI が採番せず source が持つ値を使う(source §3 の裁定)。無ければ本文中の引用と
-  // 結べないので、発明せずに知らせる(採番してしまうと、本文側の端と食い違う偽の対応ができる)。
+  // 描く行。相互参照キー(id)は UI が採番せず source が持つ値を使う(source §3 の裁定)ので、
+  // 無いものや重なったものは「結べない項目」として素通しする(発明しない)。
+  // 反復のキーは行ごとに一意でなければならないため、結べない項目は位置で並べる。
+  // DOM の id は最初の1件にだけ置く: 同じ id が2つあると断片リンク(#id)がどちらを指すか決まらず、
+  // HTML としても不正になる。
+  const rows = $derived.by(() => {
+    const seen = new Set<string>();
+    return items.map((item, index) => {
+      const id = item?.id;
+      const anchored = !!id && !seen.has(id);
+      if (id) seen.add(id);
+      return { item, key: anchored ? id : index, anchor: anchored ? id : undefined };
+    });
+  });
+
+  // 結べない項目があれば知らせる(採番してしまうと、本文側の端と食い違う偽の対応ができる)。
   $effect(() => {
-    for (const item of items) {
-      if (!item?.id) {
-        console.warn(
-          '[stemcell] Sources: 相互参照キー(id)を持たない出典があります。本文中の引用と結べません(source §3。キーは UI が採番せず source が持つ値を使う)。',
-        );
-        break;
-      }
+    if (items.some((item) => !item?.id)) {
+      console.warn(
+        '[stemcell] Sources: 相互参照キー(id)を持たない出典があります。本文中の引用と結べません(source §3。キーは UI が採番せず source が持つ値を使う)。',
+      );
+    }
+    const ids = items.map((item) => item?.id).filter(Boolean);
+    if (new Set(ids).size !== ids.length) {
+      console.warn(
+        '[stemcell] Sources: 同じ相互参照キー(id)の出典が複数あります。本文中の引用がどれを指すか決まらないので、2件目以降は結べません(source §3)。',
+      );
     }
   });
 </script>
@@ -45,12 +62,12 @@
        ul の暗黙の役割が落ちる環境がある(layout.md §6 の「役割の再付与」)。
        リストの器は Sources が持ち、項目の器(li)も Sources が出す(アプリの作法に頼らない。契約 a11y)。 -->
   <ul class="sc-sources" role="list" aria-labelledby={label ? labelId : undefined}>
-    {#each items as item, i (item.id || i)}
+    {#each rows as row (row.key)}
       <!-- 各項目は source の id を帯びる。本文中の引用の印は同じ id を指し、両端とも採番しない。
            DOM の id にそのまま載せるのは、断片リンク(#id)という最も確実に届く到達手段を開けるため。
-           id を持たない出典は位置で並べる(採番はしない): 逐次配信の途中で id の無い出典が2件以上
-           現れたとき、キーが衝突して一覧ごと落ちるのを避ける。相互参照は結べないので警告は出す。 -->
-      <li class="sc-sources-item" id={item.id || undefined}>{@render children(item)}</li>
+           結べない項目(id が無い / 同じ id の2件目以降)は位置で並べる。逐次配信の途中や、同じ出典を
+           何度も引く回答でキーが衝突し、一覧ごと落ちるのを避ける。警告は出す。 -->
+      <li class="sc-sources-item" id={row.anchor}>{@render children(row.item)}</li>
     {/each}
   </ul>
 {/if}
