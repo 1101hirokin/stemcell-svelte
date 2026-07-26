@@ -1,0 +1,25 @@
+/* 測度の中で中央に置く(Center.md)。機構は論理方向の自動余白で、契約が Expressive として
+   開けている「中央寄せの実現機構」の Web の答え。段は container のトークンをそのまま引く。
+   Container と同じ2行の機構だが CSS は共有しない: 適合検査は各部品の CSS に必須トークンの
+   var() が現れるかで照合するので、寄せると門が空振りする。 */
+.sc-center {
+  box-sizing: border-box;
+  margin-inline: auto;
+}
+
+.sc-center[data-max='sm'] {
+  max-inline-size: var(--container-sm);
+}
+.sc-center[data-max='md'] {
+  max-inline-size: var(--container-md);
+}
+.sc-center[data-max='lg'] {
+  max-inline-size: var(--container-lg);
+}
+.sc-center[data-max='xl'] {
+  max-inline-size: var(--container-xl);
+}
+/* 既定。測度(~66ch)であり、他の段と違って読者の文字の大きさに直接ぶら下がる */
+.sc-center[data-max='prose'] {
+  max-inline-size: var(--container-prose);
+}

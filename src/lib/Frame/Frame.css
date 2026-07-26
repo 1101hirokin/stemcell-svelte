@@ -1,0 +1,15 @@
+/* 比の窓(Frame.md)。枠が比を持ち、中身は枠に合わせて伸び、あふれた分は枠が刈る。
+   刈り方(cover 相当)と中身の位置は契約が Expressive として開けている。 */
+.sc-frame {
+  box-sizing: border-box;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: var(--sc-frame-ratio);
+}
+
+/* 中身は枠を満たす。画像や動画は object-fit で中央を残して刈る(引き伸ばさない) */
+.sc-frame > * {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}

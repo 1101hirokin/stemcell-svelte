@@ -1,0 +1,21 @@
+/* ページ幅の制約(Container.md)。機構は Center と同じ論理方向の自動余白で、違うのは目的と段の
+   集合である(測度を持たない)。CSS を Center と共有しないのは、適合検査が各部品の CSS に必須
+   トークンの var() が現れるかで照合するため。 */
+.sc-container {
+  box-sizing: border-box;
+  margin-inline: auto;
+}
+
+.sc-container[data-max='sm'] {
+  max-inline-size: var(--container-sm);
+}
+.sc-container[data-max='md'] {
+  max-inline-size: var(--container-md);
+}
+.sc-container[data-max='lg'] {
+  max-inline-size: var(--container-lg);
+}
+/* 既定 */
+.sc-container[data-max='xl'] {
+  max-inline-size: var(--container-xl);
+}
