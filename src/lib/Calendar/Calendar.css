@@ -3,6 +3,8 @@
 .sc-calendar {
   display: flex;
   flex-direction: column;
+  /* 器より広くならない(浮かぶ面の中でも、地の上でも) */
+  max-inline-size: 100%;
   gap: var(--spacing-stack-sm);
   color: var(--color-app-foreground);
   font-family: var(--typography-body-md-font-family);
@@ -28,18 +30,16 @@
 }
 
 .sc-calendar-grids {
-  /* 器に入る数だけ月を並べ、入らなければ縦へ折る(内在の格子。layout.md §4)。
-     max-content で並べると、狭い画面で器からはみ出していた */
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  /* 器に入る数だけ月を並べ、入らなければ折り返す。格子は自分の中身の幅で立つ:
+     器いっぱいに伸ばすと、7列が間延びして日が遠くなる(日付の欄と同じ理由。layout.md §2 の例外) */
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--spacing-inset-sm);
 }
 .sc-calendar-grid {
   border-collapse: collapse;
-  /* 列は器の幅を分け合う。7列が固定幅だと、狭い器で溢れる。
-     器の幅が中身から決まる文脈(浮かぶ面の max-content)では 100% が測れないので、床を敷く */
-  inline-size: 100%;
-  min-inline-size: 14rem;
+  /* 中身の幅で立つ(伸ばさない)。狭い器では折り返しに任せ、それでも入らないところまでが下限 */
+  flex: 0 1 auto;
   table-layout: fixed;
 }
 .sc-calendar-grid th {
@@ -57,6 +57,8 @@
      ここで指すのは「これ以上は縮まない」床である */
   min-inline-size: 1.5rem;
   min-block-size: 1.5rem;
+  /* 日は2桁までなので、列の幅はここで決まる(中身で立つ格子の基準) */
+  inline-size: 2.25rem;
   padding: var(--spacing-inset-sm);
   text-align: center;
   cursor: pointer;

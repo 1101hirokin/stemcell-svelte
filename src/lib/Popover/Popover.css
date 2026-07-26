@@ -71,3 +71,11 @@
     transform: translateY(-0.25rem);
   }
 }
+
+/* 画面の高さからも溢れない。反転しても入らない高さのときは、面の中で送る
+   (中に焦点を受ける要素があるので、キーボードでも辿り着ける。Reel の「中身の無い停留所」とは事情が違う) */
+.sc-popover-content {
+  max-block-size: calc(100dvh - var(--spacing-inset-lg) * 2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
