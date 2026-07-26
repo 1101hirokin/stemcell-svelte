@@ -24,7 +24,12 @@
   /* 幅は消費者が変数で与える。既定はアンカー幅(fill)。overlay.md §5・第3条を popover まで */
   inline-size: var(--sc-popover-inline-size, var(--sc-popover-anchor-inline-size, max-content));
   min-inline-size: var(--sc-popover-min-inline-size, max-content);
-  max-inline-size: var(--sc-popover-max-inline-size, none);
+  /* 面は描画領域より広くならない。向きの規則は面をどちらへ伸ばすかしか決められないので、
+     面自身が画面より広ければどちらへ開いても切れる(overlay.md §5) */
+  max-inline-size: min(
+    var(--sc-popover-max-inline-size, 100dvw),
+    calc(100dvw - var(--spacing-inline-md) * 2)
+  );
   background: var(--elevation-popover-surface);
   box-shadow: var(--elevation-popover-shadow);
   /* 浮かぶ面の縁(elevation.md §3)。影だけで地から浮かせる形は、強制配色で影が落とされたときに
@@ -32,8 +37,11 @@
      地との差が分かる最も薄い線でよい(color.md §6 の射程の表) */
   border: var(--shape-border-width) solid var(--color-app-divider);
   border-radius: var(--shape-semantic-popover);
-  /* 中身を角で切り抜く。端まで使う項目(余白なしの listbox 等)が丸角からはみ出さない */
-  overflow: hidden;
+  /* 面が画面より高いときだけ、残りの空きで頭打ちにして中で送る。向きの判定はこの値を見ないので、
+     頭打ちが判定を殺すことはない(overlay.md §5) */
+  max-block-size: var(--sc-popover-available-block-size, none);
+  /* 横は角で切り抜く(端まで使う項目が丸角からはみ出さない)。縦は溢れたときだけ送る */
+  overflow: hidden auto;
   /* 出現(overlay.md §2: entrance)。退場のトークンは transition で参照(opacity 変化に効く) */
   animation: sc-popover-in calc(var(--motion-entrance-duration) * var(--motion-scale)) var(--motion-entrance-easing);
   transition: opacity calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing);

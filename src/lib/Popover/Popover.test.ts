@@ -58,7 +58,8 @@ it('placement=block-start を尊重する(開くまでは測らないので位�
   expect((container.querySelector('.sc-popover-content') as HTMLElement).dataset.block).toBe('start');
 });
 
-// 開く向きはトリガーが描画領域のどちら側に居るかで決まる(面が入るかどうかでは測らない)。
+// 上下はトリガーが描画領域のどちら側に居るかで決まる。左右はトリガーの始端に揃え、
+// 揃えたままでは端をはみ出すときだけ終端へ寄る(面の幅 300px、描画領域 1024x768 で計算)。
 it.each([
   { at: '左上', rect: { top: 10, left: 10 }, block: 'end', inline: 'start' },
   { at: '右下', rect: { top: 700, left: 900 }, block: 'start', inline: 'end' },
@@ -69,6 +70,8 @@ it.each([
   const wrapper = container.querySelector('.sc-popover') as HTMLElement;
   wrapper.getBoundingClientRect = () =>
     ({ ...rect, width: 40, height: 20, bottom: rect.top + 20, right: rect.left + 40 }) as DOMRect;
+  // jsdom は描画しないので面の幅を与える(揃えたままで収まるかの判定に使う)
+  Object.defineProperty(container.querySelector('.sc-popover-content'), 'offsetWidth', { value: 300 });
   await rerender({ open: true });
   const c = container.querySelector('.sc-popover-content') as HTMLElement;
   expect(c.dataset.block).toBe(block);

@@ -18,7 +18,8 @@
   margin: 0;
   border: 0;
   z-index: var(--layer-tooltip-z);
-  max-inline-size: 18rem;
+  /* 面は描画領域より広くならない(Popover と同じ理由) */
+  max-inline-size: min(18rem, calc(100dvw - var(--spacing-inline-md) * 2));
   /* 空白の無い長い語(URL 等)が面の外へはみ出さない(背景/影の中で折る) */
   overflow-wrap: anywhere;
   padding: var(--spacing-inset-sm);
@@ -50,7 +51,12 @@
     inset-block-start: anchor(bottom);
     margin-block-start: var(--spacing-inline-md);
   }
-  /* トリガーが左半分なら左端を揃えて右へ、右半分なら右端を揃えて左へ伸ばす */
+  /* 左右はトリガーの中心に揃える。端をはみ出す位置に居るときだけ、左半分なら左端を、
+     右半分なら右端を揃える */
+  .sc-tooltip-content[data-inline='center'] {
+    inset-inline-start: anchor(center);
+    transform: translateX(-50%);
+  }
   .sc-tooltip-content[data-inline='start'] {
     inset-inline-start: anchor(left);
   }
