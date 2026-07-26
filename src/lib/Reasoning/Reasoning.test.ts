@@ -6,6 +6,7 @@ import { fireEvent, render } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { vi } from 'vitest';
 import Reasoning from './Reasoning.svelte';
+import { resolveMotion } from '../internal/motion';
 
 const snip = (html: string) => createRawSnippet(() => ({ render: () => html }));
 const summary = snip('<span>考えています</span>');
@@ -55,4 +56,24 @@ it('トリガーの操作は openchange を発火する(値の更新はアプリ
 it('畳む機構は Disclosure の合成(原子に AI の関心を持ち込まない)', () => {
   const { container } = render(Reasoning, { props: { status: 'busy', summary, children } });
   expect(container.querySelector('.sc-disclosure')).not.toBeNull();
+});
+
+it('名前の入れ替わりは transition の時間で動かし、reduced-motion では動かさない', () => {
+  // 実際の動き(古い文字が上へ去り、新しい文字が下から来る)は実ブラウザでしか確認できない。
+  // ここでは時間の解決だけを守る: 部品は reduced-motion で分岐せず、--motion-scale を掛ける。
+  const style = (vars: Record<string, string>) => ({
+    getPropertyValue: (k: string) => vars[k] ?? '',
+  });
+  expect(
+    resolveMotion(
+      style({ '--motion-transition-duration': '150ms', '--motion-scale': '1', '--motion-transition-easing': 'ease' }),
+      'transition',
+    ),
+  ).toEqual({ duration: 150, easing: 'ease' });
+  // reduced-motion(Provider が scale を 0 にする)
+  expect(
+    resolveMotion(style({ '--motion-transition-duration': '150ms', '--motion-scale': '0' }), 'transition').duration,
+  ).toBe(0);
+  // トークンが読めない環境でも動かないだけで壊れない
+  expect(resolveMotion(style({}), 'transition').duration).toBe(0);
 });

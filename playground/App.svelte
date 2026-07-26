@@ -36,6 +36,15 @@
   let toolStatus = $state<'busy' | 'result' | 'error'>('busy');
   let reasoningStatus = $state<'busy' | 'complete'>('busy');
   let reasoningOpen = $state(false);
+  // 生成中の名前は移り変わる(ChatGPT が段階ごとに文言を差し替えるのと同じ)。部品はその変化を
+  // 描かれた文字から拾って、古い文字を上へ送り新しい文字を下から迎える
+  const REASONING_PHASES = ['考えています', '資料を読んでいます', '答えをまとめています'];
+  let reasoningPhase = $state(0);
+  $effect(() => {
+    if (reasoningStatus !== 'busy') return;
+    const id = setInterval(() => (reasoningPhase = (reasoningPhase + 1) % REASONING_PHASES.length), 2000);
+    return () => clearInterval(id);
+  });
   // 承認 pattern(patterns/approval.md)の実演。決定するまで実行は止まっている
   let approvalOpen = $state(false);
   let approvalResult = $state('(まだ決めていない)');
@@ -767,7 +776,8 @@
       畳む機構は Disclosure の合成で、ここが足すのは生成の進行の到達性と、推論が回答でなく補助であるという扱い。
       既定は畳んだ状態。完了が支援技術へ届く経路は名前で、段階を語る名前が変わったことを一度だけ告げる
       (DS は「考え終わりました」のような文言を持たない)。UI は勝手に畳まない: 完了で畳みたいアプリが status を
-      見て open を落とす。
+      見て open を落とす。生成中は名前が2秒ごとに移り変わる: 部品は描かれた文字の変化を拾い、古い文字を上へ送って
+      新しい文字を下から迎える。
     </Text>
     <div class="pg-controls">
       <label>
@@ -779,7 +789,7 @@
       </label>
     </div>
     <Reasoning status={reasoningStatus} bind:open={reasoningOpen}>
-      {#snippet summary()}{reasoningStatus === 'busy' ? '考えています' : '3秒考えました'}{/snippet}
+      {#snippet summary()}{reasoningStatus === 'busy' ? REASONING_PHASES[reasoningPhase] : '3秒考えました'}{/snippet}
       <p>まず利用者が何を尋ねているかを確かめる。</p>
       <p>次に、手元の出典で答えられるかを見る。足りなければ検索する。</p>
       <p>最後に、答えの形(箇条書きか文章か)を選ぶ。</p>

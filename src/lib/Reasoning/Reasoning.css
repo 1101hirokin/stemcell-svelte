@@ -20,7 +20,21 @@
    motion.loop を引くが契約の tokensRequired には挙げない: 進行表現は Expressive で、必須にすると
    「飾りを持たない実装」が門で落ちる(ToolCall から loop を外したのと同じ線。tokensRequired は
    参照が必須のトークンの集合であって、表現の希望を書き留める欄ではない)。 */
-.sc-reasoning[data-status='busy'] .sc-reasoning-name {
+.sc-reasoning-name-slot {
+  position: relative;
+  display: inline-block;
+}
+/* 去る文字の影。同じ場所に重ねて上へ送る(JS が一時的に置き、動きが終わったら消す) */
+.sc-reasoning-name-ghost {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.sc-reasoning[data-status='busy'] .sc-reasoning-name,
+.sc-reasoning[data-status='busy'] .sc-reasoning-name-ghost {
   background-image: linear-gradient(
     100deg,
     var(--color-app-fg-muted) 40%,
@@ -46,7 +60,8 @@
    待ちの輪を止めずに低速へ沈静させたのとは判断が違う: あちらは図形が唯一の手がかりで、静止すると
    壊れて見える。こちらは名前の文字が「考えています」と語っており、光を落としても意味は失われない。 */
 @media (prefers-reduced-motion: reduce) {
-  .sc-reasoning[data-status='busy'] .sc-reasoning-name {
+  .sc-reasoning[data-status='busy'] .sc-reasoning-name,
+  .sc-reasoning[data-status='busy'] .sc-reasoning-name-ghost {
     background-image: none;
     color: var(--color-app-foreground);
     animation: none;

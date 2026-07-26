@@ -1,6 +1,7 @@
 <script lang="ts">
   import './Reasoning.css';
   import { META } from './meta';
+  import { resolveMotion } from '../internal/motion';
   import Disclosure from '../Disclosure/Disclosure.svelte';
   import type { Snippet } from 'svelte';
 
@@ -28,6 +29,61 @@
     children,
     onopenchange,
   }: Props = $props();
+
+  let slotEl: HTMLElement | undefined = $state();
+  let nameEl: HTMLElement | undefined = $state();
+
+  // 名前が別の文言へ変わったら、古い文字を上へ送り、新しい文字を下から迎える(進行表現は Expressive)。
+  // 名前はアプリが差すスニペットなので、いつ変わったかを prop では知れない。描かれた文字の変化を
+  // そのまま合図にする(観測するだけで、値も DOM の中身も書き換えない)。
+  const flip = (from: string) => {
+    const slot = slotEl;
+    const el = nameEl;
+    if (!slot || !el || typeof el.animate !== 'function') return;
+    const { duration, easing } = resolveMotion(getComputedStyle(el), 'transition');
+    // reduced-motion では --motion-scale が 0 になり、ここで動かさない(部品は分岐しない。motion.md §6)
+    if (duration <= 0) return;
+
+    // 去る文字の影。live region の外(兄弟)に置く: 中に入れると、古い文言が支援技術へもう一度届く
+    const ghost = document.createElement('span');
+    ghost.className = 'sc-reasoning-name-ghost';
+    ghost.setAttribute('aria-hidden', 'true');
+    ghost.textContent = from;
+    slot.appendChild(ghost);
+
+    const options = { duration, easing, fill: 'both' as const };
+    const out = ghost.animate(
+      [
+        { opacity: 1, transform: 'translateY(0)' },
+        { opacity: 0, transform: 'translateY(-0.5em)' },
+      ],
+      options,
+    );
+    out.onfinish = () => ghost.remove();
+    out.oncancel = () => ghost.remove();
+    el.animate(
+      [
+        { opacity: 0, transform: 'translateY(0.5em)' },
+        { opacity: 1, transform: 'translateY(0)' },
+      ],
+      options,
+    );
+  };
+
+  $effect(() => {
+    const el = nameEl;
+    if (!el || typeof MutationObserver === 'undefined') return;
+    let previous = el.textContent ?? '';
+    const observer = new MutationObserver(() => {
+      const next = el.textContent ?? '';
+      if (next === previous) return;
+      const from = previous;
+      previous = next;
+      flip(from);
+    });
+    observer.observe(el, { characterData: true, childList: true, subtree: true });
+    return () => observer.disconnect();
+  });
 </script>
 
 <!-- 生成中であることは領域が aria-busy で伝える(streaming §4 / state.md §3.2 の領域)。
@@ -37,7 +93,9 @@
 <div class="sc-reasoning" data-status={status} aria-busy={status === 'busy'}>
   <Disclosure {open} {onopenchange}>
     {#snippet summary()}
-      <span class="sc-reasoning-name" role="status">{@render summaryContent()}</span>
+      <span class="sc-reasoning-name-slot" bind:this={slotEl}>
+        <span class="sc-reasoning-name" role="status" bind:this={nameEl}>{@render summaryContent()}</span>
+      </span>
     {/snippet}
     {#snippet content()}
       <div class="sc-reasoning-body">{@render children()}</div>
