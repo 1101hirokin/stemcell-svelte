@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -224,13 +224,13 @@ events(Svelte では callback prop):
 
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
-- 格子は行と列を持ち、列に曜日の見出しが付く(Web の表現は grid / columnheader / gridcell。APG Date Picker Dialog)。契約の role には活性化される側(gridcell)を書く: 焦点と活性化のキーが立つのは日の升である(Tabs / Disclosure と同じ形)。
+- 格子は行と列を持ち、列に曜日の見出しが付く(Web の表現は grid / columnheader / gridcell。APG Date Picker Dialog)。契約の role には活性化される側(gridcell)を書く: 焦点と活性化のキーが立つのは日のセルである(Tabs / Disclosure と同じ形)。
 - 焦点は格子の中に1つだけ載る(roving tabindex 相当)。矢印で日、上下で週、Home / End で週の両端、PageUp / PageDown で月、Shift+PageUp / PageDown で年を移る(web-keys.rules.json の arrows.calendar)。移動は選択ではない: 日は Enter / Space で選ぶ(activation.gridcell)。
 - 選ばれている日が届く(aria-selected)。今日が届く(aria-current="date")。期間のときは、両端だけでなく間の日も選ばれていることが届く。
 - 選べない日(min / max の外、unavailable)は、選べないことが届く。焦点からは外さない: そこに日があること自体が読める情報である(date.md §5)。
 - 月が移ったこと、日を選んだことが支援技術へ届く。焦点を奪わず、穏当に告げる(WCAG 2.2 SC 4.1.3。date.md §6)。
 - 月名・曜日名・日付の並びは環境の書式に従う(date.md §3)。DS はこれらの文字列を持たない。
-- 日の升は当たり判定の門(size.md §4)の対象である。7列で並ぶので詰まりやすい。
+- 日のセルは当たり判定の門(size.md §4)の対象である。7列で並ぶので詰まりやすい。
 - 選択・今日・選べない日の視覚の区別は、色の差だけに頼らず地に対して 3:1 を満たす(WCAG 2.2 SC 1.4.11。選べない日はこの項の除外に当たる)。
 
 ### Card(契約 0.0.0-alpha.0)
@@ -454,7 +454,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 暦を開いたら焦点は格子へ移り、閉じたらトリガーへ戻る(overlay.md §4)。Escape で閉じる。
 - 欄と暦は同じ値を指す。片方で変えたことが他方へ届く(date.md §9 の宿題としていた同期を、束ねる側のNormative としてここで確定する。器が2つに割れて見えると、どちらが本当の値か分からなくなる)。
 - 欄だけで完結できる。暦を開かずキーボードだけで日付を入れられることが要求である(date.md §6 / 第1条)。
-- 暦を開くトリガーは器が所有する(Menu と Select が同じ形。alpha.1 で改めた)。開いているか(Web の aria-expanded)と、開く先が一時面であること(aria-haspopup)をトリガーが告げる。焦点とフォーカスリングと当たり判定の門(size.md §4)はトリガーに生きる。欄の桁と暦の升は、それぞれの契約が自分の焦点を持つ。
+- 暦を開くトリガーは器が所有する(Menu と Select が同じ形。alpha.1 で改めた)。開いているか(Web の aria-expanded)と、開く先が一時面であること(aria-haspopup)をトリガーが告げる。焦点とフォーカスリングと当たり判定の門(size.md §4)はトリガーに生きる。欄の桁と暦のセルは、それぞれの契約が自分の焦点を持つ。
 
 ### DateRangePicker(契約 0.0.0-alpha.2)
 
@@ -496,7 +496,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 2つの欄が1つの期間であることが支援技術へ届く(Web の表現は group と、期間全体の名前)。
 - 始まりだけが選ばれている途中の状態が届く。格子では、次に押した日が終わりになることが分かる形にする(見せ方は Expressive だが、途中であることが視覚と支援技術の両方へ届くのは Normative)。
 - 終わりが始まりより前にはならない。逆に選んだときは、実装が対を入れ替えるか、始まりを置き直す(どちらを採るかは Expressive。黙って不正な対を保持しない)。
-- 暦を開くトリガーは器が所有する(Menu と Select が同じ形。alpha.1 で改めた)。開いているか(Web の aria-expanded)と、開く先が一時面であること(aria-haspopup)をトリガーが告げる。焦点とフォーカスリングと当たり判定の門(size.md §4)はトリガーに生きる。欄の桁と暦の升は、それぞれの契約が自分の焦点を持つ。
+- 暦を開くトリガーは器が所有する(Menu と Select が同じ形。alpha.1 で改めた)。開いているか(Web の aria-expanded)と、開く先が一時面であること(aria-haspopup)をトリガーが告げる。焦点とフォーカスリングと当たり判定の門(size.md §4)はトリガーに生きる。欄の桁と暦のセルは、それぞれの契約が自分の焦点を持つ。
 
 ### Dialog(契約 0.0.0-alpha.2)
 
@@ -1172,6 +1172,47 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 - 切替で DOM / 読み上げ順は変わらない。
 - SwiftUI 実装は ViewThatFits を使わない: あれは内容駆動(収まりで切替)であり、同じ幅でも内容次第で形が割れて共通言語が壊れる(layout.md §9 の記録)。自前で幅を測って閾値と比べる。
+
+### Table(契約 0.0.0-alpha.1)
+
+行と列に意味がある表。器が構造と意味論(見出しとセルの対応・並べ替えの表明・選択の列)を持ち、中身はアプリが差す。セルは焦点を受けない静的な表であり、矢印でセルを渡る grid ではない(APG 逐語: a WAI-ARIA table is a static tabular structure ... it is not an interactive widget / its cells are not focusable or selectable)。セルの中に対話要素を置くことは table のままでよく、利用者は Tab でそこへ届く。
+
+props:
+
+- `columns`: array — 列の宣言。器が列を知っていることで、見出しとセルの対応・並べ替えの表明の置き場所・揃え・狭い画面での送り方を器が保証できる。見出しの文言とセルの描き方は器が解釈しない(どう受け取るかは各実装の表現)。
+- `rows`: array — 行の列。並んだ順にそのまま描く。器は並べ替えも絞り込みもしない(List / Sources と同じで、中身を解釈しない)。
+- `overflow`: "scroll" | "wrap"(既定 "scroll") — セルに収まらない中身をどう扱うか。scroll はセルを1行に収めて切り詰め、表そのものを横へ送れるようにする(行の高さが揃い、表の走査が支えられる)。wrap は折り返して行を高くする(説明文の列を持つ表向け)。切り詰めるのは見た目だけで、支援技術には全文が届く。
+- `sticky`: "none" | "start" | "end" | "both"(既定 "none") — 横へ送るとき、行の始まり側 / 終わり側の列を貼り付けるか。始まり側は行を特定する列、終わり側は行の操作を置く列が多く、流れて消えると今どの行を見ているか読めなくなる。overflow=wrap のときは送る方向が無いので効かない。
+- `sort`: object((省略可)) — いま並べ替わっている列と向き。アプリが持つ値で、器は表明するだけ(Web は aria-sort)。省略は「並べ替えていない」。
+- `selected`: array((省略可)) — 選ばれている行の id の集合。アプリが持つ値。この値と selectedchange が渡されたときだけ選択の列が現れる(真偽値の口を別に持たない。開閉が値で決まるのと同じ形)。選択は値であって状態ではないので aria-selected は使わない(table は選択を持たない。state.rules.json)。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る(表は密度の主な消費者で、密な表は sm を採る)。段が引く余白の配線は foundations/size.rules.json。密度と直交する(size.md §3)。
+
+events(Svelte では callback prop):
+
+- `onsortchange`: (payload: { column: string; direction: 'ascending' | 'descending' } | null) => void — 並べ替えの要求。器は行を並べ替えない。解除(null)を返すかどうか、昇降の循環の回し方は Expressive。名前が sortchange なのは、値(sort)と同じ名前の口を作らないため(GOVERNANCE §4。open / openchange と同じ形)。
+- `onselectedchange`: (payload: string[]) => void — 選択の要求。選ばれている行の id の集合を渡す。器は選択を保持しない。
+- `onrowactivate`: (payload: string) => void — 行の押下。一次の行き先へ進む要求で、行の id を渡す。行そのものは押せる要素ではない(表の構造である)。一次の行き先は行の中の要素(多くは名前の列のリンク)が持ち、この口はその活性化を指の操作から起こすためにある。行の中の別の操作を押したときは発火しない。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `caption`(必須) — 表の名前。無名の表を許さない(Dialog / Drawer と同じ線)。見せ方(視覚に出すか、支援技術だけへ届けるか)は Expressive。
+- `header`(必須) — 列の見出し。列ごとに一度描かれる。
+- `cell`(必須) — セルの中身。行と列の組ごとに一度描かれる。
+- `empty`(必須) — 行が0件のときに出す。枠だけが残る形は、読み込み中なのか0件なのかが読めない。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- セルは焦点を受けない。矢印でセルを渡る形(grid パターン)は持たない(APG: 選択とセルの移動は grid の観念であって table のものではない)。セルの中の対話要素は Tab で届く。
+- 見出しのセルは列に属することを表明する(Web は scope=col)。器が列を知っているからこの対応を保証できる。
+- 並べ替えている列は見出しのセルで表明する(Web は aria-sort。APG: aria-sort is set to an appropriate value on the header cell element for the sorted column)。向きの絵だけに頼らない。
+- 並べ替えを要求する操作は押せる要素である(見出しのセルそのものを押させない)。名前は列の見出しを含み、押すと何が起きるかが読める。
+- 選択のセルにはチェックボックスを置き、その名前は行を特定できるものにする(「選択」だけの名前を並べない)。全選択のチェックボックスは、一部だけ選ばれているとき indeterminate を立てる。
+- 行が0件のときは empty を出す。0件の表を構造だけ届けない(List が「項目が無いときは何も描かない」と決めたのと同じ理由)。
+- 器は表の名前を持つ(caption)。名前の無い表は、複数の表がある画面でどれがどれか読めない。
+- 行全体を押せるが、行に role を与えない(表の構造のままにする)。一次の行き先は行の中の要素が持ち、キーボードと支援技術の利用者はその要素へ Tab で届く。行の押下はその要素の活性化を代わりに起こすだけである。
+- 行の中の別の操作(チェックボックス・削除・メニュー)を押したときは行の押下を起こさない。押した相手が二つの意味を持つと、どちらが起きたのか読めない。
+- 選ばれている行は見た目でも分かるが、行に aria-selected は立てない。選択を伝えるのはチェックボックスの checked である(aria-selected を立てると選択できる表 = grid を名乗ることになり、セルを渡れないという決めと噛み合わない)。
+- 貼り付けた列と流れる列の境目には、まだ送れる向きがあることを示す表現を置く。何も出さないと境目が表の端に見えて、続きがあることに気づけない。
 
 ### Tabs(契約 0.0.0-alpha.0)
 

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion, DateField, Calendar, DatePicker, DateRangePicker } from '../../src/lib';
+  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion, DateField, Calendar, DatePicker, DateRangePicker, Table, Select } from '../../src/lib';
+  import type { TableColumn, TableSort } from '../../src/lib';
 
   let faqOpen = $state(false);
   const LIST_ITEMS = [
@@ -21,6 +22,43 @@
   let calendarMonth = $state('2026-07');
   let picked = $state('2026-07-20');
   let range = $state({ start: '2026-07-20', end: '2026-07-26' });
+
+  // Table(クラスタ10 第2段)。並べ替えも選択も値で、器は要求を返すだけ
+  const orders = [
+    { id: 'o-1041', customer: '朝日商会', status: '発送済み', amount: 128000, date: '2026-07-20' },
+    { id: 'o-1042', customer: '向日葵デザイン', status: '準備中', amount: 42800, date: '2026-07-21' },
+    { id: 'o-1043', customer: '南風製作所', status: '準備中', amount: 9800, date: '2026-07-23' },
+    { id: 'o-1044', customer: '北斗印刷', status: '取消', amount: 0, date: '2026-07-24' },
+  ];
+  const orderColumns: TableColumn[] = [
+    { id: 'id', sortable: true },
+    { id: 'customer' },
+    { id: 'status' },
+    { id: 'date', sortable: true },
+    { id: 'amount', align: 'end', sortable: true },
+  ];
+  const columnLabel: Record<string, string> = {
+    id: '注文番号',
+    customer: '取引先',
+    status: '状態',
+    date: '注文日',
+    amount: '金額',
+  };
+  let sort = $state<TableSort | undefined>({ column: 'date', direction: 'descending' });
+  let selectedOrders = $state<string[]>(['o-1042']);
+  let activated = $state('(まだ)');
+  let overflow = $state<'scroll' | 'wrap'>('scroll');
+  let sticky = $state<'none' | 'start' | 'end' | 'both'>('start');
+  // 並べ替えはアプリがやる(器は要求を返すだけ)
+  const sortedOrders = $derived.by(() => {
+    if (!sort) return orders;
+    const dir = sort.direction === 'ascending' ? 1 : -1;
+    return [...orders].sort((a, b) => {
+      const x = a[sort!.column as 'id'];
+      const y = b[sort!.column as 'id'];
+      return (x < y ? -1 : x > y ? 1 : 0) * dir;
+    });
+  });
 </script>
 
 {#snippet faqSummary()}配送について{/snippet}
@@ -137,4 +175,67 @@
       {#snippet endLabel()}終了日{/snippet}
     </DateRangePicker>
     <Text variant="body-sm" muted>期間: {range.start || '(未定)'} 〜 {range.end || '(未定)'}</Text>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">Table(クラスタ10 第2段)</Text>
+    <Text as="p" variant="body-sm" muted>
+      行と列に意味がある表。並べ替えも選択も値で、器は要求を返すだけ(並べ替えるのはアプリ)。セルは焦点を
+      受けない(表であって grid ではない)。行はどこを押しても一次の行き先へ進むが、行の中の操作を押した
+      ときは起こらない。狭いときは横へ送り、端の列を貼り付けられる。
+    </Text>
+    <Cluster>
+      <Select
+        value={overflow}
+        options={[
+          { value: 'scroll', label: 'scroll(1行に収めて送る)' },
+          { value: 'wrap', label: 'wrap(折り返す)' },
+        ]}
+        onchange={(v) => (overflow = v as typeof overflow)}
+      >
+        {#snippet label()}収まらない中身{/snippet}
+      </Select>
+      <Select
+        value={sticky}
+        options={[
+          { value: 'none', label: 'none' },
+          { value: 'start', label: 'start(先頭列)' },
+          { value: 'end', label: 'end(末尾列)' },
+          { value: 'both', label: 'both' },
+        ]}
+        onchange={(v) => (sticky = v as typeof sticky)}
+      >
+        {#snippet label()}貼り付ける列{/snippet}
+      </Select>
+    </Cluster>
+    <Table
+      columns={orderColumns}
+      rows={sortedOrders}
+      {sort}
+      {overflow}
+      {sticky}
+      selected={selectedOrders}
+      rowLabel={(row) => `${row.customer}の注文`}
+      selectionLabel="すべての注文"
+      onsortchange={(next) => (sort = next ?? undefined)}
+      onselectedchange={(next) => (selectedOrders = next)}
+      onrowactivate={(id) => (activated = id)}
+    >
+      {#snippet caption()}直近の注文{/snippet}
+      {#snippet header(column)}{columnLabel[column.id]}{/snippet}
+      {#snippet cell(row, column)}
+        {#if column.id === 'amount'}
+          {row.amount.toLocaleString('ja-JP')} 円
+        {:else if column.id === 'status'}
+          <Tag>{row.status}</Tag>
+        {:else}
+          {row[column.id]}
+        {/if}
+      {/snippet}
+      {#snippet empty()}注文はまだありません{/snippet}
+    </Table>
+    <Text variant="body-sm" muted>
+      選んだ行: {selectedOrders.join(', ') || '(なし)'} / 押された行: {activated} /
+      並べ替え: {sort ? `${sort.column} ${sort.direction}` : '(なし)'}
+    </Text>
   </section>
