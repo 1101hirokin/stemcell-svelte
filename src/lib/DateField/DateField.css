@@ -1,0 +1,187 @@
+/* 暦日を打ち込む欄(DateField.md)。欄としての床(面・枠・焦点・文字・間隔)は TextField と同じものを引く
+   (field.md §6: 8種の欄は同じ解剖を持つ)。違うのは中身が桁に分かれることだけで、桁の見た目と
+   区切りの造形は Expressive。 */
+.sc-datefield {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  /* フィールドは fill(横いっぱい)が既定。憲法第3条・field.md §2・layout.md §2(裁定 2026-07) */
+  inline-size: 100%;
+  min-inline-size: 0;
+  /* 中立の資材(TextField.md §2: resting の枠は color.app.border。hover 役が無いので hover を持たない) */
+  --_border: var(--color-app-border);
+  --_ring: var(--color-semantic-plain-focus-ring);
+}
+/* invalid は intent を danger へ差し替える(state.md §3.1 / §7) */
+.sc-datefield[data-invalid='true'] {
+  --_border: var(--color-semantic-danger-border);
+  --_ring: var(--color-semantic-danger-focus-ring);
+}
+/* disabled が invalid に勝つ(state.md §3.1)。同詳細度の後勝ちで上書きする */
+.sc-datefield[data-disabled='true'] {
+  --_border: var(--color-semantic-disabled-border);
+}
+
+.sc-datefield-label {
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+/* 記号そのものは seed(field.md §4)。造形は expressive */
+.sc-datefield-required {
+  margin-inline-start: 0.25em;
+}
+
+/* 内包時の高さは一次内容(入力)が決める(size.md §2 裁定)。縦 inset は入力に付き、器は横 inset だけを
+   持つ。align-items:stretch で affix は器の行高へ従属する(器を押し上げない) */
+.sc-datefield-control {
+  display: flex;
+  align-items: stretch;
+  gap: var(--spacing-inline-md);
+  --_inset: var(--spacing-inset-md);
+  padding-inline: var(--_inset);
+  background: var(--color-app-surface);
+  border: var(--shape-border-width) solid var(--_border);
+  border-radius: var(--shape-semantic-control);
+  transition:
+    border-color var(--motion-feedback-duration) var(--motion-feedback-easing),
+    background-color var(--motion-feedback-duration) var(--motion-feedback-easing);
+}
+.sc-datefield[data-size='sm'] .sc-datefield-control {
+  --_inset: var(--spacing-inset-sm);
+}
+.sc-datefield[data-size='lg'] .sc-datefield-control {
+  --_inset: var(--spacing-inset-lg);
+}
+/* 付属が自前のコントロール(ボタン)を持つ辺では、そのボタンが縁と当たり判定を所有するので、
+   フィールドの横 inset を手放す(size.md §2 の水平版。二重取りを避ける)。裸のアイコン/装飾の辺は
+   inset を残し、内容が枠に触れないようにする */
+.sc-datefield-control:has(.sc-datefield-start button) {
+  padding-inline-start: 0;
+}
+.sc-datefield-control:has(.sc-datefield-end button) {
+  padding-inline-end: 0;
+}
+.sc-datefield[data-disabled='true'] .sc-datefield-control {
+  background: var(--color-semantic-disabled-soft-bg);
+  cursor: not-allowed;
+}
+
+.sc-datefield-input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  border: none;
+  background: none;
+  /* 縦 inset は一次内容(入力)が持ち、器の高さを決める(size.md §2)。横は器の padding-inline が持つ */
+  padding-block: var(--_inset);
+  padding-inline: 0;
+  outline: none;
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-datefield-input::placeholder {
+  color: var(--color-app-fg-muted);
+}
+.sc-datefield[data-disabled='true'] .sc-datefield-input {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+
+/* オートフィル: ブラウザは autofill 背景を input にだけ乗せる。input は横 inset のぶん狭く角も四角なので
+   ハイライトが両端で切れ角が合わない。input の背景を box-shadow で同色に潰しつつ、control 全面に
+   :has(:autofill) で同色を敷いて、角丸の全面でハイライトを一致させる。色は brand の淡い青(primary.soft-bg)。 */
+.sc-datefield-input:-webkit-autofill,
+.sc-datefield-input:-webkit-autofill:hover,
+.sc-datefield-input:-webkit-autofill:focus,
+.sc-datefield-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 100px var(--color-semantic-primary-soft-bg) inset;
+  -webkit-text-fill-color: var(--color-app-foreground);
+  caret-color: var(--color-app-foreground);
+}
+.sc-datefield-control:has(.sc-datefield-input:autofill) {
+  background: var(--color-semantic-primary-soft-bg);
+}
+
+/* focus-ring.md: :focus-visible + outline + offset。ring は箱(control)に出す。
+   :focus-within を使わないのは、end 内の対話要素(クリアボタン等)の focus で箱を光らせないため */
+.sc-datefield-control:has(.sc-datefield-input:focus-visible) {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.sc-datefield-start,
+.sc-datefield-end {
+  display: inline-flex;
+  align-items: center;
+  /* 器の行高に従属する(size.md §2 内包時の裁定)。行高いっぱいに広がり hit-target を器が満たす */
+  align-self: stretch;
+  color: var(--color-app-fg-muted);
+}
+/* affix の対話要素/装飾は器の行高に従い、自前の縦 inset で器を押し上げない(内包時の裁定)。
+   詳細度は (0,2,1) にする: 中の button 自身の .sc-button/.sc-iconbutton[data-size](0,2,0)に
+   padding-block:0 を勝たせるため(:where は詳細度 0 で負けていた。独立レビュー blocker) */
+.sc-datefield-control .sc-datefield-start > button,
+.sc-datefield-control .sc-datefield-end > button {
+  align-self: stretch;
+  padding-block: 0;
+}
+
+.sc-datefield-description,
+.sc-datefield-error {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-datefield-description {
+  color: var(--color-app-fg-muted);
+}
+/* エラー文は danger.soft-fg の転用(TextField.md §2。コントラストはレビュー実測済み 10.45:1 / 11.04:1) */
+.sc-datefield-error {
+  color: var(--color-semantic-danger-soft-fg);
+}
+
+/* iOS(Safari / Chrome とも WebKit)は font-size<16px の入力に focus するとページをズームする。触覚ポインタ
+   では入力文字を最低 16px にしてその挙動を回避する(Web/iOS 固有。field.md)。fine ポインタ(desktop)は
+   設計どおり(14px)を保つ。padding は不変だが line-height が比率(1.334)なので、タッチ時は行高が伴って
+   約 2px 高くなる(タッチの的が少し大きくなる方向で許容)。 */
+@media (pointer: coarse) {
+  .sc-datefield-input {
+    font-size: max(16px, var(--typography-body-md-font-size));
+  }
+}
+
+/* 桁。焦点は桁に立つ(根ではない)。等幅の字形で、値が変わっても幅が跳ねない */
+.sc-datefield-segment {
+  padding-inline: 0.125em;
+  border-radius: var(--shape-semantic-selection);
+  font-variant-numeric: tabular-nums;
+  cursor: text;
+}
+.sc-datefield-segment[data-empty='true'] {
+  color: var(--color-app-fg-muted);
+}
+.sc-datefield-segment:focus {
+  outline: none;
+}
+.sc-datefield-segment:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+.sc-datefield[data-disabled='true'] .sc-datefield-segment {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+.sc-datefield-separator {
+  color: var(--color-app-fg-muted);
+  padding-inline: 0.125em;
+}

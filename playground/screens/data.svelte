@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion } from '../../src/lib';
+  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion, DateField, Calendar, DatePicker, DateRangePicker } from '../../src/lib';
 
   let faqOpen = $state(false);
   const LIST_ITEMS = [
@@ -15,6 +15,12 @@
     { id: 'faq2', label: '返品について' },
     { id: 'faq3', label: '法人向け(準備中)', disabled: true },
   ];
+
+  // 日付(クラスタ10 第3段)。値はアプリが持つ。暦日であって時刻もタイムゾーンも持たない
+  let due = $state('2026-07-20');
+  let calendarMonth = $state('2026-07');
+  let picked = $state('2026-07-20');
+  let range = $state({ start: '2026-07-20', end: '2026-07-26' });
 </script>
 
 {#snippet faqSummary()}配送について{/snippet}
@@ -72,4 +78,63 @@
     <Disclosure summary={faqSummary} content={faqContent} bind:open={faqOpen} />
     <Disclosure summary={faqSummary2} content={faqContent2} />
     <Text as="p" variant="body-sm" muted>1つ目の open: {faqOpen}</Text>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">DateField(桁で打つ欄)</Text>
+    <Text as="p" variant="body-sm" muted>
+      年・月・日を桁に分けて受ける。並びも桁の名前も週の始まりも環境から借りるので、DS は文言を持たない。
+      上下でその桁を増減し、左右で桁を移る(native の input[type=date] と同じ手触り)。値が日として成立した
+      ときにだけ change が出る: 年だけ入った状態は日ではない。
+    </Text>
+    <DateField bind:value={due} min="2026-01-01" max="2026-12-31">
+      {#snippet label()}納品日{/snippet}
+      {#snippet description()}2026年のうちで選ぶ{/snippet}
+    </DateField>
+    <Text variant="body-sm" muted>値: {due || '(未入力)'}</Text>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">Calendar(月の格子)</Text>
+    <Text as="p" variant="body-sm" muted>
+      選択の意味を持たない。今どこが選ばれているかを受け取り、押された日を返すだけで、意味づけは束ねる側が
+      与える。矢印で日、上下で週、Page で月、Shift+Page で年。移動は選択ではないので Enter で選ぶ。
+      今日には aria-current="date" が立つ。
+    </Text>
+    <Card outlined>
+      <Calendar bind:month={calendarMonth} start={picked} onselect={(d) => (picked = d)} />
+    </Card>
+    <Text variant="body-sm" muted>押された日: {picked} / 表示している月: {calendarMonth}</Text>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">DatePicker(欄 + 暦)</Text>
+    <Text as="p" variant="body-sm" muted>
+      打っても選んでもよい。両者は同じ値を指す。暦が開いているかは器が内部で持つ(トリガーに従属する一時面
+      なので、値ではない)。暦を開かずキーボードだけで入れられることが要求である。
+    </Text>
+    <DatePicker bind:value={picked} calendarLabel="暦を開く">
+      {#snippet label()}公開日{/snippet}
+    </DatePicker>
+    <Text variant="body-sm" muted>値: {picked || '(未入力)'}</Text>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">DateRangePicker(期間)</Text>
+    <Text as="p" variant="body-sm" muted>
+      始まりと終わりで1つの期間。片方だけ変わったときも対で知らせる。暦は2ヶ月ぶん並べ、1回目の押下で
+      始まり、2回目で終わりになる(逆順に押したら対を入れ替える)。プリセット(「過去7日間」等)は持たない:
+      何を候補に出すかはアプリの政策で、組み方は pattern が示す。
+    </Text>
+    <DateRangePicker
+      start={range.start}
+      end={range.end}
+      calendarLabel="暦を開く"
+      onchange={(next) => (range = next)}
+    >
+      {#snippet label()}対象の期間{/snippet}
+      {#snippet startLabel()}開始日{/snippet}
+      {#snippet endLabel()}終了日{/snippet}
+    </DateRangePicker>
+    <Text variant="body-sm" muted>期間: {range.start || '(未定)'} 〜 {range.end || '(未定)'}</Text>
   </section>

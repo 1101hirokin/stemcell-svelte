@@ -9,7 +9,7 @@ export const SCREENS = [
   { id: 'selection', label: '選択と集合', note: 'クラスタ7。集合から選ぶ。矢印キーの語彙がここで効く。' },
   { id: 'overlays', label: 'オーバーレイ', note: 'クラスタ8。一時的に浮かぶ面。焦点と退出の扱いが類ごとに違う。' },
   { id: 'navigation', label: 'ナビゲーション', note: 'クラスタ9。行き先と現在地。Collection の語彙と current の初消費。' },
-  { id: 'data', label: 'データ表示', note: 'クラスタ10。項目の並びと、畳んで開くもの。' },
+  { id: 'data', label: 'データ表示', note: 'クラスタ10。項目の並び、畳んで開くもの、そして日付。' },
   { id: 'ai', label: 'AI 有機体', note: 'クラスタ11。会話の part の上に乗る面。進行を値で持ち、段階が支援技術へ届く。' },
   { id: 'foundations', label: 'foundation の実験', note: '部品ではなく、トークンの値を実物で見比べる器。裁定の材料に使う。' },
 ] as const;
