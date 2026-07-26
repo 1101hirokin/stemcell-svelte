@@ -1,0 +1,36 @@
+/* 回答の根拠(出典)の一覧(Sources.md)。器が持つのは縦の律動と素の体裁だけで、項目の中身
+   (到達手段の Link、題や抜粋の Text)は合成した部品が描く。カード枠・区切り線・チップの塗りといった
+   造形は Expressive なので持たない。 */
+.sc-sources {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  /* 項目の縦の律動。器が間隔を所有する(layout.md §1) */
+  gap: var(--spacing-stack-sm);
+  margin: 0;
+  padding: 0;
+  /* 印は持たない(番号や点の造形は Expressive)。役割は role=list が保つ */
+  list-style: none;
+  color: var(--color-app-foreground);
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+}
+
+/* 領域名。小さな見出しで、本文より控えめに置く(領域の名前であって読ませる文ではない) */
+.sc-sources-label {
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-label-sm-font-family);
+  font-size: var(--typography-label-sm-font-size);
+  font-weight: var(--typography-label-sm-font-weight);
+  line-height: var(--typography-label-sm-line-height);
+  letter-spacing: var(--typography-label-sm-letter-spacing);
+  margin-block-end: var(--spacing-stack-sm);
+}
+
+.sc-sources-item {
+  /* 中身が長くても器の外へ溢れない(fill が制約に従って縮む。layout.md §2) */
+  min-inline-size: 0;
+}

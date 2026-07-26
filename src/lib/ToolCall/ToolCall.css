@@ -1,0 +1,51 @@
+/* ツール呼び出しの進行を1枚で見せる面(ToolCall.md)。器は中立の枠付きの面で、失敗のときだけ
+   danger が乗る。busy と result を中立に置くのは契約の判断で、完了は成功の主張ではない
+   (結果が正しいかは result の中身が語る)。 */
+.sc-tool-call {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-md);
+  border: var(--shape-border-width) solid var(--color-app-border);
+  border-radius: var(--shape-semantic-card);
+  padding: var(--spacing-inset-md);
+  color: var(--color-app-foreground);
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+}
+
+/* ツール名は領域の名前。カードの中で最も強い文字の役(部品群の title 段の最小) */
+.sc-tool-call-name {
+  font-family: var(--typography-title-sm-font-family);
+  font-size: var(--typography-title-sm-font-size);
+  font-weight: var(--typography-title-sm-font-weight);
+  line-height: var(--typography-title-sm-line-height);
+  letter-spacing: var(--typography-title-sm-letter-spacing);
+}
+
+/* 空の live region は場所を取らない(遷移で中身が入ったときだけ現れる) */
+.sc-tool-call-result:empty,
+.sc-tool-call-error:empty {
+  display: none;
+}
+
+/* 失敗は読むべき報告(color.md §5 の danger)。器の枠も danger へ寄せて、視覚でも段階が分かる */
+.sc-tool-call[data-status='error'] {
+  border-color: var(--color-semantic-danger-border);
+}
+.sc-tool-call-error {
+  border-radius: var(--shape-semantic-card);
+  padding: var(--spacing-inset-md);
+  background: var(--color-semantic-danger-soft-bg);
+  color: var(--color-semantic-danger-soft-fg);
+}
+
+/* 待ちの図形は合成した円形の不確定ローダーが描く(loop の時間と加減速も、reduced-motion での
+   沈静もあちらが持つ)。ここは並びの器だけを持つ。 */
+.sc-tool-call-busy {
+  display: flex;
+  align-items: center;
+}

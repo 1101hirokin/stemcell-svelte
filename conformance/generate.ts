@@ -84,7 +84,7 @@ describe('${name} conformance', () => {
   it('props: 名前の集合が契約と過不足なく一致する', () => {
     expect(Object.keys(META.props).sort()).toEqual(Object.keys(SPEC.props).sort());
   });
-  for (const [name, p] of Object.entries(SPEC.props)) {
+  for (const [name, p] of Object.entries<{ values: readonly string[] | null; default: unknown }>(SPEC.props)) {
     it(\`props.\${name}: enum 値と既定値が契約と一致する\`, () => {
       const m = (META.props as Record<string, any>)[name];
       if (p.values) expect([...m.values].sort()).toEqual([...p.values].sort());
