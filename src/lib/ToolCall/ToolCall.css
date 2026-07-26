@@ -43,30 +43,9 @@
   color: var(--color-semantic-danger-soft-fg);
 }
 
-/* 待ちの図形。輪が回る(進行表現は Expressive。motion.loop の範囲)。
-   意味は領域の aria-busy が運ぶので、この図形は装飾(aria-hidden)。
-   寸法は文字に従わせる(1em): 待ちの印はカードの文字と釣り合うべきで、ここで独自の長さを
-   決めると SSOT の外の数値が増える。色と太さと速さはすべて契約が挙げるトークンで引く。 */
+/* 待ちの図形は合成した円形の不確定ローダーが描く(loop の時間と加減速も、reduced-motion での
+   沈静もあちらが持つ)。ここは並びの器だけを持つ。 */
 .sc-tool-call-busy {
-  inline-size: 1em;
-  block-size: 1em;
-  border: var(--shape-border-width) solid var(--color-app-border);
-  /* 1辺だけを濃くして、回転が見える形にする */
-  border-block-start-color: var(--color-app-foreground);
-  /* 円の幾何が丸さを担う(線で描く輪に半径のトークンは要らない。円形の進行表示と同じ判断) */
-  border-radius: 50%;
-  animation: sc-tool-call-spin var(--motion-loop-duration) var(--motion-loop-easing) infinite;
-}
-@keyframes sc-tool-call-spin {
-  to {
-    rotate: 360deg;
-  }
-}
-
-/* reduced-motion では低速へ沈静させる(motion.md §6 の loop 特例)。止めないのは Loader と同じ理由で、
-   見る人には視覚しか手がかりが無く、静止した点は待ちに見えないため */
-@media (prefers-reduced-motion: reduce) {
-  .sc-tool-call-busy {
-    animation-duration: calc(var(--motion-loop-duration) * 6);
-  }
+  display: flex;
+  align-items: center;
 }

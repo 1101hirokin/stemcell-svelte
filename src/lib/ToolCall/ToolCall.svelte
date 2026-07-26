@@ -1,6 +1,7 @@
 <script lang="ts">
   import './ToolCall.css';
   import { META } from './meta';
+  import CircularLoader from '../CircularLoader/CircularLoader.svelte';
   import type { Snippet } from 'svelte';
 
   // ツール呼び出しの進行を1枚で見せる面(ToolCall.md)。ツールを実行するものではなく、
@@ -56,8 +57,13 @@
   {/if}
 
   {#if status === 'busy'}
-    <!-- 待ちの図形。意味は領域の aria-busy が運ぶので、図形は装飾として隠す -->
-    <div class="sc-tool-call-busy" aria-hidden="true"></div>
+    <!-- 待ちの図形は円形の不確定ローダーを合成する(待ちの絵を二度描かない)。
+         あの部品は本来 role=status と隠し文字で「何を待っているか」を届けるが、ここではその役を
+         領域の aria-busy が持つので(契約 a11y。進行表示自身が連呼しない)、包んで支援技術から隠す。
+         隠す以上ローダーの名前は誰にも届かないため空で渡す(HOLES #55) -->
+    <div class="sc-tool-call-busy" aria-hidden="true">
+      <CircularLoader label="" size="sm" />
+    </div>
   {/if}
 
   <div class="sc-tool-call-result" role="status">

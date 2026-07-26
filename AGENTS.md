@@ -1049,7 +1049,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 領域自体は告知しない(aria-live は個々の Toast が持つ。role=status / alert は Toast 側)。領域は器であって内容ではない。
 - 自律退去のタイマーは hover / focus 中は一時停止する(SC 2.2.1)。ホストがキューとタイマーを所有し、Toast の追加 / 退去 / 上限超過を決定的に扱う(svelte / lit が食い違わないため。GOVERNANCE §7)。
 
-### ToolCall(契約 0.0.0-alpha.0)
+### ToolCall(契約 0.0.0-alpha.1)
 
 ツール呼び出しの進行を1枚で見せる面。1つの呼び出しが busy →(result | error)を経る様を、各段階が支援技術と視覚へ届く形で描く(tool-call.md)。lifecycle は state.rules.json の相互作用状態ではないため states でなく status prop で持つ(busy は loading と同型の進行。tool-call §3)。アプリ / SDK が status を所有し駆動する(UI は与えられた段階を描くだけ。tool-call §6。Dialog の open と同じ向き)。ツールの実行・プロトコル(MCP / A2A / function-calling)・runtime には触れない(§6)。ツール名から結果描画への対応(Generative UI。§5)は result スロットの表現。承認待ち(requires-action)は必須集合外で HITL が持つ(§2)。conversation §3 の tool-call / tool-result part の上に乗る。RFC 0014 の seed(status: draft)。native 写像の一次確認まで暫定。
 

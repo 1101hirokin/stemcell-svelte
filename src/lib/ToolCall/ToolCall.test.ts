@@ -27,7 +27,17 @@ it('busy は領域が aria-busy で伝え、進行の図形は支援技術から
   expect(root(container).getAttribute('aria-busy')).toBe('true');
   const figure = container.querySelector('.sc-tool-call-busy') as HTMLElement;
   expect(figure.getAttribute('aria-hidden')).toBe('true');
-  expect(figure.textContent).toBe('');
+  // 図形は文字を持たない(合成したローダーの隠し文字も空。名前は誰にも届かないので発明しない)
+  expect(figure.textContent?.trim()).toBe('');
+});
+
+it('待ちの図形は合成した円形の不確定ローダーが描く(待ちの絵を二度描かない)', () => {
+  const { container } = render(ToolCall, { props: { status: 'busy', name } });
+  const loader = container.querySelector('.sc-tool-call-busy .sc-circularloader') as HTMLElement;
+  expect(loader).not.toBeNull();
+  // ローダー自身は role=status を持つが、包みが隠すので支援技術には届かない
+  expect(loader.getAttribute('role')).toBe('status');
+  expect(loader.closest('[aria-hidden="true"]')).not.toBeNull();
 });
 
 it('result / error では aria-busy が下りる', () => {
