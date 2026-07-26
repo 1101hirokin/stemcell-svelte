@@ -20,6 +20,8 @@
     size?: (typeof META.props.size.values)[number];
     /** 初期の行高。上限ではない(契約: 自動成長は Expressive。field-sizing はまだ Baseline 未達)。 */
     rows?: number;
+    /** 高さの上限(行数)。省略すると上限を持たない。rows と同じ値を与えると高さが固定される。 */
+    maxRows?: number;
     onchange?: (value: string) => void;
     label: Snippet;
     description?: Snippet;
@@ -37,6 +39,7 @@
     keyboard = META.props.keyboard.default,
     size = META.props.size.default,
     rows = META.props.rows.default,
+    maxRows,
     onchange,
     label,
     description,
@@ -76,6 +79,7 @@
       class="sc-textarea-input"
       id={inputId}
       style:--sc-textarea-rows={rows}
+      style:--sc-textarea-max-rows={maxRows}
       {name}
       {rows}
       bind:value

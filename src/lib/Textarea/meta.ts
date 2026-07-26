@@ -19,5 +19,6 @@ export const META = {
     },
     size: { values: ['sm', 'md', 'lg'], default: 'md' },
     rows: { default: 3 },
+    maxRows: {},
   },
 } as const;

@@ -1286,7 +1286,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - textbox は活性化のキーを持たない(web-keys.rules.json: 空配列)。操作は文字入力そのものであり、1行入力での Enter の意味(暗黙送信)は HTML のフォームの挙動であって本契約の関心ではない。
 - 標的の門: 当たり判定は size.md §4 の下限を下回らない。
 
-### Textarea(契約 0.0.0-alpha.0)
+### Textarea(契約 0.0.0-alpha.1)
 
 複数行のテキスト入力。TextField を継承する(props / states / tokensRequired)。別部品である理由は Textarea.md §1: SwiftUI では 1行(TextField)と複数行(TextEditor)で型そのものが変わり、boolean の multiline prop では実装の分岐を吸収できない(2026-07 native 調査)。slots / events は継承されないので再宣言する(スキーマの extends 意味論)。start / end を再宣言しないのは意図的である: 複数行の器にアイコンの行内配置は成立しない。
 
@@ -1302,7 +1302,8 @@ props:
 - `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。
 - `keyboard`: "text" | "email" | "numeric" | "decimal" | "tel" | "url"(既定 "text") — ソフトウェアキーボードの種類。検証ではなく入力の補助である(Web の inputmode / iOS の keyboardType / Compose の KeyboardOptions.keyboardType へ写像。6値は3プラットフォームすべてに対応物がある交差集合)。数字だが数値演算しない文字列(電話・郵便番号・カード番号)は numeric を使う。数値スピナー(type=number 相当)の意味論は持たない(2026-07 調査: その弊害は業界の一致)。
 - `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る(Carbon / Ant / Spectrum も入力に複数段を持つ)。段が引く余白の配線は foundations/size.rules.json。
-- `rows`: number(既定 3) — 初期の行高(行数)。上限ではない。内容に応じた自動成長を既定にしない: Web の field-sizing: content は 2026-07 時点で Baseline の Widely Available 未達(Newly Available 2026-06)であり、採るなら progressive enhancement(第7条)。成長のさせ方は Expressive。
+- `rows`: number(既定 3) — 高さの下限(行数)。上限ではない。内容に応じて育つ側を採る(Textarea.md §2 の裁定 2026-07-26)。Web の field-sizing: content は 2026-07 時点で Baseline の Widely Available 未達(Newly Available 2026-06)なので、育ちは progressive enhancement で、退避した環境ではこの行数の高さで立つ(第7条)。
+- `maxRows`: number((省略可)) — 高さの上限(行数)。省略すると上限を持たず、中身の高さへ育ち続ける。上限に達したら欄の中で送る。rows と同じ値を与えると高さが固定される(育たない)。高さの範囲を下限と上限の対で表すので、育つ / 育たないを別の真偽値では持たない(第3条)。
 
 events(Svelte では callback prop):
 
