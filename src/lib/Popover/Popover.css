@@ -23,7 +23,12 @@
   /* 幅は消費者が変数で与える。既定はアンカー幅(fill)。overlay.md §5・第3条を popover まで */
   inline-size: var(--sc-popover-inline-size, var(--sc-popover-anchor-inline-size, max-content));
   min-inline-size: var(--sc-popover-min-inline-size, max-content);
-  max-inline-size: var(--sc-popover-max-inline-size, none);
+  /* 画面より広くならない。反転しても収まらない幅なら、そもそも見切れる(第1条)。
+     余白は左右に1つぶん残す */
+  max-inline-size: min(
+    var(--sc-popover-max-inline-size, 100vw),
+    calc(100vw - var(--spacing-inset-lg) * 2)
+  );
   background: var(--elevation-popover-surface);
   box-shadow: var(--elevation-popover-shadow);
   /* 浮かぶ面の縁(elevation.md §3)。影だけで地から浮かせる形は、強制配色で影が落とされたときに
@@ -44,8 +49,9 @@
   .sc-popover-content {
     /* 幅はアンカー幅に一致(anchor-size)。消費者が --sc-popover-inline-size を与えればそちらが勝つ */
     inline-size: var(--sc-popover-inline-size, anchor-size(width));
-    /* 衝突時は block 方向へ反転(反転は Expressive。overlay.md §5) */
-    position-try-fallbacks: flip-block;
+    /* 衝突時に反転する(反転は Expressive。overlay.md §5)。block だけでなく inline 方向も試す:
+       画面の端に近いアンカーでは、下へ開いても横がはみ出す。両方を組んだ候補まで並べる */
+    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
   }
   .sc-popover-content[data-placement='block-end'] {
     inset-block-start: anchor(bottom);

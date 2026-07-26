@@ -15,13 +15,12 @@
   align-items: center;
   gap: var(--spacing-inset-sm);
 }
-.sc-calendar-months {
+.sc-calendar-spacer {
   flex: 1 1 auto;
-  display: grid;
-  grid-template-columns: repeat(var(--sc-calendar-months, 1), minmax(0, 1fr));
-  text-align: center;
 }
 .sc-calendar-month-label {
+  padding-block-end: var(--spacing-inset-sm);
+  text-align: center;
   font-family: var(--typography-label-sm-font-family);
   font-size: var(--typography-label-sm-font-size);
   font-weight: var(--typography-label-sm-font-weight);
@@ -29,13 +28,17 @@
 }
 
 .sc-calendar-grids {
+  /* 器に入る数だけ月を並べ、入らなければ縦へ折る(内在の格子。layout.md §4)。
+     max-content で並べると、狭い画面で器からはみ出していた */
   display: grid;
-  grid-template-columns: repeat(var(--sc-calendar-months, 1), max-content);
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
   gap: var(--spacing-inset-sm);
-  justify-content: center;
 }
 .sc-calendar-grid {
   border-collapse: collapse;
+  /* 列は器の幅を分け合う。7列が固定幅だと、狭い器で溢れる */
+  inline-size: 100%;
+  table-layout: fixed;
 }
 .sc-calendar-grid th {
   padding: var(--spacing-inset-sm);
@@ -48,7 +51,9 @@
 /* 日の升。当たり判定の門(size.md §4)の対象で、7列で並ぶので詰まりやすい。
    見た目を詰めても押せる範囲は下限(24px)を割らない */
 .sc-calendar-day {
-  min-inline-size: 2rem;
+  /* 当たり判定の門(size.md §4。Web の下限は 24px)。列は器を分け合うので、
+     ここで指すのは「これ以上は縮まない」床である */
+  min-inline-size: 1.5rem;
   min-block-size: 1.5rem;
   padding: var(--spacing-inset-sm);
   text-align: center;

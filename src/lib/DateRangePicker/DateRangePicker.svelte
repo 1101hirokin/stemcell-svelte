@@ -134,7 +134,7 @@
           disabled={disabled || readonly}
           onclick={() => (open = !open)}
         >
-          <Icon name="calender" />
+          <Icon name="calendar" />
         </button>
         {/snippet}
         {#snippet content()}

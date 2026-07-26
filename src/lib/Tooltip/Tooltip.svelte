@@ -72,7 +72,11 @@
     flipped = placement === 'block-start' ? above < h && below > above : below < h && above > below;
     const eff = flipped ? (placement === 'block-start' ? 'block-end' : 'block-start') : placement;
     const GAP = 6;
-    tipEl.style.left = `${a.left + a.width / 2}px`;
+    // アンカー中央に置くが、画面の外へはみ出さないよう押し戻す(translateX(-50%) を見込んで幅の半分で挟む)
+    const half = tipEl.offsetWidth / 2;
+    const center = a.left + a.width / 2;
+    const gutter = 8;
+    tipEl.style.left = `${Math.min(Math.max(center, half + gutter), Math.max(half + gutter, window.innerWidth - half - gutter))}px`;
     tipEl.style.top = eff === 'block-start' ? `${a.top - h - GAP}px` : `${a.bottom + GAP}px`;
   }
 

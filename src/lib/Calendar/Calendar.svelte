@@ -133,11 +133,7 @@
     >
       <Icon name="chevron.left" />
     </IconButton>
-    <div class="sc-calendar-months">
-      {#each visible as m (formatMonth(m))}
-        <span class="sc-calendar-month-label">{monthLabel(m.year, m.month)}</span>
-      {/each}
-    </div>
+    <div class="sc-calendar-spacer"></div>
     <IconButton
       label={monthLabel(addMonths({ ...first, day: 1 }, 1).year, addMonths({ ...first, day: 1 }, 1).month)}
       variant="text"
@@ -152,6 +148,8 @@
   <div class="sc-calendar-grids">
     {#each visible as m (formatMonth(m))}
       <table class="sc-calendar-grid" role="grid" aria-label={monthLabel(m.year, m.month)}>
+        <!-- 月の見出しは格子ごとに持つ。並べた月が狭い画面で縦へ折れても、見出しと格子がずれない -->
+        <caption class="sc-calendar-month-label">{monthLabel(m.year, m.month)}</caption>
         <thead>
           <tr>
             {#each weekdays as w (w.long)}

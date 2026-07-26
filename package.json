@@ -50,6 +50,6 @@
     "vitest": "^2.1.0"
   },
   "dependencies": {
-    "@stemcell/icons": "0.0.0-alpha.3"
+    "@stemcell/icons": "0.0.0-alpha.4"
   }
 }
