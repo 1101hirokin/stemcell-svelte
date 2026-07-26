@@ -53,6 +53,13 @@ it('トリガーの操作は openchange を発火する(値の更新はアプリ
   expect(onopenchange).toHaveBeenCalledWith(true);
 });
 
+it('畳みの値は Disclosure と繋がっている(bind:open を書いた消費者が取り残されない)', async () => {
+  const { container } = render(Reasoning, { props: { status: 'complete', summary, children, open: false } });
+  await fireEvent.click(container.querySelector('summary') as HTMLElement);
+  // 値が包む側まで戻るので、アプリが何もしなくても表示が追従する(所有はアプリのまま。要求は onopenchange)
+  expect((container.querySelector('details') as HTMLDetailsElement).open).toBe(true);
+});
+
 it('畳む機構は Disclosure の合成(原子に AI の関心を持ち込まない)', () => {
   const { container } = render(Reasoning, { props: { status: 'busy', summary, children } });
   expect(container.querySelector('.sc-disclosure')).not.toBeNull();

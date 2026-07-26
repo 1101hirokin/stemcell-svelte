@@ -24,7 +24,7 @@
   }
   let {
     status,
-    open = META.props.open.default,
+    open = $bindable(META.props.open.default),
     summary: summaryContent,
     children,
     onopenchange,
@@ -91,7 +91,10 @@
      完了が届く経路は名前(summary)である。段階を語る名前を穏当な live region に置き、変わったことを
      一度だけ告げる。DS は段階の文言を持たない(持てば i18n の対象が増える。ToolCall の告知と同じ筋)。 -->
 <div class="sc-reasoning" data-status={status} aria-busy={status === 'busy'}>
-  <Disclosure {open} {onopenchange}>
+  <!-- 畳みの値は Disclosure と bind で繋ぐ。繋がないと、包んだ側の open が動かないまま
+       bind:open を書いた消費者の値だけが取り残される(bind が効かない罠になる)。
+       所有はアプリのままで、要求は onopenchange が伝える(Svelte での値の結線。HOLES #15) -->
+  <Disclosure bind:open {onopenchange}>
     {#snippet summary()}
       <span class="sc-reasoning-name-slot" bind:this={slotEl}>
         <span class="sc-reasoning-name" role="status" bind:this={nameEl}>{@render summaryContent()}</span>
