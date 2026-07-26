@@ -24,6 +24,12 @@
   letter-spacing: var(--typography-label-md-letter-spacing);
   color: var(--color-app-foreground);
 }
+/* 開けない開示。抑制は intent の差し替えで示す(state.md §3.1)。焦点は受けたまま */
+.sc-disclosure[data-disabled='true'] .sc-disclosure-summary {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+
 /* WebKit は list-style では消えないので専用の擬似要素で外す */
 .sc-disclosure-summary::-webkit-details-marker {
   display: none;

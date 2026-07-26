@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Slider, Disclosure, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text, Center, Container, Cover, Frame, Reel, Imposter, ToolCall, Sources, Reasoning, Tabs, Breadcrumb, Pagination, NavList } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Slider, Disclosure, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text, Center, Container, Cover, Frame, Reel, Imposter, ToolCall, Sources, Reasoning, Tabs, Breadcrumb, Pagination, NavList, List, Accordion } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -49,6 +49,19 @@
     { id: 'admin', label: '管理(権限なし)', href: '#nav-admin', icon: 'setting', disabled: true },
   ];
   let page = $state(3);
+  const LIST_ITEMS = [
+    { id: 'l1', name: '土鍋(三合炊き)', note: '在庫あり' },
+    { id: 'l2', name: '木のまな板', note: '残り2点' },
+    { id: 'l3', name: '鉄のフライパン', note: '取り寄せ' },
+  ];
+  let listDivided = $state(true);
+  let accordionOpen = $state<string[]>(['faq1']);
+  let accordionExclusive = $state(false);
+  const ACCORDION_ITEMS = [
+    { id: 'faq1', label: '配送について' },
+    { id: 'faq2', label: '返品について' },
+    { id: 'faq3', label: '法人向け(準備中)', disabled: true },
+  ];
   let reasoningStatus = $state<'busy' | 'complete'>('busy');
   let reasoningOpen = $state(false);
   // 生成中の名前は移り変わる(ChatGPT が段階ごとに文言を差し替えるのと同じ)。部品はその変化を
@@ -748,6 +761,47 @@
         {#snippet footer()}<Text variant="label-md">足(下端に留まる)</Text>{/snippet}
       </Cover>
     </div>
+  </section>
+
+  <section>
+    <Text as="h2" variant="title-lg">List / Accordion(クラスタ10 第1段)</Text>
+    <Text as="p" variant="body-sm" muted>
+      List は項目の並びで、選択は持たない(選ぶ場面は RadioGroup / Menu / Tabs が埋めている)。項目の器は List が
+      持ち、区切りは口で選ぶ。Accordion は Disclosure の束で、開いている集合をアプリが持つ。排他の口は無く、
+      1つに保ちたいアプリは受け取った集合を絞る(下の切替で試せる)。
+    </Text>
+
+    <label class="pg-field">
+      <input type="checkbox" bind:checked={listDivided} />区切りを引く(divided)
+    </label>
+    <Card outlined>
+      <List items={LIST_ITEMS} divided={listDivided}>
+        {#snippet children(item)}
+          <Cluster gap="md" align="center">
+            <Text variant="body-md">{item.name}</Text>
+            <Tag size="sm">{item.note}</Tag>
+          </Cluster>
+        {/snippet}
+      </List>
+    </Card>
+
+    <label class="pg-field">
+      <input type="checkbox" bind:checked={accordionExclusive} />1つだけ開く(アプリ側で集合を絞る)
+    </label>
+    <Card outlined>
+      <Accordion
+        items={ACCORDION_ITEMS}
+        open={accordionOpen}
+        onopenchange={(next) => (accordionOpen = accordionExclusive ? next.slice(-1) : next)}
+      >
+        {#snippet panel(id)}
+          <Text variant="body-sm">
+            {id === 'faq1' ? '注文から3営業日で発送します。' : '到着から14日以内であれば返品できます。'}
+          </Text>
+        {/snippet}
+      </Accordion>
+    </Card>
+    <Text as="p" variant="body-sm" muted>開いている集合: [{accordionOpen.join(', ')}]</Text>
   </section>
 
   <section>

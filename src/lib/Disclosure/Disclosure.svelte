@@ -12,6 +12,8 @@
     summary: Snippet;
     /** open のとき現れる内容(必須)。 */
     content: Snippet;
+    /** 開けない開示(契約 alpha.1)。操作を抑えるだけで、開いている値は閉じない(state.md §3.2 / §6)。 */
+    disabled?: boolean;
     /** 開閉の要求。アプリが open を更新する(Dialog の open と同じ向き)。 */
     onopenchange?: (open: boolean) => void;
   }
@@ -19,6 +21,7 @@
     open = $bindable(META.props.open.default),
     summary,
     content,
+    disabled = META.props.disabled.default,
     onopenchange,
   }: Props = $props();
 
@@ -29,6 +32,9 @@
   // 既定動作を止めて要求だけを伝える(Dialog の light dismiss と同じ結線)。
   const handleToggle = (e: Event) => {
     e.preventDefault();
+    // 抑制(state.md §3.2)。native の <summary> に disabled 属性は無いので、既定動作を止めたうえで
+    // 要求も出さない。焦点は受けたままにする(開けない節があること自体が読める情報。state.md §5)
+    if (disabled) return;
     const next = !open;
     open = next;
     onopenchange?.(next);
@@ -40,8 +46,13 @@
      無償で満たす。aria-controls だけは native が張らないので補う。
      summary と content は同じ階層の兄弟に置く: content を button の中へ入れると対話要素の入れ子
      (ARIA のアンチパターン)になる(契約 a11y)。 -->
-<details class="sc-disclosure" {open}>
-  <summary class="sc-disclosure-summary" aria-controls={contentId} onclick={handleToggle}>
+<details class="sc-disclosure" {open} data-disabled={disabled}>
+  <summary
+    class="sc-disclosure-summary"
+    aria-controls={contentId}
+    aria-disabled={disabled ? 'true' : undefined}
+    onclick={handleToggle}
+  >
     <span class="sc-disclosure-marker" aria-hidden="true"></span>
     <span class="sc-disclosure-summary-text">{@render summary()}</span>
   </summary>

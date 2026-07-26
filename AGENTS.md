@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Breadcrumb, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, Menu, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -47,6 +47,31 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
   ツリーシェイク)。バンドルを絞りたいときは glyph 渡しを使う
 
 ## 部品
+
+### Accordion(契約 0.0.0-alpha.1)
+
+畳んで開く項目を束ねる。各項目は Disclosure と同じ形(常に見える見出しと、開いたときに現れる中身)で、開いている項目の集合をアプリが持つ。排他(1つだけ開く)の口は持たない: 値がアプリにあるので、排他にしたいアプリは集合を1つに保てばよい(Radix が type を持つのは、あちらが状態を部品側で管理するからである)。state.md §6 が「親が複数項目の開示を管理する形は Accordion の契約時に扱う」として残していた論点への回答。
+
+props:
+
+- `items`: array — 項目の列。データとして渡す(Tabs の items と同じ理由)。中身は任意なのでデータに載らず、スロットが受ける。
+- `open`: array(既定 []) — 開いている項目の id の集合。アプリが所有する値(state.md §6 の open を集合へ広げた形)。既定は空(すべて畳んだ状態): 畳む部品の既定は畳んだ状態である(Disclosure と同じ)。
+
+events(Svelte では callback prop):
+
+- `onopenchange`: (payload: string[]) => void — 開閉の要求。開いている id の新しい集合を渡し、アプリが open を更新する(Disclosure の openchange を集合へ広げた形)。UI が内部で確定しない。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `panel`(必須) — 開いている項目の中身。どの項目のぶんかは実装が渡す(Tabs の panel と同型で、受け取り方は各実装の表現)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 各項目は Disclosure と同じ形である。button の意味論・開いているかの告知(Web の aria-expanded)・制御する領域の指示(aria-controls)・焦点とフォーカスリングは、すべて項目の契約(Disclosure)が持つ。束ねる器は role を持たず、焦点も受けない(APG Accordion Pattern も器に役割を要求しない)。alpha.0 では器に role=button と focusRing=true を書いていたが、実装で誤りが分かった: 器はトリガーを自分では描かないので、輪を引く場所が無い(参照が必須のトークンだけを挙げるという線。ToolCall から motion.loop を外したのと同じ形)。
+- 畳んだ中身は支援技術からも到達しない(Disclosure と同じ線)。
+- 見出しのあいだを矢印キーで移動する語彙は持たない。APG Accordion Pattern は Up / Down を optional としており、見出しは button なので Tab で辿れる。Tabs が矢印を持つのは、あちらが roving tabindex で帯の中に1つだけ焦点を載せるからで、Accordion の見出しはすべてが Tab 順に載る(web-keys.rules.json に記録する)。
+- 焦点とフォーカスリングは各項目の見出しに立つ(Disclosure の契約)。中身に押せる要素があれば、そちらにも生きる。
+- 開いている項目が複数あってよい。排他は値の側(アプリが集合を1つに保つ)で表す。
 
 ### Alert(契約 0.0.0-alpha.1)
 
@@ -357,13 +382,14 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 背後スクロール封鎖(overlay.rules.json の modal.blocksScroll)。native showModal は背後を inert にするが、body のスクロール固定は実装が併せて行う。
 - 確認・破壊の Dialog に role=alertdialog を割り当てるかは将来(初版は role=dialog。alertdialog は「応答を要する通知」で、explicit + 破壊の文脈に適するが、native `<dialog>` の既定写像は dialog。立証後に足す)。
 
-### Disclosure(契約 0.0.0-alpha.0)
+### Disclosure(契約 0.0.0-alpha.1)
 
 開いたり閉じたりできる開示。常に見える要約(summary)の下に内容(content)を持ち、open で現す。open はアプリが所有する値(state.md §6。canonical name は open。native の <details> が open 属性を持つのと同じ観念)。トリガー(summary)の操作は openchange を発火し、アプリが open を更新する(Dialog の open と同じ向き)。Web は native <details> / <summary> を土台にする: 開閉・トリガーの button 意味論・aria-expanded・折りたたみ時の非到達が標準で無償(第7条 progressive enhancement。Dialog が <dialog> を土台にするのと同型)。複数項目をまとめて排他に開く形(Accordion)は Collection の関心で本契約は扱わない(state.md §6 が Accordion 契約へ送る。クラスタ7)。
 
 props:
 
 - `open`: boolean(既定 false) — 開いているか。アプリが所有する値(state.md §6。native <details> の open 属性、Radix / MUI も open)。true で content を現し、false で畳む。トリガーの操作は openchange を発火し、アプリが open を更新する(値としての結線。Dialog の open と同型)。aria-expanded はこの値のトリガー側への射影で Web の表現。
+- `disabled`: boolean(既定 false) — 開けない開示。トリガーは活性化されず、openchange も出ない(state.md §3.2 の抑制)。既に開いている中身は閉じない: disabled が抑えるのは操作であって値ではなく、開いているという値はアプリのものである(state.md §6)。Accordion の項目が「今は開けない節」を表すために要る(消費者が現れて開けた口。alpha.1)。Radix の Collapsible も単体で disabled を持つので、束ねる部品に固有の観念ではない。
 
 events(Svelte では callback prop):
 
@@ -384,6 +410,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - トリガーは当たり判定の門(size.md §4)の対象。見出しの文字が短くても判定は 24px を割らない。
 - 畳まれた content は支援技術のツリーから外れ、到達できない(native <details> が隠す)。reduced-motion では現れ方が即時になる(全 duration に --motion-scale が乗る。motion.md §6。契約は分岐しない)。
 - 複数の開示をまとめ、排他に開く形(Accordion)は本契約の外(state.md §6 が Accordion 契約へ送る。開示の集合と選択の管理は Collection クラスタ7の語彙)。
+- disabled のトリガーは焦点を受けたまま、活性化されない(Web の表現は aria-disabled。native の <summary> に disabled 属性は無い)。焦点から外す形は採らない: 開けない節があること自体が読める情報であり、Tab で辿れなくなると存在ごと消える(state.md §5)。
 
 ### Divider(契約 0.0.0-alpha.0)
 
@@ -576,6 +603,26 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 活性化のキーは role が導く(web-keys.rules.json: link は Enter のみ。native <a href> に一致)。
 - フォーカスリングの色は intent を持たないので既定の app.system を引く(focus-ring.md §4)。tokensRequired の color.app.system がそれである。文字色の color.app.link は全 elevation 面で 4.5:1 を CI が強制している(focus-ring.md §6)。
 
+### List(契約 0.0.0-alpha.0)
+
+項目の並び。器が並びの構造を保証し、各項目の中身はアプリが差す。選択は持たない: 選ぶ場面は既に RadioGroup(単一の選択)・Menu(行動)・Tabs(面の切替)が持っており、汎用の一覧に選択を足す必要は立証されていない(第3条。state.md §6 が「List は未決」として残していた論点への回答)。番号付き(順序のある一覧)も持たない。
+
+props:
+
+- `items`: array — 項目の列。id 以外の中身は器が解釈しない(Sources と同じ形)。どう受け取るか(項目ごとのスロット・スニペット・配列)は各実装の表現である。
+- `divided`: boolean(既定 false) — 項目のあいだに区切りを引く。既定は引かない(増やさない側の既定)。区切りは装飾であり、支援技術には並びの構造(項目の数と境目)が別途届く。Ant Design は既定で引き(split)、MUI は消費者が Divider を明示的に挟むので、業界は割れている。器が項目の器を持つ以上、消費者があいだへ差し込む余地は無いので、口をここに置く。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default`(必須) — 各項目の中身。項目を引数に受ける(受け取り方は各実装の表現。Sources と同型)。項目の器(list item 相当)は List が持つので、アプリが差すのは中身だけでよい。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 並びの構造は器が持つ(裁定の系譜: Sources と同じ。role=list を名乗る以上、その中に項目が並ぶことを器が保証する)。アプリの作法に頼ると、守られなかったとき「項目が0件のリスト」として支援技術に届き、機械検査でも捕まえられない。
+- 項目が無いときは何も描かない。0件のリストを支援技術へ届けない。
+- 器自身は焦点を受けない。項目の中に押せる要素があれば、focus とフォーカスリングと当たり判定の門(size.md §4)はその要素に生きる。
+- 区切り(divided)は装飾であり、支援技術から隠す。項目の境目は並びの構造が伝える。
+
 ### Menu(契約 0.0.0-alpha.1)
 
 アクションの集合を畳んで出す一時的なメニュー(APG の menu button + menu パターン)。トリガー(button, aria-haspopup=menu)を押すと menuitem の列がポップオーバーで開き、選ぶと活性化して閉じる。値を持たない: menuitem は選択(selected)でなく行為(state.md §6。Select は値を持つが Menu は持たない)。Popover を合成する(overlay の popover 類。面/影/角/層/出入りは Popover が所有)。中への移動は実 DOM フォーカスの roving(overlay.md §4 の二形態のうち Menu 側。Select の listbox は仮想フォーカスで対を成す)。トリガーは Menu が所有し ARIA を配線する(RFC 0008。Button が閉じた契約なので asChild 型に寄せず、逃げ道は Popover プリミティブが担う。第4条)。サブメニュー(menu-in-menu)と menuitemcheckbox / menuitemradio は初版の範囲外・将来 RFC。
@@ -607,7 +654,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - トリガーを Menu が所有するのは a11y の保証のため(RFC 0008)。ARIA の配線を消費者の任意要素へ委ねると穴が生じうる。Button が閉じた契約(rest を転送しない)であることとも整合する。自前トリガーが要るときは Popover プリミティブ + arrows.menu を消費者が合成する(第4条の逃げ道)。
 - 標的の門: size.md §4。
 
-### NavList(契約 0.0.0-alpha.0)
+### NavList(契約 0.0.0-alpha.1)
 
 行き先の一覧と、その中の現在地。アプリの殻(脇の一覧・上の帯)が持つ、画面から画面への移動の器である。名前を Navigation にしないのは、native がその語を族の接頭辞として使っているからである(SwiftUI の NavigationLink / NavigationStack、Compose の NavigationBar / NavigationRail / NavigationDrawer)。単体の部品が族の名を取ると、後から出る仲間が名乗れなくなる。入れ子の階層(折り畳む節)は持たない(第3条。必要が立証されてから)。
 
