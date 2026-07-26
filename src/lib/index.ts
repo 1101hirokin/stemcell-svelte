@@ -30,6 +30,7 @@ export { default as Cover } from './Cover/Cover.svelte';
 export { default as Frame } from './Frame/Frame.svelte';
 export { default as Imposter } from './Imposter/Imposter.svelte';
 export { default as Reel } from './Reel/Reel.svelte';
+export { default as Reasoning } from './Reasoning/Reasoning.svelte';
 export { default as Sources } from './Sources/Sources.svelte';
 export { default as ToolCall } from './ToolCall/ToolCall.svelte';
 export { default as Drawer } from './Drawer/Drawer.svelte';

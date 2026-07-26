@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -668,6 +668,33 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 矢印キーの規則は web-keys.rules.json の arrows.radiogroup が持つ(移動=選択、roving tabindex、disabled スキップ)。Tab はグループにひとつ: チェック済みがあればそこへ、なければ先頭へ。
 - invalid はグループの状態として届き(Web の表現は radiogroup への aria-invalid + aria-describedby)、error 文はグループの説明として届く。
 - 既定選択を置かない場合、Tab での進入先は先頭項目になる。未選択のまま送信された required グループが invalid の典型である。
+
+### Reasoning(契約 0.0.0-alpha.0)
+
+推論(thinking)の経過を畳める面で見せる有機体。conversation §3 の reasoning part(型付き part として確定。裁定 2026-07-25)の上に乗り、生成の進行が支援技術と視覚の両方へ届く形にする(streaming §4 / §6)。畳む機構そのものは Disclosure が持ち、本組織が足すのは生成の進行と、推論が回答でなく補助であるという扱いである。逐次のトークンを読み上げない(洪水回避。streaming §4)。生成の中身をどう作るか(context engineering)、署名(signature)の往復には触れない(streaming §6)。RFC 0014 の seed(status: draft)。native 写像の一次確認まで暫定。
+
+props:
+
+- `status`: "busy" | "complete" — 生成の段階。busy は生成中、complete は完了。既定を持たない(required): status 無しの推論表示は「生成中か完了か」を語らず、黙った既定は段階の主張になる(ToolCall と同型)。states でなく prop なのは、これが相互作用の状態ではなく loading と同型の進行だからである(streaming §2。tool-call §3 が敷いた線をここでも踏む)。error を持たない: 生成の失敗は会話(message)側の関心で、失敗した呼び出しの報告は ToolCall が持つ。増やさない側から評価した(第3条)。
+- `open`: boolean(既定 false) — 推論の中身を開いているか。アプリが所有する値(state.md §6)。既定は畳んだ状態: 推論は回答ではなく補助であり、既定で開くと本文より先に長い経過が立ちはだかる(第1条)。トリガーの操作は openchange を発火し、アプリが open を更新する(Disclosure・Dialog と同じ向き)。「完了で自動的に畳む」見せ方(streaming §6)は、UI が値を書き換える形では実現しない: アプリが status の遷移を見て open を落とす。UI が内部で値を確定しないという向きを、自動の見せ方のために曲げない。
+
+events(Svelte では callback prop):
+
+- `onopenchange`: (payload: boolean) => void — 開閉の要求を伝える。トリガーの活性化で発火し、アプリが open を更新する(Disclosure の openchange と同じ結線)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `summary`(必須) — 常に見えるトリガー兼名前。推論のアクセシブルネームになる(無名の推論を許さない。第1条。Dialog の title・Disclosure の summary と同型)。段階が名前に現れることを期待する(生成中と完了で文言が変わる。「考えています」→「3秒考えました」)。完了が支援技術へ届く経路がこの名前だからである(a11y notes)。Apple Foundation Models の Transcript.Reasoning が description を持つのと同じ位置にある。
+- `default`(必須) — 推論の中身。順序づけられた segments(Apple Foundation Models の Transcript.Reasoning)を1つの塊として受ける。器は列の構造を主張しない: Sources が list の器を持つのは引用と出典の相互参照という構造要求があるからで(source §5 の限定原理)、推論の経過にその要求は無い。増やさない側から評価した(第3条)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 生成中と完了が支援技術へ届く(streaming §3 / §4)。告知は穏当側で、即時の割り込みには割かない(streaming §4。割り込み度の規則は tool-call §4 が持ち、ここから読む。新設しない)。
+- 逐次のトークンを chunk ごとに読み上げない(洪水回避。streaming §4)。生成中の可視の更新(見る人向け)と、支援技術への告知の粒度(聞く人向け)を分ける。中身そのものを live region にしない。
+- 完了が届く経路は名前(summary)である。段階を語る名前が変わったことを一度だけ告げる形で、DS が段階の文言を所有しない(所有すれば i18n の対象になり、告知のためだけに DS 所有文字列を増やすことになる。i18n §4)。名前が段階を語らないアプリでは完了が届かないが、これは機械検査で捕まえられない(Badge の dot × label と同型の限界)。
+- 畳んだ中身は支援技術からも到達しない。開閉の機構と、トリガーの button 意味論・aria-expanded 相当は Disclosure の契約が持つ(合成)。焦点とフォーカスリングはトリガーに立ち、本組織のルートは focus を受けない(focusRing: false)。
+- 生成中の視覚(明滅・カーソル・末尾追従)は装飾であり、支援技術から隠す。進行の意味は領域が伝え、飾りが連呼しない(ToolCall の busy・Skeleton と同型)。
+- 推論は回答ではない。中身に押せる要素があれば、focus とフォーカスリングと当たり判定の門(size.md §4)はその要素に生きる(条件付き部分要素の a11y をスキーマは表現できない。Tag / Alert / ToolCall と同じ限界の認識)。
 
 ### Reel(契約 0.0.0-alpha.0)
 

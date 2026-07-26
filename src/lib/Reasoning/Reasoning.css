@@ -1,0 +1,16 @@
+/* 推論の経過を畳める面(Reasoning.md)。畳みの造形と焦点の輪は Disclosure が持つので、ここが持つのは
+   「推論は回答ではなく補助である」という扱いだけ: 本文より小さい文字と副次色、そして中身の縦の律動。
+   生成中の視覚は名前(summary)が語る。明滅やカーソルを足していないのは、進行の意味を運ぶのが名前で足り、
+   飾りを増やすと引くトークンも増えるためである(進行表現は Expressive。契約は motion を要求していない)。 */
+.sc-reasoning-body {
+  display: flex;
+  flex-direction: column;
+  /* 中身の段落や節の縦の律動。器が間隔を所有する(layout.md §1) */
+  gap: var(--spacing-stack-sm);
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
