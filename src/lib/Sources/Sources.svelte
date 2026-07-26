@@ -45,10 +45,12 @@
        ul の暗黙の役割が落ちる環境がある(layout.md §6 の「役割の再付与」)。
        リストの器は Sources が持ち、項目の器(li)も Sources が出す(アプリの作法に頼らない。契約 a11y)。 -->
   <ul class="sc-sources" role="list" aria-labelledby={label ? labelId : undefined}>
-    {#each items as item (item.id)}
+    {#each items as item, i (item.id || i)}
       <!-- 各項目は source の id を帯びる。本文中の引用の印は同じ id を指し、両端とも採番しない。
-           DOM の id にそのまま載せるのは、断片リンク(#id)という最も確実に届く到達手段を開けるため。 -->
-      <li class="sc-sources-item" id={item.id}>{@render children(item)}</li>
+           DOM の id にそのまま載せるのは、断片リンク(#id)という最も確実に届く到達手段を開けるため。
+           id を持たない出典は位置で並べる(採番はしない): 逐次配信の途中で id の無い出典が2件以上
+           現れたとき、キーが衝突して一覧ごと落ちるのを避ける。相互参照は結べないので警告は出す。 -->
+      <li class="sc-sources-item" id={item.id || undefined}>{@render children(item)}</li>
     {/each}
   </ul>
 {/if}

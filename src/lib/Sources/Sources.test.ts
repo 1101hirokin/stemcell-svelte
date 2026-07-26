@@ -39,6 +39,16 @@ it('id を持たない出典は warn する(発明せずに知らせる)', () =>
   warn.mockRestore();
 });
 
+it('id を持たない出典が複数あっても一覧は落ちない(逐次配信の途中の形)', () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  const half = [{ id: 's1', title: 'a', url: 'x' }, { id: '', title: 'b', url: 'y' }, { id: '', title: 'c', url: 'z' }];
+  const { container } = render(Sources, { props: { items: half as never, children: item } });
+  expect(container.querySelectorAll('li.sc-sources-item').length).toBe(3);
+  // id を持つものだけが相互参照の端になる(採番しない)
+  expect(container.querySelectorAll('li[id]').length).toBe(1);
+  warn.mockRestore();
+});
+
 it('領域名を渡すとリストの名前になる。省略時は名前を持たない', () => {
   const { container } = render(Sources, { props: { items, children: item, label } });
   const list = container.querySelector('.sc-sources') as HTMLElement;

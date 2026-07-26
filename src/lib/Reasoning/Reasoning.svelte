@@ -32,6 +32,8 @@
 
   let slotEl: HTMLElement | undefined = $state();
   let nameEl: HTMLElement | undefined = $state();
+  // 動きの途中の影。名前が速く移り変わる配信(トークンごとに文言を書き換える等)でも、影が積み上がらない
+  let leaving: Animation | undefined;
 
   // 名前が別の文言へ変わったら、古い文字を上へ送り、新しい文字を下から迎える(進行表現は Expressive)。
   // 名前はアプリが差すスニペットなので、いつ変わったかを prop では知れない。描かれた文字の変化を
@@ -43,6 +45,9 @@
     const { duration, easing } = resolveMotion(getComputedStyle(el), 'transition');
     // reduced-motion では --motion-scale が 0 になり、ここで動かさない(部品は分岐しない。motion.md §6)
     if (duration <= 0) return;
+
+    // 前の動きがまだ途中なら畳む(oncancel が影を片づける)。同時に二つの影を置かない
+    leaving?.cancel();
 
     // 去る文字の影。live region の外(兄弟)に置く: 中に入れると、古い文言が支援技術へもう一度届く
     const ghost = document.createElement('span');
@@ -61,6 +66,7 @@
     );
     out.onfinish = () => ghost.remove();
     out.oncancel = () => ghost.remove();
+    leaving = out;
     el.animate(
       [
         { opacity: 0, transform: 'translateY(0.5em)' },
