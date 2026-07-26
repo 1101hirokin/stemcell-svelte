@@ -1,0 +1,79 @@
+/* 推論の経過を畳める面(Reasoning.md)。畳みの造形と焦点の輪は Disclosure が持つので、ここが持つのは
+   「推論は回答ではなく補助である」という扱い(本文より小さい文字と副次色、中身の縦の律動)と、
+   生成中の見え方である。 */
+.sc-reasoning-body {
+  display: flex;
+  flex-direction: column;
+  /* 中身の段落や節の縦の律動。器が間隔を所有する(layout.md §1) */
+  gap: var(--spacing-stack-sm);
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+
+/* 生成中の名前。光の帯が文字の上を端から端へ走る(進行表現は Expressive。streaming §5 の loop に乗る)。
+   意味を運ぶのは名前の文字そのもので、この光は「まだ動いている」ことを目に伝える添え物である。
+   光は薄い側(副次色)から濃い側(本文色)へ振れる。読み込みの代役(Skeleton)が白帯の重ねを捨てて脈動へ
+   替えた経緯と同じ罠を避けるためである: 白や地の色を重ねる形は明るいテーマで見えず、文字の上では
+   さらにコントラストを削る。こちらは帯のところだけ濃くなるので、いちばん薄いところでも副次色の
+   可読性を割らない。
+   motion.loop を引くが契約の tokensRequired には挙げない: 進行表現は Expressive で、必須にすると
+   「飾りを持たない実装」が門で落ちる(ToolCall から loop を外したのと同じ線。tokensRequired は
+   参照が必須のトークンの集合であって、表現の希望を書き留める欄ではない)。 */
+.sc-reasoning-name-slot {
+  position: relative;
+  display: inline-block;
+  /* 立方体を見る目の位置。文字に従わせるので、大きさが変わっても回り方の印象が保たれる */
+  perspective: 12em;
+}
+/* 面。3D の変換を受けるので行内の箱にする */
+.sc-reasoning-name,
+.sc-reasoning-name-ghost {
+  display: inline-block;
+}
+/* 去る面。同じ場所に重ねて回す(JS が一時的に置き、動きが終わったら消す) */
+.sc-reasoning-name-ghost {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.sc-reasoning[data-status='busy'] .sc-reasoning-name,
+.sc-reasoning[data-status='busy'] .sc-reasoning-name-ghost {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-app-fg-muted) 46%,
+    var(--color-app-foreground) 50%,
+    var(--color-app-fg-muted) 54%
+  );
+  background-size: 400% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: sc-reasoning-shimmer calc(var(--motion-loop-duration) * 5) var(--motion-loop-easing) infinite;
+}
+@keyframes sc-reasoning-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0% 0;
+  }
+}
+
+/* reduced-motion では光を消し、素の文字へ戻す(motion.md §6 の loop 特例)。
+   待ちの輪を止めずに低速へ沈静させたのとは判断が違う: あちらは図形が唯一の手がかりで、静止すると
+   壊れて見える。こちらは名前の文字が「考えています」と語っており、光を落としても意味は失われない。 */
+@media (prefers-reduced-motion: reduce) {
+  .sc-reasoning[data-status='busy'] .sc-reasoning-name,
+  .sc-reasoning[data-status='busy'] .sc-reasoning-name-ghost {
+    background-image: none;
+    color: var(--color-app-foreground);
+    animation: none;
+  }
+}
