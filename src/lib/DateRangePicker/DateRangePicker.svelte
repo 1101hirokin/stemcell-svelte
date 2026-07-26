@@ -75,21 +75,28 @@
 
   // 格子は「この日が押された」しか返さない。意味づけはここが与える(Calendar.md §2)。
   // 対が揃っても閉じない: 期間は「選んで終わり」ではなく、両端を見比べながら詰める操作である。
-  // 揃った後にもう一度押したら、そこから新しい期間を取り直す(業界の常態)。閉じるのは
-  // 明示の退出(Escape・外側の押下)で、それは合成した Popover が持つ。
+  // 揃った後に外を押したら近い側の端を伸ばし、中を押したときだけ取り直す(DateRangePicker.md)。
+  // 閉じるのは明示の退出(Escape・外側の押下)で、それは合成した Popover が持つ。
   const onselect = (value: string) => {
     const day = parseISO(value);
     if (!day) return;
     const from = parseISO(start);
-    if (!pending || !from) {
-      pending = true;
-      commit(value, '');
+    const to = parseISO(end);
+    // 途中(始まりだけある)。終わりが始まりより前なら対を入れ替える(黙って不正な対を保持しない。契約 a11y)
+    if (pending && from) {
+      pending = false;
+      if (compare(day, from) < 0) commit(value, start);
+      else commit(start, value);
       return;
     }
-    pending = false;
-    // 終わりが始まりより前なら対を入れ替える(黙って不正な対を保持しない。契約 a11y)
-    if (compare(day, from) < 0) commit(value, start);
-    else commit(start, value);
+    // 揃っているとき、期間の外なら近い側の端を伸ばす(取り直さない)
+    if (from && to) {
+      if (compare(day, from) < 0) return commit(value, end);
+      if (compare(day, to) > 0) return commit(start, value);
+    }
+    // 期間の中、または片端しか無いとき。そこから取り直す
+    pending = true;
+    commit(value, '');
   };
 </script>
 

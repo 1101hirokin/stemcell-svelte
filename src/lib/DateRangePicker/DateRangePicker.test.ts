@@ -52,9 +52,37 @@ it('対が揃っても暦は閉じない(両端を見比べながら詰められ
   });
   // 揃っても開いたまま
   expect(trigger.getAttribute('aria-expanded')).toBe('true');
-  // もう一度押すと、そこから取り直す
-  await fireEvent.click(pick(5));
-  expect(onchange).toHaveBeenLastCalledWith({ start: expect.stringContaining('-05'), end: '' });
+});
+
+// 揃った後の押下は、外なら伸ばし、中なら取り直す(DateRangePicker.md)
+it.each([
+  { at: '手前', day: 5, want: { start: '-05', end: '-20' } },
+  { at: '先', day: 25, want: { start: '-10', end: '-25' } },
+])('揃った後に期間の$atを押すと端が伸びる', async ({ day, want }) => {
+  const onchange = vi.fn();
+  const { container } = render(DateRangePicker, { props: { ...props, onchange } });
+  await fireEvent.click(container.querySelector('button') as HTMLElement);
+  const cells = [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')];
+  const pick = (n: number) => cells.find((el) => el.textContent === String(n))!;
+  await fireEvent.click(pick(10));
+  await fireEvent.click(pick(20));
+  await fireEvent.click(pick(day));
+  expect(onchange).toHaveBeenLastCalledWith({
+    start: expect.stringContaining(want.start),
+    end: expect.stringContaining(want.end),
+  });
+});
+
+it('揃った後に期間の中を押すと、そこから取り直す', async () => {
+  const onchange = vi.fn();
+  const { container } = render(DateRangePicker, { props: { ...props, onchange } });
+  await fireEvent.click(container.querySelector('button') as HTMLElement);
+  const cells = [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')];
+  const pick = (n: number) => cells.find((el) => el.textContent === String(n))!;
+  await fireEvent.click(pick(10));
+  await fireEvent.click(pick(20));
+  await fireEvent.click(pick(15));
+  expect(onchange).toHaveBeenLastCalledWith({ start: expect.stringContaining('-15'), end: '' });
 });
 
 it('無効のときは暦を開けない', () => {
