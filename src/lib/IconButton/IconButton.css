@@ -5,7 +5,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-inline-md); /* Button 継承の gap。子が絵1つなので不活性だが継承の副産物(IconButton.md §2) */
-  border: none;
+  /* 枠を持たない強調度も同じ太さの透明な枠で場所を取る。outlined だけが背が高くなり、
+     フォームの一行で欄(枠を持つ)と揃わなくなるのを避ける(emphasis.md §3) */
+  border: var(--shape-border-width) solid transparent;
   /* 継承した typography.label-lg。可視文字は無いが絵の基準になる(IconButton.md 追記)。
      行高も Button と同じにし、グリフ枠を 1lh にすることで Button のテキスト行と同じ高さに揃える */
   font-family: var(--typography-label-lg-font-family);
@@ -84,7 +86,7 @@
 .sc-iconbutton[data-variant='soft']:active:not(:disabled) { background: var(--_soft-bg-p); }
 .sc-iconbutton[data-variant='outlined'] {
   background: transparent; color: var(--_soft-fg);
-  border: var(--shape-border-width) solid var(--_border);
+  border-color: var(--_border);
 }
 .sc-iconbutton[data-variant='outlined']:hover:not(:disabled) { background: var(--_soft-bg); }
 .sc-iconbutton[data-variant='outlined']:active:not(:disabled) { background: var(--_soft-bg-h); }

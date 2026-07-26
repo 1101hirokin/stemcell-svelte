@@ -4,7 +4,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-inline-md); /* 契約 alpha.5 が明記(HOLES #1 解消) */
-  border: none;
+  /* 枠を持たない強調度も同じ太さの透明な枠で場所を取る。outlined だけが背が高くなり、
+     フォームの一行で欄(枠を持つ)と揃わなくなるのを避ける(emphasis.md §3) */
+  border: var(--shape-border-width) solid transparent;
   border-radius: var(--shape-semantic-control);
   font-family: var(--typography-label-lg-font-family);
   font-size: var(--typography-label-lg-font-size);
@@ -66,7 +68,7 @@
 .sc-button[data-variant='soft']:active:not(:disabled) { background: var(--_soft-bg-p); }
 .sc-button[data-variant='outlined'] {
   background: transparent; color: var(--_soft-fg);
-  border: var(--shape-border-width) solid var(--_border);
+  border-color: var(--_border);
 }
 .sc-button[data-variant='outlined']:hover:not(:disabled) { background: var(--_soft-bg); }
 .sc-button[data-variant='outlined']:active:not(:disabled) { background: var(--_soft-bg-h); }

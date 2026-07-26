@@ -17,6 +17,8 @@
   --_soft-bg-hover: var(--color-semantic-plain-soft-bg-hover);
   --_soft-bg-pressed: var(--color-semantic-plain-soft-bg-pressed);
   --_border: var(--color-semantic-plain-border);
+  /* 枠を持たない強調度も同じ太さの透明な枠で場所を取る(emphasis.md §3) */
+  border: var(--shape-border-width) solid transparent;
 }
 .sc-tag[data-size='sm'] { --_inset: var(--spacing-inset-sm); }
 .sc-tag[data-size='md'] { --_inset: var(--spacing-inset-md); }
@@ -26,7 +28,7 @@
 .sc-tag[data-variant='outlined'] {
   background: transparent;
   color: var(--_soft-fg);
-  border: var(--shape-border-width) solid var(--_border);
+  border-color: var(--_border);
 }
 
 /* 選択(値。§2)。見せ方は Expressive: soft を一段濃く + 先頭に check(§5 の第一候補。撤退条件つき) */
