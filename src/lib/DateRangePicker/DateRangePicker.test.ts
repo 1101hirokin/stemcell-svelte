@@ -78,6 +78,22 @@ it.each([
   });
 });
 
+it('途中に下限より前を押したら、対を入れ替えずに下限を置き直す', async () => {
+  const onchange = vi.fn();
+  const { container } = render(DateRangePicker, { props: { ...props, onchange } });
+  await fireEvent.click(container.querySelector('button') as HTMLElement);
+  const cells = [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')];
+  const pick = (n: number) => cells.find((el) => el.textContent === String(n))!;
+  await fireEvent.click(pick(20));
+  await fireEvent.click(pick(10)); // 下限より前。ここが新しい下限になる
+  expect(onchange).toHaveBeenLastCalledWith({ start: expect.stringContaining('-10'), end: '' });
+  await fireEvent.click(pick(15));
+  expect(onchange).toHaveBeenLastCalledWith({
+    start: expect.stringContaining('-10'),
+    end: expect.stringContaining('-15'),
+  });
+});
+
 it('対の端そのものを押したときは変えない(押し間違いで期間を失わせない)', async () => {
   const onchange = vi.fn();
   const { container } = render(DateRangePicker, { props: { ...props, onchange } });

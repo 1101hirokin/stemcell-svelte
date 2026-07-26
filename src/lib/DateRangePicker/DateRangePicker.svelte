@@ -72,19 +72,21 @@
 
   // 格子は「この日が押された」しか返さない。意味づけはここが与える(Calendar.md §2)。
   // 対が揃っても閉じない: 期間は「選んで終わり」ではなく、両端を見比べながら詰める操作である。
-  // 揃った後の押下は、内も外も区別せず、その日を下限にして選び直す。対の端そのものを押したときだけ
-  // 変えない(押し間違いで期間を失わせない)。閉じるのは明示の退出(Escape・外側の押下)で、
-  // それは合成した Popover が持つ。DateRangePicker.md。
+  // 選び直しで押した日は必ず期間の下限になる(内も外も区別しない。対の端そのものを押したときだけ変えない)。
+  // 下限だけ置いた途中に下限より前を押したときも、対を入れ替えずに下限を置き直す。
+  // 閉じるのは明示の退出(Escape・外側の押下)で、それは合成した Popover が持つ。DateRangePicker.md。
   const onselect = (value: string) => {
     const day = parseISO(value);
     if (!day) return;
     const from = parseISO(start);
-    // 途中(始まりだけ置いた)。次の押下で対が揃う。始まりより前なら対を入れ替える(契約 a11y)
-    if (pending && from) {
+    // 途中(下限だけ置いた)。下限より後を押せば対が揃う
+    if (pending && from && compare(day, from) >= 0) {
       pending = false;
-      return compare(day, from) < 0 ? commit(value, start) : commit(start, value);
+      return commit(start, value);
     }
-    if (value === start || value === end) return;
+    // 対の端そのものは変えない(押し間違いで期間を失わせない)
+    if (!pending && (value === start || value === end)) return;
+    // 押した日は必ず下限になる。途中に下限より前を押したときも、対を入れ替えずにそこへ置き直す
     pending = true;
     commit(value, '');
   };
