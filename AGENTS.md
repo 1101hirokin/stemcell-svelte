@@ -203,7 +203,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - disabled は3つの要求すべてを満たすこと（foundations/state.md §5）: 活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる。属性か aria-disabled かは Web の表現であり第2条により固有。
 - 活性化のキーは本契約が定めない。role が意味論を運び、キーはその表現である（第2条）。Web の APG Button Pattern は Enter と Space、Link Pattern は Enter のみと定めるが、Compose の Modifier.clickable は Role に関わらず両方で発火する。キーを中立の契約に書けば Web の慣習を全プラットフォームへ漏らす。Web の規範層は未着手（component-contract.schema.json の $webKeys）。
 
-### Calendar(契約 0.0.0-alpha.0)
+### Calendar(契約 0.0.0-alpha.1)
 
 月の格子。日を並べ、選ばれている日を示し、押された日を要求として返す。何を選択と見なすか(1つの日か、期間の端か)は持たない: 器は「今どこが選ばれているか」を受け取り、「この日が押された」を返すだけで、意味づけは束ねる側(DatePicker / DateRangePicker)が与える。これで単一の選択と期間の選択の両方が同じ格子に乗る。値は暦日で、地域の慣習(週の始まり・月名・曜日名)は環境から借りる(date.md §2 / §3)。date.md の seed の上に乗る(status: draft)。
 
@@ -419,7 +419,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 焦点とフォーカスリングは桁に立つ。当たり判定の門(size.md §4)も桁に生きる。
 - invalid のとき、何が不正かは error スロットの文が運ぶ(色だけに頼らない。field.md §3)。
 
-### DatePicker(契約 0.0.0-alpha.1)
+### DatePicker(契約 0.0.0-alpha.2)
 
 暦日をひとつ選ぶ。打ち込む欄(DateField)と月の格子(Calendar)を束ね、格子は一時面として開く。値は暦日で、時刻もタイムゾーンも持たない(date.md §2)。欄としての解剖は field.md §2 に従う。date.md の seed の上に乗る(status: draft)。
 
@@ -456,7 +456,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 欄だけで完結できる。暦を開かずキーボードだけで日付を入れられることが要求である(date.md §6 / 第1条)。
 - 暦を開くトリガーは器が所有する(Menu と Select が同じ形。alpha.1 で改めた)。開いているか(Web の aria-expanded)と、開く先が一時面であること(aria-haspopup)をトリガーが告げる。焦点とフォーカスリングと当たり判定の門(size.md §4)はトリガーに生きる。欄の桁と暦の升は、それぞれの契約が自分の焦点を持つ。
 
-### DateRangePicker(契約 0.0.0-alpha.1)
+### DateRangePicker(契約 0.0.0-alpha.2)
 
 期間(始まりと終わり)を選ぶ。打ち込む欄を2つと月の格子を束ね、格子は一時面として開く。格子は Calendar 1つで、並べる月数を渡して2ヶ月ぶん見せるのが常態である。値は暦日の対で、時刻もタイムゾーンも持たない(date.md §2)。プリセット(「過去7日間」等)は持たない: 何を候補に出すかはアプリの政策であり、固有の規範が無い(承認 UI と同じ判断。組み方は patterns/date-range.md が示す)。date.md の seed の上に乗る(status: draft)。
 
