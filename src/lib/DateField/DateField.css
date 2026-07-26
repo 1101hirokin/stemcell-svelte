@@ -154,16 +154,6 @@
   color: var(--color-semantic-danger-soft-fg);
 }
 
-/* iOS(Safari / Chrome とも WebKit)は font-size<16px の入力に focus するとページをズームする。触覚ポインタ
-   では入力文字を最低 16px にしてその挙動を回避する(Web/iOS 固有。field.md)。fine ポインタ(desktop)は
-   設計どおり(14px)を保つ。padding は不変だが line-height が比率(1.334)なので、タッチ時は行高が伴って
-   約 2px 高くなる(タッチの的が少し大きくなる方向で許容)。 */
-@media (pointer: coarse) {
-  .sc-datefield-input {
-    font-size: max(16px, var(--typography-body-md-font-size));
-  }
-}
-
 /* 桁。焦点は桁に立つ(根ではない)。等幅の字形で、値が変わっても幅が跳ねない */
 .sc-datefield-segment {
   /* 桁は input なので、UA の枠と面と余白を落として器の中の文字として立たせる。
@@ -208,6 +198,17 @@
 .sc-datefield[data-disabled='true'] .sc-datefield-segment {
   color: var(--color-semantic-disabled-fg);
   cursor: not-allowed;
+}
+
+/* iOS(Safari / Chrome とも WebKit)は font-size<16px の入力に焦点が乗るとページごと拡大する。触覚の
+   ポインタでは打つ文字を 16px 未満にしない(field.md §2。TextField / Textarea / Select と同じ形)。
+   拡大そのものを禁じる手は採らない(利用者から拡大縮小を奪う。WCAG 2.2 SC 1.4.4)。
+   細かいポインタ(desktop)は設計どおり 14px を保つ。行高は比率なので、触点では行が約 2px 高くなる
+   (的が大きくなる方向なので許容する) */
+@media (pointer: coarse) {
+  .sc-datefield-segment {
+    font-size: max(16px, var(--typography-body-md-font-size));
+  }
 }
 /* 選択の面は出さない(桁は常に全選択で置き換わるので、青い帯が出ると打つたびに点滅して見える) */
 .sc-datefield-segment::selection {
