@@ -1,0 +1,33 @@
+/* 上位からの道筋(Breadcrumb.md)。区切りの造形と折り返しは Expressive。
+   行き先の色は合成した Link が持つので、ここでは引かない(Sources と同じ判断)。 */
+.sc-breadcrumb-trail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-breadcrumb-crumb {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+}
+/* 現在地と区切りは副次色。現在地はリンクでないことが色でも分かる */
+.sc-breadcrumb-crumb [aria-current='page'],
+.sc-breadcrumb-separator {
+  color: var(--color-app-fg-muted);
+}
+.sc-breadcrumb-label {
+  display: block;
+  margin-block-end: var(--spacing-stack-sm);
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-label-sm-font-family);
+  font-size: var(--typography-label-sm-font-size);
+}

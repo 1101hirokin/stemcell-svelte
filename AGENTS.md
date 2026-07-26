@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, Menu, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Alert, Avatar, Badge, Box, Breadcrumb, Button, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, Menu, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -131,6 +131,25 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 - 素の器(生の div / View)の直接使用は非推奨で、逃げ道はここに集約する。この規範は契約ではなく layout.md §6 が持つ(全実装を契約の外で拘束する)。
+
+### Breadcrumb(契約 0.0.0-alpha.0)
+
+今どこに居るかを、上位からの道筋で示す。順序のある行き先の列で、最後の1つが現在地である。長い道筋の省略(…)は持たない(第3条。必要が立証されてから)。
+
+props:
+
+- `items`: array — 上位から順に並べた道筋。最後の1つが現在地である(位置が意味を持つので、現在地を指す別の印を持たない)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label` — この領域の名前(「現在地」等)。省略できるが、画面に複数の道案内があるときは名前が要る。DS が既定の文言を持たないのは、持てば i18n の対象になるからである(Sources の領域名と同じ扱い。i18n.md §4)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 道案内の領域である(Web の nav ランドマーク、native は各々の表現)。中は順序のある列で(Web は ol)、順序そのものが道筋の意味を運ぶ。
+- 最後の項目は現在地であり、リンクにしない。現在地であることが支援技術へ届く(Web の aria-current=page、native は各々の表現。state.md §6 の current の初消費)。
+- 区切りの印(/ や >)は装飾であり、支援技術から隠す。読み上げに「スラッシュ」が並ばないようにする。
+- 領域自身は焦点を受けない。焦点とフォーカスリングは各行き先(合成した Link)に立つ。
 
 ### Button(契約 0.0.0-alpha.7)
 
@@ -588,6 +607,53 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - トリガーを Menu が所有するのは a11y の保証のため(RFC 0008)。ARIA の配線を消費者の任意要素へ委ねると穴が生じうる。Button が閉じた契約(rest を転送しない)であることとも整合する。自前トリガーが要るときは Popover プリミティブ + arrows.menu を消費者が合成する(第4条の逃げ道)。
 - 標的の門: size.md §4。
 
+### NavList(契約 0.0.0-alpha.0)
+
+行き先の一覧と、その中の現在地。アプリの殻(脇の一覧・上の帯)が持つ、画面から画面への移動の器である。名前を Navigation にしないのは、native がその語を族の接頭辞として使っているからである(SwiftUI の NavigationLink / NavigationStack、Compose の NavigationBar / NavigationRail / NavigationDrawer)。単体の部品が族の名を取ると、後から出る仲間が名乗れなくなる。入れ子の階層(折り畳む節)は持たない(第3条。必要が立証されてから)。
+
+props:
+
+- `items`: array — 行き先の列。データとして渡す(Menu の items と同じ理由)。
+- `current`: string((省略可)) — 今いる場所の id。アプリが所有する値(state.md §6 の current。aria-current のトークン値のうち page に当たる)。どこにも居ないとき(一覧の外の画面)は省く。UI が現在地を推測しない: url との突き合わせはアプリの知識である(値はアプリが持ち UI は描くだけ、という既存の向き)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label` — この領域の名前(「画面」「設定」等)。画面に複数の道案内があるときに要る。DS が既定の文言を持たない理由は Breadcrumb と同じ(i18n.md §4)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 道案内の領域である(Web の nav ランドマーク、native は各々の表現)。中は項目の並びで、器がその構造を保証する(Sources がリストの器を持つのと同じ形。アプリの作法に頼らない)。
+- 現在地が支援技術へ届く(Web の aria-current=page、native は各々の表現)。色や太さだけで示さない(WCAG 1.4.1 の同型)。これが本契約の要である: 移動の一覧そのものは Link の並びで書けるが、現在地の表明は合成では守られない。
+- 現在地の項目もリンクのままでよい(今いる場所を選び直せることは害でない。Breadcrumb の最後とは事情が違う: あちらは道筋の終点で、行き先ではない)。
+- 領域自身は焦点を受けない。焦点とフォーカスリングは各行き先(合成した Link)に立ち、当たり判定の門(size.md §4)もそちらに生きる。
+- 移動の横取り(SPA の routing)は契約に無い。Link と同じく、移動は行き先(href)が起こす。横取りが要る実装は、土地の声でその口を持つ(Web は祖先での捕捉)。
+
+### Pagination(契約 0.0.0-alpha.0)
+
+長い一覧を頁に分けて行き来する。前後の移動と、今どの頁に居るかの表明までを持つ。頁番号の列は持たない: 番号を並べると Collection の語彙(矢印での移動・roving tabindex)がもう一組増え、表面が倍になる(第3条。Polaris も前後だけを持つ)。頁の大きさ(1頁の件数)の選択も持たない(Select との合成)。
+
+props:
+
+- `page`: number — 今の頁(1 起点)。アプリが所有する値。既定を持たない(required)。
+- `pages`: number — 頁の総数。1 以下なら行き先が無いので、実装は前後の操作を無効にする。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: number) => void — 頁の移動の要求。アプリが page を更新する(Dialog の open と同じ向き)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `previous`(必須) — 前へ戻る操作の名前(「前へ」等)。DS が文言を持たないのは、持てば i18n の対象になるからである(i18n.md §4。既に newTabLabel / dismissLabel の2つで引き金に触れており、ここで3つ目を作らない)。
+- `next`(必須) — 次へ進む操作の名前(「次へ」等)。
+- `label` — この領域の名前(「ページ送り」等)。画面に複数の一覧があるときに要る。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 行き先を選ぶ領域である(Web の nav ランドマーク、native は各々の表現)。
+- 今どの頁に居るかが支援技術へ届く(Web の aria-current=page 相当。state.md §6 の current)。位置の表示(「3 / 12」等)は視覚にも届く必要があり、視覚だけ・支援技術だけのどちらにも寄せない(WCAG 1.4.1 の同型)。
+- 端では行き先が無いことが届く。実装は操作を無効にする(state.md §3.1 の disabled)。押せるのに何も起きない形にしない。
+- 領域自身は焦点を受けない。焦点とフォーカスリングは合成した操作(Button)に立ち、当たり判定の門(size.md §4)もそちらに生きる。
+
 ### Popover(契約 0.0.0-alpha.0)
 
 アンカー従属の一時面プリミティブ(overlay の popover 類)。Menu / Select(pointer 経路)/ Combobox が合成する再利用の器。開閉・退出(light)・フォーカスの移動と返却・アンカーへの位置決めを担い、中身と役割(role)は消費者が与える。RFC 0007 で最初のオーバーレイ契約として新設(overlay.md §8。当初 Dialog を想定したが Select のカスタム化で先になった)。振る舞いの正は overlay.rules.json、層/描画は layering/elevation、出入りの速さは motion。
@@ -911,6 +977,31 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 - 切替で DOM / 読み上げ順は変わらない。
 - SwiftUI 実装は ViewThatFits を使わない: あれは内容駆動(収まりで切替)であり、同じ幅でも内容次第で形が割れて共通言語が壊れる(layout.md §9 の記録)。自前で幅を測って閾値と比べる。
+
+### Tabs(契約 0.0.0-alpha.0)
+
+同じ場所に重ねた複数の面を、帯で切り替える。選ばれているタブはアプリが所有する値で(state.md §6: selected は親の選択の項目への射影であり、状態ではない)、UI は与えられた選択を描くだけである。帯に入りきらないときの送りは持たない(器との合成。第3条)。縦の帯は持たない(必要が立証されてから)。
+
+props:
+
+- `value`: string — 選ばれているタブの id。アプリが所有する値(field.md §5 と同じ向き)。既定を持たない(required): どれが選ばれているかを黙って決めると、最初の面の主張になる。
+- `items`: array — タブの列。データとして渡す(Select の options・Menu の items と同じ理由: 4プラットフォーム中立の契約はデータが安い。RFC 0007 / 0008)。パネルの中身は任意なのでデータに載らず、スロットが受ける。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: string) => void — 選択の要求。タブの活性化(クリック・矢印での移動)で発火し、アプリが value を更新する(Dialog の open と同じ向き)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `panel`(必須) — 選ばれているタブの中身。どのタブのぶんかは実装が渡す(Web は id を引数に取るスニペット、native は各々の表現。Sources が項目の列を受け取る形と同型で、受け取り方は各実装の表現である)。パネルを id ごとに別のスロットへ分ける形は採らない: 中立契約が可変個のスロットを表現できない。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 帯は tablist、各タブは tab、中身は tabpanel である。契約の role には活性化される側(tab)を書く: 焦点と活性化のキーが立つのはタブであり、role と focusRing と web-keys が一致する(Disclosure が group ではなく button を書いたのと同じ形)。帯とパネルの役割は実装が補う。タブは自分が制御するパネルを指し、パネルは自分を開いた タブを指す(Web の aria-controls / aria-labelledby、native は各々の表現)。
+- 矢印での移動は選択を伴う(移動 = 選択。web-keys.rules.json の arrows.tabs)。APG は「パネルの表示に目立つ遅れが無いなら焦点の移動で活性化することを推奨する」と述べ、主要な実装(Material / Carbon / Ant / Spectrum)もそうしている。手動の活性化へ切り替える prop は持たない: パネルの描画が重いときの逃げ道は、アプリがパネルを外さず保つ形で取れる(第3条)。
+- 焦点は帯の中で1つだけ Tab 順に載る(roving tabindex 相当)。disabled のタブは移動で飛ばす。焦点とフォーカスリングはタブに立ち、パネル自身は焦点を受けない(中身に押せる要素があればそちらに立つ)。
+- 選ばれているタブが視覚だけに頼らずに届く(WCAG 1.4.1 の同型)。色や下線だけでなく、選択が支援技術へ届く(Web の aria-selected、native は各々の表現)。
+- パネルは選ばれているものだけを示す。示していないパネルは支援技術からも到達しない(Disclosure の畳んだ中身と同じ線)。
 
 ### Tag(契約 0.0.0-alpha.2)
 

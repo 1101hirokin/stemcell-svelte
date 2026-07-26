@@ -1,0 +1,65 @@
+/* 行き先の一覧と現在地(NavList.md)。現在地の視覚は Expressive なので、その色は契約の必須トークンに
+   無い(挙げると別の見せ方を選んだ実装が門で落ちる)。ここでは面の塗りで示す。 */
+.sc-navlist-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  /* 項目の縦の律動。器が間隔を所有する(layout.md §1) */
+  gap: var(--spacing-stack-sm);
+}
+
+.sc-navlist-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+  padding: var(--spacing-inset-sm) var(--spacing-inset-md);
+  /* 当たり判定の門(size.md §4) */
+  min-block-size: 2.75rem;
+  box-sizing: border-box;
+  border-radius: var(--shape-semantic-control);
+  color: var(--color-app-foreground);
+  text-decoration: none;
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+}
+.sc-navlist-text {
+  min-inline-size: 0;
+}
+
+a.sc-navlist-item:hover {
+  background: var(--color-semantic-plain-soft-bg-hover);
+}
+a.sc-navlist-item:active {
+  background: var(--color-semantic-plain-soft-bg-pressed);
+}
+/* 現在地。色だけに頼らない(意味は aria-current が運ぶ) */
+.sc-navlist-item[aria-current='page'] {
+  background: var(--color-semantic-primary-soft-bg);
+  color: var(--color-semantic-primary-soft-fg);
+}
+.sc-navlist-item[aria-disabled='true'] {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+
+/* 焦点の輪郭(契約 focusRing: false はこの部品自身が焦点を受けないという意味で、行き先は受ける) */
+.sc-navlist-item:focus {
+  outline: none;
+}
+.sc-navlist-item:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.sc-navlist-label {
+  display: block;
+  margin-block-end: var(--spacing-stack-sm);
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-label-sm-font-family);
+  font-size: var(--typography-label-sm-font-size);
+}

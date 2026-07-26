@@ -1,0 +1,23 @@
+/* 頁の行き来(Pagination.md)。位置の表し方と操作の造形は Expressive。
+   押せることと当たり判定は合成した Button が持つので、ここでは引かない。 */
+.sc-pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inline-lg);
+  flex-wrap: wrap;
+}
+.sc-pagination-position {
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+  /* 桁が増えても位置が跳ねない */
+  font-variant-numeric: tabular-nums;
+}
+.sc-pagination-label {
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-label-sm-font-family);
+  font-size: var(--typography-label-sm-font-size);
+}
