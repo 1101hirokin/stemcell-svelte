@@ -211,7 +211,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 
-### Checkbox(契約 0.0.0-alpha.1)
+### Checkbox(契約 0.0.0-alpha.2)
 
 集合からの選択、または同意。送信(確定ステップ)を伴いうる(field.md §7 の線引き。裁定済み 2026-07)。即時反映する単独の設定なら Switch を使う。label のリッチ内容(リンク内包)の検算器(field.md §6)。
 
@@ -655,7 +655,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 領域自身は焦点を受けない。焦点とフォーカスリングは合成した操作(Button)に立ち、当たり判定の門(size.md §4)もそちらに生きる。
 - 中央の選択は欄であり、名前が要る(field.md §2)。器の側が既に文脈を語っているので、その名前は視覚から隠してよい(Select の labelHidden。SwiftUI の labelsHidden と同型)。
 
-### Popover(契約 0.0.0-alpha.0)
+### Popover(契約 0.0.0-alpha.1)
 
 アンカー従属の一時面プリミティブ(overlay の popover 類)。Menu / Select(pointer 経路)/ Combobox が合成する再利用の器。開閉・退出(light)・フォーカスの移動と返却・アンカーへの位置決めを担い、中身と役割(role)は消費者が与える。RFC 0007 で最初のオーバーレイ契約として新設(overlay.md §8。当初 Dialog を想定したが Select のカスタム化で先になった)。振る舞いの正は overlay.rules.json、層/描画は layering/elevation、出入りの速さは motion。
 
@@ -680,8 +680,9 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 退出は light(overlay.rules.json の dismiss)。Escape は最上位の1枚だけ(後入れ先出し。overlay.md §3)。
 - アンカーのスクロールに追従する(overlay.md §5。位置再計算は Expressive)。
 - focusRing:false は Popover 自身が焦点を持たないため。トリガーの focus-ring は anchor スロットの中身(消費者)が持つ。
+- 浮かぶ面は縁を持つ。影だけで地から浮かせる形は、強制配色(forced-colors)で影が落とされたときに境界が消え、面と地が同じ色で溶ける。縁は相互作用する部品の境界ではないので 3:1(WCAG 2.2 SC 1.4.11)の対象ではなく、地との差が分かる最も薄い線でよい(elevation.md §3)。
 
-### Radio(契約 0.0.0-alpha.1)
+### Radio(契約 0.0.0-alpha.2)
 
 RadioGroup の項目。単体では使えない(グループの外に単一選択は存在しない。React Aria は例外を投げ、Radix は単体を公開しない。Ant だけが単体 checked を許すが採らない — field.md §5)。選ばれているかはグループの value との一致から導かれ、checked という prop は持たない(導出値は prop ではない)。
 
@@ -1193,7 +1194,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - result / error スロットは status に応じて条件表示される内部領域である。その中に押せる要素(結果内のリンク等)があれば、focus とフォーカスリングと当たり判定の門はその要素に生きる。ルートの focusRing: false は ToolCall 自身が focus を受けないという意味で、内部要素を免除しない(条件付き部分要素の a11y をスキーマは表現できない。Alert / Tag と同じ限界の認識)。
 - 承認待ち(requires-action)は本組織の関心でない。承認の到達性・振る舞い(キーボードから承認でき、応答後に実行へ戻る等)は HITL foundation とその organism が持つ(tool-call §2 / §4。先取りしない)。
 
-### Tooltip(契約 0.0.0-alpha.1)
+### Tooltip(契約 0.0.0-alpha.2)
 
 アンカー(トリガー)に添える短い補助ラベル(overlay の tooltip 類)。hover と focus の両方で開き、hover / focus の終了と Escape で閉じる。フォーカスを受け取らない(受け取れば popover。overlay.md §4)。必須情報を置いてはならない: タッチには hover が無く、focus 滞在も細いので、tooltip は補強であって唯一の経路ではない(overlay.md §4「hover でしか開けないものを作らない」)。位置はアンカー従属で、Web は CSS Anchor Positioning + native popover の top-layer で描く(切れない。憲法 第2条 / 第7条。Popover と同じ機構)。開閉は内部が所有する(hover / focus 駆動。アプリに管理させるのは実用に反する。overlay.md §6)。RFC 0007 D で Popover を建てたとき、Tooltip も安くなると予告した消費者。
 
@@ -1213,4 +1214,5 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - tooltip 自身はフォーカスを受け取らない(pointer-events を切り、tabindex を持たない)。フォーカス可能にした時点でそれは tooltip でなく popover である(overlay.md §4)。scrim も背後スクロール封鎖も無い(tooltip 類)。
 - 必須情報を tooltip に置かない。trigger は tooltip 無しでも意味が通ること(第1条。タッチと focus 経路の細さの帰結)。
 - Web は native popover(top-layer)で描き、overflow / transform 祖先でも切れない。位置は CSS Anchor Positioning(anchor() / anchor-size は使わず内容幅)。非対応環境は JS の矩形計測で補う(第7条。Popover と同型)。
+- 浮かぶ面は縁を持つ。影だけで地から浮かせる形は、強制配色(forced-colors)で影が落とされたときに境界が消え、面と地が同じ色で溶ける。縁は相互作用する部品の境界ではないので 3:1(WCAG 2.2 SC 1.4.11)の対象ではなく、地との差が分かる最も薄い線でよい(elevation.md §3)。
 

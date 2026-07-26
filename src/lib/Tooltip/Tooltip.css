@@ -22,6 +22,8 @@
   overflow-wrap: anywhere;
   padding: var(--spacing-inset-sm);
   background: var(--elevation-popover-surface);
+  /* 浮かぶ面の縁(elevation.md §3。強制配色で影が落ちても境界が残る) */
+  border: var(--shape-border-width) solid var(--color-app-divider);
   box-shadow: var(--elevation-popover-shadow);
   border-radius: var(--shape-semantic-popover);
   color: var(--color-app-foreground);

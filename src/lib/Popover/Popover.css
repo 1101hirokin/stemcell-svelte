@@ -16,6 +16,7 @@
   position: fixed;
   inset: auto;
   margin: 0;
+  /* UA 既定の枠は落とす(自前の縁は下で引き直す) */
   border: 0;
   padding: 0;
   z-index: var(--layer-popover-z);
@@ -25,6 +26,10 @@
   max-inline-size: var(--sc-popover-max-inline-size, none);
   background: var(--elevation-popover-surface);
   box-shadow: var(--elevation-popover-shadow);
+  /* 浮かぶ面の縁(elevation.md §3)。影だけで地から浮かせる形は、強制配色で影が落とされたときに
+     境界が消えて面と地が溶ける。相互作用する部品の境界ではないので 3:1 の対象ではなく、
+     地との差が分かる最も薄い線でよい(color.md §6 の射程の表) */
+  border: var(--shape-border-width) solid var(--color-app-divider);
   border-radius: var(--shape-semantic-popover);
   /* 中身を角で切り抜く。端まで使う項目(余白なしの listbox 等)が丸角からはみ出さない */
   overflow: hidden;
