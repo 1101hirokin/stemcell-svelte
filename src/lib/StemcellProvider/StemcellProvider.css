@@ -30,6 +30,20 @@ body {
   overflow-wrap: anywhere;
 }
 
+/* 打つ文字の大きさ(field.md §2)。触点の環境では 16px を下回らない。iOS はこれを下回る欄に焦点が
+   乗るとページごと拡大し、利用者が戻すまで版面が崩れる(本文は 14px なので、素朴に書くと全ての欄で
+   起きる)。拡大そのものを禁じる手は採らない(利用者から拡大縮小を奪う。WCAG 2.2 SC 1.4.4)。
+   値と条件はここに一度だけ置き、打てる欄(TextField / Textarea / Select / DateField の桁)が引く。
+   行高は比率なので、触点では行が約 2px 高くなる(的が大きくなる方向なので許容する)。 */
+:root {
+  --_sc-typed-font-size: var(--typography-body-md-font-size);
+}
+@media (pointer: coarse) {
+  :root {
+    --_sc-typed-font-size: max(16px, var(--typography-body-md-font-size));
+  }
+}
+
 /* 連続曲率(shape.md §4 の MEME)。すべての非ゼロ半径に適用する。
    Web の機構は corner-shape で、未対応環境(現状 Chromium 系以外)は宣言ごと無視して素朴な円弧へ退避する
    (第7条 グレースフル・フォールバック。半径量は不変で、変わるのは質感だけ)。

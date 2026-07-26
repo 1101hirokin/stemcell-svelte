@@ -126,21 +126,44 @@
     else if (e.key === 'Backspace' || e.key === 'Delete') {
       typed = '';
       set(type, undefined);
-    } else if (/^\d$/.test(e.key)) {
-      const b = bounds(type);
-      const width = type === 'year' ? 4 : 2;
-      const buffer = (typed + e.key).slice(-width);
-      typed = buffer;
-      const n = Number(buffer);
-      set(type, Math.min(Math.max(n, 0) || b.min, b.max));
-      // 桁が埋まったら次へ送る(native の欄と同じ手触り)
-      if (buffer.length >= width || n * 10 > b.max) {
-        typed = '';
-        move(type, 1);
-      }
-    } else return;
+    } else if (/^\d$/.test(e.key)) return; // 数字は input で受ける(preventDefault しない)
+    else return;
     e.preventDefault();
   };
+
+  // 打たれた数字を1つ受ける。ソフトキーボードは keydown に打鍵を載せない環境があるので、
+  // 数字は入力イベント側で受ける(打鍵の経路を一つにする。第2条: 鍵盤は標準が出す)
+  const takeDigit = (type: SegmentType, digit: string) => {
+    const b = bounds(type);
+    const width = type === 'year' ? 4 : 2;
+    const buffer = (typed + digit).slice(-width);
+    typed = buffer;
+    const n = Number(buffer);
+    set(type, Math.min(Math.max(n, 0) || b.min, b.max));
+    // 桁が埋まったら次へ送る(native の欄と同じ手触り)
+    if (buffer.length >= width || n * 10 > b.max) {
+      typed = '';
+      move(type, 1);
+    }
+  };
+
+  // 桁は入力要素なので、環境がここへ文字を差し込む。差し込まれた内容は自分の表示へ戻し、
+  // 数字だけを値へ反映する(消しは値を空にする)
+  const oninput = (e: Event, type: SegmentType) => {
+    const el = e.currentTarget as HTMLInputElement;
+    const data = (e as InputEvent).data ?? '';
+    const deleting = ((e as InputEvent).inputType ?? '').startsWith('delete');
+    el.value = shown(type); // 表示は器が決める(差し込まれた文字列は残さない)
+    if (disabled || readonly) return;
+    if (deleting) {
+      typed = '';
+      set(type, undefined);
+    } else for (const ch of data) if (/\d/.test(ch)) takeDigit(type, ch);
+    select(el);
+  };
+
+  // 桁ぜんぶを選んだ状態にする(native の日付欄と同じで、打つと置き換わる)
+  const select = (el: HTMLInputElement) => el.setSelectionRange(0, el.value.length);
 
   const shown = (type: SegmentType) => {
     const n = parts[type];
@@ -153,7 +176,8 @@
   );
 </script>
 
-<!-- 欄の解剖は field.md §2(名前・説明・エラー)。桁は spinbutton で、値と上下限が支援技術へ届く。
+<!-- 欄の解剖は field.md §2(名前・説明・エラー)。桁は打てる要素(input)の spinbutton で、値と上下限が
+     支援技術へ届き、触点の端末では環境が数字の鍵盤を出す(RFC 0017・第2条)。
      根に role を書かないのは、活性化される要素ではないからである(役割は桁の側に立つ。契約 a11y)。
      name を持つときだけ隠し入力を置き、native の form 送信・FormData・reset に参加する(field.md §5)。 -->
 <div class="sc-datefield" data-size={size} data-invalid={invalid} data-disabled={disabled}>
@@ -171,11 +195,19 @@
   >
     {#each order as type, i (type)}
       {@const b = bounds(type)}
-      <span
+      <input
         class="sc-datefield-segment"
         data-segment={type}
         data-empty={parts[type] == null}
+        type="text"
         role="spinbutton"
+        inputmode="numeric"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+        size={type === 'year' ? 4 : 2}
+        value={shown(type)}
+        readonly={disabled || readonly}
         tabindex={disabled ? -1 : 0}
         aria-label={names[type]}
         aria-valuenow={parts[type]}
@@ -184,7 +216,9 @@
         aria-valuetext={parts[type] == null ? names[type] : `${parts[type]}`}
         aria-readonly={readonly ? 'true' : undefined}
         onkeydown={(e) => onkeydown(e, type)}
-      >{shown(type)}</span>
+        oninput={(e) => oninput(e, type)}
+        onfocus={(e) => select(e.currentTarget)}
+      />
       {#if i < order.length - 1}<span class="sc-datefield-separator" aria-hidden="true">/</span>{/if}
     {/each}
   </div>
