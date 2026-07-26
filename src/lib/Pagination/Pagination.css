@@ -1,23 +1,35 @@
-/* 頁の行き来(Pagination.md)。位置の表し方と操作の造形は Expressive。
-   押せることと当たり判定は合成した Button が持つので、ここでは引かない。 */
+/* 頁の行き来(Pagination.md)。位置の表し方と中央の選択の造形は Expressive。
+   押せることと当たり判定は合成した Button、値と一覧の到達性は合成した Select が持つので、ここでは引かない。
+   並びの間隔は spacing の段を引くので、密度(compact)では自然に詰まる。 */
 .sc-pagination {
   display: flex;
   align-items: center;
   gap: var(--spacing-inline-lg);
   flex-wrap: wrap;
 }
-.sc-pagination-position {
+/* 中央の選択。Select は器いっぱいに広がるので、頁の数字が収まる幅で止める
+   (桁が増えても跳ねないよう ch で持つ) */
+.sc-pagination-jump {
+  inline-size: 9ch;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 領域と欄の名前。視覚には出さない: 器(前後の操作と現在地)が既に文脈を語っている。
+   支援技術には届く(標準の clip 技法。field.md §2 と同じ線) */
+.sc-pagination-label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
   color: var(--color-app-fg-muted);
   font-family: var(--typography-body-sm-font-family);
   font-size: var(--typography-body-sm-font-size);
   font-weight: var(--typography-body-sm-font-weight);
   line-height: var(--typography-body-sm-line-height);
   letter-spacing: var(--typography-body-sm-letter-spacing);
-  /* 桁が増えても位置が跳ねない */
-  font-variant-numeric: tabular-nums;
-}
-.sc-pagination-label {
-  color: var(--color-app-fg-muted);
-  font-family: var(--typography-label-sm-font-family);
-  font-size: var(--typography-label-sm-font-size);
 }

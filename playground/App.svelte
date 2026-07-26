@@ -754,8 +754,10 @@
     <Text as="h2" variant="title-lg">ナビゲーション(Tabs / Breadcrumb / Pagination / NavList)</Text>
     <Text as="p" variant="body-sm" muted>
       クラスタ9。Tabs は矢印で移動すると選択も動く(移動 = 選択。disabled は飛ばし、RTL では左右が反転する)。
-      Breadcrumb は最後が現在地でリンクにしない。Pagination は端で操作を無効にする。NavList は現在地を
-      aria-current で届ける(色だけに頼らない)。
+      Breadcrumb は最後が現在地でリンクにしない。Pagination は中央が現在地の表示であると同時に行き先の選択で、
+      番号を並べずに任意の頁へ飛べる(欄の名前は器が文脈を語っているので視覚から隠している)。NavList は現在地を
+      aria-current で届ける(色だけに頼らない)。上の density を compact にすると、どれも間隔が詰まって当たり判定の
+      床(24px)だけが残る。
     </Text>
 
     <Breadcrumb items={[{ label: 'ホーム', href: '#' }, { label: '顧客', href: '#' }, { label: '青葉製作所' }]}>

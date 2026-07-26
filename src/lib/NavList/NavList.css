@@ -15,8 +15,11 @@
   align-items: center;
   gap: var(--spacing-inline-md);
   padding: var(--spacing-inset-sm) var(--spacing-inset-md);
-  /* 当たり判定の門(size.md §4) */
-  min-block-size: 2.75rem;
+  /* 当たり判定の門(size.md §4。Web の下限は 24px)。文字が短くても下限を割らない。
+     ここを大きく取らないのは、見た目の詰め具合が密度の層の仕事だからである(size.rules.json:
+     段と密度は見た目を詰めてよく、割ってはならないのは当たり判定だけ)。内側の余白は
+     spacing の段を引いているので、compact では自然に詰まる */
+  min-block-size: 1.5rem;
   box-sizing: border-box;
   border-radius: var(--shape-semantic-control);
   color: var(--color-app-foreground);
