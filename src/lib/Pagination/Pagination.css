@@ -7,10 +7,12 @@
   gap: var(--spacing-inline-lg);
   flex-wrap: wrap;
 }
-/* 中央の選択。Select は器いっぱいに広がるので、頁の数字が収まる幅で止める
-   (桁が増えても跳ねないよう ch で持つ) */
+/* 中央の選択。Select は器いっぱいに広がるので、包む側が幅を決める。
+   固定幅にすると桁が増えたとき(「12 / 12」)に文字が切れるので、中身に合わせる。
+   max-content は「折り返さずに必要な幅」を指すので、桁が増えれば器も広がる(JS は要らない)。
+   数字は等幅の字形にして、同じ桁数のあいだは幅が動かないようにする。 */
 .sc-pagination-jump {
-  inline-size: 9ch;
+  inline-size: max-content;
   font-variant-numeric: tabular-nums;
 }
 
