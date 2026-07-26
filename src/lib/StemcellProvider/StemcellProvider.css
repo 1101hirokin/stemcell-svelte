@@ -5,6 +5,29 @@ body {
   font-family: var(--typography-body-md-font-family);
   font-size: var(--typography-body-md-font-size);
   line-height: var(--typography-body-md-line-height);
+  /* 文字の描き方(typography.md §5。Web / Apple 系だけの機構)。
+     1. macOS / iOS の WebKit と Firefox は既定でサブピクセルのアンチエイリアスを掛け、太めに描く。
+        地の面が暗いテーマでは、これが滲みになって字面が潰れる。グレースケールへ寄せて、明暗どちらの
+        テーマでも同じ太さで立つようにする。他の OS では宣言ごと無視される(第7条 グレースフル・フォールバック)。
+     2. palt は和文の字送りを字面に合わせて詰める(句読点や括弧の左右の余りを削る)。等幅の込み組みは
+        欧文と混ざる見出しで穴が空いて見え、行が締まらない。和文フォントが持たなければ何も起きない。
+        高位の font-variant-* に palt へ対応する値が無いので、低位の font-feature-settings で指す。
+        数字の等幅(font-variant-numeric: tabular-nums)とは別の機能なので取り合わない。 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'palt';
+  /* 和文と欧文・数字の境目に間合いを空ける。初期値と同じだが、UA リセットで no-autospace を
+     当てられても DS の組版が残るように明示する。対応していない環境では宣言ごと無視される */
+  text-autospace: normal;
+  /* 折り返しの規則(typography.md §5)。
+     欧文は語で折る(word-break: normal。break-all は語の途中で切れて読めなくなる)。
+     和文は禁則を厳格に守る(line-break: strict。行頭に小書きの仮名や長音符を置かない)。
+     どこでも折るのは最後の手段で、切れ目を持たない長い連なり(URL・識別子)が器を突き破るときだけ効く。
+     break-word ではなく anywhere を採るのは、器の最小幅にも反映させて器ごと溢れさせないため
+     (代わりに最小内容幅が1文字ぶんまで縮む。狭い器で意図より早く折れるようなら break-word へ落とす) */
+  word-break: normal;
+  line-break: strict;
+  overflow-wrap: anywhere;
 }
 
 /* 連続曲率(shape.md §4 の MEME)。すべての非ゼロ半径に適用する。

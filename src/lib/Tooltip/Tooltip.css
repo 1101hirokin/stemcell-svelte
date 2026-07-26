@@ -20,8 +20,6 @@
   z-index: var(--layer-tooltip-z);
   /* 面は描画領域より広くならない(Popover と同じ理由) */
   max-inline-size: min(18rem, calc(100dvw - var(--spacing-inline-md) * 2));
-  /* 空白の無い長い語(URL 等)が面の外へはみ出さない(背景/影の中で折る) */
-  overflow-wrap: anywhere;
   padding: var(--spacing-inset-sm);
   background: var(--elevation-popover-surface);
   /* 浮かぶ面の縁(elevation.md §3。強制配色で影が落ちても境界が残る) */
