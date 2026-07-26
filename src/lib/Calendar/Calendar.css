@@ -57,8 +57,6 @@
      ここで指すのは「これ以上は縮まない」床である */
   min-inline-size: 1.5rem;
   min-block-size: 1.5rem;
-  /* 日は2桁までなので、列の幅はここで決まる(中身で立つ格子の基準) */
-  inline-size: 2.25rem;
   padding: 0; /* 余白は面(span)が持つ。面が升いっぱいに広がるようにするため */
   text-align: center;
   cursor: pointer;
@@ -98,6 +96,9 @@
 /* 升の面。丸みと連続曲率をここが持つ(shape.md §4)。通常フローの箱なので、帯の上・数字の下に立つ */
 .sc-calendar-day-face {
   display: block;
+  /* 日は2桁までなので、数字の箱の幅はここで決まる(中身で立つ格子の基準)。
+     升の幅はこの箱と余白から決まり、面はその升いっぱいに広がる */
+  min-inline-size: 2.25rem;
   padding: var(--spacing-inset-sm);
   border-radius: var(--shape-semantic-control);
   corner-shape: var(--_sc-corner-shape);
