@@ -195,7 +195,7 @@
                     onclick={() => select(day)}
                     onkeydown={(e) => onkeydown(e, day)}
                     onpointerenter={() => (hovered = day)}
-                  >{day.day}</td>
+                  ><span class="sc-calendar-day-face">{day.day}</span></td>
                 {:else}
                   <td class="sc-calendar-empty"></td>
                 {/if}

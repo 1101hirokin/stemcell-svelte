@@ -57,24 +57,49 @@
      ここで指すのは「これ以上は縮まない」床である */
   min-inline-size: 1.5rem;
   min-block-size: 1.5rem;
-  /* 日は2桁までなので、列の幅はここで決まる(中身で立つ格子の基準) */
-  inline-size: 2.25rem;
-  padding: var(--spacing-inset-sm);
+  padding: 0; /* 余白は面(span)が持つ。面が升いっぱいに広がるようにするため */
+  /* 列の幅は数字の箱(2桁ぶん)と内側の余白から決まる。表の指定幅は「好ましい幅」なので、
+     器が狭ければ表が縮める。最小幅で書くと縮めなくなり、狭い画面で格子が器から飛び出す */
+  inline-size: calc(2.25rem + var(--spacing-inset-sm) * 2);
   text-align: center;
   cursor: pointer;
   font-variant-numeric: tabular-nums;
-  /* 面(升の丸)と帯(期間)は擬似要素が描く。数字は文字なので、どちらより上に出る(描画順) */
-  position: relative;
   color: var(--color-app-foreground);
+  /* 帯(期間)は升そのものの面が描く。面(升の丸)は中の span が描く。
+     擬似要素の絶対配置と負の重ね順は使わない: 表の升に対する絶対配置は WebKit で升ではなく表を
+     基準にすることがあり、iOS で選ばれた日の面が消えた(実機で確認)。背景と通常フローだけで組む */
   transition: color calc(var(--motion-feedback-duration) * var(--motion-scale))
     var(--motion-feedback-easing);
 }
-/* 升の面。丸みと連続曲率をここが持つ(shape.md §4。擬似要素は corner-shape を継承しない) */
-.sc-calendar-day::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
+
+/* 期間の帯。両端より薄い面で、どこからどこまでかが色の差で読める。
+   下限だけ置いた途中は、今押せばどこまでが期間になるかを同じ帯で予告する(Calendar.md) */
+.sc-calendar-day[data-band='true'] {
+  background: var(--color-semantic-primary-soft-bg);
+}
+/* 端の升では帯を升の中央で止める。端の面は丸いので、帯が縁の外へ回り込んで角が飛び出て見える。
+   始まりと終わりが同じ日なら両方が効いて帯は消える(帯の要らない状態)。
+   grad の向きは物理なので、行の向きが逆の言語では :dir() で入れ替える */
+.sc-calendar-day[data-band-start='true'] {
+  background: linear-gradient(to right, transparent 50%, var(--color-semantic-primary-soft-bg) 50%);
+}
+.sc-calendar-day[data-band-end='true'] {
+  background: linear-gradient(to right, var(--color-semantic-primary-soft-bg) 50%, transparent 50%);
+}
+.sc-calendar-day[data-band-start='true'][data-band-end='true'] {
+  background: none;
+}
+.sc-calendar-day[data-band-start='true']:dir(rtl) {
+  background: linear-gradient(to left, transparent 50%, var(--color-semantic-primary-soft-bg) 50%);
+}
+.sc-calendar-day[data-band-end='true']:dir(rtl) {
+  background: linear-gradient(to left, var(--color-semantic-primary-soft-bg) 50%, transparent 50%);
+}
+
+/* 升の面。丸みと連続曲率をここが持つ(shape.md §4)。通常フローの箱なので、帯の上・数字の下に立つ */
+.sc-calendar-day-face {
+  display: block;
+  padding: var(--spacing-inset-sm);
   border-radius: var(--shape-semantic-control);
   corner-shape: var(--_sc-corner-shape);
   /* 指を置いたとき・選ばれたときの切替を滑らかにする(feedback の意味層)。
@@ -82,37 +107,19 @@
   transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
     var(--motion-feedback-easing);
 }
-.sc-calendar-day:hover:not([aria-disabled='true'])::after {
+.sc-calendar-day:hover:not([aria-disabled='true']) .sc-calendar-day-face {
   background: var(--color-semantic-primary-soft-bg);
-}
-
-/* 期間の帯。両端より薄い面で、どこからどこまでかが色の差で読める。面より下に敷く。
-   下限だけ置いた途中は、今押せばどこまでが期間になるかを同じ帯で予告する(Calendar.md) */
-.sc-calendar-day[data-band='true']::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background: var(--color-semantic-primary-soft-bg);
-}
-/* 端の升では帯を升の中央で止める。端の面は丸いので、帯が縁の外へ回り込んで角が飛び出て見える。
-   始まりと終わりが同じ日なら両方が効いて帯は消える(帯の要らない状態) */
-.sc-calendar-day[data-band-start='true']::before {
-  inset-inline-start: 50%;
-}
-.sc-calendar-day[data-band-end='true']::before {
-  inset-inline-end: 50%;
 }
 /* 選ばれている日(単一のときはこれだけ、期間のときは両端)。色だけに頼らず、
    地に対して 3:1 を満たす面と文字の組で示す(WCAG 2.2 SC 1.4.11。date.md §6) */
 .sc-calendar-day[data-selected='true'] {
   color: var(--color-semantic-primary-fg);
 }
-.sc-calendar-day[data-selected='true']::after {
+.sc-calendar-day[data-selected='true'] .sc-calendar-day-face {
   background: var(--color-semantic-primary-bg);
 }
 /* 今日。選ばれていなくても分かるよう、輪郭で示す(意味は aria-current が運ぶ) */
-.sc-calendar-day[data-today='true']:not([data-selected='true'])::after {
+.sc-calendar-day[data-today='true']:not([data-selected='true']) .sc-calendar-day-face {
   box-shadow: inset 0 0 0 var(--shape-border-width) var(--color-app-foreground);
 }
 .sc-calendar-day[aria-disabled='true'] {
