@@ -58,14 +58,11 @@
   const labelId = `${uid}-label`;
 
   let open = $state(false);
+  // 見えている月。開いた時点の始まりから始まり、以後は利用者のページ送りでしか動かない。
+  // 選び直しで月が跳ぶと、隣の月を見比べている最中に視界がさらわれる(DateRangePicker.md)
   let month = $state(formatMonth(parseISO(start) ?? today()));
   // 次に押した日が終わりになる途中の状態。視覚と支援技術の両方へ届ける(契約 a11y)
   let pending = $state(false);
-
-  $effect(() => {
-    if (!open) return;
-    month = formatMonth(parseISO(start) ?? today());
-  });
 
   const commit = (nextStart: string, nextEnd: string) => {
     start = nextStart;

@@ -92,6 +92,21 @@ it('対の端そのものを押したときは変えない(押し間違いで期
   expect(onchange.mock.calls.length).toBe(calls);
 });
 
+it('選び直しても月は動かない(ページ送りは利用者の明示だけ)', async () => {
+  const { container } = render(DateRangePicker, { props: { ...props, start: '2026-07-20', end: '2026-07-26' } });
+  await fireEvent.click(container.querySelector('button') as HTMLElement);
+  const caption = () => container.querySelector('.sc-calendar-month-label')?.textContent ?? '';
+  const shown = caption();
+  // 次の月へ送ってから、見えている月の日を押す(選び直し)
+  const next = container.querySelectorAll('.sc-calendar-nav button')[1] as HTMLElement;
+  await fireEvent.click(next);
+  const paged = caption();
+  expect(paged).not.toBe(shown);
+  const cells = [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')];
+  await fireEvent.click(cells.find((el) => el.textContent === '15')!);
+  expect(caption()).toBe(paged);
+});
+
 it('無効のときは暦を開けない', () => {
   const { container } = render(DateRangePicker, { props: { ...props, disabled: true } });
   expect((container.querySelector('button') as HTMLButtonElement).disabled).toBe(true);

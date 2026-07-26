@@ -172,6 +172,8 @@
                     data-focused={isSame(day, focus)}
                     data-selected={isSame(day, startDay) || isSame(day, endDay)}
                     data-in-range={inRange(day)}
+                    data-range-start={inRange(day) && isSame(day, startDay)}
+                    data-range-end={inRange(day) && isSame(day, endDay)}
                     data-today={isSame(day, now)}
                     aria-selected={isSame(day, startDay) || isSame(day, endDay) || inRange(day)}
                     aria-current={isSame(day, now) ? 'date' : undefined}
