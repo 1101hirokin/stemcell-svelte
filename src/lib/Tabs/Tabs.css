@@ -1,0 +1,61 @@
+/* 同じ場所に重ねた面を帯で切り替える(Tabs.md)。選択の視覚(下線・文字の濃さ)は Expressive で、
+   ここでは下線を採る。帯の位置や切替の動きも Expressive。 */
+.sc-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.sc-tabs-list {
+  display: flex;
+  gap: var(--spacing-inline-lg);
+  border-block-end: var(--shape-border-width) solid var(--color-app-divider);
+}
+
+.sc-tabs-tab {
+  appearance: none;
+  background: none;
+  border: 0;
+  /* 選択の下線。resting は透明にして、選択で寸法が動かないようにする(Card の枠と同じ形)。
+     太さは境界の原始の2倍: 印は髪の毛より太くないと見えないが、独自の長さを持ち込まない */
+  border-block-end: calc(var(--shape-border-width) * 2) solid transparent;
+  margin-block-end: calc(-1 * var(--shape-border-width));
+  padding: var(--spacing-inset-sm) var(--spacing-inset-md);
+  /* 当たり判定の門(size.md §4。Web の下限は 24px)。文字が短くても下限を割らない。
+     ここを大きく取らないのは、見た目の詰め具合が密度の層の仕事だからである(size.rules.json:
+     段と密度は見た目を詰めてよく、割ってはならないのは当たり判定だけ)。内側の余白は
+     spacing の段を引いているので、compact では自然に詰まる */
+  min-block-size: 1.5rem;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+  cursor: pointer;
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+}
+.sc-tabs-tab:hover:not(:disabled) {
+  color: var(--color-app-foreground);
+}
+.sc-tabs-tab[aria-selected='true'] {
+  color: var(--color-semantic-primary-bg);
+  border-block-end-color: var(--color-semantic-primary-bg);
+}
+.sc-tabs-tab:disabled {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+
+/* 焦点の輪郭(契約 focusRing: true)。色は intent を持たないので既定の app.system */
+.sc-tabs-tab:focus,
+.sc-tabs-panel:focus {
+  outline: none;
+}
+.sc-tabs-tab:focus-visible,
+.sc-tabs-panel:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+}

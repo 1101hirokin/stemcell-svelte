@@ -26,8 +26,8 @@
 /* native input は box を覆って置き、クリック・フォーカスを受ける。視覚は透明にして box に委ねる */
 .sc-checkbox-input {
   position: absolute;
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
+  inline-size: var(--selection-size);
+  block-size: var(--selection-size);
   margin: 0;
   opacity: 0;
   cursor: inherit;
@@ -36,8 +36,13 @@
 .sc-checkbox-box {
   position: relative;
   flex: 0 0 auto;
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
+  /* トークンは外形の一辺を指す(枠を含む)。含めないと枠のぶんだけ実寸が大きくなり、
+     同じ値を指しているのに実装ごとに見た目が割れる */
+  box-sizing: border-box;
+  /* 箱の寸法は SSOT が持つ(size.md §2 の例外列挙。内容から導けない箱)。
+     見た目の寸法であって当たり判定ではない: 押せる範囲は包む label が担う */
+  inline-size: var(--selection-size);
+  block-size: var(--selection-size);
   border: var(--shape-border-width) solid var(--_box-border);
   border-radius: var(--shape-semantic-selection);
   background: var(--_box-bg);
@@ -51,10 +56,11 @@
   position: absolute;
   inset-inline-start: 50%;
   inset-block-start: 46%;
-  inline-size: 0.3rem;
-  block-size: 0.6rem;
+  /* 印は箱に比例させる(箱の寸法が動いても形が保たれる) */
+  inline-size: calc(var(--selection-size) * 0.24);
+  block-size: calc(var(--selection-size) * 0.48);
   border: solid var(--_mark);
-  border-width: 0 2px 2px 0;
+  border-width: 0 calc(var(--shape-border-width) * 2) calc(var(--shape-border-width) * 2) 0;
   transform: translate(-50%, -55%) rotate(45deg);
 }
 

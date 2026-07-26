@@ -23,6 +23,8 @@
     disabled?: boolean;
     invalid?: boolean;
     required?: boolean;
+    /** 名前を視覚から隠す(支援技術には届く。field.md §2。器が文脈を語っている場合の例外)。 */
+    labelHidden?: boolean;
     size?: (typeof META.props.size.values)[number];
     onchange?: (value: string) => void;
     label: Snippet;
@@ -37,6 +39,7 @@
     disabled = META.props.disabled.default,
     invalid = META.props.invalid.default,
     required = META.props.required.default,
+    labelHidden = META.props.labelHidden.default,
     size = META.props.size.default,
     onchange,
     label,
@@ -163,7 +166,7 @@
   }
 </script>
 
-<div class="sc-select" data-size={size} data-invalid={invalid} data-disabled={disabled}>
+<div class="sc-select" data-size={size} data-invalid={invalid} data-disabled={disabled} data-label-hidden={labelHidden}>
   <label class="sc-select-label" for={inputId}>
     {@render label()}{#if required}<span class="sc-select-required" aria-hidden="true">*</span
       >{/if}

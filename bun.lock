@@ -8,7 +8,7 @@
         "@stemcell/icons": "0.0.0-alpha.3",
       },
       "devDependencies": {
-        "@stemcell/tokens": "0.0.0-alpha.7",
+        "@stemcell/tokens": "0.0.0-alpha.8",
         "@sveltejs/package": "^2.5.8",
         "@sveltejs/vite-plugin-svelte": "^4.0.0",
         "@testing-library/svelte": "^5.2.0",
@@ -153,7 +153,7 @@
 
     "@stemcell/icons": ["@stemcell/icons@0.0.0-alpha.3", "http://localhost:4873/@stemcell/icons/-/icons-0.0.0-alpha.3.tgz", {}, "sha512-DTDK7OvPI18V5EYhSF85bXr8HPzKAu9EI5FtZF/Hjo8NU82naiWUE6Xu854tPhwGXNegeKUv3WWbeh3o/zDAbQ=="],
 
-    "@stemcell/tokens": ["@stemcell/tokens@0.0.0-alpha.7", "http://localhost:4873/@stemcell/tokens/-/tokens-0.0.0-alpha.7.tgz", {}, "sha512-ASxgMHvUxOM/rOk+tTzXquFJCcB7HYzQzHHPcLo5JmqYsdQ4YDScBjpiFABo0gJ+B/OfBZziLTzI6iOnyQCXXw=="],
+    "@stemcell/tokens": ["@stemcell/tokens@0.0.0-alpha.8", "http://localhost:4873/@stemcell/tokens/-/tokens-0.0.0-alpha.8.tgz", {}, "sha512-3hxqlY95szNEwzC7CdDc3m2NgILPMcFJwg9ZPNAEms4xXlWax5n7NR0Tqyg42XCZNWFIT4/TTOnQ7fqmp4cq2Q=="],
 
     "@sveltejs/acorn-typescript": ["@sveltejs/acorn-typescript@1.0.11", "", { "peerDependencies": { "acorn": "^8.9.0" } }, "sha512-LFuZUkjJ9iF7JZye/aG5XM0SFcQ5VyL0oVX4WJ9dc0Va3R3s0OauX1BESVCb+YN/ol8TAfqGDDAQsTG627Y5kw=="],
 

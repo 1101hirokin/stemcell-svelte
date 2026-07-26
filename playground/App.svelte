@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StemcellProvider, Button, IconButton, Slider, Disclosure, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text, Center, Container, Cover, Frame, Reel, Imposter, ToolCall, Sources, Reasoning } from '../src/lib';
+  import { StemcellProvider, Button, IconButton, Slider, Disclosure, LinearProgress, CircularProgress, LinearLoader, CircularLoader, Switcher, Box, Stack, Cluster, TextField, Select, Grid, Sidebar, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Divider, Skeleton, Menu, Dialog, Drawer, Tooltip, Card, Link, Badge, Avatar, Tag, Alert, Text, Center, Container, Cover, Frame, Reel, Imposter, ToolCall, Sources, Reasoning, Tabs, Breadcrumb, Pagination, NavList } from '../src/lib';
   import checkGlyph from '@stemcell/icons/check';
 
   let size = $state<string | undefined>(undefined);
@@ -34,6 +34,21 @@
   let volume = $state(40);
   let faqOpen = $state(false);
   let toolStatus = $state<'busy' | 'result' | 'error'>('busy');
+  let tab = $state('overview');
+  const TAB_ITEMS = [
+    { id: 'overview', label: '概要' },
+    { id: 'activity', label: '活動', icon: 'chat' },
+    { id: 'files', label: '書類', disabled: true },
+    { id: 'deals', label: '取引' },
+  ];
+  let navCurrent = $state('customers');
+  const NAV_ITEMS = [
+    { id: 'home', label: 'ホーム', href: '#nav-home', icon: 'home' },
+    { id: 'customers', label: '顧客', href: '#nav-customers', icon: 'user.group' },
+    { id: 'orders', label: '注文', href: '#nav-orders', icon: 'shop.cart' },
+    { id: 'admin', label: '管理(権限なし)', href: '#nav-admin', icon: 'setting', disabled: true },
+  ];
+  let page = $state(3);
   let reasoningStatus = $state<'busy' | 'complete'>('busy');
   let reasoningOpen = $state(false);
   // 生成中の名前は移り変わる(ChatGPT が段階ごとに文言を差し替えるのと同じ)。部品はその変化を
@@ -736,6 +751,48 @@
   </section>
 
   <section>
+    <Text as="h2" variant="title-lg">ナビゲーション(Tabs / Breadcrumb / Pagination / NavList)</Text>
+    <Text as="p" variant="body-sm" muted>
+      クラスタ9。Tabs は矢印で移動すると選択も動く(移動 = 選択。disabled は飛ばし、RTL では左右が反転する)。
+      Breadcrumb は最後が現在地でリンクにしない。Pagination は中央が現在地の表示であると同時に行き先の選択で、
+      番号を並べずに任意の頁へ飛べる(欄の名前は器が文脈を語っているので視覚から隠している)。NavList は現在地を
+      aria-current で届ける(色だけに頼らない)。上の density を compact にすると、どれも間隔が詰まって当たり判定の
+      床(24px)だけが残る。
+    </Text>
+
+    <Breadcrumb items={[{ label: 'ホーム', href: '#' }, { label: '顧客', href: '#' }, { label: '青葉製作所' }]}>
+      {#snippet label()}現在地{/snippet}
+    </Breadcrumb>
+
+    <Tabs bind:value={tab} items={TAB_ITEMS}>
+      {#snippet panel(id)}
+        <Box inset="md">
+          <Text variant="body-md">{id} の面。選ばれているタブのぶんだけを描くので、他の面は支援技術からも到達しない。</Text>
+        </Box>
+      {/snippet}
+    </Tabs>
+
+    <Pagination bind:page pages={12}>
+      {#snippet previous()}前へ{/snippet}
+      {#snippet next()}次へ{/snippet}
+      {#snippet label()}ページ送り{/snippet}
+    </Pagination>
+
+    <div class="pg-nav">
+      <NavList items={NAV_ITEMS} current={navCurrent}>
+        {#snippet label()}画面{/snippet}
+      </NavList>
+    </div>
+    <Cluster gap="sm">
+      {#each NAV_ITEMS.filter((i) => !i.disabled) as item (item.id)}
+        <Button variant="text" color="plain" size="sm" onclick={() => (navCurrent = item.id)}>
+          {item.label}へ移る
+        </Button>
+      {/each}
+    </Cluster>
+  </section>
+
+  <section>
     <Text as="h2" variant="title-lg">ToolCall(ツール呼び出しの進行)</Text>
     <Text as="p" variant="body-sm" muted>
       1つの呼び出しが busy から result または error へ至る様を1枚で見せる。段階はアプリが所有する値で、
@@ -1414,6 +1471,9 @@
     justify-content: center;
     background: var(--color-semantic-primary-soft-bg);
     color: var(--color-semantic-primary-soft-fg);
+  }
+  .pg-nav {
+    max-inline-size: 16rem;
   }
   .pg-resizable {
     resize: horizontal;
