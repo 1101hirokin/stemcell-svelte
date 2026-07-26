@@ -36,8 +36,13 @@
      地との差が分かる最も薄い線でよい(color.md §6 の射程の表) */
   border: var(--shape-border-width) solid var(--color-app-divider);
   border-radius: var(--shape-semantic-popover);
+  /* 空きに入らない高さのときは面の中で送る。空きの量は、対応環境では position-area の升が、
+     退避経路では JS が --sc-popover-available-block-size で渡す(中に焦点を受ける要素があるので
+     キーボードでも辿り着ける。Reel の「中身の無い停留所」とは事情が違う) */
+  max-block-size: var(--sc-popover-available-block-size, none);
   /* 中身を角で切り抜く。端まで使う項目(余白なしの listbox 等)が丸角からはみ出さない */
-  overflow: hidden;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
   /* 出現(overlay.md §2: entrance)。退場のトークンは transition で参照(opacity 変化に効く) */
   animation: sc-popover-in calc(var(--motion-entrance-duration) * var(--motion-scale)) var(--motion-entrance-easing);
   transition: opacity calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing);
@@ -52,15 +57,18 @@
     /* 衝突時に反転する(反転は Expressive。overlay.md §5)。block だけでなく inline 方向も試す:
        画面の端に近いアンカーでは、下へ開いても横がはみ出す。両方を組んだ候補まで並べる */
     position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+    /* 空きの升が包含ブロックになるので、100% は「アンカーから画面の端までの空き」を指す。
+       画面の高さで測ると、下の方に置かれた面が自分の高さぶん切れる(下端からしか測れないため) */
+    max-inline-size: min(var(--sc-popover-max-inline-size, 100%), 100%);
+    max-block-size: 100%;
   }
   .sc-popover-content[data-placement='block-end'] {
-    inset-block-start: anchor(bottom);
-    inset-inline-start: anchor(left);
+    /* アンカーの下、行方向は始まりを揃えて終わりまで伸びる升 */
+    position-area: block-end span-inline-end;
     margin-block-start: var(--spacing-inline-md);
   }
   .sc-popover-content[data-placement='block-start'] {
-    inset-block-end: anchor(top);
-    inset-inline-start: anchor(left);
+    position-area: block-start span-inline-end;
     margin-block-end: var(--spacing-inline-md);
   }
 }
@@ -70,12 +78,4 @@
     opacity: 0;
     transform: translateY(-0.25rem);
   }
-}
-
-/* 画面の高さからも溢れない。反転しても入らない高さのときは、面の中で送る
-   (中に焦点を受ける要素があるので、キーボードでも辿り着ける。Reel の「中身の無い停留所」とは事情が違う) */
-.sc-popover-content {
-  max-block-size: calc(100dvh - var(--spacing-inset-lg) * 2);
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }

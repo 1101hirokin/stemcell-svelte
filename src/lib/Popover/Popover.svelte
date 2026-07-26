@@ -56,6 +56,12 @@
     const above = a.top;
     flipped = placement === 'block-end' ? below < h && above > below : above < h && below > above;
     const eff = flipped ? (placement === 'block-end' ? 'block-start' : 'block-end') : placement;
+    // 空き(アンカーから画面の端まで)を渡す。CSS 側の position-area の升に当たるもの
+    const gap = 8;
+    contentEl.style.setProperty(
+      '--sc-popover-available-block-size',
+      `${Math.max(0, (eff === 'block-end' ? below : above) - gap)}px`,
+    );
     // 画面の外へはみ出さないよう押し戻す(CSS 側の position-try に対応する退避)
     const width = contentEl.offsetWidth;
     const gutter = GAP * 2;

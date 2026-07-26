@@ -46,17 +46,22 @@
 @supports (anchor-name: --x) {
   .sc-tooltip-content {
     /* block だけでなく inline 方向も試す(画面の端のアンカーでは横がはみ出す) */
-    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+    position-try-fallbacks: flip-block;
+    /* 空きの升が包含ブロックになるので、100% は「アンカーから画面の端までの空き」を指す */
+    max-inline-size: min(18rem, 100%);
+    max-block-size: 100%;
   }
+  /* 中央寄せは升が持つ(自前の translate をやめる)。行方向は端まで span するので、
+     画面の端に近いアンカーでも升の中に収まる */
   .sc-tooltip-content[data-placement='block-start'] {
-    inset-block-end: anchor(top);
-    inset-inline-start: anchor(center);
+    position-area: block-start;
     margin-block-end: var(--spacing-inline-md);
+    transform: none;
   }
   .sc-tooltip-content[data-placement='block-end'] {
-    inset-block-start: anchor(bottom);
-    inset-inline-start: anchor(center);
+    position-area: block-end;
     margin-block-start: var(--spacing-inline-md);
+    transform: none;
   }
 }
 
@@ -64,12 +69,4 @@
   from {
     opacity: 0;
   }
-}
-
-/* 画面の高さからも溢れない。反転しても入らない高さのときは、面の中で送る
-   (中に焦点を受ける要素があるので、キーボードでも辿り着ける。Reel の「中身の無い停留所」とは事情が違う) */
-.sc-tooltip-content {
-  max-block-size: calc(100dvh - var(--spacing-inset-lg) * 2);
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
