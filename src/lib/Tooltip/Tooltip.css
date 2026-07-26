@@ -35,6 +35,8 @@
   letter-spacing: var(--typography-body-sm-letter-spacing);
   /* tooltip はフォーカスも操作も受け取らない(受け取れば popover。overlay.md §4) */
   pointer-events: none;
+  /* 横の揃えと押し戻しは transform が持つ(出現アニメと取り合わせない。Popover と同型) */
+  transform: translateX(var(--sc-tooltip-shift, 0px));
   /* 出現は fade(entrance)。退場のトークンは transition で参照 */
   animation: sc-tooltip-in calc(var(--motion-entrance-duration) * var(--motion-scale)) var(--motion-entrance-easing);
   transition: opacity calc(var(--motion-exit-duration) * var(--motion-scale)) var(--motion-exit-easing);
@@ -55,7 +57,7 @@
      右半分なら右端を揃える */
   .sc-tooltip-content[data-inline='center'] {
     inset-inline-start: anchor(center);
-    transform: translateX(-50%);
+    transform: translateX(calc(-50% + var(--sc-tooltip-shift, 0px)));
   }
   .sc-tooltip-content[data-inline='start'] {
     inset-inline-start: anchor(left);

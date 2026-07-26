@@ -46,10 +46,10 @@
   // CSS が置いたあとに残るはみ出しを横へ押し戻す(anchor 対応時。非対応時は resolvePosition が同じことをする)
   function shiftIntoView() {
     if (!tipEl) return;
-    tipEl.style.translate = '';
+    tipEl.style.setProperty('--sc-tooltip-shift', '0px'); // 押し戻す前の位置で測る
     const r = tipEl.getBoundingClientRect();
     const dx = inlineShift(r.left, r.width);
-    if (dx) tipEl.style.translate = `${dx}px`;
+    if (dx) tipEl.style.setProperty('--sc-tooltip-shift', `${dx}px`);
   }
 
   /** 向きを決めて返す。返り値を使うのは、書いた state を同じ effect で読み返さないため。 */

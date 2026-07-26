@@ -49,26 +49,27 @@
   let contentEl = $state<HTMLElement>();
 
   // 開く向きは overlay-position.ts の規則で決める(Tooltip と共有。overlay.md §5: 反転は Expressive)。
-  // popover の揃えはトリガーの始端で、はみ出すときだけ終端へ寄る。測る前は placement を優先の向きに使う。
+  // 揃えはトリガーの中心で、はみ出すときだけ端へ寄る。面と器の幅が同じとき(fill の Select / Menu)は
+  // 中心揃えと始端揃えが一致するので、fill の見え方は変わらない。測る前は placement を優先の向きに使う。
   let measured = $state<OverlaySides>();
   const blockSide = $derived(measured?.block ?? (placement === 'block-start' ? 'start' : 'end'));
-  const inlineSide = $derived(measured?.inline ?? 'start');
+  const inlineSide = $derived(measured?.inline ?? 'center');
   const GAP = 4; // トリガーと面の隙間(px。JS フォールバック時。CSS 側は spacing.inline.md)
 
   // CSS が置いたあとに残るはみ出しを横へ押し戻す(anchor 対応時。非対応時は resolvePosition が同じことをする)
   function shiftIntoView() {
     if (!contentEl) return;
-    contentEl.style.translate = '';
+    contentEl.style.setProperty('--sc-popover-shift', '0px'); // 押し戻す前の位置で測る
     const r = contentEl.getBoundingClientRect();
     const dx = inlineShift(r.left, r.width);
-    if (dx) contentEl.style.translate = `${dx}px`;
+    if (dx) contentEl.style.setProperty('--sc-popover-shift', `${dx}px`);
   }
 
   /** 向きを決めて返す。返り値を使うのは、書いた state を同じ effect で読み返さないため。 */
   function decideSides(): OverlaySides | undefined {
     if (!wrapperEl) return;
     const a = wrapperEl.getBoundingClientRect();
-    const sides = resolveSides(a, contentEl?.offsetWidth ?? 0, 'start');
+    const sides = resolveSides(a, contentEl?.offsetWidth ?? 0, 'center');
     measured = sides;
     // 面が画面より高いときだけ、その向きの空きで頭打ちにして面の中で送る(向きの判定はこれを見ない)
     contentEl?.style.setProperty(

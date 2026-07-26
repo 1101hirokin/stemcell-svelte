@@ -18,6 +18,7 @@ it('anchor と content を描き、content は popover 要素で既定の開き�
   expect(c).toBeTruthy();
   expect(c.getAttribute('popover')).toBe('auto'); // top-layer で light dismiss を native に委ねる
   expect(c.dataset.block).toBe('end'); // 測る前は placement が優先の向きになる
+  expect(c.dataset.inline).toBe('center'); // 左右はトリガーの中心に揃えるのが既定
 });
 
 it('native の light dismiss(toggle=closed)で openchange(false) を橋渡しする', async () => {
@@ -61,6 +62,7 @@ it('placement=block-start を尊重する(開くまでは測らないので位�
 // 上下はトリガーが描画領域のどちら側に居るかで決まる。左右はトリガーの始端に揃え、
 // 揃えたままでは端をはみ出すときだけ終端へ寄る(面の幅 300px、描画領域 1024x768 で計算)。
 it.each([
+  { at: '中ほど', rect: { top: 10, left: 480 }, block: 'end', inline: 'center' },
   { at: '左上', rect: { top: 10, left: 10 }, block: 'end', inline: 'start' },
   { at: '右下', rect: { top: 700, left: 900 }, block: 'start', inline: 'end' },
   { at: '右上', rect: { top: 10, left: 900 }, block: 'end', inline: 'end' },
