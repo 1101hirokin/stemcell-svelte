@@ -58,14 +58,11 @@
   const labelId = `${uid}-label`;
 
   let open = $state(false);
+  // 見えている月。開いた時点の始まりから始まり、以後は利用者のページ送りでしか動かない。
+  // 選び直しで月が跳ぶと、隣の月を見比べている最中に視界がさらわれる(DateRangePicker.md)
   let month = $state(formatMonth(parseISO(start) ?? today()));
   // 次に押した日が終わりになる途中の状態。視覚と支援技術の両方へ届ける(契約 a11y)
   let pending = $state(false);
-
-  $effect(() => {
-    if (!open) return;
-    month = formatMonth(parseISO(start) ?? today());
-  });
 
   const commit = (nextStart: string, nextEnd: string) => {
     start = nextStart;
@@ -75,21 +72,23 @@
 
   // 格子は「この日が押された」しか返さない。意味づけはここが与える(Calendar.md §2)。
   // 対が揃っても閉じない: 期間は「選んで終わり」ではなく、両端を見比べながら詰める操作である。
-  // 揃った後にもう一度押したら、そこから新しい期間を取り直す(業界の常態)。閉じるのは
-  // 明示の退出(Escape・外側の押下)で、それは合成した Popover が持つ。
+  // 選び直しで押した日は必ず期間の下限になる(内も外も区別しない。対の端そのものを押したときだけ変えない)。
+  // 下限だけ置いた途中に下限より前を押したときも、対を入れ替えずに下限を置き直す。
+  // 閉じるのは明示の退出(Escape・外側の押下)で、それは合成した Popover が持つ。DateRangePicker.md。
   const onselect = (value: string) => {
     const day = parseISO(value);
     if (!day) return;
     const from = parseISO(start);
-    if (!pending || !from) {
-      pending = true;
-      commit(value, '');
-      return;
+    // 途中(下限だけ置いた)。下限より後を押せば対が揃う
+    if (pending && from && compare(day, from) >= 0) {
+      pending = false;
+      return commit(start, value);
     }
-    pending = false;
-    // 終わりが始まりより前なら対を入れ替える(黙って不正な対を保持しない。契約 a11y)
-    if (compare(day, from) < 0) commit(value, start);
-    else commit(start, value);
+    // 対の端そのものは変えない(押し間違いで期間を失わせない)
+    if (!pending && (value === start || value === end)) return;
+    // 押した日は必ず下限になる。途中に下限より前を押したときも、対を入れ替えずにそこへ置き直す
+    pending = true;
+    commit(value, '');
   };
 </script>
 

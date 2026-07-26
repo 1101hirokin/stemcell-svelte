@@ -62,32 +62,57 @@
   padding: var(--spacing-inset-sm);
   text-align: center;
   cursor: pointer;
-  border-radius: var(--shape-semantic-control);
   font-variant-numeric: tabular-nums;
+  /* 面(升の丸)と帯(期間)は擬似要素が描く。数字は文字なので、どちらより上に出る(描画順) */
+  position: relative;
+  color: var(--color-app-foreground);
+  transition: color calc(var(--motion-feedback-duration) * var(--motion-scale))
+    var(--motion-feedback-easing);
+}
+/* 升の面。丸みと連続曲率をここが持つ(shape.md §4。擬似要素は corner-shape を継承しない) */
+.sc-calendar-day::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: var(--shape-semantic-control);
+  corner-shape: var(--_sc-corner-shape);
   /* 指を置いたとき・選ばれたときの切替を滑らかにする(feedback の意味層)。
      reduced-motion では --motion-scale が 0 になり瞬時に切り替わる(部品は分岐しない) */
-  transition:
-    background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
-      var(--motion-feedback-easing),
-    color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+  transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+    var(--motion-feedback-easing);
 }
-.sc-calendar-day:hover:not([aria-disabled='true']) {
+.sc-calendar-day:hover:not([aria-disabled='true'])::after {
   background: var(--color-semantic-primary-soft-bg);
 }
 
-/* 期間の間。両端より薄い面で、どこからどこまでかが色の差で読める */
-.sc-calendar-day[data-in-range='true'] {
+/* 期間の帯。両端より薄い面で、どこからどこまでかが色の差で読める。面より下に敷く。
+   下限だけ置いた途中は、今押せばどこまでが期間になるかを同じ帯で予告する(Calendar.md) */
+.sc-calendar-day[data-band='true']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
   background: var(--color-semantic-primary-soft-bg);
-  border-radius: 0;
+}
+/* 端の升では帯を升の中央で止める。端の面は丸いので、帯が縁の外へ回り込んで角が飛び出て見える。
+   始まりと終わりが同じ日なら両方が効いて帯は消える(帯の要らない状態) */
+.sc-calendar-day[data-band-start='true']::before {
+  inset-inline-start: 50%;
+}
+.sc-calendar-day[data-band-end='true']::before {
+  inset-inline-end: 50%;
 }
 /* 選ばれている日(単一のときはこれだけ、期間のときは両端)。色だけに頼らず、
    地に対して 3:1 を満たす面と文字の組で示す(WCAG 2.2 SC 1.4.11。date.md §6) */
 .sc-calendar-day[data-selected='true'] {
-  background: var(--color-semantic-primary-bg);
   color: var(--color-semantic-primary-fg);
 }
+.sc-calendar-day[data-selected='true']::after {
+  background: var(--color-semantic-primary-bg);
+}
 /* 今日。選ばれていなくても分かるよう、輪郭で示す(意味は aria-current が運ぶ) */
-.sc-calendar-day[data-today='true']:not([data-selected='true']) {
+.sc-calendar-day[data-today='true']:not([data-selected='true'])::after {
   box-shadow: inset 0 0 0 var(--shape-border-width) var(--color-app-foreground);
 }
 .sc-calendar-day[aria-disabled='true'] {

@@ -20,7 +20,7 @@ it('選ばれている日が届く。期間のときは間の日も届く', () =
   const { container } = render(Calendar, { props: { month: '2026-07', start: '2026-07-20', end: '2026-07-23' } });
   expect(cell(container, 20).dataset.selected).toBe('true');
   expect(cell(container, 23).dataset.selected).toBe('true');
-  expect(cell(container, 21).dataset.inRange).toBe('true');
+  expect(cell(container, 21).dataset.band).toBe('true');
   expect(cell(container, 21).getAttribute('aria-selected')).toBe('true');
   expect(cell(container, 25).getAttribute('aria-selected')).toBe('false');
 });
@@ -82,4 +82,19 @@ it('月数を渡すと並べて見せる(期間の選択では2つが常態)', (
   const { container } = render(Calendar, { props: { month: '2026-07', months: 2 } });
   expect(container.querySelectorAll('[role="grid"]').length).toBe(2);
   expect(cells(container).length).toBe(31 + 31); // 7月と8月
+});
+
+// 下限だけ置いた途中は、今押せばどこまでが期間になるかを帯で予告する(Calendar.md)
+it('下限だけのとき、指を置いた日までを帯で予告する', async () => {
+  const { container } = render(Calendar, { props: { month: '2026-07', start: '2026-07-10' } });
+  const at = (n: number) => cell(container, n);
+  expect(at(12).dataset.band).toBe('false');
+  await fireEvent.pointerEnter(at(14));
+  expect(at(12).dataset.band).toBe('true');
+  expect(at(14).dataset.bandEnd).toBe('true');
+  // 予告は選択ではない(支援技術へは対だけを届ける)
+  expect(at(12).getAttribute('aria-selected')).toBe('false');
+  // 下限より前は予告しない(押しても期間にならず、下限が置き直されるだけ)
+  await fireEvent.pointerEnter(at(5));
+  expect(at(7).dataset.band).toBe('false');
 });

@@ -70,6 +70,17 @@
     !(maxDay && compare(day, maxDay) > 0) &&
     !blocked.has(formatISO(day));
 
+  // 指を置いた日(無ければ焦点の日)。下限だけ置いた途中の予告に使う
+  let hovered = $state<Day | undefined>();
+  // 帯の範囲。対が揃っていれば対そのもの、下限だけ置いた途中は「今押せばここまで」を予告する。
+  // 下限より前は予告しない: そこを押すと期間にならず、下限が置き直されるだけだから(DateRangePicker.md)
+  const bandTo = $derived.by(() => {
+    if (endDay) return endDay;
+    const to = hovered ?? focused;
+    return startDay && to && compare(to, startDay) > 0 ? to : undefined;
+  });
+  const inBand = (day: Day) => !!startDay && !!bandTo && isBetween(day, startDay, bandTo);
+  // 選ばれているのは対だけである。予告は帯にしか出さない(aria-selected は対に従う)
   const inRange = (day: Day) =>
     !!startDay && !!endDay && isBetween(day, startDay, endDay);
 
@@ -145,7 +156,10 @@
     </IconButton>
   </div>
 
-  <div class="sc-calendar-grids">
+  <!-- 格子から指が出たら予告の相手を落とす(焦点の日での予告に戻る)。この器は操作要素ではなく、
+       指の位置を予告の塗りへ渡すだけなので role を持たない -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div class="sc-calendar-grids" onpointerleave={() => (hovered = undefined)}>
     {#each visible as m (formatMonth(m))}
       <table class="sc-calendar-grid" role="grid" aria-label={monthLabel(m.year, m.month)}>
         <!-- 月の見出しは格子ごとに持つ。並べた月が狭い画面で縦へ折れても、見出しと格子がずれない -->
@@ -171,13 +185,16 @@
                     tabindex={isSame(day, focus) ? 0 : -1}
                     data-focused={isSame(day, focus)}
                     data-selected={isSame(day, startDay) || isSame(day, endDay)}
-                    data-in-range={inRange(day)}
+                    data-band={inBand(day)}
+                    data-band-start={inBand(day) && isSame(day, startDay)}
+                    data-band-end={inBand(day) && isSame(day, bandTo)}
                     data-today={isSame(day, now)}
                     aria-selected={isSame(day, startDay) || isSame(day, endDay) || inRange(day)}
                     aria-current={isSame(day, now) ? 'date' : undefined}
                     aria-disabled={usable ? undefined : 'true'}
                     onclick={() => select(day)}
                     onkeydown={(e) => onkeydown(e, day)}
+                    onpointerenter={() => (hovered = day)}
                   >{day.day}</td>
                 {:else}
                   <td class="sc-calendar-empty"></td>

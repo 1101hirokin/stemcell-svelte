@@ -52,9 +52,75 @@ it('対が揃っても暦は閉じない(両端を見比べながら詰められ
   });
   // 揃っても開いたまま
   expect(trigger.getAttribute('aria-expanded')).toBe('true');
-  // もう一度押すと、そこから取り直す
-  await fireEvent.click(pick(5));
-  expect(onchange).toHaveBeenLastCalledWith({ start: expect.stringContaining('-05'), end: '' });
+});
+
+// 揃った後の押下は、内も外も区別せず、その日を下限にして選び直す(DateRangePicker.md)。
+it.each([
+  { at: '先(外)', day: 25 },
+  { at: '中', day: 15 },
+  { at: '手前(外)', day: 5 },
+])('揃った後に$atを押すと、その日を下限に選び直す', async ({ day }) => {
+  const onchange = vi.fn();
+  const { container } = render(DateRangePicker, { props: { ...props, onchange } });
+  await fireEvent.click(container.querySelector('button') as HTMLElement);
+  const cells = [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')];
+  const pick = (n: number) => cells.find((el) => el.textContent === String(n))!;
+  await fireEvent.click(pick(10));
+  await fireEvent.click(pick(20));
+  await fireEvent.click(pick(day));
+  const two = String(day).padStart(2, '0');
+  expect(onchange).toHaveBeenLastCalledWith({ start: expect.stringContaining(`-${two}`), end: '' });
+  // 選び直した先は、次の押下で終わりが決まる
+  await fireEvent.click(pick(28));
+  expect(onchange).toHaveBeenLastCalledWith({
+    start: expect.stringContaining(`-${two}`),
+    end: expect.stringContaining('-28'),
+  });
+});
+
+it('途中に下限より前を押したら、対を入れ替えずに下限を置き直す', async () => {
+  const onchange = vi.fn();
+  const { container } = render(DateRangePicker, { props: { ...props, onchange } });
+  await fireEvent.click(container.querySelector('button') as HTMLElement);
+  const cells = [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')];
+  const pick = (n: number) => cells.find((el) => el.textContent === String(n))!;
+  await fireEvent.click(pick(20));
+  await fireEvent.click(pick(10)); // 下限より前。ここが新しい下限になる
+  expect(onchange).toHaveBeenLastCalledWith({ start: expect.stringContaining('-10'), end: '' });
+  await fireEvent.click(pick(15));
+  expect(onchange).toHaveBeenLastCalledWith({
+    start: expect.stringContaining('-10'),
+    end: expect.stringContaining('-15'),
+  });
+});
+
+it('対の端そのものを押したときは変えない(押し間違いで期間を失わせない)', async () => {
+  const onchange = vi.fn();
+  const { container } = render(DateRangePicker, { props: { ...props, onchange } });
+  await fireEvent.click(container.querySelector('button') as HTMLElement);
+  const cells = [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')];
+  const pick = (n: number) => cells.find((el) => el.textContent === String(n))!;
+  await fireEvent.click(pick(10));
+  await fireEvent.click(pick(20));
+  const calls = onchange.mock.calls.length;
+  await fireEvent.click(pick(10));
+  await fireEvent.click(pick(20));
+  expect(onchange.mock.calls.length).toBe(calls);
+});
+
+it('選び直しても月は動かない(ページ送りは利用者の明示だけ)', async () => {
+  const { container } = render(DateRangePicker, { props: { ...props, start: '2026-07-20', end: '2026-07-26' } });
+  await fireEvent.click(container.querySelector('button') as HTMLElement);
+  const caption = () => container.querySelector('.sc-calendar-month-label')?.textContent ?? '';
+  const shown = caption();
+  // 次の月へ送ってから、見えている月の日を押す(選び直し)
+  const next = container.querySelectorAll('.sc-calendar-nav button')[1] as HTMLElement;
+  await fireEvent.click(next);
+  const paged = caption();
+  expect(paged).not.toBe(shown);
+  const cells = [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')];
+  await fireEvent.click(cells.find((el) => el.textContent === '15')!);
+  expect(caption()).toBe(paged);
 });
 
 it('無効のときは暦を開けない', () => {
