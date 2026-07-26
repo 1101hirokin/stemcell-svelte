@@ -86,8 +86,9 @@
   background: var(--color-semantic-primary-soft-bg);
 }
 
-/* 期間の帯。両端より薄い面で、どこからどこまでかが色の差で読める。面より下に敷く */
-.sc-calendar-day[data-in-range='true']::before {
+/* 期間の帯。両端より薄い面で、どこからどこまでかが色の差で読める。面より下に敷く。
+   下限だけ置いた途中は、今押せばどこまでが期間になるかを同じ帯で予告する(Calendar.md) */
+.sc-calendar-day[data-band='true']::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -96,10 +97,10 @@
 }
 /* 端の升では帯を升の中央で止める。端の面は丸いので、帯が縁の外へ回り込んで角が飛び出て見える。
    始まりと終わりが同じ日なら両方が効いて帯は消える(帯の要らない状態) */
-.sc-calendar-day[data-range-start='true']::before {
+.sc-calendar-day[data-band-start='true']::before {
   inset-inline-start: 50%;
 }
-.sc-calendar-day[data-range-end='true']::before {
+.sc-calendar-day[data-band-end='true']::before {
   inset-inline-end: 50%;
 }
 /* 選ばれている日(単一のときはこれだけ、期間のときは両端)。色だけに頼らず、
