@@ -23,8 +23,15 @@
 .sc-reasoning-name-slot {
   position: relative;
   display: inline-block;
+  /* 立方体を見る目の位置。文字に従わせるので、大きさが変わっても回り方の印象が保たれる */
+  perspective: 12em;
 }
-/* 去る文字の影。同じ場所に重ねて上へ送る(JS が一時的に置き、動きが終わったら消す) */
+/* 面。3D の変換を受けるので行内の箱にする */
+.sc-reasoning-name,
+.sc-reasoning-name-ghost {
+  display: inline-block;
+}
+/* 去る面。同じ場所に重ねて回す(JS が一時的に置き、動きが終わったら消す) */
 .sc-reasoning-name-ghost {
   position: absolute;
   inset-block-start: 0;

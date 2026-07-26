@@ -35,9 +35,14 @@
   // 動きの途中の影。名前が速く移り変わる配信(トークンごとに文言を書き換える等)でも、影が積み上がらない
   let leaving: Animation | undefined;
 
-  // 名前が別の文言へ変わったら、古い文字を上へ送り、新しい文字を下から迎える(進行表現は Expressive)。
+  // 名前が別の文言へ変わったら、文字が貼り付いた立方体が上へ一面ぶん回る(進行表現は Expressive)。
   // 名前はアプリが差すスニペットなので、いつ変わったかを prop では知れない。描かれた文字の変化を
   // そのまま合図にする(観測するだけで、値も DOM の中身も書き換えない)。
+  //
+  // 立方体を DOM で組み立てない: 生きている文字(live region)を別の器へ入れ直すことになり、
+  // Svelte が持つ節点を動かしてしまう。代わりに、面ごとの変換を composed で書いて同じ絵にする。
+  // 立方体の中心を文字の面より半分ぶん奥に置くので(先頭の translateZ(-D))、回り終わりは無変換に
+  // 戻る。fill が残っても文字が手前に寄って大きく見えることがない。
   const flip = (from: string) => {
     const slot = slotEl;
     const el = nameEl;
@@ -56,24 +61,22 @@
     ghost.textContent = from;
     slot.appendChild(ghost);
 
-    const options = { duration, easing, fill: 'both' as const };
-    const out = ghost.animate(
-      [
-        { opacity: 1, transform: 'translateY(0)' },
-        { opacity: 0, transform: 'translateY(-0.5em)' },
-      ],
-      options,
-    );
+    // 面の半分の奥行き。行の高さから採るので、文字の大きさが変われば立方体もついてくる
+    const depth = el.getBoundingClientRect().height / 2;
+    const face = (deg: number) => `translateZ(${-depth}px) rotateX(${deg}deg) translateZ(${depth}px)`;
+
+    // 一面ぶんの回転は、平らな入れ替わりより読むのに時間が要る。意味層の時間を源に保ったまま倍で使う
+    const options = { duration: duration * 2, easing };
+    // 去る面は手前から上へ回って裏へ抜ける
+    const out = ghost.animate([{ transform: face(0) }, { transform: face(90) }], {
+      ...options,
+      fill: 'both' as const,
+    });
     out.onfinish = () => ghost.remove();
     out.oncancel = () => ghost.remove();
     leaving = out;
-    el.animate(
-      [
-        { opacity: 0, transform: 'translateY(0.5em)' },
-        { opacity: 1, transform: 'translateY(0)' },
-      ],
-      options,
-    );
+    // 来る面は下から起き上がって正面に着く(終わりは無変換なので fill を残さない)
+    el.animate([{ transform: face(-90) }, { transform: face(0) }], options);
   };
 
   $effect(() => {
