@@ -1,6 +1,10 @@
 /* 暦日をひとつ選ぶ(DatePicker.md)。器が持つのは欄と開く操作の並びだけで、
    欄の床は DateField、格子は Calendar、一時面は Popover が持つ(参照が必須のトークンだけを引く)。 */
 .sc-datepicker {
+  /* 浮かぶ面の幅はアンカーに一致するのが Popover の既定だが、ここのアンカーは絵だけのボタンで
+     暦が入らない。中身(暦)で決まる幅に上書きする(Popover が開けている消費者の口) */
+  --sc-popover-inline-size: max-content;
+  --sc-popover-min-inline-size: 16rem;
   display: flex;
   align-items: end;
   gap: var(--spacing-inline-md);

@@ -1,6 +1,9 @@
 /* 期間を選ぶ(DateRangePicker.md)。器が持つのは2つの欄と開く操作の並びだけで、
    欄の床は DateField、格子は Calendar、一時面は Popover が持つ。 */
 .sc-daterangepicker {
+  /* 2ヶ月ぶんの暦が入る幅。狭い画面では面の側が画面幅で頭打ちになり、暦が月を縦へ折る */
+  --sc-popover-inline-size: max-content;
+  --sc-popover-min-inline-size: 16rem;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-stack-sm);

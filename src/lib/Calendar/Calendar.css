@@ -36,8 +36,10 @@
 }
 .sc-calendar-grid {
   border-collapse: collapse;
-  /* 列は器の幅を分け合う。7列が固定幅だと、狭い器で溢れる */
+  /* 列は器の幅を分け合う。7列が固定幅だと、狭い器で溢れる。
+     器の幅が中身から決まる文脈(浮かぶ面の max-content)では 100% が測れないので、床を敷く */
   inline-size: 100%;
+  min-inline-size: 14rem;
   table-layout: fixed;
 }
 .sc-calendar-grid th {
