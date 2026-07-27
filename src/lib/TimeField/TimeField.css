@@ -1,32 +1,38 @@
-/* 暦日を打ち込む欄(DateField.md)。欄としての床(面・枠・焦点・文字・間隔)は TextField と同じものを引く
+/* 時刻を打ち込む欄(TimeField.md)。桁の見た目は DateField と同じ。もとは暦日の欄(DateField.md)。欄としての床(面・枠・焦点・文字・間隔)は TextField と同じものを引く
    (field.md §6: 8種の欄は同じ解剖を持つ)。違うのは中身が桁に分かれることだけで、桁の見た目と
    区切りの造形は Expressive。 */
-.sc-datefield {
+.sc-timefield {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-stack-sm);
   /* フィールドは fill(横いっぱい)が既定。憲法第3条・field.md §2・layout.md §2(裁定 2026-07) */
   inline-size: 100%;
   min-inline-size: 0;
-  /* 中身の長さが決まっている欄なので、器いっぱいまでは広げない(layout.md §2 の例外)。
-     10文字の日付が 1400px の箱に入っても情報は増えず、桁が左端へ寄って押しにくくなる。
+  /* 中身の長さが決まっている欄は上限で頭打ちにする(layout.md §2 の例外)。上限は型ごとに置く:
+     時刻は日付より桁が少ないので、同じ上限にすると最後の桁の後ろが空く。業界も型ごとに既定の幅を
+     持つ(Carbon「ピッカーは既定の幅を持ち、フォームの中では他の欄に合わせて調整できる」)。
      値は幅の段の閉じた集合(8/12/16/20/24/32rem。layout.md §9)から採る */
-  max-inline-size: 12rem;
+  max-inline-size: 8rem;
   /* 中立の資材(TextField.md §2: resting の枠は color.app.border。hover 役が無いので hover を持たない) */
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);
 }
+/* 午前・午後や秒が付くと桁が増えるので、上限も一段上げる(中身で決まる幅である) */
+.sc-timefield:has(.sc-timefield-period),
+.sc-timefield:has([data-segment='second']) {
+  max-inline-size: 12rem;
+}
 /* invalid は intent を danger へ差し替える(state.md §3.1 / §7) */
-.sc-datefield[data-invalid='true'] {
+.sc-timefield[data-invalid='true'] {
   --_border: var(--color-semantic-danger-border);
   --_ring: var(--color-semantic-danger-focus-ring);
 }
 /* disabled が invalid に勝つ(state.md §3.1)。同詳細度の後勝ちで上書きする */
-.sc-datefield[data-disabled='true'] {
+.sc-timefield[data-disabled='true'] {
   --_border: var(--color-semantic-disabled-border);
 }
 
-.sc-datefield-label {
+.sc-timefield-label {
   font-family: var(--typography-label-md-font-family);
   font-size: var(--typography-label-md-font-size);
   font-weight: var(--typography-label-md-font-weight);
@@ -35,13 +41,13 @@
   color: var(--color-app-foreground);
 }
 /* 記号そのものは seed(field.md §4)。造形は expressive */
-.sc-datefield-required {
+.sc-timefield-required {
   margin-inline-start: 0.25em;
 }
 
 /* 内包時の高さは一次内容(入力)が決める(size.md §2 裁定)。縦 inset は入力に付き、器は横 inset だけを
    持つ。align-items:stretch で affix は器の行高へ従属する(器を押し上げない) */
-.sc-datefield-control {
+.sc-timefield-control {
   display: flex;
   align-items: stretch;
   gap: var(--spacing-inline-md);
@@ -58,27 +64,27 @@
     border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
     background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
-.sc-datefield[data-size='sm'] .sc-datefield-control {
+.sc-timefield[data-size='sm'] .sc-timefield-control {
   --_inset: var(--spacing-inset-sm);
 }
-.sc-datefield[data-size='lg'] .sc-datefield-control {
+.sc-timefield[data-size='lg'] .sc-timefield-control {
   --_inset: var(--spacing-inset-lg);
 }
 /* 付属が自前のコントロール(ボタン)を持つ辺では、そのボタンが縁と当たり判定を所有するので、
    フィールドの横 inset を手放す(size.md §2 の水平版。二重取りを避ける)。裸のアイコン/装飾の辺は
    inset を残し、内容が枠に触れないようにする */
-.sc-datefield-control:has(.sc-datefield-start button) {
+.sc-timefield-control:has(.sc-timefield-start button) {
   padding-inline-start: 0;
 }
-.sc-datefield-control:has(.sc-datefield-end button) {
+.sc-timefield-control:has(.sc-timefield-end button) {
   padding-inline-end: 0;
 }
-.sc-datefield[data-disabled='true'] .sc-datefield-control {
+.sc-timefield[data-disabled='true'] .sc-timefield-control {
   background: var(--color-semantic-disabled-soft-bg);
   cursor: not-allowed;
 }
 
-.sc-datefield-input {
+.sc-timefield-input {
   flex: 1 1 auto;
   min-inline-size: 0;
   border: none;
@@ -94,10 +100,10 @@
   letter-spacing: var(--typography-body-md-letter-spacing);
   color: var(--color-app-foreground);
 }
-.sc-datefield-input::placeholder {
+.sc-timefield-input::placeholder {
   color: var(--color-app-fg-muted);
 }
-.sc-datefield[data-disabled='true'] .sc-datefield-input {
+.sc-timefield[data-disabled='true'] .sc-timefield-input {
   color: var(--color-semantic-disabled-fg);
   cursor: not-allowed;
 }
@@ -105,27 +111,27 @@
 /* オートフィル: ブラウザは autofill 背景を input にだけ乗せる。input は横 inset のぶん狭く角も四角なので
    ハイライトが両端で切れ角が合わない。input の背景を box-shadow で同色に潰しつつ、control 全面に
    :has(:autofill) で同色を敷いて、角丸の全面でハイライトを一致させる。色は brand の淡い青(primary.soft-bg)。 */
-.sc-datefield-input:-webkit-autofill,
-.sc-datefield-input:-webkit-autofill:hover,
-.sc-datefield-input:-webkit-autofill:focus,
-.sc-datefield-input:-webkit-autofill:active {
+.sc-timefield-input:-webkit-autofill,
+.sc-timefield-input:-webkit-autofill:hover,
+.sc-timefield-input:-webkit-autofill:focus,
+.sc-timefield-input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 100px var(--color-semantic-primary-soft-bg) inset;
   -webkit-text-fill-color: var(--color-app-foreground);
   caret-color: var(--color-app-foreground);
 }
-.sc-datefield-control:has(.sc-datefield-input:autofill) {
+.sc-timefield-control:has(.sc-timefield-input:autofill) {
   background: var(--color-semantic-primary-soft-bg);
 }
 
 /* focus-ring.md: :focus-visible + outline + offset。ring は箱(control)に出す。
    :focus-within を使わないのは、end 内の対話要素(クリアボタン等)の focus で箱を光らせないため */
-.sc-datefield-control:has(.sc-datefield-input:focus-visible) {
+.sc-timefield-control:has(.sc-timefield-input:focus-visible) {
   outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
   outline-offset: var(--focus-ring-offset);
 }
 
-.sc-datefield-start,
-.sc-datefield-end {
+.sc-timefield-start,
+.sc-timefield-end {
   display: inline-flex;
   align-items: center;
   /* 器の行高に従属する(size.md §2 内包時の裁定)。行高いっぱいに広がり hit-target を器が満たす */
@@ -135,14 +141,14 @@
 /* affix の対話要素/装飾は器の行高に従い、自前の縦 inset で器を押し上げない(内包時の裁定)。
    詳細度は (0,2,1) にする: 中の button 自身の .sc-button/.sc-iconbutton[data-size](0,2,0)に
    padding-block:0 を勝たせるため(:where は詳細度 0 で負けていた。独立レビュー blocker) */
-.sc-datefield-control .sc-datefield-start > button,
-.sc-datefield-control .sc-datefield-end > button {
+.sc-timefield-control .sc-timefield-start > button,
+.sc-timefield-control .sc-timefield-end > button {
   align-self: stretch;
   padding-block: 0;
 }
 
-.sc-datefield-description,
-.sc-datefield-error {
+.sc-timefield-description,
+.sc-timefield-error {
   margin: 0;
   font-family: var(--typography-body-sm-font-family);
   font-size: var(--typography-body-sm-font-size);
@@ -150,16 +156,16 @@
   line-height: var(--typography-body-sm-line-height);
   letter-spacing: var(--typography-body-sm-letter-spacing);
 }
-.sc-datefield-description {
+.sc-timefield-description {
   color: var(--color-app-fg-muted);
 }
 /* エラー文は danger.soft-fg の転用(TextField.md §2。コントラストはレビュー実測済み 10.45:1 / 11.04:1) */
-.sc-datefield-error {
+.sc-timefield-error {
   color: var(--color-semantic-danger-soft-fg);
 }
 
 /* 桁。焦点は桁に立つ(根ではない)。等幅の字形で、値が変わっても幅が跳ねない */
-.sc-datefield-segment {
+.sc-timefield-segment {
   /* 桁は input なので、UA の枠と面と余白を落として器の中の文字として立たせる。
      幅は中身(2桁 / 4桁)で決まる(field-sizing。未対応環境は size 属性が受け持つ) */
   appearance: none;
@@ -184,33 +190,92 @@
   /* 打つ文字は触点で 16px を下回らない(StemcellProvider が値を持つ) */
   font-size: var(--_sc-typed-font-size, var(--typography-body-md-font-size));
 }
-.sc-datefield:not([data-disabled='true']) .sc-datefield-segment:hover {
+.sc-timefield:not([data-disabled='true']) .sc-timefield-segment:hover {
   background: var(--color-semantic-plain-soft-bg-hover);
 }
 /* 打っている桁を面で示す(どこを編集しているかが焦点の輪だけでは読みにくい) */
-.sc-datefield-segment:focus-visible {
+.sc-timefield-segment:focus-visible {
   background: var(--color-semantic-plain-soft-bg);
 }
-.sc-datefield-segment[data-empty='true'] {
+.sc-timefield-segment[data-empty='true'] {
   color: var(--color-app-fg-muted);
 }
-.sc-datefield-segment:focus {
+.sc-timefield-segment:focus {
   outline: none;
 }
-.sc-datefield-segment:focus-visible {
+.sc-timefield-segment:focus-visible {
   outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
   outline-offset: var(--focus-ring-offset);
 }
-.sc-datefield[data-disabled='true'] .sc-datefield-segment {
+.sc-timefield[data-disabled='true'] .sc-timefield-segment {
   color: var(--color-semantic-disabled-fg);
   cursor: not-allowed;
 }
 
 /* 選択の面は出さない(桁は常に全選択で置き換わるので、青い帯が出ると打つたびに点滅して見える) */
-.sc-datefield-segment::selection {
+.sc-timefield-segment::selection {
   background: transparent;
 }
-.sc-datefield-separator {
+.sc-timefield-separator {
   color: var(--color-app-fg-muted);
   padding-inline: 0.125em;
+}
+
+/* 午前・午後は二択である。両方を見せて選ばせる(押して回す形は、押せることにも変わったことにも
+   気づけなかった。実機で分かった)。二つで一組なので間は空けず、選ばれている側だけ面を持つ */
+.sc-timefield-period {
+  display: inline-flex;
+  align-items: stretch;
+  margin-inline-start: var(--spacing-inline-sm);
+  /* 枠は持たない。欄が既に枠を持っているので、中にもう一つ置くと二重になる。
+     選ばれている側の面だけで、どちらが選ばれているかは読める */
+}
+.sc-timefield-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 見た目の高さは桁の行に合わせる。ここで背丈を持つと、午前・午後のある欄だけ背が高くなり、
+     同じ段の時刻の欄どうしで高さが揃わない(実測 50px 対 45px)。当たり判定は下の ::after が持つ
+     (見た目の大きさと当たり判定を別にするのは Slider のサムと同じ形。size.md §4) */
+  position: relative;
+  min-inline-size: 1.5rem;
+  padding-inline: var(--spacing-inset-sm);
+  cursor: pointer;
+  color: var(--color-app-fg-muted);
+  font-size: var(--typography-body-sm-font-size);
+  transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+    var(--motion-feedback-easing);
+}
+.sc-timefield-choice {
+  border-radius: var(--shape-semantic-tag);
+}
+/* 当たり判定の門(24px)。見た目は桁の行の高さのまま、欄の縦の余白まで触れる範囲を広げる */
+.sc-timefield-choice::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block: calc(var(--_inset) * -1);
+}
+.sc-timefield-choice[data-selected='true'] {
+  background: var(--color-semantic-plain-soft-bg-pressed);
+  color: var(--color-app-foreground);
+}
+.sc-timefield-choice:hover:not([data-selected='true']) {
+  background: var(--color-semantic-plain-soft-bg);
+}
+/* 実物の radio は隠すが、焦点は受ける(隠すのは見た目だけで、名前も操作も残る) */
+.sc-timefield-choice-input {
+  position: absolute;
+  opacity: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+}
+.sc-timefield-choice:has(.sc-timefield-choice-input:focus-visible) {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+.sc-timefield[data-disabled='true'] .sc-timefield-choice {
+  cursor: not-allowed;
+  color: var(--color-semantic-disabled-fg);
 }

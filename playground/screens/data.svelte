@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion, DateField, Calendar, DatePicker, DateRangePicker, Table, Select, Menu, Icon, RadioGroup, Radio, Stack, EmptyState, TextField, Button } from '../../src/lib';
+  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion, DateField, Calendar, DatePicker, DateRangePicker, Table, Select, Menu, Icon, RadioGroup, Radio, Stack, EmptyState, TextField, Button, TimeField } from '../../src/lib';
   import type { TableColumn, TableSort } from '../../src/lib';
 
   let faqOpen = $state(false);
@@ -54,6 +54,9 @@
   // 並べ替えはアプリがやる(器は要求を返すだけ)
   // 空状態と告知(patterns/empty-results.md)。0 件は常設の領域が件数で告げ、空状態の器は告知しない
   let keyword = $state('');
+  let startTime = $state('09:00');
+  let endTime = $state('18:30');
+  let mark = $state('');
   const filteredOrders = $derived(
     keyword.trim() ? orders.filter((o) => o.customer.includes(keyword.trim())) : orders,
   );
@@ -221,6 +224,31 @@
     <Text variant="body-sm" muted>期間: {range.start || '(未定)'} 〜 {range.end || '(未定)'}</Text>
   </section>
 
+  <section>
+    <Text as="h3" variant="title-lg">TimeField(時刻の欄)</Text>
+    <Text as="p" variant="body-sm" muted>
+      桁で受けるのは DateField と同型で、手触り(増減・打ち込み・送り)は共有の道具が持つ。値は常に
+      24 時間の表記(HH:mm)で、表示が 12 時間制でも変わらない。時間の刻みは既定で環境から借り、
+      消費者が上書きできる。刻み(15 分単位)は持たない。
+    </Text>
+    <Cluster gap="lg" align="start">
+      <TimeField bind:value={startTime} segmentLabels={{ hour: '時', minute: '分' }}>
+        {#snippet label()}開始時刻(環境の刻み){/snippet}
+      </TimeField>
+      <TimeField bind:value={endTime} hourCycle="12" segmentLabels={{ hour: '時', minute: '分', dayPeriod: '午前・午後' }}>
+        {#snippet label()}終了時刻(12 時間制){/snippet}
+      </TimeField>
+      <TimeField
+        bind:value={mark}
+        hourCycle="24"
+        seconds
+        segmentLabels={{ hour: '時', minute: '分', second: '秒' }}
+      >
+        {#snippet label()}記録の位置(秒あり){/snippet}
+      </TimeField>
+    </Cluster>
+    <Text variant="body-sm" muted>いまの値: {startTime || '(空)'} / {endTime || '(空)'} / {mark || '(空)'}</Text>
+  </section>
   <section>
     <Text as="h3" variant="title-lg">Table(クラスタ10 第2段)</Text>
     <Text as="p" variant="body-sm" muted>

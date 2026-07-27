@@ -1,6 +1,7 @@
 <script lang="ts">
   import './DateField.css';
   import { arrowKeys } from '../internal/direction';
+  import { showSegment, stepSegment, takeDigit as takeSegmentDigit } from '../internal/segments';
   import { META } from './meta';
   import {
     compare, daysInMonth, formatISO, isReal, parseISO, segmentName, segmentOrder,
@@ -56,7 +57,10 @@
 
   // 桁の値。未入力は undefined(空の欄と、0 という値は別物)
   let parts = $state<{ year?: number; month?: number; day?: number }>({});
-  let typed = ''; // 打ちかけの数字。桁を移ると捨てる
+  // 打ちかけの数字と、それを打った桁。桁を移ると捨てる(焦点だけ移った場合も含む。覚えたままだと、
+  // 隣の桁で打った数字が前の桁の数字と繋がる)
+  let typed = '';
+  let typedFor: SegmentType | undefined;
   let root: HTMLElement | undefined = $state();
 
   // 外から値が変わったら桁へ写す(欄と暦が同じ値を指す。DatePicker が両方を束ねる)
@@ -93,10 +97,8 @@
 
   const step = (type: SegmentType, delta: number) => {
     const b = bounds(type);
-    const current = parts[type] ?? (type === 'year' ? new Date().getFullYear() : b.min);
-    let next = current + delta;
-    if (next > b.max) next = b.min;
-    if (next < b.min) next = b.max;
+    // 桁の増減は internal/segments が持つ(TimeField と同じ手触り。端で回る)
+    const next = stepSegment(parts[type], delta, b, type === 'year' ? new Date().getFullYear() : b.min);
     // 下限・上限の外へは出ない(打ち込みは native と同じく通し、範囲の判定はアプリが持つ)
     const candidate = complete({ ...parts, [type]: next });
     const low = min ? parseISO(min) : undefined;
@@ -111,6 +113,7 @@
     const target = order[index];
     if (!target) return;
     typed = '';
+    typedFor = undefined;
     root?.querySelector<HTMLElement>(`[data-segment="${target}"]`)?.focus();
   };
 
@@ -133,14 +136,13 @@
   // 打たれた数字を1つ受ける。ソフトキーボードは keydown に打鍵を載せない環境があるので、
   // 数字は入力イベント側で受ける(打鍵の経路を一つにする。第2条: 鍵盤は標準が出す)
   const takeDigit = (type: SegmentType, digit: string) => {
-    const b = bounds(type);
     const width = type === 'year' ? 4 : 2;
-    const buffer = (typed + digit).slice(-width);
-    typed = buffer;
-    const n = Number(buffer);
-    set(type, Math.min(Math.max(n, 0) || b.min, b.max));
+    const taken = takeSegmentDigit(typedFor === type ? typed : '', digit, width, bounds(type));
+    typed = taken.typed;
+    typedFor = type;
+    set(type, taken.value);
     // 桁が埋まったら次へ送る(native の欄と同じ手触り)
-    if (buffer.length >= width || n * 10 > b.max) {
+    if (taken.advance) {
       typed = '';
       move(type, 1);
     }
@@ -164,11 +166,8 @@
   // 桁ぜんぶを選んだ状態にする(native の日付欄と同じで、打つと置き換わる)
   const select = (el: HTMLInputElement) => el.setSelectionRange(0, el.value.length);
 
-  const shown = (type: SegmentType) => {
-    const n = parts[type];
-    if (n == null) return type === 'year' ? 'YYYY' : type === 'month' ? 'MM' : 'DD';
-    return type === 'year' ? String(n).padStart(4, '0') : String(n).padStart(2, '0');
-  };
+  const shown = (type: SegmentType) =>
+    showSegment(parts[type], type === 'year' ? 4 : 2, type === 'year' ? 'YYYY' : type === 'month' ? 'MM' : 'DD');
 
   const describedby = $derived(
     [description ? descriptionId : null, invalid && error ? errorId : null].filter(Boolean).join(' ') || undefined,
