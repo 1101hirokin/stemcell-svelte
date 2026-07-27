@@ -217,9 +217,8 @@
   display: inline-flex;
   align-items: stretch;
   margin-inline-start: var(--spacing-inline-sm);
-  border: var(--shape-border-width) solid var(--_border);
-  border-radius: var(--shape-semantic-tag);
-  overflow: hidden;
+  /* 枠は持たない。欄が既に枠を持っているので、中にもう一つ置くと二重になる。
+     選ばれている側の面だけで、どちらが選ばれているかは読める */
 }
 .sc-timefield-choice {
   display: inline-flex;
@@ -234,6 +233,9 @@
   font-size: var(--typography-body-sm-font-size);
   transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
     var(--motion-feedback-easing);
+}
+.sc-timefield-choice {
+  border-radius: var(--shape-semantic-tag);
 }
 .sc-timefield-choice[data-selected='true'] {
   background: var(--color-semantic-plain-soft-bg-pressed);
