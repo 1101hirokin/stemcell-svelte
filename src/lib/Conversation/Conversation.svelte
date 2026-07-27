@@ -10,9 +10,11 @@
   interface Props {
     /** いま発話が生成されているか。進行は状態ではなく値である(streaming.md §2)。 */
     busy?: boolean;
-    /** 末尾を追っているか。省略すると器が自分で判じる(利用者が末尾に居るあいだは追う)。 */
+    /** 末尾を追っているか。省略すると器が自分で判じる(利用者が末尾に居るあいだは追う)。
+     *  渡せばそちらが勝つ(送信直後に必ず末尾へ送る等)。値はアプリが持ち、器は followingchange で
+     *  変更を要求する。要求を受けて値を戻さないと、利用者は遡れないままになる。 */
     following?: boolean;
-    /** 末尾を追っているかが変わった。 */
+    /** 末尾を追っているかが器の判断で変わった。消費者が following を持っていても知らせる。 */
     onfollowingchange?: (following: boolean) => void;
     /** この記録の名前(ARIA は log に名前を要求する)。 */
     label: Snippet;
@@ -49,12 +51,14 @@
   };
   const toBottom = () => scroller?.scrollTo({ top: scroller.scrollHeight });
 
+  // 器が判じた結果は、消費者が値を持っているときも知らせる(値はアプリ所有で、器は変更要求を出す側で
+  // ある。field.md §5。知らせないと、貼り付けたままのアプリが利用者の遡りに気づけず制御を戻せない)
   const onscroll = () => {
     const next = distance() < 8;
     if (next === atBottom) return;
     atBottom = next;
     if (next) unseen = false;
-    if (following === undefined) onfollowingchange?.(next);
+    onfollowingchange?.(next);
   };
 
   // 新着とは末尾に足されたものを指す。末尾の要素が入れ替わったか、末尾の要素が伸びたかで判じる。

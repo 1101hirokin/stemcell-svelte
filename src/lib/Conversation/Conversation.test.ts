@@ -52,7 +52,7 @@ it('末尾から離れると知らせ、戻る手段が出る', async () => {
   expect(onfollowingchange).toHaveBeenLastCalledWith(false);
 });
 
-it('末尾を追うかを消費者が持てる(その間は器が知らせない)', async () => {
+it('末尾を追うかを消費者が持てる(持っているあいだも器は判じた結果を知らせる)', async () => {
   const onfollowingchange = vi.fn();
   const { container } = render(Conversation, { props: { ...base, following: true, onfollowingchange } });
   const scroller = container.querySelector('.sc-conversation-scroller') as HTMLElement;
@@ -60,7 +60,8 @@ it('末尾を追うかを消費者が持てる(その間は器が知らせない
   Object.defineProperty(scroller, 'clientHeight', { value: 300, configurable: true });
   scroller.scrollTop = 0;
   await fireEvent.scroll(scroller);
-  expect(onfollowingchange).not.toHaveBeenCalled();
+  // 貼り付けたままのアプリが利用者の遡りに気づけないと、制御を戻せない(field.md §5 の単方向)
+  expect(onfollowingchange).toHaveBeenLastCalledWith(false);
 });
 
 it('上へ差し込んでも新着とは見なさないが、末尾に足せば知らせる', async () => {
