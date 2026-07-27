@@ -37,3 +37,18 @@ it('変化の意味は文字が運ぶ(印だけに頼らない)', async () => {
   expect(mark.getAttribute('aria-hidden')).toBe('true');
   expect(mark.getAttribute('aria-label')).toBeNull();
 });
+
+it('名前と値が名前つきのまとまりとして届く', () => {
+  const { container } = render(Stat, { props: base });
+  const el = container.querySelector('.sc-stat') as HTMLElement;
+  expect(el.getAttribute('role')).toBe('group');
+  const named = container.querySelector(`#${el.getAttribute('aria-labelledby')}`);
+  expect(named?.textContent).toContain('今月の売上');
+});
+
+it('向きだけを渡すと警告する(目で見える人にだけ届く情報になる)', () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  render(Stat, { props: { ...base, trend: 'up' } });
+  expect(warn).toHaveBeenCalledWith(expect.stringContaining('trend を渡すなら support も要る'));
+  warn.mockRestore();
+});
