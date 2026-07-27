@@ -221,9 +221,9 @@
   <section>
     <Text as="h3" variant="title-lg">人間同士のチャット(同じ器で)</Text>
     <Text as="p" variant="body-sm" muted>
-      参加者が三人いれば発話は全部 user で、自分と相手の別も誰の発話かも role からは出てこない。誰かは
-      speakerLabel が届け、姿は variant と color と align で選ぶ。ここでは自分の発話を primary の filled で
-      行末側へ、相手の発話を soft の行頭側へ、参加の知らせを text の中央へ置いた。
+      姿は variant と color と align で選ぶ。role が答えるのは誰の発話かであって、どう見えるかではない。
+      誰かは speakerLabel が届ける。ここでは自分の発話を primary の filled で行末側へ、相手の発話を soft の
+      行頭側へ、参加の知らせを text の中央へ置いた。
     </Text>
     <div class="ai-conversation">
       <Conversation resumeLabel="新しい発話へ">
