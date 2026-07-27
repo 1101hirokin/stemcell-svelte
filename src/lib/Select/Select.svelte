@@ -1,6 +1,7 @@
 <script lang="ts">
   import './Select.css';
   import { META } from './meta';
+  import { enabledIndexes, initialActive, nextActive } from '../internal/listbox';
   import Icon from '../Icon/Icon.svelte';
   import Popover from '../Popover/Popover.svelte';
   import type { Snippet } from 'svelte';
@@ -74,9 +75,8 @@
   let activeIndex = $state(-1); // aria-activedescendant の指す先(DOM focus はトリガー据置)
   const selectedIndex = $derived(options.findIndex((o) => o.value === value));
   const selectedOption = $derived(options.find((o) => o.value === value));
-  const enabledIndexes = $derived(
-    options.map((o, i) => (o.disabled ? -1 : i)).filter((i) => i >= 0),
-  );
+  // 辿る計算は internal/listbox が持つ(Combobox と同じ手触り)
+  const enabled = $derived(enabledIndexes(options));
 
   function selectAt(i: number) {
     const o = options[i];
@@ -87,21 +87,14 @@
   function openList() {
     if (disabled) return;
     open = true;
-    activeIndex =
-      selectedIndex >= 0 && !options[selectedIndex]?.disabled
-        ? selectedIndex
-        : (enabledIndexes[0] ?? -1);
+    activeIndex = initialActive(options, selectedIndex);
   }
   function closeList() {
     open = false;
     activeIndex = -1;
   }
   function moveActive(dir: 1 | -1) {
-    if (!enabledIndexes.length) return;
-    const pos = enabledIndexes.indexOf(activeIndex);
-    const nextPos = pos < 0 ? (dir > 0 ? 0 : enabledIndexes.length - 1) : pos + dir;
-    const clamped = Math.min(Math.max(nextPos, 0), enabledIndexes.length - 1);
-    activeIndex = enabledIndexes[clamped]!;
+    activeIndex = nextActive(enabled, activeIndex, dir);
   }
 
   // type-ahead(先頭一致。空白を含む多語 label も辿れる。web-keys arrows.listbox)
@@ -111,7 +104,7 @@
     typeBuffer += ch.toLowerCase();
     clearTimeout(typeTimer);
     typeTimer = setTimeout(() => (typeBuffer = ''), 500);
-    const hit = enabledIndexes.find((i) => options[i]!.label.toLowerCase().startsWith(typeBuffer));
+    const hit = enabled.find((i) => options[i]!.label.toLowerCase().startsWith(typeBuffer));
     if (hit !== undefined) activeIndex = hit;
   }
 
@@ -134,11 +127,11 @@
         break;
       case 'Home':
         e.preventDefault();
-        activeIndex = enabledIndexes[0] ?? -1;
+        activeIndex = enabled[0] ?? -1;
         break;
       case 'End':
         e.preventDefault();
-        activeIndex = enabledIndexes.at(-1) ?? -1;
+        activeIndex = enabled.at(-1) ?? -1;
         break;
       case 'Enter':
         e.preventDefault();

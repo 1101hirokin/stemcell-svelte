@@ -56,6 +56,7 @@ export { default as Badge } from './Badge/Badge.svelte';
 export { default as Avatar } from './Avatar/Avatar.svelte';
 export { default as Tag } from './Tag/Tag.svelte';
 export { default as Alert } from './Alert/Alert.svelte';
+export { default as Combobox } from './Combobox/Combobox.svelte';
 export { default as Code } from './Code/Code.svelte';
 export { default as EmptyState } from './EmptyState/EmptyState.svelte';
 export { default as CodeBlock } from './CodeBlock/CodeBlock.svelte';

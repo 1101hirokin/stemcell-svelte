@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, Pagination, PasswordField, Popover, Radio, RadioGroup, Rating, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, TimeField, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Combobox, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, Pagination, PasswordField, Popover, Radio, RadioGroup, Rating, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, TimeField, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -390,6 +390,48 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 行番号の色は本文より弱くてよいが 4.5:1 を割らない。読める文字である(WCAG 2.2 SC 1.4.3)。
 - 構文の色は補助であって、意味を運ぶのは文字そのものである(SC 1.4.1)。着色の器械が無い環境では全体が本文の色で描かれ、コードは読める(第7条)。
 - 複写を器が持たない場合も作法は変わらない: 押した結果を利用者へ届け、焦点は動かさず、渡すのは着色前の文字列である(SC 4.1.3)。
+
+### Combobox(契約 0.0.0-alpha.1)
+
+打ちながら候補を絞り、その中から一つ選ぶ欄。選択肢が多すぎて一覧から探せない場面(取引先が一万件)のためにあり、Select と別部品なのは打てるという相互作用が増えるからである(field.md §6-2 の線)。native の自動補完(<datalist>)は採らない: 拡大に追従せず、高コントラストに応答せず、装飾がほぼ効かず、NVDA と Firefox で候補が読み上げられない(web-platform-tests の interop に未解決の項目として立っている)。type=number を捨てたのと同じ判断で、第2条は「native 要素をそのまま使え」ではなく「同じ能力を保て」と読む。絞り込みは器が持たない(絞り方は言語で変わり、候補が手元にない画面が多く、器が持つと打っている文字と選んだ値の二つを抱えて混線する。Carbon にその不具合が報告されている)。値は選択肢の中からしか生まれない。
+
+props:
+
+- `name`: string((省略可)) — フォーム名(native の form 送信・FormData・reset に参加。field.md §5)。打てる欄が値そのものを持たないので、値は隠しの欄が運ぶ(Select の pointer 経路と同じ形)。
+- `value`: string(既定 "") — 選ばれている選択肢の識別子。空文字列は未選択。打った文字はここに入らない: 打った文字は値ではなく、閉じたときも焦点が外れたときも捨てて、選ばれている値の表示へ戻す(React Spectrum も同じ既定を明文で持つ)。
+- `options`: array — いま出す候補。絞り込みは器が持たないので、消費者が絞った結果を渡す(inputchange を受けて渡し直す)。器はこの並びをそのまま出す。
+- `inputValue`: string((省略可)) — 打たれている文字。器が自分で持つこともできるが、アプリが値として持ちたい場合(取得の要求を投げる、履歴に残す)に渡す。値はアプリが所有し、器は inputchange で変更を要求する(field.md §5 の単方向)。
+- `placeholder`: string((省略可)) — 何も選ばれていないときの下敷き。名前の代わりにはならない(field.md §2)。
+- `disabled`: boolean(既定 false) — 選べない(state.md §7)。
+- `readonly`: boolean(既定 false) — 読むだけ。invalid とは同時に成立しない(field.md §5)。
+- `invalid`: boolean(既定 false) — 拒否された(state.md §7)。
+- `required`: boolean(既定 false) — 必須(field.md §4)。
+- `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 の口で、消費者が現れた欄から開ける。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 段(size.md §2)。
+- `emptyLabel`: string — 候補が一件も無いときに出す言葉(「該当する取引先がありません」)。空の一覧をそのまま出さない(patterns/empty-results.md の線)。DS は文言を持たない(i18n.md §1)。
+- `countLabel`: string — 候補の件数を支援技術へ届ける文の型(「{n} 件」)。器は件数を知っているので器が告げる(EmptyState と違う点である)。0 件も件数として届ける。文言は消費者が持つ。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: string) => void — 選ばれた選択肢が変わった。payload は選択肢の識別子で、選択が外れたときは空文字列。値はアプリが所有する(field.md §5)。
+- `oninputchange`: (payload: string) => void — 打たれている文字が変わった。payload は打たれた文字。消費者はこれを受けて候補を絞り、options を渡し直す(器は絞らない)。打った文字は値ではないので、change とは別の口である。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — この欄の名前。無名の欄は許さない(field.md §2)。
+- `description` — 補助。任意に埋めるが、受け取れることは必須である(field.md §2)。
+- `error` — 拒否の理由。invalid のときだけ現れる(field.md §3)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 打てる欄自身が combobox である(ARIA 1.2)。開いているかは aria-expanded、ポップアップの結びは aria-controls、いまどの候補に居るかは aria-activedescendant が運ぶ。DOM の焦点は欄に留まる(overlay.md §4 の仮想焦点。Select の pointer 経路と同じ形)。
+- 補完の度合いを宣言する(Web の表現は aria-autocomplete)。初版は一覧を出すだけで、欄の中の文字は補完しない。
+- 候補が一件も無いときは、空の一覧を出さずに言葉で伝える(emptyLabel)。
+- 候補の件数が支援技術へ届く(countLabel)。器は件数を知っているので器が告げる。0 件も件数である。
+- 打った文字は値ではない。閉じたときも焦点が外れたときも捨て、選ばれている値の表示へ戻す(何も選んでいなければ空にする)。画面の表示と値が食い違うと、利用者は打った文字が入っていると思ったまま送る。
+- 候補の移動と選択のキーは Select の pointer 経路と同じ規則に従う(web-keys.rules.json の arrows.listbox)。
+- 狭い器では面がシートへ移る(RFC 0017)。iOS には combobox の対応物が無く、検索の欄を持つ一覧が現地の声である。
+- 解剖と所有は他のフィールドと同じである(label 必須・description・error ↔ invalid・値はアプリ所有・name でフォーム参加)。
 
 ### Container(契約 0.0.0-alpha.0)
 
@@ -1630,7 +1672,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - keyboard prop は継承される。Compose は複数行でも keyboardType を持つ。iOS の複数行(TextEditor)で同様に効くかは未確認である(一次情報が bot 遮断で未達、二次情報は割れている。下敷きの UITextView は UITextInputTraits に準拠し keyboardType を持つため、効く可能性がむしろ高い — 独立レビューの指摘で当初の「対応物が無い」という断定を訂正)。swiftui 実装の実験で決着する。効かないと実証された場合の器は第7条(技術の普及の時間軸)ではなく ceded(removes。GOVERNANCE §4 の構造差の器)を検討する。
 - Enter は改行であり、暗黙送信は起きない(HTML の挙動。本契約の関心ではないが、TextField との違いとして記録)。
 
-### TimeField(契約 0.0.0-alpha.0)
+### TimeField(契約 0.0.0-alpha.1)
 
 時刻を打ち込む欄。時と分(必要なら秒)を桁で受ける。DateField と同型で、桁ごとに上下限が決まるので打ち間違いをその場で止められる。native の input type=time は採らない(機能が限られ、国際化に弱く、ブラウザ間で不揃いである。DateField が native を捨てた理由と同じ)。値は常に 24 時間の表記(HH:mm)で持ち、表示が 12 時間制でも変わらない: 表示の慣習と値の表現を分けておかないと、地域を切り替えたときに値が変わる(日付の値を YYYY-MM-DD に固定したのと同じ)。日付と一つの値に混ぜない(date.md §2)。タイムゾーンは持たない。
 
@@ -1640,7 +1682,7 @@ props:
 - `value`: string(既定 "") — いまの時刻。HH:mm(秒を出すときは HH:mm:ss)の文字列で、常に 24 時間の表記である。午後 3 時は 15:00 で持つ。空文字列は未入力で、値はアプリが所有する(field.md §5)。
 - `min`: string((省略可)) — 下限(HH:mm)。営業時間の始まりなど。
 - `max`: string((省略可)) — 上限(HH:mm)。
-- `hourCycle`: "auto" | "12" | "24"(既定 "auto") — 時間の刻み。既定の auto は環境から借りる(date.md §3 の「地域の慣習は環境から借りる」)。上書きの口を持つのは、地域だけでは決まらないからである: 日本の業務アプリでも午後 3 時と出したい画面があり、米国の運行管理では 24 時間制が要る(裁定 2026-07-28。React Spectrum も同じ形)。12 のときは午前・午後の桁が出る(選択の一覧ではなく桁である。移動も増減も同じ規則で済む)。表示だけが変わり、value は変わらない。
+- `hourCycle`: "auto" | "12" | "24"(既定 "auto") — 時間の刻み。既定の auto は環境から借りる(date.md §3 の「地域の慣習は環境から借りる」)。上書きの口を持つのは、地域だけでは決まらないからである: 日本の業務アプリでも午後 3 時と出したい画面があり、米国の運行管理では 24 時間制が要る(裁定 2026-07-28。React Spectrum も同じ形)。12 のときは午前・午後の二択が出る(桁ではない。alpha.1 で改めた: 桁にすると触点で詰む。打てる欄なので環境が鍵盤を出すが、そこに打てる文字が無く、押して回す形は押せることにも変わったことにも気づけなかった。実機で二度踏んだ)。表示だけが変わり、value は変わらない。
 - `seconds`: boolean(既定 false) — 秒の桁を出すか。既定では出さない: 秒まで打たせる画面は限られる(動画の位置指定、計測の記録)。真のとき value は HH:mm:ss になる。
 - `disabled`: boolean(既定 false) — 選べない(state.md §7)。
 - `readonly`: boolean(既定 false) — 読むだけ。invalid とは同時に成立しない(field.md §5)。
@@ -1664,9 +1706,10 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 桁は打てる要素で受ける(DateField と同型。触点の端末で文字が打てなくなるのを避ける)。打つ文字は触点で 16px を下回らない(field.md §2)。
 - 桁の値と範囲が伝わる(Web の表現は spinbutton と aria-valuenow / valuemin / valuemax。native は各々の機構)。
 - 欄全体が一つの名前を持つ。桁それぞれにも名前が要る(「時」「分」)が、文言は消費者が持つ(i18n.md §1)。
-- 12 時間制のときの午前・午後も桁である。選択の一覧にしない: 移動も増減も他の桁と同じ規則で済む。
+- 12 時間制のときの午前・午後は二択である(桁ではない)。両方を見せて選ばせ、選ばれている側が分かる形にする。桁にすると、打てる文字を持たない桁が一つだけ混ざり、触点で操作できなくなる(alpha.1。実機で判明)。
 - 値は 24 時間の表記で持ち、表示の刻みが変わっても値は変わらない。
 - 解剖と所有は他のフィールドと同じである(label 必須・description・error ↔ invalid・値はアプリ所有・change 一本・name でフォーム参加)。
+- 二択の当たり判定は見た目の高さと別に取る(size.md §4.3)。見た目を桁の行に合わせないと、午前・午後を持つ欄だけ背が高くなる。
 
 ### Toast(契約 0.0.0-alpha.0)
 
