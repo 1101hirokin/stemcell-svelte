@@ -122,9 +122,17 @@
 .sc-calendar-day[data-today='true']:not([data-selected='true']) .sc-calendar-day-face {
   box-shadow: inset 0 0 0 var(--shape-border-width) var(--color-app-foreground);
 }
+/* 選べない日。焦点には載る(date.md §5)ので、文字は本文の床(4.5:1)を満たす。
+   disabled の文字色(明 2.5:1 / 暗 1.9:1)はここでは使えない: 焦点に載って読み上げられるものを
+   「無効な部品」と見なして SC 1.4.3 の除外に乗せるのは無理がある。
+   薄い側(fg-muted)も採らない: 暗いテーマで浮かぶ面の上に置くと 4.2:1 で床を割る(HOLES #111)。
+   本文と同じ色で読ませ、選べないことは打ち消しで示す(色だけに頼らない。SC 1.4.1) */
 .sc-calendar-day[aria-disabled='true'] {
-  color: var(--color-semantic-disabled-fg);
   cursor: not-allowed;
+}
+.sc-calendar-day[aria-disabled='true'] .sc-calendar-day-face {
+  text-decoration: line-through;
+  text-decoration-thickness: var(--shape-border-width);
 }
 
 .sc-calendar-day:focus {
