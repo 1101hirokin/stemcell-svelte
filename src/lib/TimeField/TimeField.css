@@ -234,9 +234,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* 当たり判定の門(size.md §4)。指で押す操作である */
+  /* 見た目の高さは桁の行に合わせる。ここで背丈を持つと、午前・午後のある欄だけ背が高くなり、
+     同じ段の時刻の欄どうしで高さが揃わない(実測 50px 対 45px)。当たり判定は下の ::after が持つ
+     (見た目の大きさと当たり判定を別にするのは Slider のサムと同じ形。size.md §4) */
+  position: relative;
   min-inline-size: 1.5rem;
-  min-block-size: 1.5rem;
   padding-inline: var(--spacing-inset-sm);
   cursor: pointer;
   color: var(--color-app-fg-muted);
@@ -246,6 +248,13 @@
 }
 .sc-timefield-choice {
   border-radius: var(--shape-semantic-tag);
+}
+/* 当たり判定の門(24px)。見た目は桁の行の高さのまま、欄の縦の余白まで触れる範囲を広げる */
+.sc-timefield-choice::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block: calc(var(--_inset) * -1);
 }
 .sc-timefield-choice[data-selected='true'] {
   background: var(--color-semantic-plain-soft-bg-pressed);
