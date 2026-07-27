@@ -160,6 +160,21 @@
         {#snippet label()}重さ(kg。刻み 0.5){/snippet}
       </NumberField>
       <Text variant="body-sm" muted>いまの値: {fQuantity ?? '(空)'} / {fWeight ?? '(空)'}</Text>
+      <!-- 名前を視覚から隠す(field.md §2)。隣の文が既に何の値かを語っているとき -->
+      <Cluster gap="md" align="center">
+        <Text variant="body-md">土鍋(かまど炊き)</Text>
+        <NumberField
+          bind:value={fQuantity}
+          min={0}
+          max={99}
+          size="sm"
+          labelHidden
+          incrementLabel="数量を一つ増やす"
+          decrementLabel="数量を一つ減らす"
+        >
+          {#snippet label()}土鍋(かまど炊き)の数量{/snippet}
+        </NumberField>
+      </Cluster>
     </Stack>
   </section>
   <section>
