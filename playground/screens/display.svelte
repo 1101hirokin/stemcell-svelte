@@ -1,6 +1,6 @@
 <script lang="ts">
   import {
-    Button, IconButton, Stack, Cluster, Icon, Divider, Badge, Avatar, Tag, Text, Code, CodeBlock, toast,
+    Button, IconButton, Stack, Cluster, Icon, Divider, Badge, Avatar, Tag, Text, Code, CodeBlock, EmptyState, Card, toast,
   } from '../../src/lib';
 
   // コードの塊(CodeBlock)。値は文字列で、着色は器の外。ここでは素のまま(器械を入れていない)
@@ -210,4 +210,35 @@ export function sum(orders: Order[]): number {
     <CodeBlock code={highlighted.text} language="ts" label="着色した例のコード">
       {#snippet children()}<span class="token keyword">const</span> total <span class="token keyword">=</span> orders<span class="token function">.reduce</span>((a, o) =&gt; a <span class="token keyword">+</span> o.total, <span class="token number">0</span>); <span class="token comment">// 円</span>{'\n'}<span class="token keyword">type</span> <span class="token class-name">Order</span> = &lbrace; id: <span class="token class-name">string</span>; label: <span class="token string">'注文'</span> &rbrace;;{/snippet}
     </CodeBlock>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">EmptyState(空状態)</Text>
+    <Text as="p" variant="body-sm" muted>
+      空は正常な状態である。器は何が無いのかを言葉にし、次にできることを置く場所を持つ。失敗は扱わない
+      (空は正常、失敗は異常)。0 件になったことの告知も持たない(常設の領域がアプリ側で告げる。
+      patterns/empty-results.md)。表の中の実物は「データ表示」の画面にある。
+    </Text>
+    <div class="pg-row">
+      <code class="pg-tag">見出しだけ</code>
+      <Card outlined>
+        <EmptyState>
+          {#snippet heading()}下書きはありません{/snippet}
+        </EmptyState>
+      </Card>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">全部</code>
+      <Card outlined>
+        <EmptyState>
+          {#snippet media()}<Icon name="document" />{/snippet}
+          {#snippet heading()}まだ請求書がありません{/snippet}
+          {#snippet description()}最初の請求書を作ると、ここに一覧が出ます。下書きのまま置いておけます。{/snippet}
+          {#snippet actions()}
+            <Button size="sm">請求書を作る</Button>
+            <Button size="sm" variant="text" color="plain">取り込み方を見る</Button>
+          {/snippet}
+        </EmptyState>
+      </Card>
+    </div>
   </section>

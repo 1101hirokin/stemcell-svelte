@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -674,6 +674,26 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 多重 modal の scrim は単一に保つ(重なっても一段相当。overlay.md §8 / elevation.md §6。native ::backdrop の累積を抑える)。多重 modal 自体を推奨しない(第1条)。
 - 背後スクロール封鎖(overlay.rules.json の modal.blocksScroll)。native showModal は背後を inert にし、body のスクロール固定は実装が併せて行う。
 - 側の方向は論理方向(side)である。位置(貼り付く端)とサイズは論理で持ち、RTL / 縦書きで自動反転する(視覚方向を直書きしない。layout.md §7)。入りの方向(スライドのアニメ)は Expressive で、Web の translate は物理プロパティのため RTL の水平反転までは追従するが、縦書きでの反転は範囲外(位置は正しく、入りの手触りだけが物理に留まる)。
+
+### EmptyState(契約 0.0.0-alpha.0)
+
+ここには何も無い、という報せ。空は正常な状態である(まだ作っていない、全部片付けた、条件に当たらなかった)。器が持つのは、何が無いのかを言葉にすることと、次にできることを置く場所だけである。失敗(読み込めなかった・権限が無い)は扱わない: 空は正常で失敗は異常であり、同じ器にすると正常な空状態にまで危険の語彙(intent)が持ち込まれる(裁定 2026-07-27。Carbon も失敗を空状態の pattern から外している)。0 件になったことの告知も持たない(器は自分が現れたことしか知らず、検索の結果か最初から空かを判じられない。patterns/empty-results.md)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `heading`(必須) — 何が無いのかを言う見出し。必須にするのは、何も無い場所に絵だけが置かれると利用者が壊れていると読むからである。見出しの階層(h2 か h3 か)は画面の構造なので消費者が決める(Text の as と同じ線)。
+- `description` — 補足。次に何ができるかを文で示す。操作を置かないときはここが次の一手を担う。
+- `media` — 絵(挿絵・アイコン)。装飾であり意味を運ばない(支援技術へ届けない)。必須にしないのは、挿絵の資産を持たない画面のほうが多く、置かないほうが静かな場面もあるからである(第3条)。
+- `actions` — 次の一手(作る・招く・条件を戻す)。任意である: 検索に当たらない場面では次の一手が利用者の手元にあり、器が代行できない。必須にすると置くもののない画面が偽の操作を置くことになる。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 見出しが何が無いのかを届ける。絵だけの空白は、支援技術からは何も無いのと同じである。
+- 絵は装飾として扱い、支援技術へ届けない(意味は見出しと説明が運ぶ)。
+- 見出しの階層は消費者が決める。器が h2 を決め打ちすると、画面の見出しの並びが崩れる。
+- 器は焦点を奪わない。検索の結果として現れても、焦点は検索の欄に残る(WCAG 2.2 SC 4.1.3)。
+- 器は告知しない(生きた領域を持たない)。0 件になったことを届けるのはアプリの仕事で、後から現れる領域に live region を置くと支援技術が拾い損ねる(patterns/empty-results.md)。
+- 器自身は焦点を受けない。中に押せる要素があれば、焦点とフォーカスリングと当たり判定はその要素に生きる。
 
 ### Frame(契約 0.0.0-alpha.0)
 
