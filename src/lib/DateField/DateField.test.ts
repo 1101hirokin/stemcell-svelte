@@ -109,3 +109,11 @@ it('readonly のときは打てない', async () => {
   await digit(year, '2');
   expect(onchange).not.toHaveBeenCalled();
 });
+
+it('打ちかけの数字は桁をまたがない', async () => {
+  const { container } = render(DateField, { props: { label } });
+  await digit(seg(container, 'month'), '1');
+  await digit(seg(container, 'day'), '2');
+  // 月の打ちかけ(1)が日へ繋がって 12 にならない
+  expect((seg(container, 'day') as HTMLInputElement).value).toBe('02');
+});

@@ -63,6 +63,7 @@ export { default as NumberField } from './NumberField/NumberField.svelte';
 export { default as PasswordField } from './PasswordField/PasswordField.svelte';
 export { default as Rating } from './Rating/Rating.svelte';
 export { default as Stat } from './Stat/Stat.svelte';
+export { default as TimeField } from './TimeField/TimeField.svelte';
 export { default as Text } from './Text/Text.svelte';
 export { default as Toast } from './Toast/Toast.svelte';
 export { default as Toaster } from './Toaster/Toaster.svelte';

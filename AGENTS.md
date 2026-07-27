@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, Pagination, PasswordField, Popover, Radio, RadioGroup, Rating, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, Pagination, PasswordField, Popover, Radio, RadioGroup, Rating, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, TimeField, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -1629,6 +1629,44 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - TextField の notes がすべて当てはまる。複数行であることが支援技術に届く(Web の表現は native textarea 要素、または aria-multiline)。
 - keyboard prop は継承される。Compose は複数行でも keyboardType を持つ。iOS の複数行(TextEditor)で同様に効くかは未確認である(一次情報が bot 遮断で未達、二次情報は割れている。下敷きの UITextView は UITextInputTraits に準拠し keyboardType を持つため、効く可能性がむしろ高い — 独立レビューの指摘で当初の「対応物が無い」という断定を訂正)。swiftui 実装の実験で決着する。効かないと実証された場合の器は第7条(技術の普及の時間軸)ではなく ceded(removes。GOVERNANCE §4 の構造差の器)を検討する。
 - Enter は改行であり、暗黙送信は起きない(HTML の挙動。本契約の関心ではないが、TextField との違いとして記録)。
+
+### TimeField(契約 0.0.0-alpha.0)
+
+時刻を打ち込む欄。時と分(必要なら秒)を桁で受ける。DateField と同型で、桁ごとに上下限が決まるので打ち間違いをその場で止められる。native の input type=time は採らない(機能が限られ、国際化に弱く、ブラウザ間で不揃いである。DateField が native を捨てた理由と同じ)。値は常に 24 時間の表記(HH:mm)で持ち、表示が 12 時間制でも変わらない: 表示の慣習と値の表現を分けておかないと、地域を切り替えたときに値が変わる(日付の値を YYYY-MM-DD に固定したのと同じ)。日付と一つの値に混ぜない(date.md §2)。タイムゾーンは持たない。
+
+props:
+
+- `name`: string((省略可)) — フォーム名(native の form 送信・FormData・reset に参加。field.md §5)。
+- `value`: string(既定 "") — いまの時刻。HH:mm(秒を出すときは HH:mm:ss)の文字列で、常に 24 時間の表記である。午後 3 時は 15:00 で持つ。空文字列は未入力で、値はアプリが所有する(field.md §5)。
+- `min`: string((省略可)) — 下限(HH:mm)。営業時間の始まりなど。
+- `max`: string((省略可)) — 上限(HH:mm)。
+- `hourCycle`: "auto" | "12" | "24"(既定 "auto") — 時間の刻み。既定の auto は環境から借りる(date.md §3 の「地域の慣習は環境から借りる」)。上書きの口を持つのは、地域だけでは決まらないからである: 日本の業務アプリでも午後 3 時と出したい画面があり、米国の運行管理では 24 時間制が要る(裁定 2026-07-28。React Spectrum も同じ形)。12 のときは午前・午後の桁が出る(選択の一覧ではなく桁である。移動も増減も同じ規則で済む)。表示だけが変わり、value は変わらない。
+- `seconds`: boolean(既定 false) — 秒の桁を出すか。既定では出さない: 秒まで打たせる画面は限られる(動画の位置指定、計測の記録)。真のとき value は HH:mm:ss になる。
+- `disabled`: boolean(既定 false) — 選べない(state.md §7)。
+- `readonly`: boolean(既定 false) — 読むだけ。invalid とは同時に成立しない(field.md §5)。
+- `invalid`: boolean(既定 false) — 拒否された(state.md §7)。
+- `required`: boolean(既定 false) — 必須(field.md §4)。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 段(size.md §2)。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: string) => void — 値が変わったことを伝える。逐次であり(field.md §5)、payload は新しい値(HH:mm。秒を出すときは HH:mm:ss)。全桁を消したときは空文字列で発火する(「消した」は成立した意思である。DateField と同じ)。刻みに合わない値を打っている最中に器が書き換えない: 刻みの検証はアプリの仕事である。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — この欄の名前。無名の欄は許さない(field.md §2)。
+- `description` — 補助。任意に埋めるが、受け取れることは必須である(field.md §2)。
+- `error` — 拒否の理由。invalid のときだけ現れる(field.md §3)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 桁ごとに焦点を受け、上下で増減し、左右で桁を移る(web-keys.rules.json の arrows.date-segment。規則の名前は日付だが、中身は桁を持つ欄の規則である)。
+- 桁は打てる要素で受ける(DateField と同型。触点の端末で文字が打てなくなるのを避ける)。打つ文字は触点で 16px を下回らない(field.md §2)。
+- 桁の値と範囲が伝わる(Web の表現は spinbutton と aria-valuenow / valuemin / valuemax。native は各々の機構)。
+- 欄全体が一つの名前を持つ。桁それぞれにも名前が要る(「時」「分」)が、文言は消費者が持つ(i18n.md §1)。
+- 12 時間制のときの午前・午後も桁である。選択の一覧にしない: 移動も増減も他の桁と同じ規則で済む。
+- 値は 24 時間の表記で持ち、表示の刻みが変わっても値は変わらない。
+- 解剖と所有は他のフィールドと同じである(label 必須・description・error ↔ invalid・値はアプリ所有・change 一本・name でフォーム参加)。
 
 ### Toast(契約 0.0.0-alpha.0)
 
