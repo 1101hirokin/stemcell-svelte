@@ -1,5 +1,9 @@
 /* コードの塊(CodeBlock.md)。器が持つのは、書いたとおりに読めることと、行を保つことと、置き場所だけ。 */
 .sc-codeblock {
+  /* 番号の欄の幅。桁の場所(2.5ch)と、番号と本文の隙間。ch は等幅の段を基準にしたいので
+     ここでは決めず、字の段を持つ .sc-codeblock-code 側の font-size に効かせる(下の calc は
+     継承した値をその文脈で解く) */
+  --_gutter: calc(2.5ch + var(--spacing-inline-md));
   background: var(--color-app-surface);
   /* 中身の幅で親を押し広げない。器の中で送る(flex/grid の子でも縮める) */
   min-inline-size: 0;
@@ -47,6 +51,10 @@
   min-inline-size: 100%;
   box-sizing: border-box;
 }
+/* 番号を出すときは、その幅ぶん本文の始まりを内側へ寄せる(番号はそこへ引き出される) */
+.sc-codeblock[data-line-numbers] .sc-codeblock-pre {
+  padding-inline-start: calc(var(--spacing-inset-md) + var(--_gutter));
+}
 .sc-codeblock[data-wrap] .sc-codeblock-pre {
   white-space: pre-wrap;
   inline-size: auto;
@@ -81,6 +89,9 @@
   /* 隙間は padding で取る。margin だと面が届かず、送った文字が番号の脇から透ける */
   padding-inline-end: var(--spacing-inline-md);
   text-align: end;
+  /* 番号は本文の外(左の余白)へ引き出す。本文はどの行も同じ位置から始まるので、折り返した
+     続きの行が番号の下へ潜らない(行は inline のままなので、改行は文字として残り複写が狂わない) */
+  margin-inline-start: calc(var(--_gutter) * -1);
   /* 横へ送っても行頭側に留まる。長い行を送っても何行目かが見える */
   position: sticky;
   inset-inline-start: 0;
