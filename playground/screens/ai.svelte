@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { Button, Stack, Cluster, Dialog, Link, Text, ToolCall, Sources, Reasoning } from '../../src/lib';
+  import {
+    Button, Stack, Cluster, Dialog, Link, Text, ToolCall, Sources, Reasoning, Conversation, Message,
+    Avatar, Textarea,
+  } from '../../src/lib';
 
   let toolStatus = $state<'busy' | 'result' | 'error'>('busy');
   let reasoningStatus = $state<'busy' | 'complete'>('busy');
@@ -20,6 +23,47 @@
     { id: 'src-1', title: 'stemcell の憲法', url: 'https://example.com/constitution', excerpt: '三層(Normative / Expressive / Ceded)と七つの条。' },
     { id: 'src-2', title: 'source foundation', url: 'https://example.com/source', excerpt: '根拠への到達性と、引用と出典の相互参照。' },
   ];
+
+  // 会話の器と発話(Conversation / Message)。履歴はアプリが持つ(conversation §4)
+  type Turn = { id: string; role: 'user' | 'assistant'; speaker: string; text: string; at: string };
+  let turns = $state<Turn[]>([
+    { id: 't1', role: 'user', speaker: 'あなた', text: '土鍋の発注点はいくつにすべき？', at: '12:03' },
+    {
+      id: 't2',
+      role: 'assistant',
+      speaker: 'アシスタント',
+      text: '直近の出荷が1日あたり平均 2.1個、補充に7日かかるので、18個を目安にしています。',
+      at: '12:04',
+    },
+  ]);
+  // 人間同士のチャット。話者は全員 user で、自分と相手の別はアプリが持つ(role からは出てこない)
+  const chat = [
+    { id: 'c1', speaker: '佐藤', own: false, text: '土鍋の在庫、週末までもちそう？', at: '09:12' },
+    { id: 'c2', speaker: 'あなた', own: true, text: '18個あるので大丈夫です', at: '09:13' },
+    { id: 'c3', speaker: '鈴木', own: false, text: '追加の入荷は火曜でした', at: '09:15' },
+  ];
+  let generating = $state(false);
+  let draft = $state('');
+  const send = () => {
+    const text = draft.trim();
+    if (!text) return;
+    turns = [...turns, { id: `u${turns.length}`, role: 'user', speaker: 'あなた', text, at: '12:05' }];
+    draft = '';
+    generating = true;
+    setTimeout(() => {
+      turns = [
+        ...turns,
+        {
+          id: `a${turns.length}`,
+          role: 'assistant',
+          speaker: 'アシスタント',
+          text: '（作り話の返答です）在庫の推移を見るかぎり、その前提で問題ありません。',
+          at: '12:05',
+        },
+      ];
+      generating = false;
+    }, 1200);
+  };
 </script>
 
   <section>
@@ -130,4 +174,76 @@
         </Button>
       {/snippet}
     </Dialog>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">Conversation / Message(会話の器と発話)</Text>
+    <Text as="p" variant="body-sm" muted>
+      会話は「新しい情報が末尾にだけ足される、意味のある順序の記録」なので、器は log として届く。生成中は
+      逐次で告知せず(streaming.md §4)、完了で一度届ける。末尾に居るときだけ追い、離れているあいだの新着は
+      戻る手段とともに知らせる。発話の中身は器が解釈しない。姿は role から導かないので、ここでは助手を
+      text(地に置く)、利用者を soft の行末側にしている。
+    </Text>
+    <div class="ai-conversation">
+      <Conversation busy={generating} resumeLabel="新しい発話へ">
+        {#snippet label()}アシスタントとの会話{/snippet}
+        {#each turns as turn (turn.id)}
+          <Message
+            role={turn.role}
+            speakerLabel={turn.speaker}
+            variant={turn.role === 'user' ? 'soft' : 'text'}
+            align={turn.role === 'user' ? 'end' : 'start'}
+          >
+            {#snippet speaker()}<Avatar name={turn.speaker} size="sm" decorative={turn.role === 'assistant'} />{/snippet}
+            {#snippet meta()}{turn.at}{/snippet}
+            {turn.text}
+          </Message>
+        {/each}
+        {#if generating}
+          <Message role="assistant" speakerLabel="アシスタント" variant="text">
+            {#snippet speaker()}<Avatar name="アシスタント" size="sm" decorative />{/snippet}
+            <Reasoning status="busy">
+              {#snippet summary()}考えています{/snippet}
+              在庫の推移を見ています。
+            </Reasoning>
+          </Message>
+        {/if}
+      </Conversation>
+    </div>
+    <Cluster gap="md" align="end">
+      <Textarea bind:value={draft} rows={2} maxRows={4} placeholder="在庫について聞く">
+        {#snippet label()}質問{/snippet}
+      </Textarea>
+      <Button onclick={send} disabled={generating}>送る</Button>
+    </Cluster>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">人間同士のチャット(同じ器で)</Text>
+    <Text as="p" variant="body-sm" muted>
+      姿は variant と color と align で選ぶ。role が答えるのは誰の発話かであって、どう見えるかではない。
+      誰かは speakerLabel が届ける。ここでは自分の発話を primary の filled で行末側へ、相手の発話を soft の
+      行頭側へ、参加の知らせを text の中央へ置いた。
+    </Text>
+    <div class="ai-conversation">
+      <Conversation resumeLabel="新しい発話へ">
+        {#snippet label()}台所の道具チーム{/snippet}
+        <Message role="system" speakerLabel="お知らせ" variant="text" align="center">
+          <Text variant="body-sm" muted>佐藤さんが参加しました</Text>
+        </Message>
+        {#each chat as line (line.id)}
+          <Message
+            role="user"
+            speakerLabel={line.speaker}
+            variant={line.own ? 'filled' : 'soft'}
+            color={line.own ? 'primary' : 'plain'}
+            align={line.own ? 'end' : 'start'}
+          >
+            {#snippet speaker()}<Avatar name={line.speaker} size="sm" />{/snippet}
+            {#snippet meta()}{line.speaker}・{line.at}{/snippet}
+            {line.text}
+          </Message>
+        {/each}
+      </Conversation>
+    </div>
   </section>

@@ -1,0 +1,71 @@
+/* 発話の並びの器(Conversation.md)。器が持つのは並びの意味論と告知と追従だけで、発話の描画は Message、
+   中身はアプリが持つ。 */
+.sc-conversation {
+  /* 末尾へ戻る手段を器の端へ置くための基準。器自身は送らない(送るのは中の箱) */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  /* 高さは消費者が決める(器は並びの意味論だけを持つ)。与えられた高さを満たし、余れば中の箱が送る。
+     高さを与えられていなければ中身の高さで立つ(100% が auto に解決する) */
+  block-size: 100%;
+}
+/* 記録の名前。見せ方は Expressive で、ここでは見出しとして出す(隠したい消費者は自分で隠せる) */
+.sc-conversation-label {
+  padding-block-end: var(--spacing-stack-sm);
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-fg-muted);
+}
+.sc-conversation-scroller {
+  overflow: hidden auto;
+  /* 記録の途中で読み込みが起きても、いま読んでいる位置が飛ばない(標準の scroll anchoring。第2条) */
+  overflow-anchor: auto;
+  min-block-size: 0;
+}
+.sc-conversation-log {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-md);
+}
+
+/* 末尾から離れているあいだに新しい発話が届いたことと、戻る手段。何も出さないと会話が止まったと読まれる */
+.sc-conversation-resume {
+  position: absolute;
+  inset-block-end: var(--spacing-inset-md);
+  inset-inline: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.sc-conversation-resume-button {
+  /* 当たり判定の門(size.md §4。Web の下限は 24px) */
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-inset-sm);
+  pointer-events: auto;
+  cursor: pointer;
+  color: var(--color-app-foreground);
+  background: var(--elevation-popover-surface);
+  border: var(--shape-border-width) solid var(--color-app-divider);
+  border-radius: var(--shape-semantic-pill);
+  box-shadow: var(--elevation-popover-shadow);
+  transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+    var(--motion-feedback-easing);
+}
+.sc-conversation-resume-button:hover {
+  background: var(--color-semantic-plain-soft-bg);
+}
+.sc-conversation-resume-button:focus {
+  outline: none;
+}
+.sc-conversation-resume-button:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+}

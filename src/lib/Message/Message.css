@@ -1,0 +1,117 @@
+/* 会話のひと続きの発話(Message.md)。器が持つのは発話の境界と話者の帰属だけで、吹き出しの形は
+   Expressive である。ただし業界が割れている(ChatGPT は利用者だけ面を持ち、Slack は両方地に置き、
+   LINE と iMessage は自分の発話をブランド色で塗る)ので、選ぶ口は持つ。語彙は発明せず、面の量は
+   emphasis.md §3 の4段、色は intent、寄せは Cluster と同じ start/center/end を使う。
+   姿は role から導かない(人間同士のチャットでは発話が全部 user になる。Message.md §2)。 */
+.sc-message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-inline-md);
+  color: var(--color-app-foreground);
+}
+.sc-message-speaker {
+  flex: 0 0 auto;
+}
+.sc-message-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  min-inline-size: 0;
+}
+.sc-message-content {
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+  /* 枠を持たない強調度も同じ太さの透明な枠で場所を取る(emphasis.md §3) */
+  border: var(--shape-border-width) solid transparent;
+  border-radius: var(--shape-semantic-card);
+}
+
+/* intent の一家をチャンネル変数へ(色を1箇所で束ね、variant はチャンネルだけを見る。Button と同型)。
+   disabled を除く intent をそのまま開く: 見た目は消費者が選ぶもので、器が選べる色を絞る理由が無い */
+.sc-message[data-color='primary'] .sc-message-content {
+  --_bg: var(--color-semantic-primary-bg);
+  --_fg: var(--color-semantic-primary-fg);
+  --_soft-bg: var(--color-semantic-primary-soft-bg);
+  --_soft-fg: var(--color-semantic-primary-soft-fg);
+  --_border: var(--color-semantic-primary-border);
+}
+.sc-message[data-color='danger'] .sc-message-content {
+  --_bg: var(--color-semantic-danger-bg);
+  --_fg: var(--color-semantic-danger-fg);
+  --_soft-bg: var(--color-semantic-danger-soft-bg);
+  --_soft-fg: var(--color-semantic-danger-soft-fg);
+  --_border: var(--color-semantic-danger-border);
+}
+.sc-message[data-color='warning'] .sc-message-content {
+  --_bg: var(--color-semantic-warning-bg);
+  --_fg: var(--color-semantic-warning-fg);
+  --_soft-bg: var(--color-semantic-warning-soft-bg);
+  --_soft-fg: var(--color-semantic-warning-soft-fg);
+  --_border: var(--color-semantic-warning-border);
+}
+.sc-message[data-color='success'] .sc-message-content {
+  --_bg: var(--color-semantic-success-bg);
+  --_fg: var(--color-semantic-success-fg);
+  --_soft-bg: var(--color-semantic-success-soft-bg);
+  --_soft-fg: var(--color-semantic-success-soft-fg);
+  --_border: var(--color-semantic-success-border);
+}
+.sc-message[data-color='info'] .sc-message-content {
+  --_bg: var(--color-semantic-info-bg);
+  --_fg: var(--color-semantic-info-fg);
+  --_soft-bg: var(--color-semantic-info-soft-bg);
+  --_soft-fg: var(--color-semantic-info-soft-fg);
+  --_border: var(--color-semantic-info-border);
+}
+.sc-message[data-color='plain'] .sc-message-content {
+  --_bg: var(--color-semantic-plain-bg);
+  --_fg: var(--color-semantic-plain-fg);
+  --_soft-bg: var(--color-semantic-plain-soft-bg);
+  --_soft-fg: var(--color-semantic-plain-soft-fg);
+  --_border: var(--color-semantic-plain-border);
+}
+
+/* variant(emphasis.md §3 の配線。面 → 枠 → 文字だけ、と占める視覚の量が減る)。
+   面と枠を持つ強調度だけが内側の余白を持ち、地に置く text は本文がそのまま流れる */
+.sc-message[data-variant='filled'] .sc-message-content {
+  background: var(--_bg);
+  color: var(--_fg);
+  padding: var(--spacing-inset-md);
+}
+.sc-message[data-variant='soft'] .sc-message-content {
+  background: var(--_soft-bg);
+  color: var(--_soft-fg);
+  padding: var(--spacing-inset-md);
+}
+.sc-message[data-variant='outlined'] .sc-message-content {
+  color: var(--_soft-fg);
+  border-color: var(--_border);
+  padding: var(--spacing-inset-md);
+}
+.sc-message[data-variant='text'] .sc-message-content {
+  color: var(--_soft-fg);
+}
+
+/* 寄せ(Cluster と同じ語彙)。名乗りは発話と同じ側に付くので、行ごと向きを返す */
+.sc-message[data-align='end'] {
+  flex-direction: row-reverse;
+}
+.sc-message[data-align='end'] .sc-message-body {
+  align-items: flex-end;
+}
+.sc-message[data-align='center'] {
+  flex-direction: column;
+  align-items: center;
+}
+.sc-message[data-align='center'] .sc-message-body {
+  align-items: center;
+}
+
+.sc-message-meta {
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  line-height: var(--typography-body-sm-line-height);
+}

@@ -111,3 +111,11 @@ section > .sc-text {
   flex-direction: column;
   gap: var(--spacing-stack-md);
 }
+
+/* 会話の器の高さは消費者が決める(器は並びの意味論だけを持つ。Conversation.md §3) */
+.ai-conversation {
+  block-size: 18rem;
+  padding: var(--spacing-inset-md);
+  border: var(--shape-border-width) solid var(--color-app-divider);
+  border-radius: var(--shape-semantic-card);
+}
