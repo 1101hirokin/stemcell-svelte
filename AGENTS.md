@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, Pagination, Popover, Radio, RadioGroup, Rating, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -1088,6 +1088,44 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 矢印キーの規則は web-keys.rules.json の arrows.radiogroup が持つ(移動=選択、roving tabindex、disabled スキップ)。Tab はグループにひとつ: チェック済みがあればそこへ、なければ先頭へ。
 - invalid はグループの状態として届き(Web の表現は radiogroup への aria-invalid + aria-describedby)、error 文はグループの説明として届く。
 - 既定選択を置かない場合、Tab での進入先は先頭項目になる。未選択のまま送信された required グループが invalid の典型である。
+
+### Rating(契約 0.0.0-alpha.0)
+
+段で表す評価。読むだけの星と、付ける星の両方をこの器が持つ。WAI-ARIA Authoring Practices に評価の型は無いので、既にある型を当てはめる: 読み取り専用のときは選択の集合ではなく一つの絵として届き(Web の表現は role=img と名前。星は支援技術から外す)、入力のときは段の集合から一つを選ぶ形で届く(Web の表現は radio の群)。aria-readonly を足した選択の集合にはしない: 読むだけの星に「グループ、ラジオボタン 5 個」を聞かせるのは冗長である。半分の段は読み取りだけで許す: 入力で半分を許すと段が 10 になり、「2.5 段階目」に名前を付けることになり、指の的も半分になる(24px の門を割る)。
+
+props:
+
+- `value`: number((省略可)) — いまの評価。読み取り(readonly)では連続でよい(4.2 の平均点を整数へ丸めると嘘になる)。入力では整数だけを採る。未評価は値が無いことで、0 ではない。
+- `max`: number(既定 5) — 段の数。10 段階の満足度調査のために変えられる。
+- `readonly`: boolean(既定 false) — 読むだけか。真のとき器はフォーム部品ではなくなり、届き方ごと変わる(選択の集合から一つの絵へ)。readonly は状態ではなく性質である(ARIA が property と定義し、state.rules.json も states に持たない)。ここでは見た目の抑制ですらなく、役そのものの切り替えである。
+- `disabled`: boolean(既定 false) — 選べない(state.md §7 の disabled)。readonly と違い、これは入力の抑制である。
+- `required`: boolean(既定 false) — 必須(field.md §4)。入力のときだけ意味を持つ。
+- `invalid`: boolean(既定 false) — 拒否された(state.md §7)。readonly とは同時に成立しない(field.md §5)。
+- `name`: string((省略可)) — フォーム名(native の form 送信・FormData・reset に参加。field.md §5)。入力のときだけ意味を持つ。
+- `allowClear`: boolean(既定 false) — 評価を取り消せるか。既定は取り消せない。真にしたときは鍵盤にも消す道を用意する: radio の群は鍵盤で選択を外せないので、同じ星を押し直すだけの実装はポインタ専用の機能になり WCAG 2.2 SC 2.1.1 に触れる。
+- `valueLabel`: string((省略可)) — 読み取りのときの名前(「5 段階中 4.2」)。readonly のときは必須である: 絵として届く器に名前が無いと、評価そのものが読み上げに乗らない。DS は文言を持たない(i18n.md §1)。件数を含めるかは消費者の判断。
+- `itemLabels`: array((省略可)) — 入力のときの各段の名前(「5 段階中 2」等)。max と同じ数だけ並べる。入力のときは必須である: 数字だけの名前では、何段階中の 2 かが読み上げで分からない。関数ではなく並びで受け取るのは、どのプラットフォームでも同じ形で渡せるようにするためである。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: number | null) => void — 評価が変わったことを伝える。payload は新しい値で、取り消したときは null(0 ではない)。値はアプリが所有する(field.md §5)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — この評価の名前(「商品の評価」)。入力のときは群の名前になり、読み取りのときも何の評価かを伝える。無名の評価は、画面に評価が二つある場面でどちらか分からない。
+- `description` — 補助(field.md §2 の解剖)。入力のときに使う。
+- `error` — 拒否の理由(field.md §3)。invalid のときだけ現れる。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 読み取りと入力で役が変わる。読み取りは一つの絵として名前つきで届き(Web の表現は role=img と valueLabel。星は支援技術から外す)、入力は段の集合から一つを選ぶ形で届く(Web の表現は radio の群。native の input type=radio で組めば ARIA を足さずに済む)。
+- 入力の段には一つずつ名前が要る(itemLabels)。数字だけでは何段階中の 2 かが分からない。
+- 塗った段と空の段は色だけでなく形でも違う(WCAG 2.2 SC 1.4.1)。空の段の輪郭は地に対して 3:1 を満たす(SC 1.4.11): 空の段が見えないと、何段階中の評価かが分からない。
+- 段ひとつの当たり判定は 24px を下回らない(size.md §4。SC 2.5.8)。
+- 撫でただけの予告(ポインタが通った段まで塗る)は視覚にとどめ、読み上げに流さない(SC 4.1.3)。届けるのは値が変わったときだけである。
+- 矢印キーでの移動は RadioGroup と同じ規則に従う(web-keys.rules.json の arrows.radiogroup)。
+- 取り消しを許すときは鍵盤にも道を用意する(SC 2.1.1)。radio の群は鍵盤で選択を外せない。
+- readonly と invalid は同時に成立しない(field.md §5)。
 
 ### Reasoning(契約 0.0.0-alpha.0)
 
