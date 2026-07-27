@@ -943,7 +943,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 領域自身は焦点を受けない。焦点とフォーカスリングは各行き先(合成した Link)に立ち、当たり判定の門(size.md §4)もそちらに生きる。
 - 移動の横取り(SPA の routing)は契約に無い。Link と同じく、移動は行き先(href)が起こす。横取りが要る実装は、土地の声でその口を持つ(Web は祖先での捕捉)。
 
-### NumberField(契約 0.0.0-alpha.0)
+### NumberField(契約 0.0.0-alpha.1)
 
 数を打つ欄。打って入れることも、隣の操作や矢印キーで一つずつ動かすこともできる。TextField と別部品なのは増減という相互作用が増えるからである(field.md §6-2 の線。keyboard: numeric の欄は数字を打つだけで動かせない)。Web の機構は打てる欄に数の意味論(spinbutton)を載せる形で、native の input type=number は採らない: スピナーの見た目はブラウザ任せで指には小さく、焦点があるときのホイールで値が書き換わり、iOS で桁の扱いに難があり(DateField で経験)、GOV.UK が調査に基づいて type=number をやめている。native を捨てて失う能力(フォーム参加・format validation)は name と値のミラーで補う(Select の pointer 経路と同じ形)。書式(桁区切り・通貨)は持たない: 打っている最中の文字列を毎回解析し直すことになり、地域ごとの区切りまで抱える(Stat と同じ線)。
 
@@ -968,6 +968,12 @@ props:
 events(Svelte では callback prop):
 
 - `onchange`: (payload: number | null) => void — 値が変わったことを伝える。逐次であり(field.md §5)、payload は新しい値。欄が空になったときは null(0 ではない)。刻みに合わない値を打っている最中に器が書き換えない: 確定の時機はフォームの検証の関心である(patterns/forms.md)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — この欄の名前。無名の欄は許さない(field.md §2)。継承元と同じ解剖だが、スロットは継承されないので明示する(alpha.1 で追加: 門が欠落を捕まえた)。
+- `description` — 補助(単位・刻み・範囲の説明)。任意に埋めるが、受け取れることは必須である(field.md §2)。
+- `error` — 拒否の理由。invalid のときだけ現れる(field.md §3)。
 
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
@@ -1089,7 +1095,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - invalid はグループの状態として届き(Web の表現は radiogroup への aria-invalid + aria-describedby)、error 文はグループの説明として届く。
 - 既定選択を置かない場合、Tab での進入先は先頭項目になる。未選択のまま送信された required グループが invalid の典型である。
 
-### Rating(契約 0.0.0-alpha.0)
+### Rating(契約 0.0.0-alpha.1)
 
 段で表す評価。読むだけの星と、付ける星の両方をこの器が持つ。WAI-ARIA Authoring Practices に評価の型は無いので、既にある型を当てはめる: 読み取り専用のときは選択の集合ではなく一つの絵として届き(Web の表現は role=img と名前。星は支援技術から外す)、入力のときは段の集合から一つを選ぶ形で届く(Web の表現は radio の群)。aria-readonly を足した選択の集合にはしない: 読むだけの星に「グループ、ラジオボタン 5 個」を聞かせるのは冗長である。半分の段は読み取りだけで許す: 入力で半分を許すと段が 10 になり、「2.5 段階目」に名前を付けることになり、指の的も半分になる(24px の門を割る)。
 
@@ -1102,7 +1108,7 @@ props:
 - `required`: boolean(既定 false) — 必須(field.md §4)。入力のときだけ意味を持つ。
 - `invalid`: boolean(既定 false) — 拒否された(state.md §7)。readonly とは同時に成立しない(field.md §5)。
 - `name`: string((省略可)) — フォーム名(native の form 送信・FormData・reset に参加。field.md §5)。入力のときだけ意味を持つ。
-- `allowClear`: boolean(既定 false) — 評価を取り消せるか。既定は取り消せない。真にしたときは鍵盤にも消す道を用意する: radio の群は鍵盤で選択を外せないので、同じ星を押し直すだけの実装はポインタ専用の機能になり WCAG 2.2 SC 2.1.1 に触れる。
+- `allowClear`: boolean(既定 false) — 評価を取り消せるか。既定は取り消せない。真にしたときは鍵盤にも消す道を用意する: radio の群は鍵盤で選択を外せないので、同じ星を押し直すだけの実装はポインタ専用の機能になり WCAG 2.2 SC 2.1.1 に触れる。 Web のキーは Delete と Backspace(RFC 0020。web-keys.rules.json の clear.rating)。alpha.1 で明記。
 - `valueLabel`: string((省略可)) — 読み取りのときの名前(「5 段階中 4.2」)。readonly のときは必須である: 絵として届く器に名前が無いと、評価そのものが読み上げに乗らない。DS は文言を持たない(i18n.md §1)。件数を含めるかは消費者の判断。
 - `itemLabels`: array((省略可)) — 入力のときの各段の名前(「5 段階中 2」等)。max と同じ数だけ並べる。入力のときは必須である: 数字だけの名前では、何段階中の 2 かが読み上げで分からない。関数ではなく並びで受け取るのは、どのプラットフォームでも同じ形で渡せるようにするためである。
 
@@ -1124,7 +1130,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 段ひとつの当たり判定は 24px を下回らない(size.md §4。SC 2.5.8)。
 - 撫でただけの予告(ポインタが通った段まで塗る)は視覚にとどめ、読み上げに流さない(SC 4.1.3)。届けるのは値が変わったときだけである。
 - 矢印キーでの移動は RadioGroup と同じ規則に従う(web-keys.rules.json の arrows.radiogroup)。
-- 取り消しを許すときは鍵盤にも道を用意する(SC 2.1.1)。radio の群は鍵盤で選択を外せない。
+- 取り消しを許すときは鍵盤にも道を用意する(SC 2.1.1)。radio の群は鍵盤で選択を外せない。Web のキーは Delete と Backspace(RFC 0020)。
 - readonly と invalid は同時に成立しない(field.md §5)。
 
 ### Reasoning(契約 0.0.0-alpha.0)
