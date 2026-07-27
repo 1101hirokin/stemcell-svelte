@@ -81,6 +81,23 @@
     preset = v;
     presetRange = rangePresets.find((p) => p.value === v)!.of();
   };
+
+  // 候補が多いとき(10 を超える)は Select へ畳む(patterns/date-range.md §3)。実物で確かめる
+  const manyPresets = [
+    ['today', '今日'], ['yesterday', '昨日'], ['7d', '過去7日間'], ['14d', '過去14日間'],
+    ['30d', '過去30日間'], ['60d', '過去60日間'], ['90d', '過去90日間'], ['mtd', '今月'],
+    ['lastMonth', '先月'], ['qtd', '今四半期'], ['ytd', '今年'], ['lastYear', '昨年'],
+  ].map(([value, label]) => ({ value: value!, label: label! }));
+  const manyDays: Record<string, number> = {
+    today: 0, yesterday: 1, '7d': 6, '14d': 13, '30d': 29, '60d': 59, '90d': 89,
+    mtd: 20, lastMonth: 50, qtd: 80, ytd: 200, lastYear: 400,
+  };
+  let manyPreset = $state('30d');
+  let manyRange = $state(back(29));
+  const applyMany = (v: string) => {
+    manyPreset = v;
+    manyRange = back(manyDays[v] ?? 0);
+  };
 </script>
 
 {#snippet faqSummary()}配送について{/snippet}
@@ -310,5 +327,39 @@
     </DateRangePicker>
     <Text variant="body-sm" muted>
       候補: {preset || '(選ばれていない)'} / 期間: {presetRange.start} 〜 {presetRange.end}
+    </Text>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">候補が多いとき(pattern §3 の確認)</Text>
+    <Text as="p" variant="body-sm" muted>
+      候補が10を超えたら Select へ畳んでよい、という指針の実物確認。選択の意味論は同じ(値の選択)で、
+      見せ方だけが変わる。面の中に畳んだ選択を置くので、面の中で面が開く形になる。
+    </Text>
+    <DateRangePicker
+      start={manyRange.start}
+      end={manyRange.end}
+      calendarLabel="暦を開く"
+      onchange={(next) => {
+        manyRange = next;
+        manyPreset = '';
+      }}
+    >
+      {#snippet label()}対象の期間(候補12件){/snippet}
+      {#snippet startLabel()}開始日{/snippet}
+      {#snippet endLabel()}終了日{/snippet}
+      {#snippet panelLead()}
+        <Select
+          value={manyPreset}
+          options={manyPresets}
+          placeholder="候補から選ぶ"
+          onchange={(v) => applyMany(v)}
+        >
+          {#snippet label()}期間の候補{/snippet}
+        </Select>
+      {/snippet}
+    </DateRangePicker>
+    <Text variant="body-sm" muted>
+      候補: {manyPreset || '(選ばれていない)'} / 期間: {manyRange.start} 〜 {manyRange.end}
     </Text>
   </section>
