@@ -1,0 +1,233 @@
+/* 行と列に意味がある表(Table.md)。役割と構造は native の table がそのまま持つ(第2条)。
+   器が描くのは、見出しの行・区切り・寄せ・貼り付き・送れる向きの表現だけで、セルの中身は合成した部品が描く。 */
+.sc-table {
+  /* 送れる向きの表現(::before / ::after)を器の端へ置くための基準。器自身は送らない(送るのは中の箱) */
+  position: relative;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+/* 送る箱。表は中身の幅で立ち、器より広ければここで送る(Table.md §2)。
+   overscroll-behavior-inline: contain は、表の端まで送ったあと親(ページや履歴)へ送りが移るのを止める */
+.sc-table-scroller {
+  overflow: auto hidden;
+  overscroll-behavior-inline: contain;
+}
+.sc-table[data-overflow='wrap'] .sc-table-scroller {
+  overflow: visible;
+}
+
+.sc-table-grid {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+
+/* 表の名前。送る箱の外に置くので、横へ送っても流れない。見せ方は Expressive で、ここでは見出しとして
+   出す(隠したい消費者は自分で隠せる) */
+.sc-table-caption {
+  padding-block-end: var(--spacing-stack-sm);
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-fg-muted);
+}
+
+.sc-table-grid th,
+.sc-table-grid td {
+  padding: var(--_inset);
+  text-align: start;
+  vertical-align: middle;
+  border-block-end: var(--shape-border-width) solid var(--color-app-divider);
+}
+.sc-table[data-size='sm'] .sc-table-grid {
+  --_inset: var(--spacing-inset-sm);
+}
+.sc-table[data-size='md'] .sc-table-grid {
+  --_inset: var(--spacing-inset-md);
+}
+.sc-table[data-size='lg'] .sc-table-grid {
+  --_inset: var(--spacing-inset-lg);
+}
+
+/* セルは既定で1行に収める。行の高さが揃うことが表の走査を支える(Table.md §2)。
+   収まらない分は表が広がり、器の中で横へ送る */
+.sc-table[data-overflow='scroll'] .sc-table-grid :where(th, td) {
+  white-space: nowrap;
+}
+
+/* 桁で読む列は行末側へ寄せ、等幅の字形で並べる(桁が縦に揃わないと見比べられない) */
+.sc-table-grid :where(th, td)[data-align='end'] {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 貼り付く面(見出しの行・端の列)は不透明でなければ、下を流れる中身が透ける。
+   その面の色は行の状態に従う: 行だけ色が変わって貼り付いた列が白いままになると、行が分断されて見える。
+   地の面は消費者が置いた場所で変わる(カードの上か、地の上か)ので、逃げ道を一つ開ける(第4条) */
+.sc-table-grid tbody tr {
+  --_row-bg: var(--sc-table-surface, var(--color-app-surface));
+  background: var(--_row-bg);
+  transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+    var(--motion-feedback-easing);
+}
+/* 選ばれている行。色だけに頼らない: 同じことをチェックボックスが形で示している(Table.md §2) */
+.sc-table-grid tbody tr[data-selected='true'] {
+  --_row-bg: var(--color-semantic-primary-soft-bg);
+}
+.sc-table-grid tbody tr[data-activatable='true']:hover {
+  --_row-bg: var(--color-semantic-plain-soft-bg);
+}
+
+.sc-table-grid thead th {
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-fg-muted);
+  /* 見出しの行は器の上端に貼り付く。縦に長い表で、送っても列の意味を見失わない */
+  position: sticky;
+  inset-block-start: 0;
+  background: var(--sc-table-surface, var(--color-app-surface));
+  z-index: 1;
+}
+
+/* 並べ替えを要求する操作。見出しのセルそのものは押させない(押せるのはこの要素) */
+.sc-table-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-inline-sm);
+  /* 当たり判定の門(size.md §4。Web の下限は 24px) */
+  min-block-size: 1.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  border-radius: var(--shape-semantic-control);
+  transition: color calc(var(--motion-feedback-duration) * var(--motion-scale))
+    var(--motion-feedback-easing);
+}
+.sc-table-sort:hover {
+  color: var(--color-app-foreground);
+}
+.sc-table-sort:focus {
+  outline: none;
+}
+.sc-table-sort:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: var(--focus-ring-offset);
+}
+/* 向きの絵は、並べ替えていない列では薄く出す(押せば並べ替わることが読める) */
+.sc-table-sort-mark {
+  display: inline-flex;
+  color: var(--color-app-fg-muted);
+  opacity: 0.4;
+}
+.sc-table-grid th[aria-sort='ascending'] .sc-table-sort-mark,
+.sc-table-grid th[aria-sort='descending'] .sc-table-sort-mark {
+  color: var(--color-app-foreground);
+  opacity: 1;
+}
+
+/* 押せるのは指の操作の便宜で、意味論は行の中の要素が持つ(行に role は与えない) */
+.sc-table-grid tbody tr[data-activatable='true'] {
+  cursor: pointer;
+}
+
+.sc-table-selection {
+  inline-size: 1px; /* 中身(チェックボックス)の幅で立つ */
+  white-space: nowrap;
+}
+.sc-table-visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sc-table-empty td {
+  color: var(--color-app-fg-muted);
+  text-align: center;
+}
+
+/* 端の列の貼り付き(overflow=scroll のときだけ)。始まり側は行を特定する列、終わり側は行の操作の列が多く、
+   流れて消えると今どの行を見ているか読めなくなる */
+.sc-table[data-overflow='scroll']:where([data-sticky='start'], [data-sticky='both'])
+  .sc-table-grid
+  :where(th, td):first-child,
+.sc-table[data-overflow='scroll']:where([data-sticky='end'], [data-sticky='both'])
+  .sc-table-grid
+  :where(th, td):last-child {
+  position: sticky;
+  background: var(--_row-bg, var(--sc-table-surface, var(--color-app-surface)));
+  z-index: 2;
+}
+.sc-table[data-overflow='scroll']:where([data-sticky='start'], [data-sticky='both'])
+  .sc-table-grid
+  :where(th, td):first-child {
+  inset-inline-start: 0;
+}
+.sc-table[data-overflow='scroll']:where([data-sticky='end'], [data-sticky='both'])
+  .sc-table-grid
+  :where(th, td):last-child {
+  inset-inline-end: 0;
+}
+/* 貼り付いた列と流れる列の境目。まだ送れる向きがあるときだけ線を引く */
+.sc-table[data-more-start='true']:where([data-sticky='start'], [data-sticky='both'])
+  .sc-table-grid
+  :where(th, td):first-child {
+  border-inline-end: var(--shape-border-width) solid var(--color-app-divider);
+}
+.sc-table[data-more-end='true']:where([data-sticky='end'], [data-sticky='both'])
+  .sc-table-grid
+  :where(th, td):last-child {
+  border-inline-start: var(--shape-border-width) solid var(--color-app-divider);
+}
+
+/* まだ送れる向きの表現。何も出さないと、端が表の終わりに見えて続きに気づけない(Table.md §2)。
+   貼り付いた列がある側は、その列の縁が境目を示すので薄れを出さない */
+.sc-table::before,
+.sc-table::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inline-size: var(--spacing-inset-lg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity calc(var(--motion-feedback-duration) * var(--motion-scale))
+    var(--motion-feedback-easing);
+}
+.sc-table::before {
+  inset-inline-start: 0;
+  background: linear-gradient(to right, var(--sc-table-surface, var(--color-app-surface)), transparent);
+}
+.sc-table::after {
+  inset-inline-end: 0;
+  background: linear-gradient(to left, var(--sc-table-surface, var(--color-app-surface)), transparent);
+}
+.sc-table:dir(rtl)::before {
+  background: linear-gradient(to left, var(--sc-table-surface, var(--color-app-surface)), transparent);
+}
+.sc-table:dir(rtl)::after {
+  background: linear-gradient(to right, var(--sc-table-surface, var(--color-app-surface)), transparent);
+}
+.sc-table[data-more-start='true']:where([data-sticky='none'], [data-sticky='end'])::before,
+.sc-table[data-more-end='true']:where([data-sticky='none'], [data-sticky='start'])::after {
+  opacity: 1;
+}
