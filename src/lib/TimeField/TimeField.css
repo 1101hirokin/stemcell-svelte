@@ -11,7 +11,9 @@
   /* 中身の長さが決まっている欄なので、器いっぱいまでは広げない(layout.md §2 の例外)。
      10文字の日付が 1400px の箱に入っても情報は増えず、桁が左端へ寄って押しにくくなる。
      値は幅の段の閉じた集合(8/12/16/20/24/32rem。layout.md §9)から採る */
-  max-inline-size: 12rem;
+  /* 中身の長さが決まっている欄は上限で頭打ちにする(layout.md §2)。時刻は日付より短い:
+     時と分だけなら 8rem で足り、午前・午後や秒が付くぶんだけ広がる(幅の段の閉じた集合から採る) */
+  max-inline-size: 8rem;
   /* 中立の資材(TextField.md §2: resting の枠は color.app.border。hover 役が無いので hover を持たない) */
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);
@@ -44,6 +46,10 @@
 .sc-timefield-control {
   display: flex;
   align-items: stretch;
+  /* 枠は中身に沿う。桁の数で幅が決まる欄なので、余った幅を枠の中に抱えると、最後の桁の後ろに
+     使い道のない空きが残る(実機で気になった)。器が狭ければ 100% で頭打ちになる */
+  inline-size: max-content;
+  max-inline-size: 100%;
   gap: var(--spacing-inline-md);
   --_inset: var(--spacing-inset-md);
   padding-inline: var(--_inset);
@@ -53,6 +59,11 @@
   transition:
     border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
     background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+}
+/* 午前・午後や秒が付くと桁が増えるので、上限もその分だけ広げる(中身で決まる幅である) */
+.sc-timefield:has(.sc-timefield-period),
+.sc-timefield:has([data-segment='second']) {
+  max-inline-size: 12rem;
 }
 .sc-timefield[data-size='sm'] .sc-timefield-control {
   --_inset: var(--spacing-inset-sm);
