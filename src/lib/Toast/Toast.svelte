@@ -24,6 +24,8 @@
     dismissLabel?: string;
     /** 退去アニメ中(ホストが制御。data-leaving を出す)。 */
     leaving?: boolean;
+    /** 退去アニメが終わったことを知らせる(ホストがキューから外す)。 */
+    onexitend?: () => void;
   }
   let {
     message,
@@ -34,6 +36,7 @@
     ondismiss,
     dismissLabel = WEB.dismissLabel.default,
     leaving = false,
+    onexitend,
   }: Props = $props();
 
   // 割り込みの度合いと intent の絵は Alert と同一規範(internal/notice-intent へ集約)。danger のみ即時
@@ -41,6 +44,19 @@
   // (WCAG 1.4.1)。
   const role = $derived(noticeRole(color));
   const intentGlyph = $derived(noticeGlyph(color));
+
+  // 退去の終わりは要素に走っているアニメーションが教える(Web Animations の finished)。
+  // 時間を JS で計算して待つ形は持たない(CSS と JS で同じ値を二重に持つことになる。憲法 第2条)。
+  // アニメーションが無い場合(reduced-motion で 0 になる・消費者が止める)も finished は即座に解決する。
+  let el = $state<HTMLElement>();
+  $effect(() => {
+    if (!leaving || !el) return;
+    let live = true;
+    const running = el.getAnimations();
+    if (running.length === 0) onexitend?.();
+    else void Promise.allSettled(running.map((a) => a.finished)).then(() => live && onexitend?.());
+    return () => (live = false);
+  });
 
   const uid = $props.id();
   const messageId = `${uid}-message`;
@@ -51,7 +67,7 @@
 
 <!-- 個々の Toast が role=status/alert を持ち、動的挿入で告知する(領域は landmark。Toaster が担う)。
      intent の絵は装飾(aria-hidden)。名前配線はしない(内容が読み上げ順で届く領域。Alert と同型)。 -->
-<div class="sc-toast" data-color={color} data-leaving={leaving || undefined} {role}>
+<div class="sc-toast" bind:this={el} data-color={color} data-leaving={leaving || undefined} {role}>
   <span class="sc-toast-icon" aria-hidden="true"><Icon glyph={intentGlyph} /></span>
   <div class="sc-toast-message" id={messageId}>{message}</div>
   {#if actionLabel}

@@ -3,9 +3,7 @@
   import { META } from './meta';
   import DateField from '../DateField/DateField.svelte';
   import Calendar from '../Calendar/Calendar.svelte';
-  import Popover from '../Popover/Popover.svelte';
-  import Drawer from '../Drawer/Drawer.svelte';
-  import { watchCompact } from '../internal/viewport';
+  import AnchoredPanel from '../internal/AnchoredPanel.svelte';
   import Icon from '../Icon/Icon.svelte';
   import { formatMonth, parseISO, today } from '../internal/date';
   import type { Snippet } from 'svelte';
@@ -62,10 +60,6 @@
     onchange?.(next);
   };
 
-  // 狭い画面では暦を modal 類(下端のシート)で開く。アンカー従属のままだと面が画面より広くなる
-  // (RFC 0017 / overlay.md §5)。判定は環境の広さだけで、利用者の好みや消費者の裁量では動かない
-  let compact = $state(false);
-  $effect(() => watchCompact((v) => (compact = v)));
 </script>
 
 <div class="sc-datepicker" data-disabled={disabled}>
@@ -115,16 +109,6 @@
   {/snippet}
 
   <div class="sc-datepicker-trigger">
-    {#if compact}
-      {@render trigger()}
-      <Drawer bind:open side="block-end" onopenchange={(o) => (open = o)} title={label}>
-        {#snippet content()}{@render panel()}{/snippet}
-      </Drawer>
-    {:else}
-      <Popover bind:open>
-        {#snippet anchor()}{@render trigger()}{/snippet}
-        {#snippet content()}{@render panel()}{/snippet}
-      </Popover>
-    {/if}
+    <AnchoredPanel bind:open title={label} {trigger} content={panel} />
   </div>
 </div>

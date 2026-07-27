@@ -12,7 +12,7 @@ export const isTier = (v: string): v is SpacingTier =>
 /** 大域の原始 X(8〜24 の整数の文字列)か。小域(0〜7)と生の px は受けない(spacing.md §6)。 */
 export const isGlobalPrimitive = (v: string): boolean => /^(8|9|1[0-9]|2[0-4])$/.test(v);
 
-/** 語彙外の値の共通の警告(退避先は呼び出し側が示す)。 */
+/** 語彙外の値の共通の警告(退避先は呼び出し側が示す)。useGap を通す部品は直に呼ばない。 */
 export const warnSpacing = (component: string, prop: string, value: string, fallback: string) => {
   console.warn(
     `[stemcell] ${component}: ${prop}="${value}" は spacing の語彙(sm/md/lg または 8〜24)ではない。${fallback}へ退避する(layout.md §6)。`,

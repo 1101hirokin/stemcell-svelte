@@ -3,9 +3,7 @@
   import { META } from './meta';
   import DateField from '../DateField/DateField.svelte';
   import Calendar from '../Calendar/Calendar.svelte';
-  import Popover from '../Popover/Popover.svelte';
-  import Drawer from '../Drawer/Drawer.svelte';
-  import { watchCompact } from '../internal/viewport';
+  import AnchoredPanel from '../internal/AnchoredPanel.svelte';
   import Icon from '../Icon/Icon.svelte';
   import { compare, formatMonth, parseISO, today } from '../internal/date';
   import type { Snippet } from 'svelte';
@@ -76,11 +74,8 @@
   // 対が揃っても閉じない: 期間は「選んで終わり」ではなく、両端を見比べながら詰める操作である。
   // 選び直しで押した日は必ず期間の下限になる(内も外も区別しない。対の端そのものを押したときだけ変えない)。
   // 下限だけ置いた途中に下限より前を押したときも、対を入れ替えずに下限を置き直す。
-  // 閉じるのは明示の退出(Escape・外側の押下)で、それは合成した Popover が持つ。DateRangePicker.md。
-  // 狭い画面では暦を modal 類(下端のシート)で開く(RFC 0017 / overlay.md §5)。2ヶ月ぶんの格子は
-  // アンカー従属のままだと画面に入りきらない
-  let compact = $state(false);
-  $effect(() => watchCompact((v) => (compact = v)));
+  // 閉じるのは明示の退出(Escape・外側の押下)で、それは合成した面(AnchoredPanel)が持つ。
+  // 狭い画面ではその面が modal 類(下端のシート)へ移る(RFC 0017 / overlay.md §5)。
 
   const onselect = (value: string) => {
     const day = parseISO(value);
@@ -148,17 +143,7 @@
     {/snippet}
 
     <div class="sc-daterangepicker-trigger">
-      {#if compact}
-        {@render trigger()}
-        <Drawer bind:open side="block-end" onopenchange={(o) => (open = o)} title={label}>
-          {#snippet content()}{@render panel()}{/snippet}
-        </Drawer>
-      {:else}
-        <Popover bind:open>
-          {#snippet anchor()}{@render trigger()}{/snippet}
-          {#snippet content()}{@render panel()}{/snippet}
-        </Popover>
-      {/if}
+      <AnchoredPanel bind:open title={label} {trigger} content={panel} />
     </div>
   </div>
 

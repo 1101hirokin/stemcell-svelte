@@ -1,7 +1,7 @@
 <script lang="ts">
   import './Cover.css';
   import { META } from './meta';
-  import { isTier, isGlobalPrimitive, warnSpacing } from '../internal/spacing';
+  import { useGap } from '../internal/spacing.svelte';
   import type { Snippet } from 'svelte';
 
   // 1画面ぶんの骨格(Cover.md)。器の高さいっぱいに立ち、主役を残り空間の中央に置き、
@@ -18,11 +18,7 @@
   }
   let { gap = META.props.gap.default, header, children, footer }: Props = $props();
 
-  const tier = $derived(isTier(gap));
-  const primitive = $derived(!tier && isGlobalPrimitive(gap));
-  $effect(() => {
-    if (!tier && !primitive) warnSpacing('Cover', 'gap', gap, `既定の "${META.props.gap.default}" `);
-  });
+  const gapUse = useGap('Cover', 'gap', () => gap, META.props.gap.default);
 </script>
 
 <!-- 見た目と意味を持たない器(契約 a11y): states 無し・focus 無し・構造の主張無し。
@@ -31,8 +27,8 @@
      意味づけが要るなら中身がその要素を持つ。 -->
 <div
   class="sc-cover"
-  data-gap={primitive ? undefined : tier ? gap : META.props.gap.default}
-  style:gap={primitive ? `var(--spacing-${gap})` : undefined}
+  data-gap={gapUse.primitive ? undefined : gapUse.tier ? gap : META.props.gap.default}
+  style:gap={gapUse.primitive ? `var(--spacing-${gap})` : undefined}
 >
   {#if header}
     <div class="sc-cover-header">{@render header()}</div>

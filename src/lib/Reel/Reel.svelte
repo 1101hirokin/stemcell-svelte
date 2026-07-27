@@ -1,7 +1,7 @@
 <script lang="ts">
   import './Reel.css';
   import { META } from './meta';
-  import { isTier, isGlobalPrimitive, warnSpacing } from '../internal/spacing';
+  import { useGap } from '../internal/spacing.svelte';
   import type { Snippet } from 'svelte';
 
   // 横に流す帯(Reel.md)。あふれても折り返さず流れの方向へスクロールする(折り返すのは Cluster)。
@@ -12,11 +12,7 @@
   }
   let { gap = META.props.gap.default, children }: Props = $props();
 
-  const tier = $derived(isTier(gap));
-  const primitive = $derived(!tier && isGlobalPrimitive(gap));
-  $effect(() => {
-    if (!tier && !primitive) warnSpacing('Reel', 'gap', gap, `既定の "${META.props.gap.default}" `);
-  });
+  const gapUse = useGap('Reel', 'gap', () => gap, META.props.gap.default);
 
   // 実際にあふれているときだけ焦点を受ける。ポインタでしか届かない帯を作らないことが
   // 契約の Normative(第1条)で、Web での実現は tabindex になる。常時立てないのは、収まっている
@@ -54,8 +50,8 @@
   <div
     class="sc-reel-track"
     bind:this={track}
-    data-gap={primitive ? undefined : tier ? gap : META.props.gap.default}
-    style:gap={primitive ? `var(--spacing-${gap})` : undefined}
+    data-gap={gapUse.primitive ? undefined : gapUse.tier ? gap : META.props.gap.default}
+    style:gap={gapUse.primitive ? `var(--spacing-${gap})` : undefined}
   >
     {@render children()}
   </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import './Tabs.css';
+  import { arrowKeys } from '../internal/direction';
   import { META, type TabItem } from './meta';
   import Icon from '../Icon/Icon.svelte';
   import { tick } from 'svelte';
@@ -43,10 +44,8 @@
   };
 
   const onkeydown = async (e: KeyboardEvent, id: string) => {
-    // 論理方向。RTL では Left / Right の意味が反転する(web-keys.rules.json の共通則)
-    const rtl = listEl ? getComputedStyle(listEl).direction === 'rtl' : false;
-    const forward = rtl ? 'ArrowLeft' : 'ArrowRight';
-    const backward = rtl ? 'ArrowRight' : 'ArrowLeft';
+    // 論理方向(RTL では左右の意味が反転する。internal/direction.ts が :dir() で解く)
+    const { forward, backward } = arrowKeys(listEl);
     const enabled = items.filter((item) => !item.disabled);
     if (e.key === forward) await step(id, 1);
     else if (e.key === backward) await step(id, -1);

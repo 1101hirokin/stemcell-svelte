@@ -1,7 +1,7 @@
 <script lang="ts">
   import './Grid.css';
   import { META } from './meta';
-  import { isTier, isGlobalPrimitive, warnSpacing } from '../internal/spacing';
+  import { useGap } from '../internal/spacing.svelte';
   import { isWidthTier, WIDTH_TIERS } from '../internal/length';
   import type { Snippet } from 'svelte';
 
@@ -18,11 +18,9 @@
     children,
   }: Props = $props();
 
-  const gapTier = $derived(isTier(gap));
-  const gapPrimitive = $derived(!gapTier && isGlobalPrimitive(gap));
+  const gapUse = useGap('Grid', 'gap', () => gap, META.props.gap.default);
   const validMin = $derived(isWidthTier(min));
   $effect(() => {
-    if (!gapTier && !gapPrimitive) warnSpacing('Grid', 'gap', gap, `既定の "${META.props.gap.default}" `);
     if (!validMin) {
       console.warn(
         `[stemcell] Grid: min="${min}" は幅の段(${WIDTH_TIERS.join(' / ')})ではない(裁定 2026-07。契約 alpha.2)。既定の "${META.props.min.default}" へ退避する(HOLES #20)。`,
@@ -39,8 +37,8 @@
      したい合成は消費者の責任で role="list" を再付与する(独立レビュー指摘で明文化) -->
 <div
   class="sc-grid"
-  data-gap={gapPrimitive ? undefined : gapTier ? gap : META.props.gap.default}
-  style:gap={gapPrimitive ? `var(--spacing-${gap})` : undefined}
+  data-gap={gapUse.primitive ? undefined : gapUse.tier ? gap : META.props.gap.default}
+  style:gap={gapUse.primitive ? `var(--spacing-${gap})` : undefined}
   style:--sc-grid-min={validMin ? min : META.props.min.default}
 >
   {@render children()}

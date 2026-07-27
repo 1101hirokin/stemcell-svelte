@@ -1,9 +1,9 @@
 /** 通知ストアのライフサイクル(RFC 0013): enqueue / 自律退去 / action は退去しない / 上限 / pause。 */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { toast, toasts, dismiss, setConfig, pause, resume } from './toast-store.svelte';
+import { toast, toasts, dismiss, finishDismiss, setConfig, pause, resume } from './toast-store.svelte';
 
 // exitMs は --motion-exit-duration を読むが jsdom では空 → 200ms フォールバック。
-const EXIT = 200;
+// 退去アニメの終わりは要素(Toast)が知らせる。店は時間を測らないので、ここでは合図を直に送る
 
 beforeEach(() => {
   toasts.splice(0, toasts.length);
@@ -31,12 +31,14 @@ it('intent ショートカット: toast.success/danger が color を載せる', 
   expect(toasts[1]!.color).toBe('danger');
 });
 
-it('自律退去: duration 経過で leaving → exit 後にキューから外れる(SC 2.2.1)', () => {
-  toast('こんにちは', { duration: 1000 });
+it('自律退去: duration 経過で leaving → 退去の終わりでキューから外れる(SC 2.2.1)', () => {
+  const id = toast('こんにちは', { duration: 1000 });
   expect(toasts.length).toBe(1);
   vi.advanceTimersByTime(1000);
   expect(toasts[0]!.leaving).toBe(true); // exit アニメ中はまだ在る
-  vi.advanceTimersByTime(EXIT);
+  vi.advanceTimersByTime(60_000);
+  expect(toasts.length).toBe(1); // 時間では外れない(外すのは要素の合図)
+  finishDismiss(id);
   expect(toasts.length).toBe(0);
 });
 
@@ -85,7 +87,8 @@ it('onDismiss が throw しても除去は走り、例外は系へ伝播しな�
     },
   });
   expect(() => dismiss(id)).not.toThrow();
-  vi.advanceTimersByTime(EXIT);
+  expect(toasts[0]!.leaving).toBe(true); // 例外があっても退去は始まる
+  finishDismiss(id);
   expect(toasts.length).toBe(0); // leaving のまま残らない
   expect(err).toHaveBeenCalled();
   err.mockRestore();

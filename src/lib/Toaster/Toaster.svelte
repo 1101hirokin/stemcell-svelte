@@ -9,6 +9,7 @@
     pause,
     resume,
     dismiss,
+    finishDismiss,
     registerToaster,
     unregisterToaster,
     isActiveToaster,
@@ -113,6 +114,7 @@
           dismissible={t.dismissible}
           actionLabel={t.actionLabel}
           leaving={t.leaving}
+          onexitend={() => finishDismiss(t.id)}
           onaction={t.onAction}
           ondismiss={() => close(t.id)}
         />
