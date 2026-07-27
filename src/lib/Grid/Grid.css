@@ -3,6 +3,9 @@
 .sc-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(var(--sc-grid-min), 100%), 1fr));
+  /* 包む器は、中身が縮めるように場所を作る(layout.md §2)。ここが内容幅で広がると、
+     内側の min-inline-size: 0 は無効になり、送れる中身がページごと横へ伸びる */
+  min-inline-size: 0;
 }
 
 .sc-grid[data-gap='sm'] {

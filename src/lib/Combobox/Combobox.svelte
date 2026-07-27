@@ -209,6 +209,9 @@
           {readonly}
           {oninput}
           {onkeydown}
+          onpointerup={() => {
+            if (!open) openList();
+          }}
           onblur={() => closeList()}
         />
         <span class="sc-combobox-chevron" aria-hidden="true"><Icon name="chevron.down" /></span>
@@ -233,9 +236,12 @@
               if (!opt.disabled) activeIndex = i;
             }}
           >
-            {#if opt.icon}<Icon name={opt.icon} />{/if}
-            <span class="sc-combobox-option-label">{opt.label}</span>
-            {#if opt.description}<span class="sc-combobox-option-description">{opt.description}</span>{/if}
+            {#if opt.icon}<span class="sc-combobox-option-icon" aria-hidden="true"><Icon name={opt.icon} /></span>{/if}
+            <span class="sc-combobox-option-body">
+              <span class="sc-combobox-option-label">{opt.label}</span>
+              {#if opt.description}<span class="sc-combobox-option-desc">{opt.description}</span>{/if}
+            </span>
+            {#if opt.value === value}<span class="sc-combobox-option-check" aria-hidden="true"><Icon name="check" /></span>{/if}
           </li>
         {/each}
         {#if options.length === 0}

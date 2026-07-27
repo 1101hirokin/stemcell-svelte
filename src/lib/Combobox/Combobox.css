@@ -1,6 +1,6 @@
-/* 二経路の選択入力(RFC 0007 の B2)。field は TextField と同型(field.md §6)。
-   touch=native <select>、pointer=custom combobox(トリガー)+ listbox(Popover の中身)。
-   ドロップダウンの面/影/角/層/出入りは Popover が所有し、Select は field と option を着せる。 */
+/* 打ちながら候補を絞る欄(Combobox.md)。打てる欄そのものが combobox で、候補は Popover の中の listbox。
+   面/影/角/層/出入りは Popover が所有し、Combobox は欄と項目を着せる。
+   Select と違い、押すだけのトリガーではないので native の <select> へ落ちる経路は無い。 */
 .sc-combobox {
   display: flex;
   flex-direction: column;
@@ -9,9 +9,8 @@
   min-inline-size: 0;
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);
-  /* ドロップダウンの幅: fill(アンカー=トリガー幅に一致。既定でアンカー幅なので inline-size は上書きしない。
-     top-layer では JS が --sc-popover-anchor-inline-size にアンカー幅を入れる)。トリガーが fill なので
-     幅はトリガーが支配し、選択内容で変動しない。下限は content、上限は敷かない。 */
+  /* 候補の面の幅は欄に一致する(既定でアンカー幅)。下限は content、上限は敷かない
+     (画面をはみ出さない頭打ちは Popover が持つ) */
   --sc-popover-min-inline-size: max-content;
   --sc-popover-max-inline-size: none;
 }
@@ -52,21 +51,18 @@
   margin-inline-start: 0.25em;
 }
 
-/* 器(native の wrapper / custom のトリガー button が共有)。inset は中身が持ち、器は端まで面を張る。
-   こうすると native の <select> が器の全幅を占め、UA ドロップダウンがトリガー幅に一致する(選択肢のずれ防止)。
-   フィールドは fill(横いっぱい。field.md §2・第3条)。custom の button は既定 shrink-wrap なので明示する */
+/* 器。inset は中身(欄)が持ち、器は端まで面を張る。フィールドは fill(横いっぱい。field.md §2・第3条) */
 .sc-combobox-control {
   display: flex;
   align-items: stretch;
-  /* chevron を絶対配置のオーバーレイにするための基準。主内容が器の全幅を占め、chevron はその上に浮く。
-     これで native は <select> がクリック領域全体を覆い、chevron の上を押しても開く(chevron は透過) */
+  /* 山形を絶対配置で浮かせるための基準。欄が器の全幅を占め、山形はその上に乗る
+     (pointer-events を持たないので、山形の上を押しても欄が受ける) */
   position: relative;
   inline-size: 100%;
   min-inline-size: 0;
-  /* border-box: inline-size:100% に border を含める(段で総幅がずれない) */
   box-sizing: border-box;
   --_inset: var(--spacing-inset-md);
-  /* 右端 chevron が食う幅(アイコン 1em + 隙間)。中身はこの分だけ右を空ける */
+  /* 右端の山形が食う幅(アイコン 1em + 隙間)。欄はその分だけ右を空ける */
   --_chevron-room: calc(1em + var(--spacing-inline-md));
   background: var(--color-app-surface);
   border: var(--shape-border-width) solid var(--_border);
@@ -86,7 +82,7 @@
   cursor: not-allowed;
 }
 
-/* native path: <select> 本体 */
+/* 打てる欄。文字は欄が持ち、面と枠は器が持つ。横の inset は欄が持ち、右は山形の分だけ足す */
 .sc-combobox-input {
   flex: 1 1 auto;
   min-inline-size: 0;
@@ -95,18 +91,17 @@
   border: none;
   background: none;
   padding-block: var(--_inset);
-  /* 横 inset は中身(=<select>)が持つ。右は chevron の分だけ足す。器は端まで面なので全幅に広がる */
   padding-inline: var(--_inset) calc(var(--_inset) + var(--_chevron-room));
   outline: none;
   font-family: var(--typography-body-md-font-family);
+  /* 触点では 16px を下回らない(下回ると iOS がページごと拡大する。StemcellProvider が値を持つ) */
   font-size: var(--_sc-typed-font-size, var(--typography-body-md-font-size));
   font-weight: var(--typography-body-md-font-weight);
   line-height: var(--typography-body-md-line-height);
   letter-spacing: var(--typography-body-md-letter-spacing);
   color: var(--color-app-foreground);
-  cursor: pointer;
 }
-.sc-combobox-input:required:invalid {
+.sc-combobox-input::placeholder {
   color: var(--color-app-fg-muted);
 }
 .sc-combobox[data-disabled='true'] .sc-combobox-input {
@@ -118,43 +113,7 @@
   outline-offset: var(--focus-ring-offset);
 }
 
-/* custom path: combobox トリガー(button を器として使う) */
-.sc-combobox-trigger {
-  padding-block: var(--_inset);
-  font: inherit;
-  color: var(--color-app-foreground);
-  text-align: start;
-  cursor: pointer;
-}
-.sc-combobox-trigger:disabled {
-  color: var(--color-semantic-disabled-fg);
-  cursor: not-allowed;
-}
-.sc-combobox-trigger:focus-visible {
-  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
-  outline-offset: var(--focus-ring-offset);
-}
-.sc-combobox-value {
-  flex: 1 1 auto;
-  min-inline-size: 0;
-  /* 横 inset は中身(=value)が持つ。右は chevron の分だけ足す(native の <select> と同じ規則) */
-  padding-inline: var(--_inset) calc(var(--_inset) + var(--_chevron-room));
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-inline-md);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-family: var(--typography-body-md-font-family);
-  font-size: var(--_sc-typed-font-size, var(--typography-body-md-font-size));
-  line-height: var(--typography-body-md-line-height);
-}
-.sc-combobox-value[data-placeholder='true'] {
-  color: var(--color-app-fg-muted);
-}
-
-/* 開閉インジケータ(装飾。native の矢印は appearance:none で消し自前で描く)。器の右端に絶対配置で浮かせ、
-   pointer-events:none でクリックを背後(native は <select>、custom は button)へ透過する */
+/* 開閉の合図(装飾)。押す先は欄なので、山形は当たり判定を持たず背後へ透過する */
 .sc-combobox-chevron {
   position: absolute;
   inset-inline-end: var(--_inset);
@@ -201,6 +160,7 @@
   display: inline-flex;
   flex: 0 0 auto;
 }
+/* 名前と補足は縦に積む。横に並べると一行が長くなり、面が画面の幅を越える */
 .sc-combobox-option-body {
   flex: 1 1 auto;
   min-inline-size: 0;
@@ -217,46 +177,6 @@
   font-size: var(--typography-body-sm-font-size);
   line-height: var(--typography-body-sm-line-height);
   color: var(--color-app-fg-muted);
-}
-
-.sc-combobox-description,
-.sc-combobox-error {
-  margin: 0;
-  font-family: var(--typography-body-sm-font-family);
-  font-size: var(--typography-body-sm-font-size);
-  font-weight: var(--typography-body-sm-font-weight);
-  line-height: var(--typography-body-sm-line-height);
-  letter-spacing: var(--typography-body-sm-letter-spacing);
-}
-.sc-combobox-description {
-  color: var(--color-app-fg-muted);
-}
-.sc-combobox-error {
-  color: var(--color-semantic-danger-soft-fg);
-}
-
-
-/* 打てる欄(Select は押すだけのトリガーだった)。文字は欄が持ち、面と枠は器が持つ */
-.sc-combobox-input {
-  flex: 1 1 auto;
-  min-inline-size: 0;
-  border: none;
-  background: none;
-  padding-block: var(--_inset);
-  padding-inline: 0;
-  outline: none;
-  font-family: var(--typography-body-md-font-family);
-  font-size: var(--_sc-typed-font-size, var(--typography-body-md-font-size));
-  line-height: var(--typography-body-md-line-height);
-  letter-spacing: var(--typography-body-md-letter-spacing);
-  color: var(--color-app-foreground);
-}
-.sc-combobox-input::placeholder {
-  color: var(--color-app-fg-muted);
-}
-.sc-combobox-control:has(.sc-combobox-input:focus-visible) {
-  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
-  outline-offset: var(--focus-ring-offset);
 }
 /* 候補が無いときの言葉。選べる項目ではないので、選択の見た目を持たない */
 .sc-combobox-empty {
@@ -277,18 +197,19 @@
   white-space: nowrap;
   border: 0;
 }
-/* 名前を視覚から隠す(field.md §2 の口) */
-.sc-combobox[data-label-hidden='true'] {
-  gap: 0;
+
+.sc-combobox-description,
+.sc-combobox-error {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
 }
-.sc-combobox[data-label-hidden='true'] .sc-combobox-label {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
+.sc-combobox-description {
+  color: var(--color-app-fg-muted);
+}
+.sc-combobox-error {
+  color: var(--color-semantic-danger-soft-fg);
 }
