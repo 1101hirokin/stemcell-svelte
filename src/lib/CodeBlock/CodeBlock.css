@@ -55,11 +55,13 @@
 }
 
 .sc-codeblock-code {
-  font-family: var(--typography-mono-md-font-family);
-  font-size: var(--typography-mono-md-font-size);
-  font-weight: var(--typography-mono-md-font-weight);
-  line-height: var(--typography-mono-md-line-height);
-  letter-spacing: var(--typography-mono-md-letter-spacing);
+  /* 本文より一段小さい役で組む。同じ段の等幅は字幅が揃うぶん字面が大きく、本文と並べると
+     明らかに大きく見える(CodeBlock.md §2。Zenn も本文に対して 0.9em に落としている) */
+  font-family: var(--typography-mono-sm-font-family);
+  font-size: var(--typography-mono-sm-font-size);
+  font-weight: var(--typography-mono-sm-font-weight);
+  line-height: var(--typography-mono-sm-line-height);
+  letter-spacing: var(--typography-mono-sm-letter-spacing);
   counter-reset: sc-line;
 }
 
