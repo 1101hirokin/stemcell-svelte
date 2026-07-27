@@ -145,10 +145,17 @@
     };
     window.addEventListener('scroll', onScroll, true);
     window.addEventListener('resize', onScroll);
+    // 見えている領域そのものが動く場面(触点の鍵盤の出入り、拡大)。版面は動かないので
+    // window の resize では気づけない
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', onScroll);
+    vv?.addEventListener('scroll', onScroll);
     const removeScroll = () => {
       if (frame) cancelAnimationFrame(frame);
       window.removeEventListener('scroll', onScroll, true);
       window.removeEventListener('resize', onScroll);
+      vv?.removeEventListener('resize', onScroll);
+      vv?.removeEventListener('scroll', onScroll);
     };
     return () => {
       wrapperEl.removeEventListener('focusout', onFocusout);
