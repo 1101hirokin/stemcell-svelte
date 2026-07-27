@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -365,6 +365,36 @@ slots(Svelte では snippet。default は子要素をそのまま):
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
+
+### Conversation(契約 0.0.0-alpha.1)
+
+発話の並びを収める器。会話は「新しい情報が末尾にだけ足される、意味のある順序の記録」で、この形は ARIA が log として持つ(MDN は log の例に chat logs と messaging history を挙げ、暗黙の aria-live=polite が付くと書く)。feed は採らない: あちらは記事の無限スクロール向けで、各記事が焦点を受けページキーで読み飛ばせることを前提にするが、会話の発話は焦点を受けない。器が持つのは並びの意味論と、新着の告知と、末尾の追従だけである。発話ひとつの描画は Message、中身の解釈はしない(日付の区切りやシステムの通知を混ぜるのはアプリの政策)。RFC 0014 の seed(status: draft)。native 写像の一次確認まで暫定。
+
+props:
+
+- `busy`: boolean(既定 false) — いま発話が生成されているか。進行は状態ではなく値である(streaming.md §2)。真のあいだ器は記録の告知を抑え、偽へ戻ったところで一度届ける。逐次のトークンを chunk ごとに読み上げないという規範(streaming.md §4)を器が実現するための口で、Web の表現は aria-busy である。
+- `following`: boolean((省略可)) — 末尾を追っているか。省略すると器が自分で判じる(利用者が末尾に居るあいだは追い、離れたら追わない)。アプリが値として持ちたい場合(送信直後に必ず末尾へ送る等)に渡す。
+- `resumeLabel`: string — 末尾へ戻る操作の名前。絵だけの操作なので文字列で足りる(DatePicker の calendarLabel と同じ形)。DS は文言を持たない(i18n.md §1)。alpha.1 で追加: 既定の手段を器が出す以上、その名前が要る。
+
+events(Svelte では callback prop):
+
+- `onfollowingchange`: (payload: boolean) => void — 末尾を追っているかが変わった。利用者が上へ遡ったとき偽、末尾へ戻ったとき真。アプリが新着の知らせを出し分けるために使う。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — この記録の名前(「アシスタントとの会話」等)。ARIA は log に accessible name を要求する。画面に会話が二つある場面でどちらの記録か読めなくなるので必須にした。DS が既定の文言を持たないのは、持てば i18n の対象になるからである(Sources の領域名と同じ扱い)。
+- `children`(必須) — 並ぶもの。多くは Message だが、器は中身を解釈しない(日付の区切り・システムの通知・アプリ固有の差し込みを混ぜてよい)。
+- `resume` — 末尾へ戻る手段の中身を差し替える。省略すると器が既定の手段(絵のボタン)を出し、その名前は resumeLabel が運ぶ。見せ方(浮かぶボタン・件数・影)は Expressive である。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 新しい発話が順序を保って支援技術へ届く(Web の表現は role=log と暗黙の aria-live=polite。native は各々の告知機構)。順序が意味を持つので、末尾以外へ差し込む形は想定しない。
+- 記録には名前が要る(label)。無名の記録は、会話が二つある画面でどちらか読めない。
+- 生成中は逐次で告知しない(streaming.md §4)。busy のあいだ告知を抑え、完了で一度届ける。Web の表現は aria-busy。
+- 器は焦点を奪わない。新しい発話が届いても焦点は動かさない(WCAG 2.2 SC 4.1.3。送信後の焦点は入力欄に残る)。
+- 末尾から離れているあいだは追わない。読んでいる最中に画面を送るのは利用者の操作を奪うことである(第1条)。離れているあいだの新着は、戻る手段とともに知らせる。
+- 器が縮んだとき(画面キーボードが開く、窓が小さくなる)も、末尾に居たなら末尾に留まる。縮んだだけで末尾から押し出されると、利用者は何もしていないのに新着が読めなくなる。縮んだことは新着ではないので戻る手段は出さない(alpha.1 で追記: 実装が見つけた)。
+- 器自身は焦点を受けない。発話の中に押せる要素があれば、焦点とフォーカスリングと当たり判定はその要素に生きる(List / Sources と同じ形)。
 
 ### Cover(契約 0.0.0-alpha.0)
 
@@ -800,6 +830,30 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 開閉(open)を prop に持たないのは書き落としではない。Menu は Popover を合成してコンポーネント内部が open を所有する(overlay.md §6: Select / Tooltip と同じく開閉をアプリに管理させるのは実用に反する)。open は値であって契約の面(prop)に現れない。
 - トリガーを Menu が所有するのは a11y の保証のため(RFC 0008)。ARIA の配線を消費者の任意要素へ委ねると穴が生じうる。Button が閉じた契約(rest を転送しない)であることとも整合する。自前トリガーが要るときは Popover プリミティブ + arrows.menu を消費者が合成する(第4条の逃げ道)。
 - 標的の門: size.md §4。
+
+### Message(契約 0.0.0-alpha.1)
+
+会話のひと続きの発話(turn)を描く器。conversation §2 の primitive は role を帯びた content unit の列で、turn はその列に対する描画時の view である(§6 で Expressive と定めた grouping の形状)。この器はその view を一つ描くだけで、データが turn にネストしていても平坦な列でも上に置ける。中身(文・絵・出典・道具・推論)は解釈しない: part の集合は閉じており(§3)、part ごとの描画を器が持つと part が増えるたびに器を直すことになり、data の不透明パススルーを受け取れなくなる。吹き出しの形(面を持つか地に置くか、左右に寄せるか)は Expressive で、業界も割れている(ChatGPT は利用者の発話だけ面を持ち、Slack は両方とも地に置く)。RFC 0014 の seed(status: draft)。native 写像の一次確認まで暫定。
+
+props:
+
+- `role`: "user" | "assistant" | "system" | "tool" — この発話の話者(conversation §2 の閉集合をそのまま採る。部品が role を発明しない)。視覚の寄せ方や面の有無をここから導くかは Expressive だが、支援技術へ届けることは Normative である。
+- `speakerLabel`: string — 話者の名前。支援技術がこの発話を名指すのに使う(誰の発話かを視覚だけに頼らない。conversation §5)。DS は文言を持たないので消費者が与える(「あなた」「アシスタント」のどれを出すかはアプリの政策。i18n.md §1)。絵だけの操作の名前を文字列で受けるのと同じ形(DatePicker の calendarLabel。alpha.1 で追加)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `children`(必須) — 発話の中身。器は解釈しない(文・絵・コード・出典・道具の呼び出し・推論のいずれが来ても同じ器に載る)。既に部品になっているもの(Sources / ToolCall / Reasoning)は合成する。
+- `speaker` — 話者の名乗り(表示名・顔。Avatar の合成)。省略できる: 名前は speakerLabel が届けるので、視覚の名乗りを出すかは画面の政策である。連続する同じ話者で繰り返すかどうかも消費者が決める(Message.md §4)。
+- `meta` — 発話に添える補助(時刻・状態・操作)。器は書式を持たない: 相対時刻か絶対時刻かは地域と画面の政策で、DS は日付の書式を持たない(date.md §3 と同じ線)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 発話は一つのまとまりとして届く(Web の表現は group。名前は話者から作る)。role を group にするのは、中身が任意の part の集合で、見出しでも一覧でもないからである。
+- 誰の発話かが支援技術へ届く(conversation §5)。視覚だけに頼らない。名前は speakerLabel が運ぶ(器が role から文言を作らない: 文言を持てば i18n の対象になる)。
+- 発話の境目が読める。どこからどこまでが一人の発話かが、視覚でも支援技術でも分かる(器が境界を持つ)。
+- 器自身は焦点を受けない。発話の中に押せる要素があれば、焦点とフォーカスリングと当たり判定はその要素に生きる(List / Sources と同じ形)。
+- system の発話を出すかどうかは消費者が決める(conversation §2: 表示されるとは限らない)。器は渡されたものを描くだけで、role を見て隠さない。
+- 発話を縦に並べる器は持たない。新しい発話の告知(streaming.md)と末尾への自動追尾は、会話全体の器の仕事である(Message.md §4 の未決)。
 
 ### NavList(契約 0.0.0-alpha.1)
 

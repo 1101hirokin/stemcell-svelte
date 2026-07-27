@@ -1,0 +1,49 @@
+/* 会話のひと続きの発話(Message.md)。器が持つのは発話の境界と話者の帰属だけで、吹き出しの形は
+   Expressive である。ここでは「利用者の発話だけ面を持ち、他は地に置く」形を採る(ChatGPT と同じ側。
+   Slack と Teams は両方とも地に置き、Vercel の AI Elements は両方に面を持たせる。業界は割れている)。 */
+.sc-message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-inline-md);
+  color: var(--color-app-foreground);
+}
+.sc-message-speaker {
+  flex: 0 0 auto;
+}
+.sc-message-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  min-inline-size: 0;
+}
+.sc-message-content {
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+}
+/* 利用者の発話は面を持ち、行の終わり側へ寄る。話者の別が形でも読める(色だけに頼らない) */
+.sc-message[data-role='user'] {
+  flex-direction: row-reverse;
+}
+.sc-message[data-role='user'] .sc-message-content {
+  background: var(--color-app-surface);
+  border: var(--shape-border-width) solid var(--color-app-divider);
+  border-radius: var(--shape-semantic-card);
+  padding: var(--spacing-inset-md);
+}
+.sc-message[data-role='user'] .sc-message-body {
+  align-items: flex-end;
+}
+/* 道具の出力は地に置くが、中身が機械の言葉なので、地との差を薄い面で示す */
+.sc-message[data-role='tool'] .sc-message-content {
+  background: var(--color-semantic-plain-soft-bg);
+  border-radius: var(--shape-semantic-card);
+  padding: var(--spacing-inset-md);
+}
+.sc-message-meta {
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  line-height: var(--typography-body-sm-line-height);
+}

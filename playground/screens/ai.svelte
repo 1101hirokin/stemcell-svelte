@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { Button, Stack, Cluster, Dialog, Link, Text, ToolCall, Sources, Reasoning } from '../../src/lib';
+  import {
+    Button, Stack, Cluster, Dialog, Link, Text, ToolCall, Sources, Reasoning, Conversation, Message,
+    Avatar, Textarea,
+  } from '../../src/lib';
 
   let toolStatus = $state<'busy' | 'result' | 'error'>('busy');
   let reasoningStatus = $state<'busy' | 'complete'>('busy');
@@ -20,6 +23,41 @@
     { id: 'src-1', title: 'stemcell の憲法', url: 'https://example.com/constitution', excerpt: '三層(Normative / Expressive / Ceded)と七つの条。' },
     { id: 'src-2', title: 'source foundation', url: 'https://example.com/source', excerpt: '根拠への到達性と、引用と出典の相互参照。' },
   ];
+
+  // 会話の器と発話(Conversation / Message)。履歴はアプリが持つ(conversation §4)
+  type Turn = { id: string; role: 'user' | 'assistant'; speaker: string; text: string; at: string };
+  let turns = $state<Turn[]>([
+    { id: 't1', role: 'user', speaker: 'あなた', text: '土鍋の発注点はいくつにすべき？', at: '12:03' },
+    {
+      id: 't2',
+      role: 'assistant',
+      speaker: 'アシスタント',
+      text: '直近の出荷が1日あたり平均 2.1個、補充に7日かかるので、18個を目安にしています。',
+      at: '12:04',
+    },
+  ]);
+  let generating = $state(false);
+  let draft = $state('');
+  const send = () => {
+    const text = draft.trim();
+    if (!text) return;
+    turns = [...turns, { id: `u${turns.length}`, role: 'user', speaker: 'あなた', text, at: '12:05' }];
+    draft = '';
+    generating = true;
+    setTimeout(() => {
+      turns = [
+        ...turns,
+        {
+          id: `a${turns.length}`,
+          role: 'assistant',
+          speaker: 'アシスタント',
+          text: '（作り話の返答です）在庫の推移を見るかぎり、その前提で問題ありません。',
+          at: '12:05',
+        },
+      ];
+      generating = false;
+    }, 1200);
+  };
 </script>
 
   <section>
@@ -130,4 +168,40 @@
         </Button>
       {/snippet}
     </Dialog>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">Conversation / Message(会話の器と発話)</Text>
+    <Text as="p" variant="body-sm" muted>
+      会話は「新しい情報が末尾にだけ足される、意味のある順序の記録」なので、器は log として届く。生成中は
+      逐次で告知せず(streaming.md §4)、完了で一度届ける。末尾に居るときだけ追い、離れているあいだの新着は
+      戻る手段とともに知らせる。発話の中身は器が解釈しない。
+    </Text>
+    <div class="ai-conversation">
+      <Conversation busy={generating} resumeLabel="新しい発話へ">
+        {#snippet label()}アシスタントとの会話{/snippet}
+        {#each turns as turn (turn.id)}
+          <Message role={turn.role} speakerLabel={turn.speaker}>
+            {#snippet speaker()}<Avatar name={turn.speaker} size="sm" decorative={turn.role === 'assistant'} />{/snippet}
+            {#snippet meta()}{turn.at}{/snippet}
+            {turn.text}
+          </Message>
+        {/each}
+        {#if generating}
+          <Message role="assistant" speakerLabel="アシスタント">
+            {#snippet speaker()}<Avatar name="アシスタント" size="sm" decorative />{/snippet}
+            <Reasoning status="busy">
+              {#snippet summary()}考えています{/snippet}
+              在庫の推移を見ています。
+            </Reasoning>
+          </Message>
+        {/if}
+      </Conversation>
+    </div>
+    <Cluster gap="md" align="end">
+      <Textarea bind:value={draft} rows={2} maxRows={4} placeholder="在庫について聞く">
+        {#snippet label()}質問{/snippet}
+      </Textarea>
+      <Button onclick={send} disabled={generating}>送る</Button>
+    </Cluster>
   </section>
