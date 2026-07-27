@@ -59,6 +59,7 @@ export { default as Alert } from './Alert/Alert.svelte';
 export { default as Code } from './Code/Code.svelte';
 export { default as EmptyState } from './EmptyState/EmptyState.svelte';
 export { default as CodeBlock } from './CodeBlock/CodeBlock.svelte';
+export { default as Stat } from './Stat/Stat.svelte';
 export { default as Text } from './Text/Text.svelte';
 export { default as Toast } from './Toast/Toast.svelte';
 export { default as Toaster } from './Toaster/Toaster.svelte';

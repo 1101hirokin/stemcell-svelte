@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -1237,6 +1237,29 @@ slots(Svelte では snippet。default は子要素をそのまま):
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
+
+### Stat(契約 0.0.0-alpha.0)
+
+一つの指標。名前と数、必要なら変化を添える。指標は読むためではなく比べるために置かれるので、揃うことと変化の向きが読めることが器の仕事になる。値は整形済みの文字列で受け取り、器は数値を整形しない: 桁の区切りも小数の点も通貨記号の位置も地域と通貨の政策で、器が数値を受け取ると書式を DS が抱えることになる(date.md §3 と同じ線。Ant Design は precision / groupSeparator / formatter を器に持たせているが採らない)。変化は向きだけを持ち、良し悪しは持たない: 増えたら良い指標と増えたら悪い指標(解約率・欠品率・応答時間)が同じだけ実在し、増加を緑に固定すると嘘になる。向き(値)と評価(政策)を分け、評価は消費者が intent で渡す。
+
+props:
+
+- `trend`: "up" | "down" | "flat"((省略可)) — 変化の向き。上がった・下がった・変わらないの三つだけで、良し悪しは含まない。省略すると変化を示さない。印は装飾であり、意味は support の文字が運ぶ(色だけに頼らない。WCAG 2.2 SC 1.4.1)。
+- `color`: "success" | "danger" | "plain"(既定 "plain") — 変化の評価(color.md の intent)。良し悪しはアプリの政策なので、器は向きから導かない。既定の plain は評価を主張しない。変化の部分にだけ効き、値そのものは本文の色のままにする(大きな数が緑や赤で塗られると、値そのものが警告に見える)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — 何の数かを言う名前。必須にするのは、読み上げで数字だけが流れても意味を持たないからである。
+- `value`(必須) — 値。整形済みの文字列で受け取る(器は数値を整形しない)。並べて比べる数字なので、字幅の揃った数字で描く(typography.md §5 の数字の揃え)。
+- `support` — 変化や期間の補足(「前月比 +12%」「過去30日」)。変化の意味を運ぶのはこの文字であり、向きの印ではない。DS は文言を持たない(i18n.md §1)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 名前と値が一つのまとまりとして届く。読み上げで数字だけが流れても意味を持たない。
+- 変化を色だけで運ばない(WCAG 2.2 SC 1.4.1)。向きの印は装飾で、意味は support の文字が運ぶ。矢印だけでも足りない: 記号の読み上げは環境によって変わる。
+- 値は字幅の揃った数字で描く。桁がずれた数の列は大小が読めない(typography.md §5)。
+- 器自身は焦点を受けない。指標に操作を足すなら、その操作の要素が焦点と当たり判定を持つ。
+- 更新の告知は持たない。自動で更新される指標で読み上げるかはアプリが決める(器は自分が描き直されたことしか知らない。EmptyState と同じ線)。
 
 ### StemcellProvider(契約 0.0.0-alpha.1)
 

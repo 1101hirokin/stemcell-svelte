@@ -1,0 +1,53 @@
+/* 一つの指標(Stat.md)。名前を上、値を下に置く形を採る(名前を読んでから数を読む順)。並べ方も面の
+   有無も Expressive で、群は持たない(Cluster と Grid で足りる)。 */
+.sc-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  color: var(--color-app-foreground);
+  /* 評価は変化の部分にだけ効く。既定は主張しない */
+  --_change: var(--color-app-fg-muted);
+}
+.sc-stat[data-color='success'] {
+  --_change: var(--color-semantic-success-soft-fg);
+}
+.sc-stat[data-color='danger'] {
+  --_change: var(--color-semantic-danger-soft-fg);
+}
+
+.sc-stat-label {
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+}
+
+.sc-stat-value {
+  font-family: var(--typography-headline-sm-font-family);
+  font-size: var(--typography-headline-sm-font-size);
+  font-weight: var(--typography-headline-sm-font-weight);
+  line-height: var(--typography-headline-sm-line-height);
+  letter-spacing: var(--typography-headline-sm-letter-spacing);
+  /* 並べて比べる数字は字幅を揃える(typography.md §5)。桁がずれた数の列は大小が読めない */
+  font-variant-numeric: tabular-nums;
+}
+
+/* 変化。色は評価(アプリの政策)で、向きの印は装飾である。意味は文字が運ぶ */
+.sc-stat-support {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inline-sm);
+  color: var(--_change);
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+  font-variant-numeric: tabular-nums;
+}
+.sc-stat-trend {
+  display: inline-flex;
+  /* 印は文字の大きさに追従する(絵は 1em) */
+  flex: none;
+}
