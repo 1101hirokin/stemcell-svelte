@@ -28,6 +28,8 @@
     endLabel: Snippet;
     /** 暦を開く操作の名前。 */
     calendarLabel: string;
+    /** 暦の面の先頭へ差し込む中身(期間の候補など)。省略すれば暦だけが出る(patterns/date-range.md §3)。 */
+    panelLead?: Snippet;
     description?: Snippet;
     error?: Snippet;
     /** 期間が変わった。始まりと終わりを対で渡す。 */
@@ -49,6 +51,7 @@
     startLabel,
     endLabel,
     calendarLabel,
+    panelLead,
     description,
     error,
     onchange,
@@ -137,7 +140,10 @@
       </button>
     {/snippet}
     {#snippet panel()}
+      <!-- 面の先頭に差し込む中身(候補の列など)。器は中身を解釈しない。狭い画面では暦の上へ回る
+           (行の始まり側に置く場所が無い。patterns/date-range.md §3) -->
       <div class="sc-daterangepicker-panel" aria-live="polite">
+        {#if panelLead}<div class="sc-daterangepicker-panel-lead">{@render panelLead()}</div>{/if}
         <Calendar bind:month months={2} {start} {end} {min} {max} {unavailable} {onselect} />
       </div>
     {/snippet}

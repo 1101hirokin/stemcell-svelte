@@ -127,3 +127,21 @@ it('無効のときは暦を開けない', () => {
   const { container } = render(DateRangePicker, { props: { ...props, disabled: true } });
   expect((container.querySelector('button') as HTMLButtonElement).disabled).toBe(true);
 });
+
+// 面の先頭へ差し込む口(候補の列など)。器は中身を解釈しない(patterns/date-range.md §3)
+it('面の先頭へ差し込んだ中身が暦と一緒に出る', async () => {
+  const { container } = render(DateRangePicker, {
+    props: { ...props, panelLead: snip('期間の候補') },
+  });
+  await fireEvent.click(container.querySelector('button') as HTMLElement);
+  const lead = container.querySelector('.sc-daterangepicker-panel-lead');
+  expect(lead?.textContent).toContain('期間の候補');
+  // 暦は同じ面の中に居る(差し替えではなく先頭への追加)
+  expect(container.querySelector('.sc-daterangepicker-panel .sc-calendar')).not.toBeNull();
+});
+
+it('差し込まなければ器は場所を作らない', async () => {
+  const { container } = render(DateRangePicker, { props });
+  await fireEvent.click(container.querySelector('button') as HTMLElement);
+  expect(container.querySelector('.sc-daterangepicker-panel-lead')).toBeNull();
+});
