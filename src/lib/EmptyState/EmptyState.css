@@ -1,0 +1,43 @@
+/* ここには何も無い、という報せ(EmptyState.md)。中央へ寄せるかは Expressive で、ここでは寄せる形を
+   採る(表の中でも画面いっぱいでも、空白の真ん中に置くのが読み取りやすい)。 */
+.sc-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-stack-md);
+  padding: var(--spacing-inset-lg);
+  color: var(--color-app-foreground);
+  text-align: center;
+}
+.sc-empty-state-media {
+  /* 絵は装飾。大きさは中身が決める(DS は絵を持たない) */
+  display: flex;
+  color: var(--color-app-fg-muted);
+}
+.sc-empty-state-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  /* 読める幅で止める。説明が横いっぱいに伸びると読めない(layout.md §2 の measure と同じ理由) */
+  max-inline-size: var(--container-prose);
+}
+.sc-empty-state-heading {
+  font-family: var(--typography-title-md-font-family);
+  font-size: var(--typography-title-md-font-size);
+  font-weight: var(--typography-title-md-font-weight);
+  line-height: var(--typography-title-md-line-height);
+  letter-spacing: var(--typography-title-md-letter-spacing);
+}
+.sc-empty-state-description {
+  color: var(--color-app-fg-muted);
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-empty-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-inline-md);
+}

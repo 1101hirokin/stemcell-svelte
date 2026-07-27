@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion, DateField, Calendar, DatePicker, DateRangePicker, Table, Select, Menu, Icon, RadioGroup, Radio, Stack } from '../../src/lib';
+  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion, DateField, Calendar, DatePicker, DateRangePicker, Table, Select, Menu, Icon, RadioGroup, Radio, Stack, EmptyState, TextField, Button } from '../../src/lib';
   import type { TableColumn, TableSort } from '../../src/lib';
 
   let faqOpen = $state(false);
@@ -52,10 +52,15 @@
   let overflow = $state<'scroll' | 'wrap'>('scroll');
   let sticky = $state<'none' | 'start' | 'end' | 'both'>('both');
   // 並べ替えはアプリがやる(器は要求を返すだけ)
+  // 空状態と告知(patterns/empty-results.md)。0 件は常設の領域が件数で告げ、空状態の器は告知しない
+  let keyword = $state('');
+  const filteredOrders = $derived(
+    keyword.trim() ? orders.filter((o) => o.customer.includes(keyword.trim())) : orders,
+  );
   const sortedOrders = $derived.by(() => {
-    if (!sort) return orders;
+    if (!sort) return filteredOrders;
     const dir = sort.direction === 'ascending' ? 1 : -1;
-    return [...orders].sort((a, b) => {
+    return [...filteredOrders].sort((a, b) => {
       const x = a[sort!.column as 'id'];
       const y = b[sort!.column as 'id'];
       return (x < y ? -1 : x > y ? 1 : 0) * dir;
@@ -247,6 +252,16 @@
         {#snippet label()}貼り付ける列{/snippet}
       </Select>
     </Cluster>
+    <Cluster gap="md" align="end">
+      <TextField bind:value={keyword} placeholder="取引先で絞る">
+        {#snippet label()}取引先{/snippet}
+      </TextField>
+      <!-- 件数の領域は最初から居て、中身だけ差し替える(後から現れる領域は拾われない。
+           patterns/empty-results.md §2)。空状態の器は告知しない -->
+      <Text variant="body-sm" muted>
+        <span role="status">{sortedOrders.length ? `${sortedOrders.length} 件` : '該当なし'}</span>
+      </Text>
+    </Cluster>
     <Table
       columns={orderColumns}
       rows={sortedOrders}
@@ -285,7 +300,16 @@
           {row[column.id]}
         {/if}
       {/snippet}
-      {#snippet empty()}注文はまだありません{/snippet}
+      {#snippet empty()}
+        <EmptyState>
+          {#snippet media()}<Icon name="search" />{/snippet}
+          {#snippet heading()}「{keyword}」に一致する注文はありません{/snippet}
+          {#snippet description()}取引先の名前の一部で探せます。条件を戻すと全部の注文が出ます。{/snippet}
+          {#snippet actions()}
+            <Button size="sm" variant="outlined" color="plain" onclick={() => (keyword = '')}>条件を戻す</Button>
+          {/snippet}
+        </EmptyState>
+      {/snippet}
     </Table>
     <Text variant="body-sm" muted>
       選んだ行: {selectedOrders.join(', ') || '(なし)'} / 押された行: {activated} /
