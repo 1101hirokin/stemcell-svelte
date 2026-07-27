@@ -23,8 +23,19 @@
 .sc-daterangepicker-trigger {
   padding-block-end: var(--spacing-stack-sm);
 }
+/* 面の中身。候補の列があれば行の始まり側へ置き、暦と横に並べる。狭い画面(面がシートへ移る幅)では
+   横に並べる余地が無いので、候補が暦の上へ回る(patterns/date-range.md §3) */
 .sc-daterangepicker-panel {
   padding: var(--spacing-inset-md);
+  /* 候補の列があれば暦と横に並べ、置く余地が無ければ折り返して暦の上へ回る(中身で立つ。layout.md §2) */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--spacing-inline-md);
+}
+.sc-daterangepicker-panel-lead {
+  /* 候補の列は自分の幅で立ち、伸びも縮みもしない(暦の格子が幅を決める) */
+  flex: 0 0 auto;
 }
 .sc-daterangepicker-label,
 .sc-daterangepicker-description,

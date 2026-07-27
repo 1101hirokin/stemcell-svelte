@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion, DateField, Calendar, DatePicker, DateRangePicker, Table, Select, Menu, Icon } from '../../src/lib';
+  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion, DateField, Calendar, DatePicker, DateRangePicker, Table, Select, Menu, Icon, RadioGroup, Radio, Stack } from '../../src/lib';
   import type { TableColumn, TableSort } from '../../src/lib';
 
   let faqOpen = $state(false);
@@ -61,6 +61,26 @@
       return (x < y ? -1 : x > y ? 1 : 0) * dir;
     });
   });
+
+  // 期間の候補(patterns/date-range.md)。候補の中身も「いまどれか」もアプリが持つ。器は日付を比べない
+  const dayMs = 86_400_000;
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  const back = (days: number) => {
+    const now = new Date();
+    return { start: iso(new Date(now.getTime() - days * dayMs)), end: iso(now) };
+  };
+  const rangePresets = [
+    { value: 'today', label: '今日', of: () => back(0) },
+    { value: '7d', label: '過去7日間', of: () => back(6) },
+    { value: '30d', label: '過去30日間', of: () => back(29) },
+    { value: '90d', label: '過去90日間', of: () => back(89) },
+  ];
+  let preset = $state('7d');
+  let presetRange = $state(rangePresets[1]!.of());
+  const applyPreset = (v: string) => {
+    preset = v;
+    presetRange = rangePresets.find((p) => p.value === v)!.of();
+  };
 </script>
 
 {#snippet faqSummary()}配送について{/snippet}
@@ -253,5 +273,42 @@
     <Text variant="body-sm" muted>
       選んだ行: {selectedOrders.join(', ') || '(なし)'} / 押された行: {activated} /
       並べ替え: {sort ? `${sort.column} ${sort.direction}` : '(なし)'}
+    </Text>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">期間の候補(pattern の実物確認)</Text>
+    <Text as="p" variant="body-sm" muted>
+      「過去7日間」のような候補を期間の選択に添える形(patterns/date-range.md)。候補は値の選択なので
+      RadioGroup で組み、いまどれが選ばれているかはアプリが持つ(器は日付を比べない)。暦や欄で直に変えたら
+      どの候補も選ばれていない状態にする。候補は暦の面の先頭へ差し込む。
+    </Text>
+    <DateRangePicker
+      start={presetRange.start}
+      end={presetRange.end}
+      calendarLabel="暦を開く"
+      onchange={(next) => {
+        presetRange = next;
+        preset = ''; // 直に変えたら候補の選択は外れる(pattern §2)
+      }}
+    >
+      {#snippet label()}対象の期間{/snippet}
+      {#snippet startLabel()}開始日{/snippet}
+      {#snippet endLabel()}終了日{/snippet}
+      {#snippet panelLead()}
+        <Stack gap="sm">
+          <RadioGroup name="range-preset" value={preset} onchange={(v) => applyPreset(v)}>
+            {#snippet label()}期間の候補{/snippet}
+            {#each rangePresets as p (p.value)}
+              <Radio value={p.value}>
+                {#snippet label()}{p.label}{/snippet}
+              </Radio>
+            {/each}
+          </RadioGroup>
+        </Stack>
+      {/snippet}
+    </DateRangePicker>
+    <Text variant="body-sm" muted>
+      候補: {preset || '(選ばれていない)'} / 期間: {presetRange.start} 〜 {presetRange.end}
     </Text>
   </section>
