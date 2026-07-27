@@ -215,9 +215,8 @@
       採らない。打った文字は値ではないので、閉じたときは選ばれている値へ戻す。候補が無いときは言葉で
       伝え、件数は器が耳へ届ける。
     </Text>
-    <div class="pg-row">
-      <code class="pg-tag">単一選択</code>
-      <Stack gap="sm">
+    <Stack gap="sm">
+      <div>
         <Combobox
           bind:value={partner}
           bind:inputValue={partnerQuery}
@@ -229,7 +228,7 @@
           {#snippet label()}取引先{/snippet}
           {#snippet description()}名前の一部を打つと候補が絞られる{/snippet}
         </Combobox>
-        <Text variant="body-sm" muted>選ばれている値: {partner || '(未選択)'} / 打っている文字: {partnerQuery || '(空)'}</Text>
-      </Stack>
-    </div>
+      </div>
+      <Text variant="body-sm" muted>選ばれている値: {partner || '(未選択)'} / 打っている文字: {partnerQuery || '(空)'}</Text>
+    </Stack>
   </section>
