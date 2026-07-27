@@ -174,6 +174,15 @@
       </Stack>
     </div>
     <div class="pg-row">
+      <code class="pg-tag">名前を隠す</code>
+      <Stack gap="sm">
+        <Text variant="title-sm">土鍋(かまど炊き)</Text>
+        <Rating readonly value={4.7} valueLabel="5 段階中 4.7(128 件の評価)" labelHidden>
+          {#snippet label()}この商品の評価{/snippet}
+        </Rating>
+      </Stack>
+    </div>
+    <div class="pg-row">
       <code class="pg-tag">10 段階</code>
       <Rating
         value={7}

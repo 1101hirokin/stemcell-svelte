@@ -17,6 +17,8 @@
     name?: string;
     /** 取り消しを許すか。許すときは鍵盤にも道が要る(radio の群は鍵盤で選択を外せない。SC 2.1.1)。 */
     allowClear?: boolean;
+    /** 名前を視覚から隠す(支援技術には届く)。周りが既に何の評価かを語っている場所で使う。 */
+    labelHidden?: boolean;
     /** 読み取りのときの名前(「5 段階中 4.2」)。 */
     valueLabel?: string;
     /** 入力のときの各段の名前。max と同じ数だけ並べる。 */
@@ -35,6 +37,7 @@
     invalid = META.props.invalid.default,
     name,
     allowClear = META.props.allowClear.default,
+    labelHidden = META.props.labelHidden.default,
     valueLabel,
     itemLabels,
     onchange,
@@ -96,7 +99,7 @@
 
 {#if readonly}
   <!-- 読むだけの星はフォーム部品ではない。一つの絵として名前つきで届き、星は支援技術から外す -->
-  <div class="sc-rating" data-readonly="true">
+  <div class="sc-rating" data-readonly="true" data-label-hidden={labelHidden}>
     <span class="sc-rating-label" id={labelId}>{@render label()}</span>
     <div class="sc-rating-stars" role="img" aria-label={valueLabel} style:--sc-rating-fill="{fillRatio}%">
       <div class="sc-rating-track" aria-hidden="true">
@@ -113,6 +116,7 @@
   <fieldset
     class="sc-rating"
     role="radiogroup"
+    data-label-hidden={labelHidden}
     data-invalid={effectiveInvalid}
     data-disabled={disabled}
     {disabled}

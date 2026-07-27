@@ -23,6 +23,8 @@
     required?: boolean;
     autocomplete?: string;
     keyboard?: (typeof META.props.keyboard.values)[number];
+    /** 名前を視覚から隠す(支援技術には届く)。隣が既に何の値かを語っている行で使う。 */
+    labelHidden?: boolean;
     size?: (typeof META.props.size.values)[number];
     /** 増やす操作の名前(絵だけの操作)。 */
     incrementLabel: string;
@@ -47,6 +49,7 @@
     required = META.props.required.default,
     autocomplete,
     keyboard = META.props.keyboard.default,
+    labelHidden = META.props.labelHidden.default,
     size = META.props.size.default,
     incrementLabel,
     decrementLabel,
@@ -130,7 +133,13 @@
   const atMax = $derived(max != null && value != null && value >= max);
 </script>
 
-<div class="sc-numberfield" data-size={size} data-invalid={effectiveInvalid} data-disabled={disabled}>
+<div
+  class="sc-numberfield"
+  data-size={size}
+  data-invalid={effectiveInvalid}
+  data-disabled={disabled}
+  data-label-hidden={labelHidden}
+>
   <label class="sc-numberfield-label" for={inputId}>
     {@render label()}{#if required}<span class="sc-numberfield-required" aria-hidden="true">*</span>{/if}
   </label>

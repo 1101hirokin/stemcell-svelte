@@ -77,3 +77,19 @@ it('入力で段の名前が足りないと警告する', () => {
   expect(warn).toHaveBeenCalledWith(expect.stringContaining('itemLabels'));
   warn.mockRestore();
 });
+
+it('名前を視覚から隠しても、名前は残る(読み取りでも入力でも)', () => {
+  const read = render(Rating, {
+    props: { ...base, readonly: true, value: 4, valueLabel: '5 段階中 4', labelHidden: true },
+  });
+  const readRoot = read.container.querySelector('.sc-rating') as HTMLElement;
+  expect(readRoot.dataset.labelHidden).toBe('true');
+  expect(readRoot.querySelector('.sc-rating-label')!.textContent).toContain('商品の評価');
+  expect(readRoot.querySelector('[role="img"]')!.getAttribute('aria-label')).toBe('5 段階中 4');
+
+  const input = render(Rating, { props: { ...base, value: 3, labelHidden: true } });
+  const group = input.container.querySelector('[role="radiogroup"]') as HTMLElement;
+  expect(group.dataset.labelHidden).toBe('true');
+  const named = input.container.querySelector(`#${group.getAttribute('aria-labelledby')}`);
+  expect(named?.textContent).toContain('商品の評価');
+});

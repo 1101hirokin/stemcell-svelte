@@ -87,3 +87,14 @@ it('name を渡すとフォーム送信に値が載る(打てる欄が text な�
   expect(hidden.name).toBe('quantity');
   expect(hidden.value).toBe('7');
 });
+
+it('名前を視覚から隠しても、名前は残る(消えるのは見た目だけ)', () => {
+  const { container } = render(NumberField, { props: { ...base, value: 2, labelHidden: true } });
+  const root = container.querySelector('.sc-numberfield') as HTMLElement;
+  const label = container.querySelector('.sc-numberfield-label') as HTMLElement;
+  expect(root.dataset.labelHidden).toBe('true');
+  // 名前の要素は残り、欄との結びも切れない(display:none にしない)
+  expect(label).not.toBeNull();
+  expect(label.getAttribute('for')).toBe(input(container).id);
+  expect(label.textContent).toContain('数量');
+});
