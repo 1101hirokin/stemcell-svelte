@@ -9,9 +9,9 @@
   min-inline-size: 0;
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);
-  /* 候補の面の幅は欄に一致する(既定でアンカー幅)。下限は content、上限は敷かない
-     (画面をはみ出さない頭打ちは Popover が持つ) */
-  --sc-popover-min-inline-size: max-content;
+  /* 候補の面の幅は欄に一致し、選択肢の文字の長さでは変わらない(下限も欄の幅で、
+     中身では広がらない)。長い選択肢は面の中で折り返す(切り詰めない。読めなくなる) */
+  --sc-popover-min-inline-size: 0;
   --sc-popover-max-inline-size: none;
 }
 .sc-combobox[data-invalid='true'] {

@@ -11,8 +11,9 @@
   --_ring: var(--color-semantic-plain-focus-ring);
   /* ドロップダウンの幅: fill(アンカー=トリガー幅に一致。既定でアンカー幅なので inline-size は上書きしない。
      top-layer では JS が --sc-popover-anchor-inline-size にアンカー幅を入れる)。トリガーが fill なので
-     幅はトリガーが支配し、選択内容で変動しない。下限は content、上限は敷かない。 */
-  --sc-popover-min-inline-size: max-content;
+     幅はトリガーが支配する。下限も content ではなくトリガー幅で、選択肢の文字の長さでは変わらない
+     (長い選択肢は面の中で折り返す)。上限は敷かない。 */
+  --sc-popover-min-inline-size: 0;
   --sc-popover-max-inline-size: none;
 }
 .sc-select[data-invalid='true'] {
