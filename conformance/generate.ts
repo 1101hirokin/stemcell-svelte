@@ -4,6 +4,8 @@
  * 実装側の meta.ts(既定値の単一の源)と CSS に対して照合する。
  * extends は仕様側スキーマの意味論どおり props / states / tokensRequired を1段だけ解決する。
  * 実装が存在しない契約は失敗にせず、未実装として一覧に出す(実装は門を通った契約から順に増える)。
+ * 字の役だけは逆向きにも見る: 実装が引いている typography の役を契約が宣言しているか。契約が宣言した
+ * ものが実装にあるかしか見ないと、実装が黙って別の役を引いても検出できない(2026-07-27 に4件の漏れ)。
  */
 import { readdirSync, existsSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -71,6 +73,10 @@ for (const name of dirs) {
       { type: p.type, values: p.values ?? null, default: p.default ?? null, optional: p.optional ?? false }])),
     states: c.states ?? [],
     cssVars: cssVars(c),
+    // 宣言された字の役(--typography-body-md 等から役名だけを取る)。逆向きの検査に使う
+    typography: cssVars(c)
+      .filter((v) => v.startsWith('--typography-'))
+      .map((v) => v.slice('--typography-'.length)),
   };
   writeFileSync(join(OUT, `${name}.test.ts`), `// 自動生成。編集しない(源は契約)。
 import { describe, it, expect } from 'vitest';
@@ -95,6 +101,15 @@ describe('${name} conformance', () => {
     const cssPath = join(__dirname, '../../src/lib/${name}/${name}.css');
     const css = existsSync(cssPath) ? readFileSync(cssPath, 'utf-8') : '';
     for (const v of SPEC.cssVars) expect(css, \`missing \${v}\`).toContain(\`var(\${v}\`);
+  });
+  it('typography: 実装が引く字の役をすべて契約が宣言している', () => {
+    const cssPath = join(__dirname, '../../src/lib/${name}/${name}.css');
+    const css = existsSync(cssPath) ? readFileSync(cssPath, 'utf-8') : '';
+    const used = new Set(
+      [...css.matchAll(/--typography-([a-z0-9-]+?)-(?:font-family|font-size|font-weight|line-height|letter-spacing)/g)]
+        .map((m) => m[1]!),
+    );
+    for (const role of used) expect(SPEC.typography, \`undeclared typography.\${role}\`).toContain(role);
   });
 });
 `);
