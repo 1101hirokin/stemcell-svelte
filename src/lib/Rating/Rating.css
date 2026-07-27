@@ -33,7 +33,8 @@
    空の段が見えないと、何段階中の評価かが分からない */
 .sc-rating-star {
   display: inline-flex;
-  font-size: 1.25rem;
+  /* 星の大きさは Expressive。当たり判定(24px)は段の器が持つので、絵は小さくできる */
+  font-size: 1rem;
   color: var(--color-app-border);
 }
 
