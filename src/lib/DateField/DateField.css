@@ -46,6 +46,10 @@
   align-items: stretch;
   gap: var(--spacing-inline-md);
   --_inset: var(--spacing-inset-md);
+  /* 縦の inset は桁の行が持つ。TextField は一次内容(入力)に付けているが、こちらの一次内容は桁の
+     並びなので行に付ける(桁ごとに付けると、押した桁の面が背丈いっぱいになって重く見える)。
+     これが無いと、同じ段でも文字の欄より背が低くなる(実測 21px 対 45px。2026-07-28 に直した) */
+  padding-block: var(--_inset);
   padding-inline: var(--_inset);
   background: var(--color-app-surface);
   border: var(--shape-border-width) solid var(--_border);
