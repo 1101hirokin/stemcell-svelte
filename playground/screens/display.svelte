@@ -1,5 +1,25 @@
 <script lang="ts">
-  import { Button, IconButton, Stack, Cluster, Icon, Divider, Badge, Avatar, Tag, Text } from '../../src/lib';
+  import {
+    Button, IconButton, Stack, Cluster, Icon, Divider, Badge, Avatar, Tag, Text, Code, CodeBlock, toast,
+  } from '../../src/lib';
+
+  // コードの塊(CodeBlock)。値は文字列で、着色は器の外。ここでは素のまま(器械を入れていない)
+  const sample = `type Order = { id: string; total: number };
+
+// 直近の注文を合計する
+export function sum(orders: Order[]): number {
+  return orders.reduce((acc, o) => acc + o.total, 0); // 円
+}`;
+  const longLine = 'const veryLongIdentifierForTestingHorizontalScroll = { alpha: 1, beta: 2, gamma: 3, delta: 4, epsilon: 5, zeta: 6 };';
+  const highlighted = {
+    text: "const total = orders.reduce((a, o) => a + o.total, 0); // 円\ntype Order = { id: string; label: '注文' };",
+  };
+  let wrap = $state(false);
+  let lineNumbers = $state(true);
+  const copy = (text: string) => {
+    navigator.clipboard?.writeText(text);
+    toast('コードを複写しました');
+  };
 
   let tagFilters = $state<Record<string, boolean>>({ react: true, svelte: false, vue: false });
   let tagChips = $state(['デザイン', 'トークン', '契約']);
@@ -152,4 +172,42 @@
         <Tag dismissible disabled>消せる disabled</Tag>
       </Cluster>
     </div>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">Code / CodeBlock(コード)</Text>
+    <Text as="p" variant="body-sm" muted>
+      文中のコードは <Code>Code</Code>、塊は <Code>CodeBlock</Code>。塊は値を文字列で受け取り、着色は器の外に
+      置く(色だけ DS が持つ)。既定は折らずに横へ送り、溢れているときだけ焦点を受ける。ヘッダーは場所だけ
+      で、複写ボタンはアプリが置く。
+    </Text>
+    <div class="pg-row">
+      <code class="pg-tag">文中</code>
+      <Text variant="body-md">
+        まず <Code>npm install @stemcell/svelte</Code> を実行し、<Code>--force</Code> は付けない。
+      </Text>
+    </div>
+    <Cluster gap="md" align="center">
+      <Button size="sm" variant="outlined" color="plain" onclick={() => (wrap = !wrap)}>
+        折り返し: {wrap ? 'する' : 'しない'}
+      </Button>
+      <Button size="sm" variant="outlined" color="plain" onclick={() => (lineNumbers = !lineNumbers)}>
+        行番号: {lineNumbers ? 'あり' : 'なし'}
+      </Button>
+    </Cluster>
+    <CodeBlock code={`${sample}\n${longLine}`} language="ts" label="注文の合計のコード" {wrap} {lineNumbers}>
+      {#snippet header()}
+        <Text variant="label-sm">orders.ts</Text>
+        <IconButton label="コードを複写する" size="sm" variant="text" color="plain" onclick={() => copy(`${sample}\n${longLine}`)}>
+          <Icon name="clipboard" />
+        </IconButton>
+      {/snippet}
+    </CodeBlock>
+    <Text as="p" variant="body-sm" muted>
+      着色済みの中身を差した例(器械は入れていないので、Prism が吐く形の印を手で書いている)。色は DS が
+      持つ6役(comment / keyword / string / number / function / type)で、器械が無ければ本文の色で描かれる。
+    </Text>
+    <CodeBlock code={highlighted.text} language="ts" label="着色した例のコード">
+      {#snippet children()}<span class="token keyword">const</span> total <span class="token keyword">=</span> orders<span class="token function">.reduce</span>((a, o) =&gt; a <span class="token keyword">+</span> o.total, <span class="token number">0</span>); <span class="token comment">// 円</span>{'\n'}<span class="token keyword">type</span> <span class="token class-name">Order</span> = &lbrace; id: <span class="token class-name">string</span>; label: <span class="token string">'注文'</span> &rbrace;;{/snippet}
+    </CodeBlock>
   </section>
