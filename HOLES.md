@@ -118,3 +118,4 @@
 | 108 | (横断) | 行の向きの判定 `getComputedStyle(el).direction === 'rtl'` が Tabs / Calendar / DateField に逐語で写っていた | internal/direction.ts の arrowKeys() へ集約し、判定を :dir(rtl) へ寄せた。算出値を読む形はスタイル再計算を起こすうえ、dir="auto"(中身から向きが決まる)を拾えない | B |
 | 109 | (横断) | 間隔 prop の解決(段か大域の原始か・語彙外なら警告)が8つのプリミティブへ写し取られていた | internal/spacing.svelte.ts の useGap() へ集約(挙動は同じ)。Box だけは二値の inset を持つ別の形なので、今回は寄せていない | B |
 | 110 | DatePicker / DateRangePicker | 狭い画面で面の類を変える処理(matchMedia の購読と Popover / Drawer の出し分け)が両部品に重複していた | internal/AnchoredPanel.svelte へ切り出した。RFC 0017 の規則(器の広さで類が変わる)を持つ場所が一箇所になる | B |
+| 111 | Calendar / (トークン) | 選べない日の文字が disabled の色(明 2.47:1 / 暗 1.93:1)で、本文の床(4.5:1)を大きく割っていた。焦点に載る日をその色で描くと、読み上げられるのに読めない | 本文と同じ色で描き、選べないことは打ち消しで示す(色だけに頼らない)。薄い側(app.fg-muted)も採れない: 暗いテーマで浮かぶ面(#38414b)の上に置くと 4.2:1 で床を割る。地の面の上(5.48:1)なら足りるので、暗いテーマの fg-muted が浮かぶ面を勘定に入れていない。#62 と同根で、トークン側の較正が要る | A・既知(実装は解消。トークンへ還元する) |
