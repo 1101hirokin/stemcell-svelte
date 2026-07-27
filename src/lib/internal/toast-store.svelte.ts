@@ -121,27 +121,9 @@ export function enqueue(message: string, opts: ToastOptions = {}): string {
 }
 
 /**
- * 退去アニメの後にキューから外すまでの時間(ms)。CSS 側と同じ計算(duration × --motion-scale)で出す。
- * reduced-motion は --motion-scale が 0 になることで効くので、ここで prefers-reduced-motion を
- * 読み直さない(機構の単一の源。motion.md §6。HOLES #36)。
- * トークン値は変わらないのでキャッシュするが、--motion-scale は環境設定の切替で変わるため毎回読む。
- */
-let cachedExitMs: number | null = null;
-function exitMs(): number {
-  if (typeof window === 'undefined') return 0;
-  const style = getComputedStyle(document.documentElement);
-  if (cachedExitMs == null) {
-    const v = style.getPropertyValue('--motion-exit-duration').trim();
-    cachedExitMs = v.endsWith('ms') ? parseFloat(v) : v.endsWith('s') ? parseFloat(v) * 1000 : 200;
-  }
-  const rawScale = style.getPropertyValue('--motion-scale').trim();
-  const scale = rawScale === '' ? 1 : Number(rawScale);
-  return cachedExitMs * (Number.isFinite(scale) ? scale : 1);
-}
-
-/**
  * 通知の退去を要求する。ホストが所有する退去(自律・明示・アクション後)。leaving を立てて CSS の exit
- * アニメを起動し、motion.exit 経過後に実際にキューから外す。onDismiss は要求時に一度だけ呼ぶ。
+ * アニメを起動し、そのアニメが終わったら finishDismiss で実際にキューから外す。
+ * onDismiss は要求時に一度だけ呼ぶ。
  */
 export function dismiss(id: string): void {
   const item = toasts.find((t) => t.id === id);
@@ -150,14 +132,18 @@ export function dismiss(id: string): void {
   const t = timers.get(id);
   if (t?.handle) clearTimeout(t.handle);
   timers.delete(id);
-  // 除去の予約を onDismiss の成否から独立させる: コールバックが throw しても通知は残さず、
-  // 例外が enqueue の上限退去ループや click ハンドラへ伝播して系を壊さないようにする。
-  setTimeout(() => remove(id), exitMs());
+  // 実際にキューから外すのは、退去アニメが終わったと Toast が知らせたとき(finishDismiss)。
+  // 時間を JS で計算して待つ形は持たない(CSS と JS が同じ値を二重に持つ)。
   try {
     item.onDismiss?.();
   } catch (e) {
     console.error('[stemcell] toast onDismiss threw', e);
   }
+}
+
+/** 退去アニメが終わった。Toast(要素)が知らせる。 */
+export function finishDismiss(id: string): void {
+  remove(id);
 }
 
 function remove(id: string): void {

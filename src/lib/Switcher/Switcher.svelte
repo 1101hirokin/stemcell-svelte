@@ -1,7 +1,7 @@
 <script lang="ts">
   import './Switcher.css';
   import { META, isRemLength } from './meta';
-  import { isTier, isGlobalPrimitive, warnSpacing } from '../internal/spacing';
+  import { useGap } from '../internal/spacing.svelte';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -17,11 +17,9 @@
     children,
   }: Props = $props();
 
-  const gapTier = $derived(isTier(gap));
-  const gapPrimitive = $derived(!gapTier && isGlobalPrimitive(gap));
+  const gapUse = useGap('Switcher', 'gap', () => gap, META.props.gap.default);
   const validThreshold = $derived(isRemLength(threshold));
   $effect(() => {
-    if (!gapTier && !gapPrimitive) warnSpacing('Switcher', 'gap', gap, `既定の "${META.props.gap.default}" `);
     if (!validThreshold) {
       console.warn(
         `[stemcell] Switcher: threshold="${threshold}" は rem の長さではない(単位は rem と裁定済み。契約 alpha.1)。既定の "${META.props.threshold.default}" へ退避する。`,
@@ -34,8 +32,8 @@
      切替は閾値駆動(flex-basis 算術)。DOM / 読み上げ順は切替で変わらない。 -->
 <div
   class="sc-switcher"
-  data-gap={gapPrimitive ? undefined : gapTier ? gap : META.props.gap.default}
-  style:gap={gapPrimitive ? `var(--spacing-${gap})` : undefined}
+  data-gap={gapUse.primitive ? undefined : gapUse.tier ? gap : META.props.gap.default}
+  style:gap={gapUse.primitive ? `var(--spacing-${gap})` : undefined}
   style:--sc-switcher-threshold={validThreshold ? threshold : META.props.threshold.default}
 >
   {@render children()}

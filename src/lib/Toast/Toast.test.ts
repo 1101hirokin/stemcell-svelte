@@ -51,3 +51,17 @@ it('閉じるのアクセシブルネームは message + 閉じる語を兄弟�
     expect(container.querySelector(`#${id}`)).toBeTruthy();
   }
 });
+
+// 退去の終わりは要素のアニメーションが教える(時間を JS で測らない)
+it('退去アニメが終わったら知らせる。走っていなければ即座に知らせる', async () => {
+  const onexitend = vi.fn();
+  const { container, rerender } = render(Toast, { props: { message: 'さようなら', onexitend } });
+  const el = container.querySelector('.sc-toast') as HTMLElement;
+  // jsdom は Web Animations を持たないので、走っているアニメーションを差し替えて確かめる
+  const finished = Promise.resolve();
+  el.getAnimations = () => [{ finished } as unknown as Animation];
+  await rerender({ message: 'さようなら', onexitend, leaving: true });
+  await finished;
+  await Promise.resolve();
+  expect(onexitend).toHaveBeenCalled();
+});

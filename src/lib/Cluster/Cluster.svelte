@@ -1,7 +1,7 @@
 <script lang="ts">
   import './Cluster.css';
   import { META } from './meta';
-  import { isTier, isGlobalPrimitive, warnSpacing } from '../internal/spacing';
+  import { useGap } from '../internal/spacing.svelte';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -17,20 +17,16 @@
     children,
   }: Props = $props();
 
-  const tier = $derived(isTier(gap));
-  const primitive = $derived(!tier && isGlobalPrimitive(gap));
-  $effect(() => {
-    if (!tier && !primitive) warnSpacing('Cluster', 'gap', gap, `既定の "${META.props.gap.default}" `);
-  });
+  const gapUse = useGap('Cluster', 'gap', () => gap, META.props.gap.default);
 </script>
 
 <!-- 見た目と意味を持たない器(契約 a11y): states 無し・focus 無し・構造の主張無し。
      項目ごとに流れる(折返し)のが Cluster。全体が一斉に切り替わるのは Switcher。 -->
 <div
   class="sc-cluster"
-  data-gap={primitive ? undefined : tier ? gap : META.props.gap.default}
+  data-gap={gapUse.primitive ? undefined : gapUse.tier ? gap : META.props.gap.default}
   data-align={align}
-  style:gap={primitive ? `var(--spacing-${gap})` : undefined}
+  style:gap={gapUse.primitive ? `var(--spacing-${gap})` : undefined}
 >
   {@render children()}
 </div>

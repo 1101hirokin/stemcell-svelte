@@ -1,5 +1,6 @@
 <script lang="ts">
   import './Calendar.css';
+  import { arrowKeys } from '../internal/direction';
   import { META } from './meta';
   import IconButton from '../IconButton/IconButton.svelte';
   import Icon from '../Icon/Icon.svelte';
@@ -111,10 +112,8 @@
   };
 
   const onkeydown = async (e: KeyboardEvent, day: Day) => {
-    // 論理方向。RTL では左右の意味が反転する
-    const rtl = root ? getComputedStyle(root).direction === 'rtl' : false;
-    const forward = rtl ? 'ArrowLeft' : 'ArrowRight';
-    const backward = rtl ? 'ArrowRight' : 'ArrowLeft';
+    // 論理方向(RTL では左右の意味が反転する。internal/direction.ts が :dir() で解く)
+    const { forward, backward } = arrowKeys(root);
     if (e.key === forward) await moveFocus(addDays(day, 1));
     else if (e.key === backward) await moveFocus(addDays(day, -1));
     else if (e.key === 'ArrowDown') await moveFocus(addDays(day, 7));

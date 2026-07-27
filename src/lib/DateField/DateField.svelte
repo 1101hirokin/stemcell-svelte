@@ -1,5 +1,6 @@
 <script lang="ts">
   import './DateField.css';
+  import { arrowKeys } from '../internal/direction';
   import { META } from './meta';
   import {
     compare, daysInMonth, formatISO, isReal, parseISO, segmentName, segmentOrder,
@@ -115,10 +116,8 @@
 
   const onkeydown = (e: KeyboardEvent, type: SegmentType) => {
     if (disabled || readonly) return;
-    // 論理方向。RTL では左右の意味が反転する(web-keys.rules.json の共通則)
-    const rtl = root ? getComputedStyle(root).direction === 'rtl' : false;
-    const forward = rtl ? 'ArrowLeft' : 'ArrowRight';
-    const backward = rtl ? 'ArrowRight' : 'ArrowLeft';
+    // 論理方向(RTL では左右の意味が反転する。internal/direction.ts が :dir() で解く)
+    const { forward, backward } = arrowKeys(root);
     if (e.key === 'ArrowUp') step(type, 1);
     else if (e.key === 'ArrowDown') step(type, -1);
     else if (e.key === forward) move(type, 1);
