@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconButton, Box, Stack, Cluster, TextField, Select, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Text } from '../../src/lib';
+  import { IconButton, Box, Stack, Cluster, TextField, Select, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Text, NumberField } from '../../src/lib';
 
   let invite = $state('abc');
   let agree = $state(false);
@@ -8,6 +8,8 @@
   let bio = $state('');
   let notify = $state(true);
   let fEmail = $state('a@b.com');
+  let fQuantity = $state<number | null>(2);
+  let fWeight = $state<number | null>(null);
   let fSubscribe = $state(true);
   let fNotify = $state(true);
   let fShip = $state('exp');
@@ -135,6 +137,32 @@
     </Stack>
   </section>
   <section>
+    <Text as="h3" variant="title-lg">NumberField(数の欄)</Text>
+    <Text as="p" variant="body-sm" muted>
+      打てる欄に数の意味論(spinbutton)を載せる。native の type=number は採らない(スピナーが指に小さく、
+      ホイールで値が書き換わり、iOS で桁の扱いに難がある)。増減はタブ順から外し、矢印キーが同じことをする。
+      上下で 1、PageUp / PageDown で 10 動く。Home と End は文字の移動に残す。書式は持たない。
+    </Text>
+    <Stack gap="md">
+      <NumberField bind:value={fQuantity} min={0} max={99} incrementLabel="数量を一つ増やす" decrementLabel="数量を一つ減らす">
+        {#snippet label()}数量(0〜99){/snippet}
+        {#snippet description()}矢印キーでも動く。ホイールでは動かない{/snippet}
+      </NumberField>
+      <NumberField
+        bind:value={fWeight}
+        keyboard="decimal"
+        step={0.5}
+        min={0}
+        size="sm"
+        incrementLabel="重さを増やす"
+        decrementLabel="重さを減らす"
+      >
+        {#snippet label()}重さ(kg。刻み 0.5){/snippet}
+      </NumberField>
+      <Text variant="body-sm" muted>いまの値: {fQuantity ?? '(空)'} / {fWeight ?? '(空)'}</Text>
+    </Stack>
+  </section>
+  <section>
     <Text as="h3" variant="title-lg">Form participation</Text>
     <Text as="p" variant="body-sm" muted>
       name を与えると native の <code>&lt;form&gt;</code> 送信・FormData・reset に参加する(controlled と両立。
@@ -160,6 +188,9 @@
         >
           {#snippet label()}配送(name=ship){/snippet}
         </Select>
+        <NumberField name="quantity" bind:value={fQuantity} min={0} incrementLabel="増やす" decrementLabel="減らす">
+          {#snippet label()}数量(name=quantity){/snippet}
+        </NumberField>
         <RadioGroup name="plan" required bind:value={fPlan}>
           {#snippet label()}プラン(name=plan, required){/snippet}
           <Radio value="free">{#snippet label()}無料{/snippet}</Radio>

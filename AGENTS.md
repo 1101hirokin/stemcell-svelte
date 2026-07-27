@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -942,6 +942,43 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 現在地の項目もリンクのままでよい(今いる場所を選び直せることは害でない。Breadcrumb の最後とは事情が違う: あちらは道筋の終点で、行き先ではない)。
 - 領域自身は焦点を受けない。焦点とフォーカスリングは各行き先(合成した Link)に立ち、当たり判定の門(size.md §4)もそちらに生きる。
 - 移動の横取り(SPA の routing)は契約に無い。Link と同じく、移動は行き先(href)が起こす。横取りが要る実装は、土地の声でその口を持つ(Web は祖先での捕捉)。
+
+### NumberField(契約 0.0.0-alpha.0)
+
+数を打つ欄。打って入れることも、隣の操作や矢印キーで一つずつ動かすこともできる。TextField と別部品なのは増減という相互作用が増えるからである(field.md §6-2 の線。keyboard: numeric の欄は数字を打つだけで動かせない)。Web の機構は打てる欄に数の意味論(spinbutton)を載せる形で、native の input type=number は採らない: スピナーの見た目はブラウザ任せで指には小さく、焦点があるときのホイールで値が書き換わり、iOS で桁の扱いに難があり(DateField で経験)、GOV.UK が調査に基づいて type=number をやめている。native を捨てて失う能力(フォーム参加・format validation)は name と値のミラーで補う(Select の pointer 経路と同じ形)。書式(桁区切り・通貨)は持たない: 打っている最中の文字列を毎回解析し直すことになり、地域ごとの区切りまで抱える(Stat と同じ線)。
+
+props:
+
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。controlled の value と両立する非破壊の上乗せ。Web は native の name 属性。
+- `value`: number((省略可)) — いまの値。空(未入力)は値が無いことであって 0 ではない: 空を 0 に丸めると、まだ入れていない欄と 0 を入れた欄が区別できなくなる。必須かどうかは required が持つ(field.md §4)。値はアプリが所有し、器は change で変更を要求する(field.md §5)。
+- `placeholder`: string((省略可)) — 入力例のヒント。label の代替ではない(field.md §2: 入力した瞬間に消える名前は、名前ではない)。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
+- `readonly`: boolean(既定 false) — 読めるが編集できない。状態ではなく property である(state.md §6)。invalid と同時に成立しない(HTML が readonly を constraint validation から除外する)。コントラストの免除は受けない(Understanding SC 1.4.3 は disabled のみを例示)。
+- `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2。判定が値から来たかサーバから来たかは問わない)。intent を danger へ差し替える(state.md §7)。いつ立てるか(blur / submit / 逐次)は Stemcell が規範化しない(field.md §3「バリデーションの所有」)。
+- `required`: boolean(既定 false) — 必須。支援技術に届くことは Normative、視覚標示も部品が自動で出す(field.md §4。裁定済み 2026-07。記号そのものは seed)。
+- `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。
+- `keyboard`: "numeric" | "decimal"(既定 "numeric") — 入力様式のヒント(TextField から絞る)。整数だけの欄は numeric、小数を許す欄は decimal。text や email はこの部品に無い: 数の欄である。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る(Carbon / Ant / Spectrum も入力に複数段を持つ)。段が引く余白の配線は foundations/size.rules.json。
+- `min`: number((省略可)) — 下限。増減の操作でも打った値でも効く。
+- `max`: number((省略可)) — 上限。増減の操作でも打った値でも効く。
+- `step`: number(既定 1) — 一回の増減で動く量。大きく動かすキー(PageUp / PageDown)の倍率は実装の判断で、値そのものは規範にしない(web-keys.rules.json の arrows.number-field。slider と同じ)。
+- `incrementLabel`: string — 増やす操作の名前。絵だけの操作なので文字列で足りる(DatePicker の calendarLabel と同じ形)。DS は文言を持たない(i18n.md §1)。
+- `decrementLabel`: string — 減らす操作の名前。同上。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: number | null) => void — 値が変わったことを伝える。逐次であり(field.md §5)、payload は新しい値。欄が空になったときは null(0 ではない)。刻みに合わない値を打っている最中に器が書き換えない: 確定の時機はフォームの検証の関心である(patterns/forms.md)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 欄はいまの値と境界を伝える(Web の表現は spinbutton と aria-valuenow / aria-valuemin / aria-valuemax。native は各々の機構)。
+- 増減の操作は器が持ち、タブ順から外す。同じことが矢印キーでできるので、キーボード利用者に二重の停留を作らない(React Aria も同じ形)。操作自体は見えていなければならない: 指とマウスのための手段なので、hover で出す形は採らない。
+- 増減の操作にも名前が要る(incrementLabel / decrementLabel)。絵だけの操作である。
+- 当たり判定は 24px を下回らない(size.md §4。WCAG 2.2 SC 2.5.8)。指で押す操作である。
+- 打つ文字は触点で 16px を下回らない(field.md §2)。iOS が欄に焦点が乗るとページごと拡大するのを避ける。
+- 上で増え、下で減る(web-keys.rules.json の arrows.number-field)。Home / End は文字の移動に残す: 打てる欄で最小値へ飛ぶと、打っている最中に行頭へ戻れなくなる。
+- ホイールで値は動かない。長い表を送っている最中に、通り過ぎた欄の数量が書き換わる事故を避ける(送る操作と値を変える操作を同じ入力に重ねない)。
+- 解剖と所有は他のフィールドと同じである(label 必須・description・error ↔ invalid・値はアプリ所有・change 一本・name でフォーム参加。field.md §2 / §5 / §6-2)。
 
 ### Pagination(契約 0.0.0-alpha.1)
 

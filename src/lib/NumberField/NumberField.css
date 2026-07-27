@@ -1,0 +1,167 @@
+/* 数の欄(NumberField.md)。解剖と資材は TextField と同じ(field.md §2 / §5。分かれるのは相互作用だけ)。
+   足すのは増減の操作で、それは指とマウスのための手段なので見えていて、当たり判定を持つ。 */
+.sc-numberfield {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  /* フィールドは fill(横いっぱい)が既定。憲法第3条・field.md §2・layout.md §2(裁定 2026-07) */
+  inline-size: 100%;
+  min-inline-size: 0;
+  /* 中立の資材(TextField.md §2: resting の枠は color.app.border。hover 役が無いので hover を持たない) */
+  --_border: var(--color-app-border);
+  --_ring: var(--color-semantic-plain-focus-ring);
+}
+/* invalid は intent を danger へ差し替える(state.md §3.1 / §7) */
+.sc-numberfield[data-invalid='true'] {
+  --_border: var(--color-semantic-danger-border);
+  --_ring: var(--color-semantic-danger-focus-ring);
+}
+/* disabled が invalid に勝つ(state.md §3.1)。同詳細度の後勝ちで上書きする */
+.sc-numberfield[data-disabled='true'] {
+  --_border: var(--color-semantic-disabled-border);
+}
+
+.sc-numberfield-label {
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+/* 記号そのものは seed(field.md §4)。造形は expressive */
+.sc-numberfield-required {
+  margin-inline-start: 0.25em;
+}
+
+/* 内包時の高さは一次内容(入力)が決める(size.md §2 裁定)。縦 inset は入力に付き、器は横 inset だけを
+   持つ。align-items:stretch で affix は器の行高へ従属する(器を押し上げない) */
+.sc-numberfield-control {
+  display: flex;
+  align-items: stretch;
+  gap: var(--spacing-inline-md);
+  --_inset: var(--spacing-inset-md);
+  padding-inline: var(--_inset);
+  background: var(--color-app-surface);
+  border: var(--shape-border-width) solid var(--_border);
+  border-radius: var(--shape-semantic-control);
+  transition:
+    border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+}
+.sc-numberfield[data-size='sm'] .sc-numberfield-control {
+  --_inset: var(--spacing-inset-sm);
+}
+.sc-numberfield[data-size='lg'] .sc-numberfield-control {
+  --_inset: var(--spacing-inset-lg);
+}
+.sc-numberfield[data-disabled='true'] .sc-numberfield-control {
+  background: var(--color-semantic-disabled-soft-bg);
+  cursor: not-allowed;
+}
+
+.sc-numberfield-input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  border: none;
+  background: none;
+  /* 縦 inset は一次内容(入力)が持ち、器の高さを決める(size.md §2)。横は器の padding-inline が持つ */
+  padding-block: var(--_inset);
+  padding-inline: 0;
+  outline: none;
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--_sc-typed-font-size, var(--typography-body-md-font-size));
+  font-weight: var(--typography-body-md-font-weight);
+  line-height: var(--typography-body-md-line-height);
+  letter-spacing: var(--typography-body-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-numberfield-input::placeholder {
+  color: var(--color-app-fg-muted);
+}
+.sc-numberfield[data-disabled='true'] .sc-numberfield-input {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+
+
+/* focus-ring.md: :focus-visible + outline + offset。ring は箱(control)に出す。
+   :focus-within を使わないのは、end 内の対話要素(クリアボタン等)の focus で箱を光らせないため */
+.sc-numberfield-control:has(.sc-numberfield-input:focus-visible) {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+
+.sc-numberfield-description,
+.sc-numberfield-error {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-numberfield-description {
+  color: var(--color-app-fg-muted);
+}
+/* エラー文は danger.soft-fg の転用(TextField.md §2。コントラストはレビュー実測済み 10.45:1 / 11.04:1) */
+.sc-numberfield-error {
+  color: var(--color-semantic-danger-soft-fg);
+}
+
+
+/* 増減。タブ順からは外すが、押せることは見えていなければならない(hover で出す形は採らない)。
+   二つは隣り合わせる: 欄をまたいで左右に離すと、続けて押すのに指と視線が往復する。
+   横に並べるのは当たり判定のためである: 縦に積むと欄の高さを二つで分け合い、24px を割る(実測 21px)。
+   欄の高さは一次内容(打つ文字)が決めるので、二つ分の門を縦には取れない(size.md §2 / §4) */
+.sc-numberfield-stepper {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  background: none;
+  color: var(--color-app-fg-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 当たり判定の門(size.md §4。指で押す操作である)。二つ積んでも欄の高さに収まる範囲で最大に取る */
+  /* 当たり判定の門(size.md §4。指で押す操作である)。器の行高いっぱいに伸ばし、幅も門を満たす */
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  align-self: stretch;
+  flex: none;
+  padding-inline: var(--spacing-inset-sm);
+  transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+    var(--motion-feedback-easing);
+}
+/* 増減が居る側だけ器の横 inset を手放す(そこはボタンが縁と当たり判定を持つ。TextField の付属と
+   同じ扱い)。値の側は inset を残す: 手放すと打つ文字が枠に触れる。
+   隣り合う二つの間は空けない。二つで一組の操作なので、離すと別々の操作に見える */
+.sc-numberfield-control:has(.sc-numberfield-stepper) {
+  padding-inline-end: 0;
+  gap: 0;
+}
+/* 端のボタンの面は器の角の内側で切る。四角い面のまま置くと押した色が丸めた角から飛び出し、
+   ボタン側に同じ半径を与えると枠の曲がりとずれて隙間が出る(枠の太さのぶん内側に居るため)。
+   器で切れば、内側の曲がりは常に枠と一致する。焦点の輪は器の外に描かれるので切られない */
+.sc-numberfield-control {
+  overflow: hidden;
+}
+.sc-numberfield-stepper:hover:not(:disabled) {
+  background: var(--color-semantic-plain-soft-bg);
+}
+.sc-numberfield-stepper:disabled {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+/* 増減は焦点を奪わない。タブ順から外してある操作が押下で停留すると、続けて打てなくなる
+   (焦点は欄に残す)。押下の合図は面の色が担う */
+.sc-numberfield-stepper:focus {
+  outline: none;
+}
+
+/* 数は並べて比べる(表の中の数量)。字幅を揃える(typography.md §5 の数字の揃え) */
+.sc-numberfield-input {
+  font-variant-numeric: tabular-nums;
+}
