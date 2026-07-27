@@ -11,7 +11,7 @@
     role?: MessageRole;
     /** 面の量(emphasis.md §3 の4段)。器は role から姿を導かないので、変えたい消費者が渡す。 */
     variant?: MessageVariant;
-    /** 面と文字の intent。ブランド色の吹き出し(LINE の緑、iMessage の青)は primary が担う。 */
+    /** 面と文字の intent。ブランド色の吹き出しは primary、注意や失敗を帯びた通知は danger / warning。 */
     color?: MessageColor;
     /** 行のどちら側へ寄せるか(Cluster と同じ語彙)。自分の発話を行末側へ置くなら end。 */
     align?: MessageAlign;
@@ -38,8 +38,8 @@
 
 <!-- 発話は一つのまとまりとして届く(group)。名前は話者から作る(誰の発話かを視覚だけに頼らない。
      conversation §5)。器自身は焦点を受けず、中の押せる要素に焦点と当たり判定が生きる。
-     姿は role から導かない: 人間同士のチャットでは発話が全部 user になり、自分と相手の別も
-     誰の発話かも role からは出てこない(Message.md §2)。 -->
+     姿は role から導かない: role が答えるのは誰の発話かであって、どう見えるかではない。
+     どの発話の姿も消費者が選ぶ(Message.md §2)。 -->
 <div
   class="sc-message"
   data-role={role}

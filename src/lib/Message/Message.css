@@ -28,13 +28,42 @@
   border-radius: var(--shape-semantic-card);
 }
 
-/* intent の一家をチャンネル変数へ(色を1箇所で束ね、variant はチャンネルだけを見る。Button と同型) */
+/* intent の一家をチャンネル変数へ(色を1箇所で束ね、variant はチャンネルだけを見る。Button と同型)。
+   disabled を除く intent をそのまま開く: 見た目は消費者が選ぶもので、器が選べる色を絞る理由が無い */
 .sc-message[data-color='primary'] .sc-message-content {
   --_bg: var(--color-semantic-primary-bg);
   --_fg: var(--color-semantic-primary-fg);
   --_soft-bg: var(--color-semantic-primary-soft-bg);
   --_soft-fg: var(--color-semantic-primary-soft-fg);
   --_border: var(--color-semantic-primary-border);
+}
+.sc-message[data-color='danger'] .sc-message-content {
+  --_bg: var(--color-semantic-danger-bg);
+  --_fg: var(--color-semantic-danger-fg);
+  --_soft-bg: var(--color-semantic-danger-soft-bg);
+  --_soft-fg: var(--color-semantic-danger-soft-fg);
+  --_border: var(--color-semantic-danger-border);
+}
+.sc-message[data-color='warning'] .sc-message-content {
+  --_bg: var(--color-semantic-warning-bg);
+  --_fg: var(--color-semantic-warning-fg);
+  --_soft-bg: var(--color-semantic-warning-soft-bg);
+  --_soft-fg: var(--color-semantic-warning-soft-fg);
+  --_border: var(--color-semantic-warning-border);
+}
+.sc-message[data-color='success'] .sc-message-content {
+  --_bg: var(--color-semantic-success-bg);
+  --_fg: var(--color-semantic-success-fg);
+  --_soft-bg: var(--color-semantic-success-soft-bg);
+  --_soft-fg: var(--color-semantic-success-soft-fg);
+  --_border: var(--color-semantic-success-border);
+}
+.sc-message[data-color='info'] .sc-message-content {
+  --_bg: var(--color-semantic-info-bg);
+  --_fg: var(--color-semantic-info-fg);
+  --_soft-bg: var(--color-semantic-info-soft-bg);
+  --_soft-fg: var(--color-semantic-info-soft-fg);
+  --_border: var(--color-semantic-info-border);
 }
 .sc-message[data-color='plain'] .sc-message-content {
   --_bg: var(--color-semantic-plain-bg);

@@ -5,7 +5,7 @@ export const META = {
     speakerLabel: {}, // 話者の名前(契約 alpha.1。DS は文言を持たない)
     // 姿を選ぶ口(契約 alpha.2)。語彙は発明せず emphasis の4段・intent・Cluster の揃えを使う
     variant: { values: ['filled', 'soft', 'outlined', 'text'], default: 'soft' },
-    color: { values: ['primary', 'plain'], default: 'plain' },
+    color: { values: ['primary', 'danger', 'warning', 'success', 'info', 'plain'], default: 'plain' },
     align: { values: ['start', 'center', 'end'], default: 'start' },
   },
 } as const;
