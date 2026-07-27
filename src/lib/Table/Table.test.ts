@@ -32,7 +32,11 @@ const all = (c: HTMLElement, s: string) => [...c.querySelectorAll<HTMLElement>(s
 
 it('表の構造(名前・見出し・本体)を器が持つ', () => {
   const { container } = render(Table<Row>, { props });
-  expect(q(container, 'caption').textContent).toContain('注文');
+  // 名前は送る箱の外に置き、aria-labelledby で表へ結ぶ(横へ送っても名前が流れない)
+  const table = q(container, 'table');
+  const named = q(container, `#${table.getAttribute('aria-labelledby')}`);
+  expect(named.textContent).toContain('注文');
+  expect(named.closest('.sc-table-scroller')).toBeNull();
   expect(all(container, 'thead th').map((th) => th.getAttribute('scope'))).toEqual(['col', 'col']);
   expect(all(container, 'tbody tr').length).toBe(2);
   // セルは焦点を受けない(表であって grid ではない)

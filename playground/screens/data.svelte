@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion, DateField, Calendar, DatePicker, DateRangePicker, Table, Select } from '../../src/lib';
+  import { Disclosure, Cluster, Card, Tag, Text, List, Accordion, DateField, Calendar, DatePicker, DateRangePicker, Table, Select, Menu, Icon } from '../../src/lib';
   import type { TableColumn, TableSort } from '../../src/lib';
 
   let faqOpen = $state(false);
@@ -36,6 +36,7 @@
     { id: 'status' },
     { id: 'date', sortable: true },
     { id: 'amount', align: 'end', sortable: true },
+    { id: 'actions', align: 'end' },
   ];
   const columnLabel: Record<string, string> = {
     id: '注文番号',
@@ -43,12 +44,13 @@
     status: '状態',
     date: '注文日',
     amount: '金額',
+    actions: '操作',
   };
   let sort = $state<TableSort | undefined>({ column: 'date', direction: 'descending' });
   let selectedOrders = $state<string[]>(['o-1042']);
   let activated = $state('(まだ)');
   let overflow = $state<'scroll' | 'wrap'>('scroll');
-  let sticky = $state<'none' | 'start' | 'end' | 'both'>('start');
+  let sticky = $state<'none' | 'start' | 'end' | 'both'>('both');
   // 並べ替えはアプリがやる(器は要求を返すだけ)
   const sortedOrders = $derived.by(() => {
     if (!sort) return orders;
@@ -224,7 +226,21 @@
       {#snippet caption()}直近の注文{/snippet}
       {#snippet header(column)}{columnLabel[column.id]}{/snippet}
       {#snippet cell(row, column)}
-        {#if column.id === 'amount'}
+        {#if column.id === 'actions'}
+          <Menu
+            size="sm"
+            placement="block-end"
+            items={[
+              { id: 'detail', label: '詳細を見る', icon: 'search' },
+              { id: 'duplicate', label: '複製', icon: 'clipboard' },
+              { id: 'invoice', label: '請求書を送る', icon: 'share', description: '取引先へメールで送る' },
+              { id: 'cancel', label: '取消', icon: 'delete', disabled: row.status === '取消' },
+            ]}
+            onselect={(id) => (activated = `${row.id} / ${id}`)}
+          >
+            {#snippet trigger()}<Icon name="dots.horizontal" label="この注文の操作" />{/snippet}
+          </Menu>
+        {:else if column.id === 'amount'}
           {row.amount.toLocaleString('ja-JP')} 円
         {:else if column.id === 'status'}
           <Tag>{row.status}</Tag>

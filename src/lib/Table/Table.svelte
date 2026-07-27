@@ -63,6 +63,7 @@
   }: Props = $props();
 
   const uid = $props.id();
+  const captionId = `${uid}-caption`;
   // 選択の列は、値と受け口が揃ったときだけ現れる(真偽値の口を別に持たない。第3条)
   const selectable = $derived(!!selected && !!onselectedchange);
   const selectedSet = $derived(new Set(selected ?? []));
@@ -133,9 +134,11 @@
   data-more-start={more.start}
   data-more-end={more.end}
 >
+  <!-- 表の名前は送る箱の外に置く。中に置くと横へ送ったときに名前まで流れていき、何の表か読めなくなる。
+       名前としては aria-labelledby で表へ結ぶので、支援技術への届き方は caption と変わらない -->
+  <div class="sc-table-caption" id={captionId}>{@render caption()}</div>
   <div class="sc-table-scroller" bind:this={scroller} onscroll={measure}>
-    <table class="sc-table-grid">
-      <caption class="sc-table-caption">{@render caption()}</caption>
+    <table class="sc-table-grid" aria-labelledby={captionId}>
       <thead>
         <tr>
           {#if selectable}

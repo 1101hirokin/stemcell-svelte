@@ -28,9 +28,9 @@
   color: var(--color-app-foreground);
 }
 
-/* 表の名前。見せ方は Expressive で、ここでは見出しとして出す(隠したい消費者は自分で隠せる) */
+/* 表の名前。送る箱の外に置くので、横へ送っても流れない。見せ方は Expressive で、ここでは見出しとして
+   出す(隠したい消費者は自分で隠せる) */
 .sc-table-caption {
-  text-align: start;
   padding-block-end: var(--spacing-stack-sm);
   font-family: var(--typography-label-md-font-family);
   font-size: var(--typography-label-md-font-size);
