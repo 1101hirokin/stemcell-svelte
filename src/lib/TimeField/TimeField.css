@@ -8,15 +8,19 @@
   /* フィールドは fill(横いっぱい)が既定。憲法第3条・field.md §2・layout.md §2(裁定 2026-07) */
   inline-size: 100%;
   min-inline-size: 0;
-  /* 中身の長さが決まっている欄なので、器いっぱいまでは広げない(layout.md §2 の例外)。
-     10文字の日付が 1400px の箱に入っても情報は増えず、桁が左端へ寄って押しにくくなる。
+  /* 中身の長さが決まっている欄は上限で頭打ちにする(layout.md §2 の例外)。上限は型ごとに置く:
+     時刻は日付より桁が少ないので、同じ上限にすると最後の桁の後ろが空く。業界も型ごとに既定の幅を
+     持つ(Carbon「ピッカーは既定の幅を持ち、フォームの中では他の欄に合わせて調整できる」)。
      値は幅の段の閉じた集合(8/12/16/20/24/32rem。layout.md §9)から採る */
-  /* 中身の長さが決まっている欄は上限で頭打ちにする(layout.md §2)。日付の欄と同じ上限にして、
-     並べたときに幅が揃うようにする */
-  max-inline-size: 12rem;
+  max-inline-size: 8rem;
   /* 中立の資材(TextField.md §2: resting の枠は color.app.border。hover 役が無いので hover を持たない) */
   --_border: var(--color-app-border);
   --_ring: var(--color-semantic-plain-focus-ring);
+}
+/* 午前・午後や秒が付くと桁が増えるので、上限も一段上げる(中身で決まる幅である) */
+.sc-timefield:has(.sc-timefield-period),
+.sc-timefield:has([data-segment='second']) {
+  max-inline-size: 12rem;
 }
 /* invalid は intent を danger へ差し替える(state.md §3.1 / §7) */
 .sc-timefield[data-invalid='true'] {
