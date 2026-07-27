@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, Pagination, Popover, Radio, RadioGroup, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -349,6 +349,47 @@ slots(Svelte では snippet。default は子要素をそのまま):
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 見た目と意味を持たない器である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
+
+### Code(契約 0.0.0-alpha.0)
+
+文中のコード。段落の途中に混ざる短い断片(npm install / --flag / useState)を、等幅で単色に描き、「ここはコードである」を支援技術へ届ける。塊(CodeBlock)と別部品にするのは必要とするものが違うからで、塊は横送り・焦点・ヘッダー・行番号を持つが文中の断片はそのどれも持たない。一つにまとめると、文中の一語に対して送れる領域と焦点の判定が付いてくる。業界も分かれており、Carbon は一部品で三形を扱い、Radix Themes と Chakra は文中を別部品に切っている。名前は命名規約(native HTML 名の踏襲)から code 要素そのものを採る。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `children`(必須) — コードの断片。器は解釈しない(着色しないので、中身は文字である)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 「ここはコードである」が支援技術へ届く(Web の表現は code 要素＝ARIA の code ロール。native は各々の機構)。等幅と薄い面だけで伝えると、読み上げでは地の文と区別が付かない。
+- 器自身は焦点を受けない。文中の一語に操作を足さない(複写も持たない)。
+- 折り返しは切れ目のない長い連なりだけ許す(typography.md §5 の三つ目)。長い識別子が器を突き破らないためで、語の途中で切ってよいという意味ではない。
+
+### CodeBlock(契約 0.0.0-alpha.0)
+
+コードの塊。等幅で、書いたとおりの空白と改行を保ち、行を折らずに横へ送る器。値は文字列で受け取る(着色済みの木ではない): 持ち出すべきは着色前の文字であり、生成されるコードは少しずつ届くので、届いた分をそのまま渡せる形でないと器がその都合を背負う。着色は器の仕事ではない(言語の集合が閉じないので辞書を持てば器が肥大する。第3条)が、色の値は DS が持つ(color.md §10 の6役。RFC 0018。器械の既定テーマに任せると明暗の較正が規約の外で行われ、暗いテーマで注釈が地に沈む)。ヘッダーは場所だけ持ち、複写もファイル名もアプリが置く。文中の短いコードは Code が持つ。
+
+props:
+
+- `code`: string — コードの文字列。器が持つ真実で、複写が渡すのもこれである。着色済みの中身を children で差した場合も、この値は受け取ったままにする(着色済みの木から文字を拾い直すと行番号や装飾が混ざる)。
+- `language`: string((省略可)) — 言語の印(ts / python / sql)。自由な文字列である: 世の中の言語は増え続けるので DS が列挙できない。器は解釈せず、着色の器械が読む印として素通しする(Web の表現は code 要素の language-* クラス)。画面に出すかどうかは Expressive。
+- `label`: string — 送れる領域の名前。溢れているとき、この器はキーボードの焦点を受ける(WCAG 2.2 SC 2.1.1。Chrome と Firefox は自動で与えるが Safari は与えない)ので、名前が要る。DS は文言を持たない(i18n.md §1)。
+- `wrap`: boolean(既定 false) — 行を折り返すか。既定は折らない: 行が構文の単位で、段付けが入れ子の深さを表すからである(typography.md §5 のコードの例外)。折るのは器の端であって、語や禁則の規則ではない。狭い器で読めれば足りる場面のための口。
+- `lineNumbers`: boolean(既定 false) — 行番号を出すか。既定は出さない(そのまま複写する使い方の邪魔になる)。折り返した先には振らない(番号は論理行に付く)。番号は行頭側に貼り付き、横送りで流れない。支援技術からは隠す(全行に数字が挟まると中身が追えない)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `children` — 着色済みの中身。省略すると器が code をそのまま描く。着色の器械の出力を描くための逃げ道で、これが無いと着色したい消費者は器ごと捨てることになる。差されても複写は code を渡す。
+- `header` — 本体と線で区切られた上部の領域。何を置くかは器が決めない(言語名・ファイル名・複写・実行はアプリの政策)。出すかどうかは別の prop で切り替えず、差されたかどうかで決める: 切り替えの prop を別に立てると「出すと言われたが中身が無い」という無意味な組が生まれ、真実の源が二つになる(Tag と同型)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 空白と改行が書いたとおりに保たれる(Web の表現は pre + code。ARIA の code ロールを native が与える)。
+- 溢れているときだけキーボードの焦点を受ける(WCAG 2.2 SC 2.1.1)。溢れていない塊にまで焦点を置かない: 押せもしない場所での停留はキーボード利用者の邪魔になる。焦点を受けるからには名前が要る(label)。
+- 行番号は支援技術から隠す。全行に数字が挟まると中身が追えなくなる。
+- 行番号を選択して複写したときに番号が混ざらない。混ざるコードは貼り付けても動かないので、これは Normative である。
+- 行番号の色は本文より弱くてよいが 4.5:1 を割らない。読める文字である(WCAG 2.2 SC 1.4.3)。
+- 構文の色は補助であって、意味を運ぶのは文字そのものである(SC 1.4.1)。着色の器械が無い環境では全体が本文の色で描かれ、コードは読める(第7条)。
+- 複写を器が持たない場合も作法は変わらない: 押した結果を利用者へ届け、焦点は動かさず、渡すのは着色前の文字列である(SC 4.1.3)。
 
 ### Container(契約 0.0.0-alpha.0)
 

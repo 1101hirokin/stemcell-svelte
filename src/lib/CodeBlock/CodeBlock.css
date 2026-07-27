@@ -1,0 +1,144 @@
+/* コードの塊(CodeBlock.md)。器が持つのは、書いたとおりに読めることと、行を保つことと、置き場所だけ。 */
+.sc-codeblock {
+  background: var(--color-app-surface);
+  /* 中身の幅で親を押し広げない。器の中で送る(flex/grid の子でも縮める) */
+  min-inline-size: 0;
+  border: var(--shape-border-width) solid var(--color-app-divider);
+  border-radius: var(--shape-semantic-card);
+  /* 角の内側で中身を切る(送れる箱が角から食み出さない) */
+  overflow: hidden;
+  color: var(--color-app-foreground);
+}
+
+/* 本体と線で区切られた上部。中身はアプリが置く(器は場所だけ持つ) */
+.sc-codeblock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-inline-md);
+  padding-inline: var(--spacing-inset-md);
+  padding-block: var(--spacing-inset-sm);
+  border-block-end: var(--shape-border-width) solid var(--color-app-divider);
+  color: var(--color-app-fg-muted);
+}
+
+.sc-codeblock-scroller {
+  overflow: auto;
+  /* 最大の高さは逃げ道として開ける。畳み込みは持たない(超えたぶんは縦へ送り、畳むのは
+     Disclosure と組んだアプリの仕事。CodeBlock.md §2) */
+  max-block-size: var(--sc-codeblock-max-block-size, none);
+}
+.sc-codeblock-scroller:focus {
+  outline: none;
+}
+/* 溢れているときだけ焦点を受ける。受けた以上は見えるべきなので、内側へ引いて描く(器の端で切れる) */
+.sc-codeblock-scroller:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.sc-codeblock-pre {
+  margin: 0;
+  padding: var(--spacing-inset-md);
+  /* 行は折らない。行が構文の単位で、段付けが入れ子の深さを表す(typography.md §5 のコードの例外) */
+  white-space: pre;
+  /* 幅は中身が決める。器より広ければ scroller が送る */
+  inline-size: max-content;
+  min-inline-size: 100%;
+  box-sizing: border-box;
+}
+.sc-codeblock[data-wrap] .sc-codeblock-pre {
+  white-space: pre-wrap;
+  inline-size: auto;
+  /* 折るのは器の端であって、語や禁則の規則ではない。word-break と line-break は持ち込まない */
+  overflow-wrap: anywhere;
+}
+
+.sc-codeblock-code {
+  font-family: var(--typography-mono-md-font-family);
+  font-size: var(--typography-mono-md-font-size);
+  font-weight: var(--typography-mono-md-font-weight);
+  line-height: var(--typography-mono-md-line-height);
+  letter-spacing: var(--typography-mono-md-letter-spacing);
+  counter-reset: sc-line;
+}
+
+/* 行番号。数えるのは CSS で、行の中身は文字のままなので複写に混ざらない。
+   content の alt 文字列(/ "")で支援技術からは外れる: 全行に数字が挟まると中身が追えなくなる。
+   .line も見るのは、着色の器械が行ごとの要素をその名前で吐くためである(Shiki の慣行) */
+.sc-codeblock-line,
+.sc-codeblock-code .line {
+  counter-increment: sc-line;
+}
+.sc-codeblock[data-line-numbers] .sc-codeblock-line::before,
+.sc-codeblock[data-line-numbers] .sc-codeblock-code .line::before {
+  content: counter(sc-line) / '';
+  display: inline-block;
+  /* 桁が増えても本文が動かない。数字の幅で先に場所を取る */
+  min-inline-size: 2.5ch;
+  /* 隙間は padding で取る。margin だと面が届かず、送った文字が番号の脇から透ける */
+  padding-inline-end: var(--spacing-inline-md);
+  text-align: end;
+  /* 横へ送っても行頭側に留まる。長い行を送っても何行目かが見える */
+  position: sticky;
+  inset-inline-start: 0;
+  background: var(--color-app-surface);
+  color: var(--color-app-fg-muted);
+  /* 選んでも入らない。番号が混ざったコードは貼り付けても動かない */
+  user-select: none;
+}
+
+/* 構文の色(color.md §10。RFC 0018)。着色の器械が吐くクラスへ写す。器械が無ければ全体が本文の色で
+   描かれ、コードは読める(第7条)。Prism は .token.<役>、highlight.js は .hljs-<役> を吐く */
+.sc-codeblock-code .token.comment,
+.sc-codeblock-code .token.prolog,
+.sc-codeblock-code .hljs-comment,
+.sc-codeblock-code .hljs-quote {
+  color: var(--color-code-comment);
+}
+.sc-codeblock-code .token.keyword,
+.sc-codeblock-code .token.atrule,
+.sc-codeblock-code .hljs-keyword,
+.sc-codeblock-code .hljs-built_in {
+  color: var(--color-code-keyword);
+}
+.sc-codeblock-code .token.string,
+.sc-codeblock-code .token.char,
+.sc-codeblock-code .token.attr-value,
+.sc-codeblock-code .hljs-string,
+.sc-codeblock-code .hljs-attr {
+  color: var(--color-code-string);
+}
+.sc-codeblock-code .token.number,
+.sc-codeblock-code .token.boolean,
+.sc-codeblock-code .hljs-number,
+.sc-codeblock-code .hljs-literal {
+  color: var(--color-code-number);
+}
+.sc-codeblock-code .token.function,
+.sc-codeblock-code .hljs-title,
+.sc-codeblock-code .hljs-section {
+  color: var(--color-code-function);
+}
+.sc-codeblock-code .token.class-name,
+.sc-codeblock-code .token.tag,
+.sc-codeblock-code .hljs-type,
+.sc-codeblock-code .hljs-name {
+  color: var(--color-code-type);
+}
+
+/* 色をインラインで書く器械(Shiki)へは、CSS 変数のテーマとして同じ役を渡す。
+   変数の名前は Shiki の createCssVariablesTheme の既定(--shiki-*)に合わせる */
+.sc-codeblock {
+  --shiki-comment: var(--color-code-comment);
+  --shiki-keyword: var(--color-code-keyword);
+  --shiki-string: var(--color-code-string);
+  --shiki-string-expression: var(--color-code-string);
+  --shiki-constant: var(--color-code-number);
+  --shiki-number: var(--color-code-number);
+  --shiki-function: var(--color-code-function);
+  --shiki-token-function: var(--color-code-function);
+  --shiki-punctuation: var(--color-app-foreground);
+  --shiki-foreground: var(--color-app-foreground);
+  --shiki-background: transparent;
+}

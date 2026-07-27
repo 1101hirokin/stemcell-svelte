@@ -1,0 +1,18 @@
+/* 文中のコード(Code.md)。段落の途中に混ざるので、周囲の行送りを乱さないのが責務である。 */
+.sc-code {
+  font-family: var(--typography-mono-sm-font-family);
+  /* 等幅は同じ段でも字面が大きく見えるので、周囲より一段小さい役で釣り合わせる(§2 の表現) */
+  font-size: var(--typography-mono-sm-font-size);
+  font-weight: var(--typography-mono-sm-font-weight);
+  letter-spacing: var(--typography-mono-sm-letter-spacing);
+  color: var(--color-app-foreground);
+  /* 行の高さを押し広げない。文中に混ざるので行送りは周囲のものに従う */
+  line-height: inherit;
+  background: var(--color-semantic-plain-soft-bg);
+  border-radius: var(--shape-semantic-tag);
+  padding-inline: 0.25em;
+  padding-block: 0.125em;
+  /* 折り返すのは切れ目のない長い連なりだけ(typography.md §5 の三つ目)。語の途中で切ってよいという
+     意味ではないので、word-break と line-break の判断は持ち込まない */
+  overflow-wrap: anywhere;
+}
