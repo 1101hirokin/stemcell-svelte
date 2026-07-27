@@ -99,3 +99,15 @@ it('打ちかけの数字は桁をまたがない', async () => {
   expect(seg(container, 'minute').value).toBe('03');
   expect(onchange).toHaveBeenLastCalledWith('01:03');
 });
+
+it('午前・午後は押して切り替えられる(触点では打つ文字が無い)', async () => {
+  const onchange = vi.fn();
+  const { container } = render(TimeField, { props: { ...base, hourCycle: '12', value: '18:30', onchange } });
+  const period = seg(container, 'dayPeriod');
+  // 打てる文字を持たない桁なので、鍵盤を呼ばない
+  expect(period.getAttribute('inputmode')).toBe('none');
+  await fireEvent.pointerUp(period);
+  expect(onchange).toHaveBeenLastCalledWith('06:30');
+  await fireEvent.pointerUp(period);
+  expect(onchange).toHaveBeenLastCalledWith('18:30');
+});

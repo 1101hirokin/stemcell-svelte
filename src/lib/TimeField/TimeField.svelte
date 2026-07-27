@@ -197,6 +197,13 @@
 
   const select = (el: HTMLInputElement) => el.setSelectionRange(0, el.value.length);
 
+  // 午前・午後は打てる文字を持たない桁である。触点では鍵盤を出しても打つものが無く、
+  // 手が止まる(実機で詰んだ)。押して切り替える道を開ける。二値なので押すたびに入れ替わる
+  const onpointerup = (type: TimeSegment) => {
+    if (type !== 'dayPeriod' || disabled || readonly) return;
+    togglePeriod(!isPM);
+  };
+
   const shown = (type: TimeSegment) => {
     if (type === 'dayPeriod') return parts.hour == null ? periods.am : isPM ? periods.pm : periods.am;
     if (type === 'hour') return showSegment(shownHour, 2, 'hh');
@@ -239,7 +246,7 @@
         data-empty={type === 'dayPeriod' ? parts.hour == null : parts[type] == null}
         type="text"
         role="spinbutton"
-        inputmode={type === 'dayPeriod' ? 'text' : 'numeric'}
+        inputmode={type === 'dayPeriod' ? 'none' : 'numeric'}
         autocomplete="off"
         autocorrect="off"
         spellcheck="false"
@@ -259,7 +266,8 @@
         aria-readonly={readonly ? 'true' : undefined}
         onkeydown={(e) => onkeydown(e, type)}
         oninput={(e) => oninput(e, type)}
-        onfocus={(e) => select(e.currentTarget)}
+        onpointerup={() => onpointerup(type)}
+        onfocus={(e) => (type === 'dayPeriod' ? undefined : select(e.currentTarget))}
       />
       {#if i < order.length - 1 && order[i + 1] !== 'dayPeriod'}
         <span class="sc-timefield-separator" aria-hidden="true">:</span>

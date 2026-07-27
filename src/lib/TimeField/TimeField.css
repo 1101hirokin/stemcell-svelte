@@ -210,8 +210,12 @@
   color: var(--color-app-fg-muted);
   padding-inline: 0.125em;
 }
-/* 午前・午後の桁は数の桁と種類が違うので、数の並びから少し離す(桁の間の間隔は inline の段から引く) */
+/* 午前・午後の桁は数の桁と種類が違うので、数の並びから少し離す(桁の間の間隔は inline の段から引く)。
+   打てる文字を持たない桁なので、文字を打つ合図(caret)も選択の把手も出さない。押すと入れ替わる */
 .sc-timefield-segment[data-segment='dayPeriod'] {
   margin-inline-start: var(--spacing-inline-sm);
   text-transform: uppercase;
+  caret-color: transparent;
+  user-select: none;
+  cursor: pointer;
 }
