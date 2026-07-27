@@ -138,6 +138,12 @@
 .sc-numberfield-control:has(.sc-numberfield-stepper) {
   padding-inline: 0;
 }
+/* 端のボタンの面は器の角の内側で切る。四角い面のまま置くと押した色が丸めた角から飛び出し、
+   ボタン側に同じ半径を与えると枠の曲がりとずれて隙間が出る(枠の太さのぶん内側に居るため)。
+   器で切れば、内側の曲がりは常に枠と一致する。焦点の輪は器の外に描かれるので切られない */
+.sc-numberfield-control {
+  overflow: hidden;
+}
 .sc-numberfield-stepper:hover:not(:disabled) {
   background: var(--color-semantic-plain-soft-bg);
 }
