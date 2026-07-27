@@ -1,6 +1,6 @@
 <script lang="ts">
   import {
-    Button, IconButton, Stack, Cluster, Icon, Divider, Badge, Avatar, Tag, Text, Code, CodeBlock, EmptyState, Card, toast,
+    Button, IconButton, Stack, Cluster, Icon, Divider, Badge, Avatar, Tag, Text, Code, CodeBlock, EmptyState, Card, Stat, Grid, toast,
   } from '../../src/lib';
 
   // コードの塊(CodeBlock)。値は文字列で、着色は器の外。ここでは素のまま(器械を入れていない)
@@ -241,4 +241,42 @@ export function sum(orders: Order[]): number {
         </EmptyState>
       </Card>
     </div>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">Stat(指標)</Text>
+    <Text as="p" variant="body-sm" muted>
+      値は整形済みの文字列で受け取る(桁も通貨もアプリの政策)。変化は向きだけを器が持ち、良し悪しは
+      消費者が intent で渡す。増えたら悪い指標(解約率)があるので、器は向きから評価を導かない。変化の
+      意味は文字が運び、印は装飾である。数字は字幅を揃えて並ぶ。
+    </Text>
+    <Grid min="12rem" gap="md">
+      <Card outlined>
+        <Stat trend="up" color="success">
+          {#snippet label()}今月の売上{/snippet}
+          {#snippet value()}1,284,000 円{/snippet}
+          {#snippet support()}前月比 +12%{/snippet}
+        </Stat>
+      </Card>
+      <Card outlined>
+        <Stat trend="up" color="danger">
+          {#snippet label()}解約率{/snippet}
+          {#snippet value()}3.4 %{/snippet}
+          {#snippet support()}前月比 +0.8pt{/snippet}
+        </Stat>
+      </Card>
+      <Card outlined>
+        <Stat trend="flat">
+          {#snippet label()}平均応答時間{/snippet}
+          {#snippet value()}128 ms{/snippet}
+          {#snippet support()}前週から変わらず{/snippet}
+        </Stat>
+      </Card>
+      <Card outlined>
+        <Stat>
+          {#snippet label()}登録済みの取引先{/snippet}
+          {#snippet value()}1,024{/snippet}
+        </Stat>
+      </Card>
+    </Grid>
   </section>

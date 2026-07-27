@@ -63,7 +63,8 @@
   white-space: nowrap;
 }
 
-/* 桁で読む列は行末側へ寄せ、等幅の字形で並べる(桁が縦に揃わないと見比べられない) */
+/* 桁で読む列は行末側へ寄せ、字幅の揃った数字で並べる(typography.md §5 の数字の揃え。
+   桁が縦に揃わないと見比べられない) */
 .sc-table-grid :where(th, td)[data-align='end'] {
   text-align: end;
   font-variant-numeric: tabular-nums;
