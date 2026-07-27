@@ -32,3 +32,20 @@ it('名乗りと補助を差せば同じ器に載る', () => {
   expect(container.querySelector('.sc-message-speaker')?.textContent).toContain('AI');
   expect(container.querySelector('.sc-message-meta')?.textContent).toContain('12:04');
 });
+
+it('姿は role から導かず、渡された variant と align が出る', () => {
+  const { container } = render(Message, {
+    props: { ...base, role: 'user', variant: 'filled', color: 'primary', align: 'end' },
+  });
+  const el = container.querySelector('.sc-message') as HTMLElement;
+  expect(el.dataset.variant).toBe('filled');
+  expect(el.dataset.color).toBe('primary');
+  expect(el.dataset.align).toBe('end');
+});
+
+it('既定の姿は話者によらず同じ(人間同士のチャットでは発話が全部 user になる)', () => {
+  const { container } = render(Message, { props: { ...base, role: 'user', speakerLabel: '田中' } });
+  const el = container.querySelector('.sc-message') as HTMLElement;
+  expect(el.dataset.variant).toBe('soft');
+  expect(el.dataset.align).toBe('start');
+});

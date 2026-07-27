@@ -57,15 +57,26 @@
     if (following === undefined) onfollowingchange?.(next);
   };
 
+  // 新着とは末尾に足されたものを指す。末尾の要素が入れ替わったか、末尾の要素が伸びたかで判じる。
+  // 上や途中への差し込み(遡って履歴を読み込む)は末尾を動かさないので新着ではない
+  const tail = () => {
+    const last = content?.lastElementChild as HTMLElement | null;
+    return { last, size: last?.offsetHeight ?? 0 };
+  };
+
   // 中身が伸びたときと器が縮んだときに動く。末尾を追っているなら送り、離れているなら新着があることを
   // 覚える(読んでいる最中に画面を引きずらない。第1条)。器の伸縮は新着ではないので覚えない
   $effect(() => {
     const box = content;
     const view = scroller;
     if (!box || !view || typeof ResizeObserver === 'undefined') return;
+    let seen = tail();
     const ro = new ResizeObserver((entries) => {
+      const now = tail();
+      const arrived = now.last !== seen.last || now.size > seen.size;
+      seen = now;
       if (followingNow) toBottom();
-      else if (entries.some((entry) => entry.target === box)) unseen = true;
+      else if (arrived && entries.some((entry) => entry.target === box)) unseen = true;
     });
     ro.observe(box);
     ro.observe(view);

@@ -395,6 +395,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 末尾から離れているあいだは追わない。読んでいる最中に画面を送るのは利用者の操作を奪うことである(第1条)。離れているあいだの新着は、戻る手段とともに知らせる。
 - 器が縮んだとき(画面キーボードが開く、窓が小さくなる)も、末尾に居たなら末尾に留まる。縮んだだけで末尾から押し出されると、利用者は何もしていないのに新着が読めなくなる。縮んだことは新着ではないので戻る手段は出さない(alpha.1 で追記: 実装が見つけた)。
 - 器自身は焦点を受けない。発話の中に押せる要素があれば、焦点とフォーカスリングと当たり判定はその要素に生きる(List / Sources と同じ形)。
+- 新着とは末尾に足されたものを指す。上や途中への差し込み(遡って履歴を読み込む、既読の印を挟む)は新着ではないので知らせない。器は履歴の読み込みを持たないが、持たないものを誤って知らせないことは器の責任である(alpha.1 で追記: 実装が見つけた)。
 
 ### Cover(契約 0.0.0-alpha.0)
 
@@ -831,13 +832,16 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - トリガーを Menu が所有するのは a11y の保証のため(RFC 0008)。ARIA の配線を消費者の任意要素へ委ねると穴が生じうる。Button が閉じた契約(rest を転送しない)であることとも整合する。自前トリガーが要るときは Popover プリミティブ + arrows.menu を消費者が合成する(第4条の逃げ道)。
 - 標的の門: size.md §4。
 
-### Message(契約 0.0.0-alpha.1)
+### Message(契約 0.0.0-alpha.2)
 
-会話のひと続きの発話(turn)を描く器。conversation §2 の primitive は role を帯びた content unit の列で、turn はその列に対する描画時の view である(§6 で Expressive と定めた grouping の形状)。この器はその view を一つ描くだけで、データが turn にネストしていても平坦な列でも上に置ける。中身(文・絵・出典・道具・推論)は解釈しない: part の集合は閉じており(§3)、part ごとの描画を器が持つと part が増えるたびに器を直すことになり、data の不透明パススルーを受け取れなくなる。吹き出しの形(面を持つか地に置くか、左右に寄せるか)は Expressive で、業界も割れている(ChatGPT は利用者の発話だけ面を持ち、Slack は両方とも地に置く)。RFC 0014 の seed(status: draft)。native 写像の一次確認まで暫定。
+会話のひと続きの発話(turn)を描く器。conversation §2 の primitive は role を帯びた content unit の列で、turn はその列に対する描画時の view である(§6 で Expressive と定めた grouping の形状)。この器はその view を一つ描くだけで、データが turn にネストしていても平坦な列でも上に置ける。中身(文・絵・出典・道具・推論)は解釈しない: part の集合は閉じており(§3)、part ごとの描画を器が持つと part が増えるたびに器を直すことになり、data の不透明パススルーを受け取れなくなる。吹き出しの形(面を持つか地に置くか、左右に寄せるか)は Expressive で、業界も割れている(ChatGPT は利用者の発話だけ面を持ち、Slack は両方とも地に置き、LINE と iMessage は自分の発話をブランド色で塗る)。割れているからこそ選ぶ口を持ち、語彙は発明しない: 面の量は emphasis の4段(variant)、色は intent(color)、寄せは start/center/end(align)。姿は role から導かない: 人間同士のチャットでは発話が全部 user で、自分と相手の別も誰の発話かも role からは出てこない(alpha.2)。RFC 0014 の seed(status: draft)。native 写像の一次確認まで暫定。
 
 props:
 
-- `role`: "user" | "assistant" | "system" | "tool" — この発話の話者(conversation §2 の閉集合をそのまま採る。部品が role を発明しない)。視覚の寄せ方や面の有無をここから導くかは Expressive だが、支援技術へ届けることは Normative である。
+- `role`: "user" | "assistant" | "system" | "tool" — この発話の話者(conversation §2 の閉集合をそのまま採る。部品が role を発明しない)。帰属であって見た目ではない: 器は role から姿を導かず、寄せ方と面の量は variant / color / align が受け取る(alpha.2)。支援技術へ届けることは Normative である。
+- `variant`: "filled" | "soft" | "outlined" | "text"(既定 "soft") — 発話の面の量(emphasis.md §3 の4段。部品は発明せず部分集合を選ぶ。§5)。filled は intent の面に fg、soft は soft-bg に soft-fg、outlined は枠だけ、text は地に置く。ChatGPT の助手は text、利用者は soft、LINE と iMessage の自分の発話は filled にあたる。alpha.2 で追加: 割れている表現を消費者が選べないと、実装の内側のクラス名へ CSS を当てることになり共通言語の外へ出る。
+- `color`: "primary" | "plain"(既定 "plain") — 面と文字の intent(color.md)。既定の plain は中立で、ブランド色の吹き出し(LINE の緑、iMessage の青)は primary が担う。danger や warning は発話の意味づけであって器の仕事ではないので採らない(部分集合の選択。emphasis.md §5)。alpha.2 で追加。
+- `align`: "start" | "center" | "end"(既定 "start") — 行のどちら側へ寄せるか(Cluster と同じ語彙)。自分の発話を行末側へ置く形(LINE / iMessage / ChatGPT)は end、参加の知らせのような中央寄せは center。role から導かないのは、人間同士のチャットで話者が全員 user になるからである。alpha.2 で追加。
 - `speakerLabel`: string — 話者の名前。支援技術がこの発話を名指すのに使う(誰の発話かを視覚だけに頼らない。conversation §5)。DS は文言を持たないので消費者が与える(「あなた」「アシスタント」のどれを出すかはアプリの政策。i18n.md §1)。絵だけの操作の名前を文字列で受けるのと同じ形(DatePicker の calendarLabel。alpha.1 で追加)。
 
 slots(Svelte では snippet。default は子要素をそのまま):
@@ -854,6 +858,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 器自身は焦点を受けない。発話の中に押せる要素があれば、焦点とフォーカスリングと当たり判定はその要素に生きる(List / Sources と同じ形)。
 - system の発話を出すかどうかは消費者が決める(conversation §2: 表示されるとは限らない)。器は渡されたものを描くだけで、role を見て隠さない。
 - 発話を縦に並べる器は持たない。新しい発話の告知(streaming.md)と末尾への自動追尾は、会話全体の器の仕事である(Message.md §4 の未決)。
+- 姿は role から導かない。人間同士のチャットでは発話が全部 user になり、自分と相手の別も誰の発話かも role からは出てこない。誰かは speakerLabel が届け、どちらへ寄せるかは画面の政策である(alpha.2)。
 
 ### NavList(契約 0.0.0-alpha.1)
 

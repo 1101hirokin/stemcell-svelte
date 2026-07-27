@@ -36,6 +36,12 @@
       at: '12:04',
     },
   ]);
+  // 人間同士のチャット。話者は全員 user で、自分と相手の別はアプリが持つ(role からは出てこない)
+  const chat = [
+    { id: 'c1', speaker: '佐藤', own: false, text: '土鍋の在庫、週末までもちそう？', at: '09:12' },
+    { id: 'c2', speaker: 'あなた', own: true, text: '18個あるので大丈夫です', at: '09:13' },
+    { id: 'c3', speaker: '鈴木', own: false, text: '追加の入荷は火曜でした', at: '09:15' },
+  ];
   let generating = $state(false);
   let draft = $state('');
   const send = () => {
@@ -175,20 +181,26 @@
     <Text as="p" variant="body-sm" muted>
       会話は「新しい情報が末尾にだけ足される、意味のある順序の記録」なので、器は log として届く。生成中は
       逐次で告知せず(streaming.md §4)、完了で一度届ける。末尾に居るときだけ追い、離れているあいだの新着は
-      戻る手段とともに知らせる。発話の中身は器が解釈しない。
+      戻る手段とともに知らせる。発話の中身は器が解釈しない。姿は role から導かないので、ここでは助手を
+      text(地に置く)、利用者を soft の行末側にしている。
     </Text>
     <div class="ai-conversation">
       <Conversation busy={generating} resumeLabel="新しい発話へ">
         {#snippet label()}アシスタントとの会話{/snippet}
         {#each turns as turn (turn.id)}
-          <Message role={turn.role} speakerLabel={turn.speaker}>
+          <Message
+            role={turn.role}
+            speakerLabel={turn.speaker}
+            variant={turn.role === 'user' ? 'soft' : 'text'}
+            align={turn.role === 'user' ? 'end' : 'start'}
+          >
             {#snippet speaker()}<Avatar name={turn.speaker} size="sm" decorative={turn.role === 'assistant'} />{/snippet}
             {#snippet meta()}{turn.at}{/snippet}
             {turn.text}
           </Message>
         {/each}
         {#if generating}
-          <Message role="assistant" speakerLabel="アシスタント">
+          <Message role="assistant" speakerLabel="アシスタント" variant="text">
             {#snippet speaker()}<Avatar name="アシスタント" size="sm" decorative />{/snippet}
             <Reasoning status="busy">
               {#snippet summary()}考えています{/snippet}
@@ -204,4 +216,34 @@
       </Textarea>
       <Button onclick={send} disabled={generating}>送る</Button>
     </Cluster>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">人間同士のチャット(同じ器で)</Text>
+    <Text as="p" variant="body-sm" muted>
+      参加者が三人いれば発話は全部 user で、自分と相手の別も誰の発話かも role からは出てこない。誰かは
+      speakerLabel が届け、姿は variant と color と align で選ぶ。ここでは自分の発話を primary の filled で
+      行末側へ、相手の発話を soft の行頭側へ、参加の知らせを text の中央へ置いた。
+    </Text>
+    <div class="ai-conversation">
+      <Conversation resumeLabel="新しい発話へ">
+        {#snippet label()}台所の道具チーム{/snippet}
+        <Message role="system" speakerLabel="お知らせ" variant="text" align="center">
+          <Text variant="body-sm" muted>佐藤さんが参加しました</Text>
+        </Message>
+        {#each chat as line (line.id)}
+          <Message
+            role="user"
+            speakerLabel={line.speaker}
+            variant={line.own ? 'filled' : 'soft'}
+            color={line.own ? 'primary' : 'plain'}
+            align={line.own ? 'end' : 'start'}
+          >
+            {#snippet speaker()}<Avatar name={line.speaker} size="sm" />{/snippet}
+            {#snippet meta()}{line.speaker}・{line.at}{/snippet}
+            {line.text}
+          </Message>
+        {/each}
+      </Conversation>
+    </div>
   </section>
