@@ -1,0 +1,135 @@
+/* 段で表す評価(Rating.md)。読み取りと入力で役が変わるが、見た目は同じ星の列である。
+   塗った段と空の段は色だけでなく形でも違う(塗りつぶしと輪郭。WCAG 2.2 SC 1.4.1)。 */
+.sc-rating {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  min-inline-size: 0;
+  /* fieldset の既定を落とす(RadioGroup と同じ扱い) */
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--color-app-foreground);
+}
+.sc-rating-label {
+  padding: 0;
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+.sc-rating-required {
+  margin-inline-start: 0.25em;
+}
+
+.sc-rating-stars {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inline-sm);
+}
+/* 星ひとつ。空の段の輪郭は地に対して 3:1 を満たす色を引く(border は 3:1 で較正済み。SC 1.4.11)。
+   空の段が見えないと、何段階中の評価かが分からない */
+.sc-rating-star {
+  display: inline-flex;
+  font-size: 1.25rem;
+  color: var(--color-app-border);
+}
+
+/* 読み取り: 二枚重ねで連続値を塗り分ける(平均点を整数へ丸めると嘘になる)。
+   星そのものは支援技術から外し、名前は器(role=img)が持つ */
+.sc-rating[data-readonly='true'] .sc-rating-stars {
+  position: relative;
+  display: inline-flex;
+  inline-size: max-content;
+}
+/* 段の間隔は星の箱の中に持つ。列の隙間(gap)で空けると箱の幅が不揃いになり、4.2 の 0.2 が
+   隙間の上に落ちて塗り分けがずれる(段ごとに同じ幅にすれば、割合がそのまま段の位置になる) */
+.sc-rating[data-readonly='true'] .sc-rating-track,
+.sc-rating[data-readonly='true'] .sc-rating-fill {
+  gap: 0;
+}
+.sc-rating[data-readonly='true'] .sc-rating-star {
+  padding-inline-end: var(--spacing-inline-sm);
+}
+.sc-rating-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  overflow: hidden;
+  /* 値のぶんだけ見せる。器から渡る割合 */
+  inline-size: var(--sc-rating-fill, 0%);
+  white-space: nowrap;
+}
+.sc-rating-track,
+.sc-rating-fill {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inline-sm);
+}
+.sc-rating-fill .sc-rating-star {
+  color: var(--color-app-foreground);
+}
+
+/* 入力: 段ごとに native の radio を置く。名前は文字で持ち、視覚には星を出す */
+.sc-rating-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 当たり判定の門(size.md §4。SC 2.5.8)。五つ並べても 120px で収まる */
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  cursor: pointer;
+}
+.sc-rating[data-disabled='true'] .sc-rating-step {
+  cursor: not-allowed;
+}
+/* 段の名前は読み上げにだけ届く(視覚には星が出る)。器から隠さずに置き場所だけ外す */
+.sc-rating-name {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.sc-rating-input {
+  position: absolute;
+  opacity: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+}
+/* 選ばれた段までは塗り、その先は輪郭のまま(形も色も変わる。SC 1.4.1)。どこまで塗るかは器が持つ
+   (撫でたときの予告も同じ印で描くので、CSS の :checked では足りない) */
+.sc-rating-step[data-filled] .sc-rating-star {
+  color: var(--color-app-foreground);
+}
+.sc-rating[data-disabled='true'] .sc-rating-star {
+  color: var(--color-semantic-disabled-fg);
+}
+/* 焦点の輪は段に立つ(focus-ring.md)。native radio は隠してあるので、段の器が受けて描く */
+.sc-rating-step:has(.sc-rating-input:focus-visible) {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-semantic-plain-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--shape-semantic-control);
+}
+
+.sc-rating-description,
+.sc-rating-error {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-rating-description {
+  color: var(--color-app-fg-muted);
+}
+.sc-rating-error {
+  color: var(--color-semantic-danger-soft-fg);
+}

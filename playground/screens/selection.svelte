@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { Slider, Stack, Cluster, Select, Radio, RadioGroup, Text } from '../../src/lib';
+  import { Slider, Stack, Cluster, Select, Radio, RadioGroup, Text, Rating } from '../../src/lib';
+
+  // 評価(Rating)。読み取りは連続、入力は整数。段の名前は消費者が並びで渡す
+  const starLabels = ['5 段階中 1', '5 段階中 2', '5 段階中 3', '5 段階中 4', '5 段階中 5'];
+  let stars = $state<number | null>(3);
 
   let size = $state<string | undefined>(undefined);
   let sizeTouched = $state(false);
@@ -144,4 +148,39 @@
       進行表示のトラックを 4dp、Slider のトラックを 16dp と定めており、本 DS も溝の中立段を別に引いている。
       当たり判定は見た目の径と別で、サムを小さくしても 24px の下限を割らない(size.rules.json)。
     </Text>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">Rating(評価)</Text>
+    <Text as="p" variant="body-sm" muted>
+      読むだけの星は一つの絵として名前つきで届き(role=img)、付ける星は段の集合になる(native の radio)。
+      平均点は連続で塗り、入力は整数だけを採る。撫でたときの予告は目で見える人にだけ出す。
+      取り消しを許すときは鍵盤にも道を用意する(Delete と Backspace)。
+    </Text>
+    <div class="pg-row">
+      <code class="pg-tag">読むだけ</code>
+      <Rating readonly value={4.2} valueLabel="5 段階中 4.2(128 件の評価)">
+        {#snippet label()}この商品の評価{/snippet}
+      </Rating>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">付ける</code>
+      <Stack gap="sm">
+        <Rating bind:value={stars} itemLabels={starLabels} allowClear>
+          {#snippet label()}あなたの評価{/snippet}
+          {#snippet description()}矢印キーで動く。Delete か Backspace で取り消せる{/snippet}
+        </Rating>
+        <Text variant="body-sm" muted>いまの値: {stars ?? '(未評価)'}</Text>
+      </Stack>
+    </div>
+    <div class="pg-row">
+      <code class="pg-tag">10 段階</code>
+      <Rating
+        value={7}
+        max={10}
+        itemLabels={Array.from({ length: 10 }, (_, i) => `10 段階中 ${i + 1}`)}
+      >
+        {#snippet label()}満足度{/snippet}
+      </Rating>
+    </div>
   </section>
