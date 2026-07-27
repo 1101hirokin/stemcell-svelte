@@ -135,19 +135,6 @@
     {@render label()}{#if required}<span class="sc-numberfield-required" aria-hidden="true">*</span>{/if}
   </label>
   <div class="sc-numberfield-control">
-    <!-- 増減はタブ順から外す(同じことが矢印キーでできる)。押せることは見えていなければならない。
-         横に並べるのは当たり判定のためである: 縦に積むと欄の高さを二つで分け合って 24px を割る
-         (実測 21px。size.md §4 / WCAG 2.2 SC 2.5.8) -->
-    <button
-      type="button"
-      class="sc-numberfield-stepper"
-      tabindex="-1"
-      aria-label={decrementLabel}
-      disabled={disabled || readonly || atMin}
-      onclick={() => nudge(-1)}
-    >
-      <Icon name="arthmetic.minus" />
-    </button>
     <!-- 打てる欄に数の意味論を載せる。値と境界は spinbutton が伝える。
          ホイールは割り当てない: 送る操作と値を変える操作を同じ入力に重ねない(RFC 0019) -->
     <input
@@ -172,6 +159,20 @@
       onblur={() => (typed = null)}
       onchangecapture={(e) => e.stopPropagation()}
     />
+    <!-- 増減はタブ順から外す(同じことが矢印キーでできる)。押せることは見えていなければならない。
+         二つを隣り合わせるのは、続けて押すのに指と視線を往復させないためである。横に並べるのは
+         当たり判定で、縦に積むと欄の高さを二つで分け合って 24px を割る(実測 21px。size.md §4 /
+         WCAG 2.2 SC 2.5.8) -->
+    <button
+      type="button"
+      class="sc-numberfield-stepper"
+      tabindex="-1"
+      aria-label={decrementLabel}
+      disabled={disabled || readonly || atMin}
+      onclick={() => nudge(-1)}
+    >
+      <Icon name="arthmetic.minus" />
+    </button>
     <button
       type="button"
       class="sc-numberfield-stepper"

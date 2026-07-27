@@ -112,6 +112,7 @@
 
 
 /* 増減。タブ順からは外すが、押せることは見えていなければならない(hover で出す形は採らない)。
+   二つは隣り合わせる: 欄をまたいで左右に離すと、続けて押すのに指と視線が往復する。
    横に並べるのは当たり判定のためである: 縦に積むと欄の高さを二つで分け合い、24px を割る(実測 21px)。
    欄の高さは一次内容(打つ文字)が決めるので、二つ分の門を縦には取れない(size.md §2 / §4) */
 .sc-numberfield-stepper {
@@ -134,15 +135,20 @@
   transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
     var(--motion-feedback-easing);
 }
-/* 器の横 inset を手放し、ボタンが縁と当たり判定を持つ(TextField の付属と同じ扱い) */
+/* 増減が居る側だけ器の横 inset を手放す(そこはボタンが縁と当たり判定を持つ。TextField の付属と
+   同じ扱い)。値の側は inset を残す: 手放すと打つ文字が枠に触れる */
 .sc-numberfield-control:has(.sc-numberfield-stepper) {
-  padding-inline: 0;
+  padding-inline-end: 0;
 }
 /* 端のボタンの面は器の角の内側で切る。四角い面のまま置くと押した色が丸めた角から飛び出し、
    ボタン側に同じ半径を与えると枠の曲がりとずれて隙間が出る(枠の太さのぶん内側に居るため)。
    器で切れば、内側の曲がりは常に枠と一致する。焦点の輪は器の外に描かれるので切られない */
 .sc-numberfield-control {
   overflow: hidden;
+}
+/* 値と操作の境目を引く(隣り合う二つは分けない。二つで一組の操作である) */
+.sc-numberfield-stepper:first-of-type {
+  border-inline-start: var(--shape-border-width) solid var(--_border);
 }
 .sc-numberfield-stepper:hover:not(:disabled) {
   background: var(--color-semantic-plain-soft-bg);
