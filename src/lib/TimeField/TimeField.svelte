@@ -59,12 +59,9 @@
   // 12 時間制で出すかは、既定では環境から借りる(date.md §3)。消費者が上書きできる
   const hour12 = $derived(hourCycle === 'auto' ? prefers12Hour() : hourCycle === '12');
   const periods = dayPeriodNames();
-  const order = $derived<TimeSegment[]>([
-    'hour',
-    'minute',
-    ...(seconds ? (['second'] as const) : []),
-    ...(hour12 ? (['dayPeriod'] as const) : []),
-  ]);
+  // 桁は数の桁だけである。午前・午後は桁ではなく二択にした(触点では打つ文字が無く、
+  // 押して回す形は変化に気づけない。実機で分かった)
+  const order = $derived<TimeSegment[]>(['hour', 'minute', ...(seconds ? (['second'] as const) : [])]);
 
   let parts = $state<{ hour?: number; minute?: number; second?: number }>({});
   // 打ちかけの数字と、それを打った桁。桁を移ると捨てる(焦点だけ移った場合も含む。
@@ -99,7 +96,7 @@
     onchange?.(next);
   };
 
-  const set = (type: Exclude<TimeSegment, 'dayPeriod'>, n: number | undefined) => {
+  const set = (type: TimeSegment, n: number | undefined) => {
     parts = { ...parts, [type]: n };
     publish();
   };
@@ -131,10 +128,6 @@
   };
 
   const step = (type: TimeSegment, delta: number) => {
-    if (type === 'dayPeriod') {
-      togglePeriod(!isPM);
-      return;
-    }
     const b = bounds(type);
     const current = type === 'hour' ? shownHour : parts[type];
     const next = stepSegment(current, delta, b, b.min);
@@ -152,7 +145,7 @@
 
   const clear = (type: TimeSegment) => {
     typed = '';
-    if (type === 'dayPeriod') return; // 午前午後だけを消せない(時の値の一部である)
+    typedFor = undefined;
     set(type, undefined);
   };
 
@@ -164,13 +157,12 @@
     else if (e.key === forward) move(type, 1);
     else if (e.key === backward) move(type, -1);
     else if (e.key === 'Backspace' || e.key === 'Delete') clear(type);
-    else if (type === 'dayPeriod' && /^[ap]$/i.test(e.key)) togglePeriod(e.key.toLowerCase() === 'p');
     else if (/^\d$/.test(e.key)) return; // 数字は input で受ける
     else return;
     e.preventDefault();
   };
 
-  const takeOne = (type: Exclude<TimeSegment, 'dayPeriod'>, digit: string) => {
+  const takeOne = (type: TimeSegment, digit: string) => {
     const taken = takeDigit(typedFor === type ? typed : '', digit, 2, bounds(type));
     typed = taken.typed;
     typedFor = type;
@@ -189,9 +181,7 @@
     el.value = shown(type); // 表示は器が決める
     if (disabled || readonly) return;
     if (deleting) clear(type);
-    else if (type === 'dayPeriod') {
-      for (const ch of data) if (/^[ap]$/i.test(ch)) togglePeriod(ch.toLowerCase() === 'p');
-    } else for (const ch of data) if (/\d/.test(ch)) takeOne(type, ch);
+    else for (const ch of data) if (/\d/.test(ch)) takeOne(type, ch);
     select(el);
   };
 
@@ -199,25 +189,15 @@
 
   // 午前・午後は打てる文字を持たない桁である。触点では鍵盤を出しても打つものが無く、
   // 手が止まる(実機で詰んだ)。押して切り替える道を開ける。二値なので押すたびに入れ替わる
-  const onpointerup = (type: TimeSegment) => {
-    if (type !== 'dayPeriod' || disabled || readonly) return;
-    togglePeriod(!isPM);
-  };
+
 
   const shown = (type: TimeSegment) => {
-    if (type === 'dayPeriod') return parts.hour == null ? periods.am : isPM ? periods.pm : periods.am;
     if (type === 'hour') return showSegment(shownHour, 2, 'hh');
     return showSegment(parts[type], 2, type === 'minute' ? 'mm' : 'ss');
   };
 
   const nameOf = (type: TimeSegment) =>
-    type === 'hour'
-      ? segmentLabels.hour
-      : type === 'minute'
-        ? segmentLabels.minute
-        : type === 'second'
-          ? (segmentLabels.second ?? segmentLabels.minute)
-          : (segmentLabels.dayPeriod ?? segmentLabels.hour);
+    type === 'hour' ? segmentLabels.hour : type === 'minute' ? segmentLabels.minute : (segmentLabels.second ?? segmentLabels.minute);
 
   const describedby = $derived(
     [description ? descriptionId : null, invalid && error ? errorId : null].filter(Boolean).join(' ') || undefined,
@@ -238,41 +218,58 @@
     aria-describedby={describedby}
     aria-disabled={disabled ? 'true' : undefined}
   >
+    {#snippet segment(type: TimeSegment, b: { min: number; max: number })}
+      <input
+          class="sc-timefield-segment"
+          data-segment={type}
+          data-empty={parts[type] == null}
+          type="text"
+          role="spinbutton"
+          inputmode="numeric"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          size={2}
+          value={shown(type)}
+          readonly={disabled || readonly}
+          tabindex={disabled ? -1 : 0}
+          aria-label={nameOf(type)}
+          aria-valuenow={parts[type]}
+          aria-valuemin={b.min}
+          aria-valuemax={b.max}
+          aria-valuetext={parts[type] == null ? nameOf(type) : `${type === 'hour' ? shownHour : parts[type]}`}
+          aria-readonly={readonly ? 'true' : undefined}
+          onkeydown={(e) => onkeydown(e, type)}
+          oninput={(e) => oninput(e, type)}
+          onfocus={(e) => select(e.currentTarget)}
+        />
+    {/snippet}
     {#each order as type, i (type)}
       {@const b = bounds(type)}
-      <input
-        class="sc-timefield-segment"
-        data-segment={type}
-        data-empty={type === 'dayPeriod' ? parts.hour == null : parts[type] == null}
-        type="text"
-        role="spinbutton"
-        inputmode={type === 'dayPeriod' ? 'none' : 'numeric'}
-        autocomplete="off"
-        autocorrect="off"
-        spellcheck="false"
-        size={type === 'dayPeriod' ? Math.max(periods.am.length, periods.pm.length) : 2}
-        value={shown(type)}
-        readonly={disabled || readonly}
-        tabindex={disabled ? -1 : 0}
-        aria-label={nameOf(type)}
-        aria-valuenow={type === 'dayPeriod' ? undefined : parts[type]}
-        aria-valuemin={type === 'dayPeriod' ? undefined : b.min}
-        aria-valuemax={type === 'dayPeriod' ? undefined : b.max}
-        aria-valuetext={type === 'dayPeriod'
-          ? shown(type)
-          : parts[type] == null
-            ? nameOf(type)
-            : `${type === 'hour' ? shownHour : parts[type]}`}
-        aria-readonly={readonly ? 'true' : undefined}
-        onkeydown={(e) => onkeydown(e, type)}
-        oninput={(e) => oninput(e, type)}
-        onpointerup={() => onpointerup(type)}
-        onfocus={(e) => (type === 'dayPeriod' ? undefined : select(e.currentTarget))}
-      />
-      {#if i < order.length - 1 && order[i + 1] !== 'dayPeriod'}
+      {@render segment(type, b)}
+      {#if i < order.length - 1}
         <span class="sc-timefield-separator" aria-hidden="true">:</span>
       {/if}
     {/each}
+    {#if hour12}
+      <!-- 午前・午後は二択である。両方を見せて選ばせる(押して回す形は、押せることにも
+           変わったことにも気づけなかった。実機で分かった) -->
+      <span class="sc-timefield-period" role="radiogroup" aria-label={segmentLabels.dayPeriod ?? segmentLabels.hour}>
+        {#each [{ pm: false, text: periods.am }, { pm: true, text: periods.pm }] as choice (choice.pm)}
+          <label class="sc-timefield-choice" data-selected={parts.hour != null && isPM === choice.pm}>
+            <input
+              class="sc-timefield-choice-input"
+              type="radio"
+              name={`${uid}-period`}
+              checked={parts.hour != null && isPM === choice.pm}
+              disabled={disabled || readonly}
+              onchange={() => togglePeriod(choice.pm)}
+            />
+            {choice.text}
+          </label>
+        {/each}
+      </span>
+    {/if}
   </div>
 
   {#if name}<input type="hidden" {name} {value} />{/if}

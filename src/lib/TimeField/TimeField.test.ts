@@ -32,14 +32,16 @@ it('12 時間制でも値は 24 時間の表記のまま', async () => {
   const { container } = render(TimeField, { props: { ...base, hourCycle: '12', value: '15:00', onchange } });
   // 表示は 3、値は 15:00
   expect(seg(container, 'hour').value).toBe('03');
-  expect(seg(container, 'dayPeriod')).not.toBeNull();
-  await fireEvent.keyDown(seg(container, 'dayPeriod'), { key: 'ArrowUp' });
+  const group = container.querySelector('[role="radiogroup"]') as HTMLElement;
+  expect(group).not.toBeNull();
+  const [am] = [...group.querySelectorAll('input[type="radio"]')] as HTMLInputElement[];
+  await fireEvent.change(am!, { target: { checked: true } });
   expect(onchange).toHaveBeenLastCalledWith('03:00');
 });
 
-it('24 時間制では午前・午後の桁を出さない', () => {
+it('24 時間制では午前・午後を出さない', () => {
   const { container } = render(TimeField, { props: { ...base, hourCycle: '24' } });
-  expect(seg(container, 'dayPeriod')).toBeNull();
+  expect(container.querySelector('[role="radiogroup"]')).toBeNull();
 });
 
 it('秒は消費者が選ぶ(既定は出さない)', () => {
@@ -100,14 +102,17 @@ it('打ちかけの数字は桁をまたがない', async () => {
   expect(onchange).toHaveBeenLastCalledWith('01:03');
 });
 
-it('午前・午後は押して切り替えられる(触点では打つ文字が無い)', async () => {
+it('午前・午後は二択として選ぶ(桁にしない)', async () => {
   const onchange = vi.fn();
   const { container } = render(TimeField, { props: { ...base, hourCycle: '12', value: '18:30', onchange } });
-  const period = seg(container, 'dayPeriod');
-  // 打てる文字を持たない桁なので、鍵盤を呼ばない
-  expect(period.getAttribute('inputmode')).toBe('none');
-  await fireEvent.pointerUp(period);
+  // 桁ではないので spinbutton の並びには居ない
+  expect(seg(container, 'dayPeriod')).toBeNull();
+  const group = container.querySelector('[role="radiogroup"]') as HTMLElement;
+  expect(group.getAttribute('aria-label')).toBe('午前・午後');
+  const [am, pm] = [...group.querySelectorAll('input[type="radio"]')] as HTMLInputElement[];
+  // 両方が見えていて、いま選ばれている側が分かる
+  expect(am!.checked).toBe(false);
+  expect(pm!.checked).toBe(true);
+  await fireEvent.change(am!, { target: { checked: true } });
   expect(onchange).toHaveBeenLastCalledWith('06:30');
-  await fireEvent.pointerUp(period);
-  expect(onchange).toHaveBeenLastCalledWith('18:30');
 });

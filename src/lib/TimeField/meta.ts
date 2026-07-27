@@ -15,4 +15,5 @@ export const META = {
   },
 } as const;
 
-export type TimeSegment = 'hour' | 'minute' | 'second' | 'dayPeriod';
+/** 桁は数の桁だけである。午前・午後は桁ではなく二択(TimeField.md §2)。 */
+export type TimeSegment = 'hour' | 'minute' | 'second';

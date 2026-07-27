@@ -210,12 +210,51 @@
   color: var(--color-app-fg-muted);
   padding-inline: 0.125em;
 }
-/* 午前・午後の桁は数の桁と種類が違うので、数の並びから少し離す(桁の間の間隔は inline の段から引く)。
-   打てる文字を持たない桁なので、文字を打つ合図(caret)も選択の把手も出さない。押すと入れ替わる */
-.sc-timefield-segment[data-segment='dayPeriod'] {
+
+/* 午前・午後は二択である。両方を見せて選ばせる(押して回す形は、押せることにも変わったことにも
+   気づけなかった。実機で分かった)。二つで一組なので間は空けず、選ばれている側だけ面を持つ */
+.sc-timefield-period {
+  display: inline-flex;
+  align-items: stretch;
   margin-inline-start: var(--spacing-inline-sm);
-  text-transform: uppercase;
-  caret-color: transparent;
-  user-select: none;
+  border: var(--shape-border-width) solid var(--_border);
+  border-radius: var(--shape-semantic-tag);
+  overflow: hidden;
+}
+.sc-timefield-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 当たり判定の門(size.md §4)。指で押す操作である */
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  padding-inline: var(--spacing-inset-sm);
   cursor: pointer;
+  color: var(--color-app-fg-muted);
+  font-size: var(--typography-body-sm-font-size);
+  transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+    var(--motion-feedback-easing);
+}
+.sc-timefield-choice[data-selected='true'] {
+  background: var(--color-semantic-plain-soft-bg-pressed);
+  color: var(--color-app-foreground);
+}
+.sc-timefield-choice:hover:not([data-selected='true']) {
+  background: var(--color-semantic-plain-soft-bg);
+}
+/* 実物の radio は隠すが、焦点は受ける(隠すのは見た目だけで、名前も操作も残る) */
+.sc-timefield-choice-input {
+  position: absolute;
+  opacity: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+}
+.sc-timefield-choice:has(.sc-timefield-choice-input:focus-visible) {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+.sc-timefield[data-disabled='true'] .sc-timefield-choice {
+  cursor: not-allowed;
+  color: var(--color-semantic-disabled-fg);
 }
