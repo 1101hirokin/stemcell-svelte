@@ -136,19 +136,17 @@
     var(--motion-feedback-easing);
 }
 /* 増減が居る側だけ器の横 inset を手放す(そこはボタンが縁と当たり判定を持つ。TextField の付属と
-   同じ扱い)。値の側は inset を残す: 手放すと打つ文字が枠に触れる */
+   同じ扱い)。値の側は inset を残す: 手放すと打つ文字が枠に触れる。
+   隣り合う二つの間は空けない。二つで一組の操作なので、離すと別々の操作に見える */
 .sc-numberfield-control:has(.sc-numberfield-stepper) {
   padding-inline-end: 0;
+  gap: 0;
 }
 /* 端のボタンの面は器の角の内側で切る。四角い面のまま置くと押した色が丸めた角から飛び出し、
    ボタン側に同じ半径を与えると枠の曲がりとずれて隙間が出る(枠の太さのぶん内側に居るため)。
    器で切れば、内側の曲がりは常に枠と一致する。焦点の輪は器の外に描かれるので切られない */
 .sc-numberfield-control {
   overflow: hidden;
-}
-/* 値と操作の境目を引く(隣り合う二つは分けない。二つで一組の操作である) */
-.sc-numberfield-stepper:first-of-type {
-  border-inline-start: var(--shape-border-width) solid var(--_border);
 }
 .sc-numberfield-stepper:hover:not(:disabled) {
   background: var(--color-semantic-plain-soft-bg);
@@ -157,6 +155,12 @@
   color: var(--color-semantic-disabled-fg);
   cursor: not-allowed;
 }
+/* 増減は焦点を奪わない。タブ順から外してある操作が押下で停留すると、続けて打てなくなる
+   (焦点は欄に残す)。押下の合図は面の色が担う */
+.sc-numberfield-stepper:focus {
+  outline: none;
+}
+
 /* 数は並べて比べる(表の中の数量)。字幅を揃える(typography.md §5 の数字の揃え) */
 .sc-numberfield-input {
   font-variant-numeric: tabular-nums;

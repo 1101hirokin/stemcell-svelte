@@ -160,7 +160,8 @@
       onchangecapture={(e) => e.stopPropagation()}
     />
     <!-- 増減はタブ順から外す(同じことが矢印キーでできる)。押せることは見えていなければならない。
-         二つを隣り合わせるのは、続けて押すのに指と視線を往復させないためである。横に並べるのは
+         二つを隣り合わせるのは、続けて押すのに指と視線を往復させないためである。押下で焦点を
+         奪わない(pointerdown を止める): 焦点が欄から外れると、続けて打てなくなる。横に並べるのは
          当たり判定で、縦に積むと欄の高さを二つで分け合って 24px を割る(実測 21px。size.md §4 /
          WCAG 2.2 SC 2.5.8) -->
     <button
@@ -169,6 +170,7 @@
       tabindex="-1"
       aria-label={decrementLabel}
       disabled={disabled || readonly || atMin}
+      onpointerdown={(e) => e.preventDefault()}
       onclick={() => nudge(-1)}
     >
       <Icon name="arthmetic.minus" />
@@ -179,6 +181,7 @@
       tabindex="-1"
       aria-label={incrementLabel}
       disabled={disabled || readonly || atMax}
+      onpointerdown={(e) => e.preventDefault()}
       onclick={() => nudge(1)}
     >
       <Icon name="arthmetic.plus" />
