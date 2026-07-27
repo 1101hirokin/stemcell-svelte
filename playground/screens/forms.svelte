@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconButton, Box, Stack, Cluster, TextField, Select, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Text, NumberField } from '../../src/lib';
+  import { IconButton, Box, Stack, Cluster, TextField, Select, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Text, NumberField, PasswordField } from '../../src/lib';
 
   let invite = $state('abc');
   let agree = $state(false);
@@ -10,6 +10,7 @@
   let fEmail = $state('a@b.com');
   let fQuantity = $state<number | null>(2);
   let fWeight = $state<number | null>(null);
+  let fPassword = $state('');
   let fSubscribe = $state(true);
   let fNotify = $state(true);
   let fShip = $state('exp');
@@ -175,6 +176,27 @@
           {#snippet label()}土鍋(かまど炊き)の数量{/snippet}
         </NumberField>
       </Cluster>
+    </Stack>
+  </section>
+  <section>
+    <Text as="h3" variant="title-lg">PasswordField(秘匿の欄)</Text>
+    <Text as="p" variant="body-sm" muted>
+      切り替えは器が必ず持つ(見せる手段が無いと、打ち間違いを直す手段が全部消して打ち直すことしか
+      無くなる)。切り替えたことは隠れた文で知らせ、値そのものは読み上げに流さない(GOV.UK の裁定)。
+      押された状態(aria-pressed)では伝えない。autocomplete は消費者が渡す。
+    </Text>
+    <Stack gap="md">
+      <PasswordField
+        bind:value={fPassword}
+        autocomplete="new-password"
+        revealLabel="パスワードを表示する"
+        hideLabel="パスワードを隠す"
+        revealedMessage="パスワードを表示しました"
+        hiddenMessage="パスワードを隠しました"
+      >
+        {#snippet label()}新しいパスワード{/snippet}
+        {#snippet description()}12 文字以上。強さの判定はアプリの政策なので器は持たない{/snippet}
+      </PasswordField>
     </Stack>
   </section>
   <section>

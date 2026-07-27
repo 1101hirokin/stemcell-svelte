@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, Pagination, Popover, Radio, RadioGroup, Rating, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, Pagination, PasswordField, Popover, Radio, RadioGroup, Rating, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -1014,6 +1014,43 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 端では行き先が無いことが届く。実装は操作を無効にする(state.md §3.1 の disabled)。押せるのに何も起きない形にしない。
 - 領域自身は焦点を受けない。焦点とフォーカスリングは合成した操作(Button)に立ち、当たり判定の門(size.md §4)もそちらに生きる。
 - 中央の選択は欄であり、名前が要る(field.md §2)。器の側が既に文脈を語っているので、その名前は視覚から隠してよい(Select の labelHidden。SwiftUI の labelsHidden と同型)。
+
+### PasswordField(契約 0.0.0-alpha.0)
+
+秘匿して打つ欄。隠したまま打たせると打ち間違いを直す手段が「全部消して打ち直す」しか無くなるので、見せる・隠すの切り替えを器が必ず持つ(既定は隠す)。TextField と別部品にするのは、秘匿が入力様式ではなく値の扱いの違いであり、切り替えという相互作用も増えるからである(field.md §6-2 の線。SwiftUI が SecureField を別の型として持つのも同じ理由)。切り替えたことは文で知らせ、値そのものは読み上げに流さない: GOV.UK が調査の末に採った形で、値を読み上げる案は周りに人が居る場所で声に出てしまうため捨てられている。強度の判定は持たない(何を強いとするかは製品の政策)。
+
+props:
+
+- `name`: string((省略可)) — フォーム内でのフィールド名(native の <form> 送信・FormData・reset に参加。field.md §5)。controlled の value と両立する非破壊の上乗せ。Web は native の name 属性。
+- `value`: string(既定 "") — 現在値。アプリが所有する(field.md §5: SwiftUI の Binding も Compose の value+onValueChange も単方向で、Web の controlled と同型)。部品は change で新しい値を通知するだけで、自分では保持しない。uncontrolled は土地の便宜であり契約外。
+- `placeholder`: string((省略可)) — 入力例のヒント。label の代替ではない(field.md §2: 入力した瞬間に消える名前は、名前ではない)。
+- `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
+- `readonly`: boolean(既定 false) — 読めるが編集できない。状態ではなく property である(state.md §6)。invalid と同時に成立しない(HTML が readonly を constraint validation から除外する)。コントラストの免除は受けない(Understanding SC 1.4.3 は disabled のみを例示)。
+- `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2。判定が値から来たかサーバから来たかは問わない)。intent を danger へ差し替える(state.md §7)。いつ立てるか(blur / submit / 逐次)は Stemcell が規範化しない(field.md §3「バリデーションの所有」)。
+- `required`: boolean(既定 false) — 必須。支援技術に届くことは Normative、視覚標示も部品が自動で出す(field.md §4。裁定済み 2026-07。記号そのものは seed)。
+- `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。
+- `keyboard`: "text"(既定 "text") — 入力様式は text に固定する(継承元の値域から絞る)。秘匿の欄に数値やメールの入力様式を与える意味は無く、与えると打てる文字を誤って狭める。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る(Carbon / Ant / Spectrum も入力に複数段を持つ)。段が引く余白の配線は foundations/size.rules.json。
+- `revealLabel`: string — 見せる操作の名前(「パスワードを表示する」)。絵だけの操作なので文字列で足りる(DatePicker の calendarLabel と同じ形)。DS は文言を持たない(i18n.md §1)。
+- `hideLabel`: string — 隠す操作の名前(「パスワードを隠す」)。切り替えの名前は状態で入れ替わる。
+- `revealedMessage`: string — 見せたときに支援技術へ届ける文(「パスワードを表示しました」)。切り替えの結果だけを伝え、値そのものは流さない(GOV.UK の裁定と同じ)。
+- `hiddenMessage`: string — 隠したときに支援技術へ届ける文(「パスワードを隠しました」)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — この欄の名前。無名の欄は許さない(field.md §2)。
+- `description` — 補助(要件の説明など)。任意に埋めるが、受け取れることは必須である(field.md §2)。
+- `error` — 拒否の理由。invalid のときだけ現れる(field.md §3)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 切り替えは器が必ず持つ。見せる手段の無い秘匿の欄は、打ち間違いを直す手段が全部消して打ち直すことしか無くなる。
+- 切り替えの結果を文で知らせる(Web の表現は生きた領域に置いた隠れた文)。値そのものは読み上げに流さない: 周りに人が居る場所でパスワードが声に出る(GOV.UK が値を読み上げる案を捨てた理由)。
+- aria-pressed で押された状態として伝える形は採らない。押されていることと、パスワードが見えていることは利用者から見て同じではない。名前(見せる/隠す)と結果の文の二つで足りる。
+- 切り替えの操作にも当たり判定の門(24px)が生きる(size.md §4)。
+- autocomplete は消費者が渡す(ログインは current-password、新しく決める欄は new-password)。同じ見た目の欄が二つの意味を持つので、器は決められない。
+- Caps Lock の警告を出すなら視覚だけに出す(読み上げには流さない)。支援技術もパスワード管理ソフトも、この状況を自分の機構で扱う。
+- 解剖と所有は他のフィールドと同じである(label 必須・description・error ↔ invalid・値はアプリ所有・change 一本・name でフォーム参加)。
 
 ### Popover(契約 0.0.0-alpha.1)
 
