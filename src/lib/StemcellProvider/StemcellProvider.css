@@ -16,6 +16,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'palt';
+  /* 3. エンジンに文字を勝手に大きくさせない。WebKit(iOS)は、器より広い塊を見つけると読みやすさの
+        ためと判断して中の文字を膨らませる。横へ送るコードの塊のように、幅が窓を超える中身がある
+        画面では、そこだけ本文の 1.4 倍ほどになって版面が割れる(実機で確認)。100% は「自動で
+        変えない」であって、利用者自身の拡大や本文の大きさの設定は効いたままである
+        (奪うと WCAG 2.2 SC 1.4.4 に触れる。none は採らない)。 */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   /* 和文と欧文・数字の境目に間合いを空ける。初期値と同じだが、UA リセットで no-autospace を
      当てられても DS の組版が残るように明示する。対応していない環境では宣言ごと無視される */
   text-autospace: normal;
