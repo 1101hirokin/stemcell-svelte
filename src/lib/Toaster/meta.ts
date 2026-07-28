@@ -10,7 +10,7 @@ export const META = {
         'block-end inline-center',
         'block-end inline-end',
       ],
-      default: 'block-end inline-end',
+      default: 'block-end inline-center',
     },
     max: { default: 3 },
     defaultDuration: { default: 5000 },

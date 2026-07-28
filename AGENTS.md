@@ -1567,7 +1567,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 部品自身は焦点を受けない。指標に操作を足すなら、その操作の要素が焦点と当たり判定を持つ。
 - 更新の告知は持たない。自動で更新される指標で読み上げるかはアプリが決める(部品は自分が描き直されたことしか知らない。EmptyState と同じ線)。
 
-### StemcellProvider(契約 0.0.0-alpha.1)
+### StemcellProvider(契約 0.0.0-alpha.2)
 
 アプリの文脈軸が確立される一点(第6条)。トークンを配らず、各プラットフォームの環境機構に軸を立てる。Web では DOM を出さない副作用、native ではラッパー(StemcellProvider.md §1 / §8)。状態を持たない: テーマの所有・永続化はアプリの仕事であり、Provider は受け取った値で軸を立てるだけ(§5)。
 
@@ -1883,14 +1883,14 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - intent の絵(先頭のアイコン)は色に頼らない識別の手がかり(WCAG 1.4.1)。絵の意味名はアイコンセット受領時に確定(iconography.md §6)。
 - message は通知の内容であって Toast の名前配線(aria-labelledby 相当)はしない。内容が読み上げ順で届く領域である(Alert と同型)。
 
-### Toaster(契約 0.0.0-alpha.0)
+### Toaster(契約 0.0.0-alpha.1)
 
 通知(Toast)のホスト。キュー・タイマー・自律退去のライフサイクルを所有し、隅の領域に Toast を積んで描く状態を持つユニット(RFC 0013)。子孫へ命令形の enqueue 能力を各プラットフォームの文脈 / 環境機構で提供する(Web は context、Compose は hoist した host state、SwiftUI は environment)。この enqueue 能力は props / events / slots に収まらない新種の契約表面であり、機構は表現・「文脈のルートがホストを提供し各所が環境機構で enqueue する」構造が Normative(第2条・overlay.md §6)。StemcellProvider が既定の Toaster を1つ establish するのでゼロ設定で enqueue が動く(第4条-1)。アプリが Toaster を明示的に置けば位置 / safe-area / scope を上書きできる(第4条 逃げ道)。StemcellProvider の無状態(契約 §5)は保たれる: 状態を持つのはこの Toaster であって provider ではない。
 
 props:
 
-- `position`: "block-start inline-start" | "block-start inline-center" | "block-start inline-end" | "block-end inline-start" | "block-end inline-center" | "block-end inline-end"(既定 "block-end inline-end") — 領域を寄せる隅(論理方向。layout.md §7。RTL / 縦書きで自動反転)。既定 block-end inline-end は seed。safe-area(ノッチ / ホームインジケータ)への内側寄せは実装が担う(第1条)。
-- `max`: number(既定 3) — 同時に見せる Toast の最大数。超えた分は畳む / 待たせる(overflow の見せ方は Expressive)。既定 3 は seed。多重に積み上げて画面を埋めない(第1条 / 第3条)。
+- `position`: "block-start inline-start" | "block-start inline-center" | "block-start inline-end" | "block-end inline-start" | "block-end inline-center" | "block-end inline-end"(既定 "block-end inline-center") — 領域を寄せる隅(論理方向。layout.md §7。RTL / 縦書きで自動反転)。既定は block-end inline-center(下の中央。裁定 2026-07-28: 触点で親指に近く、広い画面でも視線の移動が短い。以前は block-end inline-end を既定にしていた)。safe-area(ノッチ / ホームインジケータ)への内側寄せは実装が担う(第1条)。
+- `max`: number(既定 3) — 同時に見せる Toast の最大数。超えた分は畳む / 待たせる(overflow の見せ方は Expressive)。既定 3(裁定 2026-07-28。画面を塞がない限界としての経験則)。多重に積み上げて画面を埋めない(第1条 / 第3条)。
 - `defaultDuration`: number(既定 5000) — Toast が duration を省いたときの既定の自律退去時間(ミリ秒)。既定 5000 は seed(overlay.md §8 の「自律退去時間の値と置き場所」をここで閉じる: 値は Toaster が持つ)。SC 2.2.1 に従い、hover / focus 中は一時停止し、個々の Toast の duration で上書きできる。actionLabel を持つ Toast はこの既定に関わらず自律退去しない(Toast 契約)。
 
 a11y(実装が保証する。アプリ側で aria を足さないこと):
