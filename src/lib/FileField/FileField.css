@@ -50,7 +50,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  align-self: start;
+  /* 段の中では左端に置く。落とせる面の中のように中央へ寄せたい合成のために、逃げ道を一つ開ける
+     (第4条。値は align-self が取るもの) */
+  align-self: var(--sc-filefield-trigger-align, start);
   padding-block: var(--spacing-inset-md);
   padding-inline: var(--spacing-inset-lg);
   background: var(--color-app-surface);

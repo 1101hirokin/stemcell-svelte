@@ -5,6 +5,8 @@
 import { render, fireEvent } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import FileField from './FileField.svelte';
 
 const snip = (html: string) => createRawSnippet(() => ({ render: () => html }));
@@ -18,6 +20,11 @@ it('土台は環境のファイル選択である(入力は消さずに重ねる
   expect(el.type).toBe('file');
   // display:none にすると焦点が当たらない。透明で重ねる(CSS の宣言を検査)
   expect(container.querySelector('.sc-filefield-trigger')?.contains(el)).toBe(true);
+});
+
+it('中央へ寄せたい合成のために、選ぶ操作の寄せ方に逃げ道を開ける(第4条)', () => {
+  const css = readFileSync(join(import.meta.dirname, 'FileField.css'), 'utf-8');
+  expect(css).toContain('align-self: var(--sc-filefield-trigger-align, start)');
 });
 
 it('選ぶ操作の名前は消費者が渡す', () => {

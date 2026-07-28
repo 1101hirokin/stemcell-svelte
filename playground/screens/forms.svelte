@@ -303,7 +303,9 @@
       <!-- 絞り込みは値を持つ側(FileField)に任せる。面が先に弾くと、受け取った件数と弾いた件数が
            二度に分かれて告知が上書きされる(実物で分かった) -->
       <DropArea ondrop={(files) => field?.accepted(files)}>
-        <FileField
+        <div class="pg-drop">
+          <span class="pg-drop-mark" aria-hidden="true"><Icon name="file.upload" /></span>
+          <FileField
           bind:this={field}
           bind:value={attachments}
           multiple
@@ -312,9 +314,10 @@
           receivedLabel="{'{n}'} 件を受け取りました"
           rejectedLabel="{'{n}'} 件は受け取れません"
         >
-          {#snippet label()}請求書{/snippet}
-          {#snippet description()}画像か PDF。落とす・貼り付け・選ぶのどれでも入る{/snippet}
-        </FileField>
+            {#snippet label()}請求書{/snippet}
+            {#snippet description()}画像か PDF。落とす・貼り付け・選ぶのどれでも入る{/snippet}
+          </FileField>
+        </div>
       </DropArea>
       {#each attachments as file, i (file.name + i)}
         <FilePreview
