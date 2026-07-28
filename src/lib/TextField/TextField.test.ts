@@ -197,10 +197,10 @@ describe('clearable', () => {
     const css = readFileSync(join(import.meta.dirname, '../internal/field-button.css'), 'utf-8');
     expect(css).toContain('inline-size: var(--sc-field-side)');
     expect(css).toContain('align-self: stretch');
-    // 一辺は「打つ文字の1行 + 縦の inset 二つ分」で組み立てる(器の高さと同じ式)
+    // 一辺は「打つ文字の1行 + 縦の inset 二つ分」で組み立てる(部品の高さと同じ式)
     expect(css).toContain('--typography-body-md-line-height');
     expect(css).toContain('var(--_inset, var(--spacing-inset-md)) * 2');
-    // 角は丸めない(器の曲がりとずれる)
+    // 角は丸めない(部品の曲がりとずれる)
     expect(css).toContain('border-radius: 0');
   });
 

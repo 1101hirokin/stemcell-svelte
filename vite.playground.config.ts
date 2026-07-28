@@ -1,4 +1,4 @@
-// Playground(WORKFLOW §2-6。裁定 2026-07: 各実装リポは実物を触って確認する器を持つ)の設定。
+// Playground(WORKFLOW §2-6。裁定 2026-07: 各実装リポは実物を触って確認する場を持つ)の設定。
 // テストは vitest.config.ts が別に持つ。
 import { defineConfig, loadEnv } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';

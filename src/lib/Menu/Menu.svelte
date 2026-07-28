@@ -69,8 +69,8 @@
     if (target !== undefined) {
       await focusItem(target);
     } else {
-      // 全項目 disabled: 動かせる項目が無いので menu 容器へ実フォーカスを入れる(トリガーに残さない)。
-      // これで focus は popover 内に入り、Escape(容器の keydown)で閉じられる。フォーカスがトリガーに
+      // 全項目 disabled: 動かせる項目が無いので menu 容部品へ実フォーカスを入れる(トリガーに残さない)。
+      // これで focus は popover 内に入り、Escape(容部品の keydown)で閉じられる。フォーカスがトリガーに
       // 残ると Popover の focusout が誤発火しない代わりに矢印も効かず操作不能に見えるのを避ける。
       await tick();
       menuListEl?.focus();
@@ -112,7 +112,7 @@
   }
 
   function onTriggerKeydown(e: KeyboardEvent) {
-    if (open) return; // 開いている間フォーカスは項目(または全 disabled 時は menu 容器)にあり、ここへは来ない
+    if (open) return; // 開いている間フォーカスは項目(または全 disabled 時は menu 本体)にあり、ここへは来ない
     if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
       e.preventDefault();
       openMenu('first');

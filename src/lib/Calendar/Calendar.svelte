@@ -155,7 +155,7 @@
     </IconButton>
   </div>
 
-  <!-- 格子から指が出たら予告の相手を落とす(焦点の日での予告に戻る)。この器は操作要素ではなく、
+  <!-- 格子から指が出たら予告の相手を落とす(焦点の日での予告に戻る)。この部品は操作要素ではなく、
        指の位置を予告の塗りへ渡すだけなので role を持たない -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="sc-calendar-grids" onpointerleave={() => (hovered = undefined)}>

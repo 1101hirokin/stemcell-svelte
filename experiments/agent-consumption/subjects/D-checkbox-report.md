@@ -18,11 +18,11 @@
    明示 type="submit"・副作用はアプリ、と読めた。
 4. checked の bind 可否: 推測で埋めた。AGENTS.md が $bindable と明言するのは TextField の
    value だけで、Checkbox の checked については何も無い。安全側に倒して checked + onchange の
-   非 bind パターンを採った(どちらでも動く)。→ 生成器の写像規則を「値の prop(value / checked)は
+   非 bind パターンを採った(どちらでも動く)。→ 生成部品の写像規則を「値の prop(value / checked)は
    bind に対応する」と一般化して還流した。
 5. <form> の使用: 推測で埋めた。stemcell に Form 相当は無く、AGENTS.md に form の具体例も無い。
    「type=submit で form 内なら送信される」から逆算して素の form で包んだ。→ patterns/forms.md §2
-   が form 参加を定めているが、AGENTS.md には未反映(生成器は契約のみを源とするため、パターン
+   が form 参加を定めているが、AGENTS.md には未反映(生成部品は契約のみを源とするため、パターン
    文書は載らない。今後の課題)。
 6. Checkbox に name が無い: 読み取れた。native form serialization は前提にせず全状態を $state で持った。
 7. error の常時渡し: 読み取れた(AGENTS.md 明記)。

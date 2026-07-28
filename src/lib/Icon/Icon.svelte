@@ -4,7 +4,7 @@
   // icons alpha.3 で分離。独立レビュー M2)。直書きの重複を避け、SSOT を icons に一元化する。
   import { viewBox, type Glyph } from '@stemcell/icons/meta';
 
-  // 語彙を絵で示す描画器(iconography.md)。色は currentColor、寸法は 1em。
+  // 語彙を絵で示す部品(iconography.md)。色は currentColor、寸法は 1em。
   // 二つの受け取り先(iconography.md §6): name(中立契約。文字列。全束が入る)/ glyph(Web 方言。静的に
   // 取ってツリーシェイク。`import glyph from '@stemcell/icons/arrow.down'` して渡す)。
   interface Props {

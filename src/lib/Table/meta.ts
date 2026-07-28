@@ -2,7 +2,7 @@
 export const META = {
   props: {
     columns: {}, // {id, align?, sortable?}[]
-    rows: {}, // {id}[] を渡す。id 以外の中身は器が解釈しない(List と同じ形)
+    rows: {}, // {id}[] を渡す。id 以外の中身は部品が解釈しない(List と同じ形)
     overflow: { values: ['scroll', 'wrap'], default: 'scroll' },
     sticky: { values: ['none', 'start', 'end', 'both'], default: 'none' },
     sort: {},
@@ -15,7 +15,7 @@ export type TableColumn = {
   id: string;
   /** セルの中身を行のどちら側へ寄せるか。桁で読む列(数量・金額・日付)は end。 */
   align?: 'start' | 'end';
-  /** この列で並べ替えを要求できるか。器は並べ替えない。 */
+  /** この列で並べ替えを要求できるか。部品は並べ替えない。 */
   sortable?: boolean;
 };
 

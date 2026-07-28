@@ -1,5 +1,5 @@
 /* 開いたり閉じたりできる開示(Disclosure.md)。native の <details> / <summary> を土台にし、
-   見た目だけを引き取る。角の丸みは持たない: 器でなく本文の流れに置かれる部品で、契約の
+   見た目だけを引き取る。角の丸みは持たない: 部品でなく本文の流れに置かれる部品で、契約の
    tokensRequired にも shape が無い。 */
 .sc-disclosure {
   display: flex;

@@ -1,5 +1,5 @@
 /* 線形・不確定(LinearLoader.md)。流れる帯で待ちを告げる。
-   径を持たず幅は器いっぱい、太さは progress.track-thickness。溝は plain.soft-bg、帯は中立の fg-muted。
+   径を持たず幅は親いっぱい、太さは progress.track-thickness。溝は plain.soft-bg、帯は中立の fg-muted。
    角は pill(溝も帯も)。 */
 .sc-linearloader {
   position: relative;

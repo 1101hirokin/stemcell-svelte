@@ -43,7 +43,7 @@
 <!-- 行き先を選ぶ領域(nav ランドマーク)。端では行き先が無いので操作を無効にする
      (押せるのに何も起きない形にしない。state.md §3.1)。
      中央は現在地の表示であると同時に行き先の選択で、選ばれている値がそのまま現在地を語る。
-     欄の名前は領域の名前と同じものを使い、視覚からは隠す(器が文脈を語っている。field.md §2)。 -->
+     欄の名前は領域の名前と同じものを使い、視覚からは隠す(部品が文脈を語っている。field.md §2)。 -->
 <nav class="sc-pagination" aria-labelledby={labelId}>
   <span class="sc-pagination-label" id={labelId}>{@render label()}</span>
 

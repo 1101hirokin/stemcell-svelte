@@ -67,7 +67,7 @@
 
 .sc-toast-message {
   flex: 1 1 auto;
-  min-inline-size: 0; /* 長い語で器を押し広げない(折り返しの規則は地の面が持つ) */
+  min-inline-size: 0; /* 長い語で部品を押し広げない(折り返しの規則は地の面が持つ) */
 }
 
 /* アクション(単一)。intent 色の text ボタン。focus を受け、リング色は app.system。文字は label-md。

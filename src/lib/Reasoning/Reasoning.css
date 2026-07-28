@@ -4,7 +4,7 @@
 .sc-reasoning-body {
   display: flex;
   flex-direction: column;
-  /* 中身の段落や節の縦の律動。器が間隔を所有する(layout.md §1) */
+  /* 中身の段落や節の縦の律動。部品が間隔を所有する(layout.md §1) */
   gap: var(--spacing-stack-sm);
   color: var(--color-app-fg-muted);
   font-family: var(--typography-body-sm-font-family);

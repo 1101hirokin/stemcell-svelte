@@ -187,7 +187,7 @@
   <section>
     <Text as="h3" variant="title-lg">PasswordField(秘匿の欄)</Text>
     <Text as="p" variant="body-sm" muted>
-      切り替えは器が必ず持つ(見せる手段が無いと、打ち間違いを直す手段が全部消して打ち直すことしか
+      切り替えは部品が必ず持つ(見せる手段が無いと、打ち間違いを直す手段が全部消して打ち直すことしか
       無くなる)。切り替えたことは隠れた文で知らせ、値そのものは読み上げに流さない(GOV.UK の裁定)。
       押された状態(aria-pressed)では伝えない。autocomplete は消費者が渡す。
     </Text>
@@ -201,7 +201,7 @@
         hiddenMessage="パスワードを隠しました"
       >
         {#snippet label()}新しいパスワード{/snippet}
-        {#snippet description()}12 文字以上。強さの判定はアプリの政策なので器は持たない{/snippet}
+        {#snippet description()}12 文字以上。強さの判定はアプリの政策なので部品は持たない{/snippet}
       </PasswordField>
     </Stack>
   </section>

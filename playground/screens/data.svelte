@@ -23,7 +23,7 @@
   let picked = $state('2026-07-20');
   let range = $state({ start: '2026-07-20', end: '2026-07-26' });
 
-  // Table(クラスタ10 第2段)。並べ替えも選択も値で、器は要求を返すだけ
+  // Table(クラスタ10 第2段)。並べ替えも選択も値で、部品は要求を返すだけ
   const orders = [
     { id: 'o-1041', customer: '朝日商会', status: '発送済み', amount: 128000, date: '2026-07-20' },
     { id: 'o-1042', customer: '向日葵デザイン', status: '準備中', amount: 42800, date: '2026-07-21' },
@@ -51,8 +51,8 @@
   let activated = $state('(まだ)');
   let overflow = $state<'scroll' | 'wrap'>('scroll');
   let sticky = $state<'none' | 'start' | 'end' | 'both'>('both');
-  // 並べ替えはアプリがやる(器は要求を返すだけ)
-  // 空状態と告知(patterns/empty-results.md)。0 件は常設の領域が件数で告げ、空状態の器は告知しない
+  // 並べ替えはアプリがやる(部品は要求を返すだけ)
+  // 空状態と告知(patterns/empty-results.md)。0 件は常設の領域が件数で告げ、空状態の部品は告知しない
   let keyword = $state('');
   let startTime = $state('09:00');
   let endTime = $state('18:30');
@@ -70,7 +70,7 @@
     });
   });
 
-  // 期間の候補(patterns/date-range.md)。候補の中身も「いまどれか」もアプリが持つ。器は日付を比べない
+  // 期間の候補(patterns/date-range.md)。候補の中身も「いまどれか」もアプリが持つ。部品は日付を比べない
   const dayMs = 86_400_000;
   const iso = (d: Date) => d.toISOString().slice(0, 10);
   const back = (days: number) => {
@@ -116,7 +116,7 @@
   <section>
     <Text as="h3" variant="title-lg">List / Accordion(クラスタ10 第1段)</Text>
     <Text as="p" variant="body-sm" muted>
-      List は項目の並びで、選択は持たない(選ぶ場面は RadioGroup / Menu / Tabs が埋めている)。項目の器は List が
+      List は項目の並びで、選択は持たない(選ぶ場面は RadioGroup / Menu / Tabs が埋めている)。項目の部品は List が
       持ち、区切りは prop で選ぶ。Accordion は Disclosure の束で、開いている集合をアプリが持つ。排他の prop は無く、
       1つに保ちたいアプリは受け取った集合を絞る(下の切替で試せる)。
     </Text>
@@ -195,7 +195,7 @@
   <section>
     <Text as="h3" variant="title-lg">DatePicker(欄 + 暦)</Text>
     <Text as="p" variant="body-sm" muted>
-      打っても選んでもよい。両者は同じ値を指す。暦が開いているかは器が内部で持つ(トリガーに従属する一時面
+      打っても選んでもよい。両者は同じ値を指す。暦が開いているかは部品が内部で持つ(トリガーに従属する一時面
       なので、値ではない)。暦を開かずキーボードだけで入れられることが要求である。
     </Text>
     <DatePicker bind:value={picked} calendarLabel="暦を開く">
@@ -252,7 +252,7 @@
   <section>
     <Text as="h3" variant="title-lg">Table(クラスタ10 第2段)</Text>
     <Text as="p" variant="body-sm" muted>
-      行と列に意味がある表。並べ替えも選択も値で、器は要求を返すだけ(並べ替えるのはアプリ)。セルは焦点を
+      行と列に意味がある表。並べ替えも選択も値で、部品は要求を返すだけ(並べ替えるのはアプリ)。セルは焦点を
       受けない(表であって grid ではない)。行はどこを押しても一次の行き先へ進むが、行の中の操作を押した
       ときは起こらない。狭いときは横へ送り、端の列を貼り付けられる。
     </Text>
@@ -285,7 +285,7 @@
         {#snippet label()}取引先{/snippet}
       </TextField>
       <!-- 件数の領域は最初から居て、中身だけ差し替える(後から現れる領域は拾われない。
-           patterns/empty-results.md §2)。空状態の器は告知しない -->
+           patterns/empty-results.md §2)。空状態の部品は告知しない -->
       <Text variant="body-sm" muted>
         <span role="status">{sortedOrders.length ? `${sortedOrders.length} 件` : '該当なし'}</span>
       </Text>
@@ -349,7 +349,7 @@
     <Text as="h3" variant="title-lg">期間の候補(pattern の実物確認)</Text>
     <Text as="p" variant="body-sm" muted>
       「過去7日間」のような候補を期間の選択に添える形(patterns/date-range.md)。候補は値の選択なので
-      RadioGroup で組み、いまどれが選ばれているかはアプリが持つ(器は日付を比べない)。暦や欄で直に変えたら
+      RadioGroup で組み、いまどれが選ばれているかはアプリが持つ(部品は日付を比べない)。暦や欄で直に変えたら
       どの候補も選ばれていない状態にする。候補は暦の面の先頭へ差し込む。
     </Text>
     <DateRangePicker

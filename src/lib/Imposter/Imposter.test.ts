@@ -1,6 +1,6 @@
 /**
  * 生成される適合検査は props と必須トークンの CSS 参照しか照合しない(HOLES #19)。
- * ここでは構造(器が自分で基準を持つこと、DOM の順)と、位置と層の配線を守る。
+ * ここでは構造(部品が自分で基準を持つこと、DOM の順)と、位置と層の配線を守る。
  */
 import { render } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
@@ -12,7 +12,7 @@ const kids = snip('<span>売り切れ</span>');
 const root = (c: HTMLElement) => c.querySelector('.sc-imposter') as HTMLElement;
 const overlay = (c: HTMLElement) => c.querySelector('.sc-imposter-overlay') as HTMLElement;
 
-it('器が下地と重ねの両方を持つ(基準を祖先に求めない。Imposter.md §2)', () => {
+it('部品が下地と重ねの両方を持つ(基準を祖先に求めない。Imposter.md §2)', () => {
   const { container } = render(Imposter, { props: { base, children: kids } });
   expect(root(container).querySelector('img')).not.toBeNull();
   expect(overlay(container).textContent).toBe('売り切れ');

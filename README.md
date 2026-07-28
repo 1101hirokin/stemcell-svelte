@@ -27,7 +27,7 @@ Stemcell の Svelte 実装。規範は [stemcell-component-prompts](../stemcell-
 ## Playground
 
 `bun run playground` で起動する(WORKFLOW §2-6。裁定 2026-07: 各実装リポは実装済み部品を
-実物で触って確認する器を持つ)。実測検証と「実物で判断」保留の消化の器であり、配信物ではない。
+実物で触って確認する場を持つ)。実測検証と「実物で判断」保留を消化する場であり、配信物ではない。
 
 ## トークン
 

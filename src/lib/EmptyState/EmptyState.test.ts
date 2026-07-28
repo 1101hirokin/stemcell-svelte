@@ -24,7 +24,7 @@ it('絵は装飾として支援技術から外れる', () => {
   expect(media.getAttribute('aria-hidden')).toBe('true');
 });
 
-it('器は告知しない(生きた領域を持たない)', () => {
+it('部品は告知しない(生きた領域を持たない)', () => {
   const { container } = render(EmptyState, {
     props: { ...base, description: snip('「土鍋」に一致する注文はありません') },
   });

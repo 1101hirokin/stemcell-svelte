@@ -26,7 +26,7 @@
     const v = viewport;
     const t = track;
     if (!v || !t) return;
-    // 器(見える幅)と帯(中身の幅)の両方を見る。帯は中身に合わせて伸びるので、子の増減や
+    // 見える幅と帯(中身の幅)の両方を見る。帯は中身に合わせて伸びるので、子の増減や
     // 寸法の変化も帯の寸法変化として届く(子を個別に購読しなくてよい)。
     const measure = () => {
       scrollable = t.getBoundingClientRect().width - v.clientWidth > 1;
@@ -39,7 +39,7 @@
   });
 </script>
 
-<!-- 見た目と意味を持たない器(契約 a11y): states 無し・構造の主張無し。role は立てない
+<!-- 見た目と意味を持たない部品(契約 a11y): states 無し・構造の主張無し。role は立てない
      (スクロール領域の意味づけは Web の表現であり、契約が role を持たない)。
      焦点を受けるのでリング(focus-ring.md)は必須(契約 focusRing: true)。 -->
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->

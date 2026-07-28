@@ -65,7 +65,7 @@ it('readonly×invalid: warn して invalid を落とす(state.md §6。TextField
   warn.mockRestore();
 });
 
-it('start / end を持たない(複数行の器に行内アイコンは成立しない。契約が再宣言しない)', () => {
+it('start / end を持たない(複数行の部品に行内アイコンは成立しない。契約が再宣言しない)', () => {
   const { container } = render(Textarea, { props: { label } });
   expect(container.querySelector('.sc-textarea-start')).toBeNull();
   expect(container.querySelector('.sc-textarea-end')).toBeNull();

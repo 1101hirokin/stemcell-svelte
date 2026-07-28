@@ -24,7 +24,7 @@
     disabled?: boolean;
     invalid?: boolean;
     required?: boolean;
-    /** 名前を視覚から隠す(支援技術には届く。field.md §2。器が文脈を語っている場合の例外)。 */
+    /** 名前を視覚から隠す(支援技術には届く。field.md §2。部品が文脈を語っている場合の例外)。 */
     labelHidden?: boolean;
     size?: (typeof META.props.size.values)[number];
     onchange?: (value: string) => void;

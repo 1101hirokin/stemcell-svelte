@@ -52,7 +52,7 @@
   </section>
   <section>
     <Text as="h3" variant="title-lg">Skeleton</Text>
-    <Text as="p" variant="body-sm" muted>読み込み中の代役。text=文字行 / box=面 / circle=円。寸法は器か font に従う。reduced-motion で shimmer 停止。</Text>
+    <Text as="p" variant="body-sm" muted>読み込み中の代役。text=文字行 / box=面 / circle=円。寸法は親か font に従う。reduced-motion で shimmer 停止。</Text>
     <Cluster gap="md">
       <div style="inline-size: 3rem; block-size: 3rem;"><Skeleton form="circle" /></div>
       <Stack gap="sm">

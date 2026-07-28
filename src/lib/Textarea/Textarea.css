@@ -66,13 +66,13 @@
   padding: 0;
   outline: none;
   /* 中身の高さに追従する(Textarea.md §2 の「育ち方」。JS で測って高さを書く形は持たない。憲法 第2条)。
-     高さの範囲は行数の対で決まる。field-sizing が効くと rows 属性は無視されるので、器が渡す行数から
+     高さの範囲は行数の対で決まる。field-sizing が効くと rows 属性は無視されるので、部品が渡す行数から
      下限と上限を引き直す(上限は省略されうるので、既定を infinity にして「上限なし」を表す)。
      上限に達したら欄の中で送る。未対応の環境では宣言ごと無視され、native の rows の行高で立つ(第7条) */
   field-sizing: content;
   min-block-size: calc(var(--sc-textarea-rows, 3) * 1lh);
   max-block-size: calc(var(--sc-textarea-max-rows, infinity) * 1lh);
-  /* リサイズは土地の声(契約 Expressive)。縦のみ許し、横は器が持つ。
+  /* リサイズは土地の声(契約 Expressive)。縦のみ許し、横は部品が持つ。
      つまみで高さを決めたら、そこで固定される(利用者が選んだ大きさを追従で上書きしない) */
   resize: vertical;
   font-family: var(--typography-body-md-font-family);

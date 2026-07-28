@@ -22,7 +22,7 @@ it('頭と足を渡すと主役の前後に置く(DOM の順が読み上げの�
   expect(order).toEqual(['sc-cover-header', 'sc-cover-main', 'sc-cover-footer']);
 });
 
-it('頭と足を landmark の要素にしない(器は構造を主張しない。layout.md §6)', () => {
+it('頭と足を landmark の要素にしない(部品は構造を主張しない。layout.md §6)', () => {
   const { container } = render(Cover, {
     props: { children: kids, header: snip('<span>頭</span>'), footer: snip('<span>足</span>') },
   });

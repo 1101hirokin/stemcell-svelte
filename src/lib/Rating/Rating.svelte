@@ -71,7 +71,7 @@
     if (readonly && !valueLabel) {
       console.warn(
         '[stemcell] Rating: readonly のときは valueLabel が要る(Rating.md §2)。' +
-          '絵として届く器に名前が無いと、評価そのものが読み上げに乗らない。',
+          '絵として届く部品に名前が無いと、評価そのものが読み上げに乗らない。',
       );
     }
     if (!readonly && (itemLabels?.length ?? 0) !== max) {

@@ -45,8 +45,8 @@
   margin-inline-start: 0.25em;
 }
 
-/* 内包時の高さは一次内容(入力)が決める(size.md §2 裁定)。縦 inset は入力に付き、器は横 inset だけを
-   持つ。align-items:stretch で affix は器の行高へ従属する(器を押し上げない) */
+/* 内包時の高さは一次内容(入力)が決める(size.md §2 裁定)。縦 inset は入力に付き、部品は横 inset だけを
+   持つ。align-items:stretch で affix は部品の行高へ従属する(部品を押し上げない) */
 .sc-timefield-control {
   display: flex;
   align-items: stretch;
@@ -89,7 +89,7 @@
   min-inline-size: 0;
   border: none;
   background: none;
-  /* 縦 inset は一次内容(入力)が持ち、器の高さを決める(size.md §2)。横は器の padding-inline が持つ */
+  /* 縦 inset は一次内容(入力)が持ち、部品の高さを決める(size.md §2)。横は部品の padding-inline が持つ */
   padding-block: var(--_inset);
   padding-inline: 0;
   outline: none;
@@ -134,11 +134,11 @@
 .sc-timefield-end {
   display: inline-flex;
   align-items: center;
-  /* 器の行高に従属する(size.md §2 内包時の裁定)。行高いっぱいに広がり hit-target を器が満たす */
+  /* 部品の行高に従属する(size.md §2 内包時の裁定)。行高いっぱいに広がり hit-target を部品が満たす */
   align-self: stretch;
   color: var(--color-app-fg-muted);
 }
-/* affix の対話要素/装飾は器の行高に従い、自前の縦 inset で器を押し上げない(内包時の裁定)。
+/* affix の対話要素/装飾は部品の行高に従い、自前の縦 inset で部品を押し上げない(内包時の裁定)。
    詳細度は (0,2,1) にする: 中の button 自身の .sc-button/.sc-iconbutton[data-size](0,2,0)に
    padding-block:0 を勝たせるため(:where は詳細度 0 で負けていた。独立レビュー blocker) */
 .sc-timefield-control .sc-timefield-start > button,
@@ -166,7 +166,7 @@
 
 /* 桁。焦点は桁に立つ(根ではない)。等幅の字形で、値が変わっても幅が跳ねない */
 .sc-timefield-segment {
-  /* 桁は input なので、UA の枠と面と余白を落として器の中の文字として立たせる。
+  /* 桁は input なので、UA の枠と面と余白を落として部品の中の文字として立たせる。
      幅は中身(2桁 / 4桁)で決まる(field-sizing。未対応環境は size 属性が受け持つ) */
   appearance: none;
   border: none;

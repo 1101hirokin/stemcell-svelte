@@ -1,11 +1,11 @@
-/* コードの塊(CodeBlock.md)。器が持つのは、書いたとおりに読めることと、行を保つことと、置き場所だけ。 */
+/* コードの塊(CodeBlock.md)。部品が持つのは、書いたとおりに読めることと、行を保つことと、置き場所だけ。 */
 .sc-codeblock {
   /* 番号の欄の幅。桁の場所(2.5ch)と、番号と本文の隙間。ch は等幅の段を基準にしたいので
      ここでは決めず、字の段を持つ .sc-codeblock-code 側の font-size に効かせる(下の calc は
      継承した値をその文脈で解く) */
   --_gutter: calc(2.5ch + var(--spacing-inline-md));
   background: var(--color-app-surface);
-  /* 中身の幅で親を押し広げない。器の中で送る(flex/grid の子でも縮める) */
+  /* 中身の幅で親を押し広げない。部品の中で送る(flex/grid の子でも縮める) */
   min-inline-size: 0;
   border: var(--shape-border-width) solid var(--color-app-divider);
   border-radius: var(--shape-semantic-card);
@@ -14,7 +14,7 @@
   color: var(--color-app-foreground);
 }
 
-/* 本体と線で区切られた上部。中身はアプリが置く(器は場所だけ持つ) */
+/* 本体と線で区切られた上部。中身はアプリが置く(部品は場所だけ持つ) */
 .sc-codeblock-header {
   display: flex;
   align-items: center;
@@ -35,7 +35,7 @@
 .sc-codeblock-scroller:focus {
   outline: none;
 }
-/* 溢れているときだけ焦点を受ける。受けた以上は見えるべきなので、内側へ引いて描く(器の端で切れる) */
+/* 溢れているときだけ焦点を受ける。受けた以上は見えるべきなので、内側へ引いて描く(置き場所の端で切れる) */
 .sc-codeblock-scroller:focus-visible {
   outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
   outline-offset: calc(var(--focus-ring-offset) * -1);
@@ -46,7 +46,7 @@
   padding: var(--spacing-inset-md);
   /* 行は折らない。行が構文の単位で、段付けが入れ子の深さを表す(typography.md §5 のコードの例外) */
   white-space: pre;
-  /* 幅は中身が決める。器より広ければ scroller が送る */
+  /* 幅は中身が決める。親より広ければ scroller が送る */
   inline-size: max-content;
   min-inline-size: 100%;
   box-sizing: border-box;
@@ -58,7 +58,7 @@
 .sc-codeblock[data-wrap] .sc-codeblock-pre {
   white-space: pre-wrap;
   inline-size: auto;
-  /* 折るのは器の端であって、語や禁則の規則ではない。word-break と line-break は持ち込まない */
+  /* 折るのは置き場所の端であって、語や禁則の規則ではない。word-break と line-break は持ち込まない */
   overflow-wrap: anywhere;
 }
 
@@ -75,7 +75,7 @@
 
 /* 行番号。数えるのは CSS で、行の中身は文字のままなので複写に混ざらない。
    content の alt 文字列(/ "")で支援技術からは外れる: 全行に数字が挟まると中身が追えなくなる。
-   .line も見るのは、着色の器械が行ごとの要素をその名前で吐くためである(Shiki の慣行) */
+   .line も見るのは、着色の道具が行ごとの要素をその名前で吐くためである(Shiki の慣行) */
 .sc-codeblock-line,
 .sc-codeblock-code .line {
   counter-increment: sc-line;
@@ -101,7 +101,7 @@
   user-select: none;
 }
 
-/* 構文の色(color.md §10。RFC 0018)。着色の器械が吐くクラスへ写す。器械が無ければ全体が本文の色で
+/* 構文の色(color.md §10。RFC 0018)。着色の道具が吐くクラスへ写す。道具が無ければ全体が本文の色で
    描かれ、コードは読める(第7条)。Prism は .token.<役>、highlight.js は .hljs-<役> を吐く */
 .sc-codeblock-code .token.comment,
 .sc-codeblock-code .token.prolog,
@@ -140,7 +140,7 @@
   color: var(--color-code-type);
 }
 
-/* 色をインラインで書く器械(Shiki)へは、CSS 変数のテーマとして同じ役を渡す。
+/* 色をインラインで書く道具(Shiki)へは、CSS 変数のテーマとして同じ役を渡す。
    変数の名前は Shiki の createCssVariablesTheme の既定(--shiki-*)に合わせる */
 .sc-codeblock {
   --shiki-comment: var(--color-code-comment);

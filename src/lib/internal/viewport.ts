@@ -1,5 +1,5 @@
 /**
- * 器の広さで overlay の類を変えるための判定(RFC 0017 / overlay.md §5)。
+ * 画面の広さで overlay の類を変えるための判定(RFC 0017 / overlay.md §5)。
  * 狭いとみなすのは `breakpoint.medium` 未満(Material の compact 相当)である。
  *
  * 閾値の値は持たない。CSS のメディアクエリは custom property を読めない(layout.md §8)ので、

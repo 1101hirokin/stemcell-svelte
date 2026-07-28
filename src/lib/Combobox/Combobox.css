@@ -31,7 +31,7 @@
   color: var(--color-app-foreground);
 }
 /* 名前を視覚から隠す(field.md §2)。支援技術には届く標準の clip 技法で、
-   欄と名前の間の律動も消す(器が文脈を語っている場面で使う) */
+   欄と名前の間の律動も消す(部品が文脈を語っている場面で使う) */
 .sc-combobox[data-label-hidden='true'] {
   gap: 0;
 }
@@ -51,11 +51,11 @@
   margin-inline-start: 0.25em;
 }
 
-/* 器。inset は中身(欄)が持ち、器は端まで面を張る。フィールドは fill(横いっぱい。field.md §2・第3条) */
+/* 欄の外枠。inset は中身(欄)が持ち、部品は端まで面を張る。フィールドは fill(横いっぱい。field.md §2・第3条) */
 .sc-combobox-control {
   display: flex;
   align-items: stretch;
-  /* 山形を絶対配置で浮かせるための基準。欄が器の全幅を占め、山形はその上に乗る
+  /* 山形を絶対配置で浮かせるための基準。欄が親の全幅を占め、山形はその上に乗る
      (pointer-events を持たないので、山形の上を押しても欄が受ける) */
   position: relative;
   inline-size: 100%;
@@ -82,7 +82,7 @@
   cursor: not-allowed;
 }
 
-/* 打てる欄。文字は欄が持ち、面と枠は器が持つ。横の inset は欄が持ち、右は山形の分だけ足す */
+/* 打てる欄。文字は欄が持ち、面と枠は部品が持つ。横の inset は欄が持ち、右は山形の分だけ足す */
 .sc-combobox-input {
   flex: 1 1 auto;
   min-inline-size: 0;

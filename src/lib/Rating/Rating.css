@@ -33,13 +33,13 @@
    空の段が見えないと、何段階中の評価かが分からない */
 .sc-rating-star {
   display: inline-flex;
-  /* 星の大きさは Expressive。当たり判定(24px)は段の器が持つので、絵は小さくできる */
+  /* 星の大きさは Expressive。当たり判定(24px)は段の部品が持つので、絵は小さくできる */
   font-size: 1rem;
   color: var(--color-app-border);
 }
 
 /* 読み取り: 二枚重ねで連続値を塗り分ける(平均点を整数へ丸めると嘘になる)。
-   星そのものは支援技術から外し、名前は器(role=img)が持つ */
+   星そのものは支援技術から外し、名前は部品(role=img)が持つ */
 .sc-rating[data-readonly='true'] .sc-rating-stars {
   position: relative;
   display: inline-flex;
@@ -59,7 +59,7 @@
   inset-block: 0;
   inset-inline-start: 0;
   overflow: hidden;
-  /* 値のぶんだけ見せる。器から渡る割合 */
+  /* 値のぶんだけ見せる。部品から渡る割合 */
   inline-size: var(--sc-rating-fill, 0%);
   white-space: nowrap;
 }
@@ -86,7 +86,7 @@
 .sc-rating[data-disabled='true'] .sc-rating-step {
   cursor: not-allowed;
 }
-/* 段の名前は読み上げにだけ届く(視覚には星が出る)。器から隠さずに置き場所だけ外す */
+/* 段の名前は読み上げにだけ届く(視覚には星が出る)。部品から隠さずに置き場所だけ外す */
 .sc-rating-name {
   position: absolute;
   inline-size: 1px;
@@ -105,7 +105,7 @@
   block-size: 1px;
   margin: 0;
 }
-/* 選ばれた段までは塗り、その先は輪郭のまま(形も色も変わる。SC 1.4.1)。どこまで塗るかは器が持つ
+/* 選ばれた段までは塗り、その先は輪郭のまま(形も色も変わる。SC 1.4.1)。どこまで塗るかは部品が持つ
    (撫でたときの予告も同じ印で描くので、CSS の :checked では足りない) */
 .sc-rating-step[data-filled] .sc-rating-star {
   color: var(--color-app-foreground);
@@ -113,7 +113,7 @@
 .sc-rating[data-disabled='true'] .sc-rating-star {
   color: var(--color-semantic-disabled-fg);
 }
-/* 焦点の輪は段に立つ(focus-ring.md)。native radio は隠してあるので、段の器が受けて描く */
+/* 焦点の輪は段に立つ(focus-ring.md)。native radio は隠してあるので、段の部品が受けて描く */
 .sc-rating-step:has(.sc-rating-input:focus-visible) {
   outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-semantic-plain-focus-ring);
   outline-offset: var(--focus-ring-offset);

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Slider, Stack, Cluster, Select, Radio, RadioGroup, Text, Rating, Combobox } from '../../src/lib';
 
-  // 打ちながら絞る欄(Combobox)。絞り込みは器が持たないので、ここ(消費者)で絞る
+  // 打ちながら絞る欄(Combobox)。絞り込みは部品が持たないので、ここ(消費者)で絞る
   const partners = [
     { value: 'asahi', label: '朝日商会', description: '東京都千代田区' },
     { value: 'himawari', label: '向日葵デザイン', description: '大阪府大阪市' },
@@ -211,9 +211,9 @@
   <section>
     <Text as="h3" variant="title-lg">Combobox(打ちながら絞る)</Text>
     <Text as="p" variant="body-sm" muted>
-      絞り込みは器が持たない(打たれた文字を知らせるだけで、絞った候補は消費者が渡す)。一覧にない値は
+      絞り込みは部品が持たない(打たれた文字を知らせるだけで、絞った候補は消費者が渡す)。一覧にない値は
       採らない。打った文字は値ではないので、閉じたときは選ばれている値へ戻す。候補が無いときは言葉で
-      伝え、件数は器が耳へ届ける。
+      伝え、件数は部品が耳へ届ける。
     </Text>
     <Stack gap="sm">
       <div>

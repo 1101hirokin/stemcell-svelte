@@ -24,7 +24,7 @@
     { id: 'src-2', title: 'source foundation', url: 'https://example.com/source', excerpt: '根拠への到達性と、引用と出典の相互参照。' },
   ];
 
-  // 会話の器と発話(Conversation / Message)。履歴はアプリが持つ(conversation §4)
+  // 会話の部品と発話(Conversation / Message)。履歴はアプリが持つ(conversation §4)
   type Turn = { id: string; role: 'user' | 'assistant'; speaker: string; text: string; at: string };
   let turns = $state<Turn[]>([
     { id: 't1', role: 'user', speaker: 'あなた', text: '土鍋の発注点はいくつにすべき？', at: '12:03' },
@@ -129,7 +129,7 @@
   <section>
     <Text as="h3" variant="title-lg">Sources(回答の根拠)</Text>
     <Text as="p" variant="body-sm" muted>
-      出典の集合を一枚に集める。器が縛るのは到達性と相互参照だけで、項目の中身(到達手段の Link、題や
+      出典の集合を一枚に集める。部品が縛るのは到達性と相互参照だけで、項目の中身(到達手段の Link、題や
       抜粋の Text)はアプリが組む。相互参照キーは UI が採番せず出典が持つ値を使い、各項目がその id を帯びる
       (下の項目は id="src-1" のように付いていて、本文中の引用から断片リンクで指せる)。
     </Text>
@@ -177,11 +177,11 @@
   </section>
 
   <section>
-    <Text as="h3" variant="title-lg">Conversation / Message(会話の器と発話)</Text>
+    <Text as="h3" variant="title-lg">Conversation / Message(会話の部品と発話)</Text>
     <Text as="p" variant="body-sm" muted>
-      会話は「新しい情報が末尾にだけ足される、意味のある順序の記録」なので、器は log として届く。生成中は
+      会話は「新しい情報が末尾にだけ足される、意味のある順序の記録」なので、部品は log として届く。生成中は
       逐次で告知せず(streaming.md §4)、完了で一度届ける。末尾に居るときだけ追い、離れているあいだの新着は
-      戻る手段とともに知らせる。発話の中身は器が解釈しない。姿は role から導かないので、ここでは助手を
+      戻る手段とともに知らせる。発話の中身は部品が解釈しない。姿は role から導かないので、ここでは助手を
       text(地に置く)、利用者を soft の行末側にしている。
     </Text>
     <div class="ai-conversation">
@@ -219,7 +219,7 @@
   </section>
 
   <section>
-    <Text as="h3" variant="title-lg">人間同士のチャット(同じ器で)</Text>
+    <Text as="h3" variant="title-lg">人間同士のチャット(同じ部品で)</Text>
     <Text as="p" variant="body-sm" muted>
       姿は variant と color と align で選ぶ。role が答えるのは誰の発話かであって、どう見えるかではない。
       誰かは speakerLabel が届ける。ここでは自分の発話を primary の filled で行末側へ、相手の発話を soft の

@@ -3,7 +3,7 @@
 .sc-calendar {
   display: flex;
   flex-direction: column;
-  /* 器より広くならない(浮かぶ面の中でも、地の上でも) */
+  /* 親より広くならない(浮かぶ面の中でも、地の上でも) */
   max-inline-size: 100%;
   gap: var(--spacing-stack-sm);
   color: var(--color-app-foreground);
@@ -30,15 +30,15 @@
 }
 
 .sc-calendar-grids {
-  /* 器に入る数だけ月を並べ、入らなければ折り返す。格子は自分の中身の幅で立つ:
-     器いっぱいに伸ばすと、7列が間延びして日が遠くなる(日付の欄と同じ理由。layout.md §2 の例外) */
+  /* 部品に入る数だけ月を並べ、入らなければ折り返す。格子は自分の中身の幅で立つ:
+     親いっぱいに伸ばすと、7列が間延びして日が遠くなる(日付の欄と同じ理由。layout.md §2 の例外) */
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-inset-sm);
 }
 .sc-calendar-grid {
   border-collapse: collapse;
-  /* 中身の幅で立つ(伸ばさない)。狭い器では折り返しに任せ、それでも入らないところまでが下限 */
+  /* 中身の幅で立つ(伸ばさない)。狭い置き場所では折り返しに任せ、それでも入らないところまでが下限 */
   flex: 0 1 auto;
   table-layout: fixed;
 }
@@ -53,13 +53,13 @@
 /* 日のセル。当たり判定の門(size.md §4)の対象で、7列で並ぶので詰まりやすい。
    見た目を詰めても押せる範囲は下限(24px)を割らない */
 .sc-calendar-day {
-  /* 当たり判定の門(size.md §4。Web の下限は 24px)。列は器を分け合うので、
+  /* 当たり判定の門(size.md §4。Web の下限は 24px)。列は部品を分け合うので、
      ここで指すのは「これ以上は縮まない」床である */
   min-inline-size: 1.5rem;
   min-block-size: 1.5rem;
   padding: 0; /* 余白は面(span)が持つ。面がセルいっぱいに広がるようにするため */
   /* 列の幅は数字の箱(2桁ぶん)と内側の余白から決まる。表の指定幅は「好ましい幅」なので、
-     器が狭ければ表が縮める。最小幅で書くと縮めなくなり、狭い画面で格子が器から飛び出す */
+     置き場所が狭ければ表が縮める。最小幅で書くと縮めなくなり、狭い画面で格子が部品から飛び出す */
   inline-size: calc(2.25rem + var(--spacing-inset-sm) * 2);
   text-align: center;
   cursor: pointer;

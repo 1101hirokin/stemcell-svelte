@@ -30,7 +30,7 @@ const props = {
 const q = <T extends HTMLElement>(c: HTMLElement, s: string) => c.querySelector(s) as T;
 const all = (c: HTMLElement, s: string) => [...c.querySelectorAll<HTMLElement>(s)];
 
-it('表の構造(名前・見出し・本体)を器が持つ', () => {
+it('表の構造(名前・見出し・本体)を部品が持つ', () => {
   const { container } = render(Table<Row>, { props });
   // 名前は送る箱の外に置き、aria-labelledby で表へ結ぶ(横へ送っても名前が流れない)
   const table = q(container, 'table');
@@ -57,7 +57,7 @@ it('桁で読む列は行末側へ寄せる', () => {
   expect(cells[1]!.dataset.align).toBe('end');
 });
 
-// 並べ替えは要求で、器は並べ替えない(Table.md §2)
+// 並べ替えは要求で、部品は並べ替えない(Table.md §2)
 it('並べ替えを要求する。昇順 → 降順 → 解除で回る', async () => {
   const onsortchange = vi.fn();
   const { container, rerender } = render(Table<Row>, { props: { ...props, onsortchange } });
@@ -83,7 +83,7 @@ it('並べ替えている列を見出しで表明する', async () => {
   expect(amount!.getAttribute('aria-sort')).toBe('descending');
 });
 
-it('並べ替えない列は器も並べ替えない(行の順は渡されたまま)', () => {
+it('並べ替えない列は部品も並べ替えない(行の順は渡されたまま)', () => {
   const { container } = render(Table<Row>, { props });
   expect(all(container, 'tbody tr').map((tr) => tr.textContent)).toEqual([
     expect.stringContaining('朝顔'),
@@ -143,7 +143,7 @@ it('行の中の操作を押したときは行の押下を起こさない', asyn
   expect(onrowactivate).not.toHaveBeenCalled();
 });
 
-it('折り返しと貼り付きを器が持つ', () => {
+it('折り返しと貼り付きを部品が持つ', () => {
   const { container } = render(Table<Row>, { props: { ...props, overflow: 'wrap', sticky: 'both' } });
   const root = q(container, '.sc-table');
   expect(root.dataset.overflow).toBe('wrap');

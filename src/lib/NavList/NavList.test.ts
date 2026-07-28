@@ -9,7 +9,7 @@ const items = [
 ];
 const label = createRawSnippet(() => ({ render: () => '<span>画面</span>' }));
 
-it('道案内の領域と、項目の器はこの部品が持つ(アプリの作法に頼らない)', () => {
+it('道案内の領域と、項目の部品はこの部品が持つ(アプリの作法に頼らない)', () => {
   const { container } = render(NavList, { props: { items } });
   expect(container.querySelector('nav')).not.toBeNull();
   expect(container.querySelector('ul')?.getAttribute('role')).toBe('list');

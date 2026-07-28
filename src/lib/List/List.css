@@ -1,4 +1,4 @@
-/* 項目の並び(List.md)。器が持つのは並びの構造と縦の律動、そして区切りだけで、項目の中身は
+/* 項目の並び(List.md)。部品が持つのは並びの構造と縦の律動、そして区切りだけで、項目の中身は
    合成した部品が描く。行の高さや内側の余白は Expressive。 */
 .sc-list {
   list-style: none;
@@ -6,7 +6,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  /* 項目の縦の律動。器が間隔を所有する(layout.md §1) */
+  /* 項目の縦の律動。部品が間隔を所有する(layout.md §1) */
   gap: var(--spacing-stack-sm);
 }
 
@@ -24,6 +24,6 @@
 }
 
 .sc-list-item {
-  /* 中身が長くても器の外へ溢れない(fill が制約に従って縮む。layout.md §2) */
+  /* 中身が長くても部品の外へ溢れない(fill が制約に従って縮む。layout.md §2) */
   min-inline-size: 0;
 }

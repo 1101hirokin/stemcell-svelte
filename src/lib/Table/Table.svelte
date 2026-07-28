@@ -5,20 +5,20 @@
   import Icon from '../Icon/Icon.svelte';
   import type { Snippet } from 'svelte';
 
-  // 行と列に意味がある表(Table.md)。器が構造(見出しとセルの対応・並べ替えの表明・選択の列)を持ち、
+  // 行と列に意味がある表(Table.md)。部品が構造(見出しとセルの対応・並べ替えの表明・選択の列)を持ち、
   // 中身はアプリが差す。表であって grid ではない: セルは焦点を受けず、キーはセルのあいだを渡らない
   // (APG 逐語: a WAI-ARIA table is a static tabular structure ... its cells are not focusable or selectable)。
-  // 並べ替えも絞り込みも器はしない。要求を返すだけで、並んだ結果は rows としてアプリが渡す。
+  // 並べ替えも絞り込みも部品はしない。要求を返すだけで、並んだ結果は rows としてアプリが渡す。
   interface Props {
-    /** 列の宣言。見出しとセルの対応・並べ替えの表明・揃えを器が保証するために要る。 */
+    /** 列の宣言。見出しとセルの対応・並べ替えの表明・揃えを部品が保証するために要る。 */
     columns: TableColumn[];
-    /** 行の列。並んだ順にそのまま描く(器は並べ替えない)。 */
+    /** 行の列。並んだ順にそのまま描く(部品は並べ替えない)。 */
     rows: T[];
     /** セルに収まらない中身の扱い。scroll は1行に収めて横へ送る、wrap は折り返す。 */
     overflow?: (typeof META.props.overflow.values)[number];
     /** 横へ送るとき、行の始まり側 / 終わり側の列を貼り付けるか(overflow=wrap では効かない)。 */
     sticky?: (typeof META.props.sticky.values)[number];
-    /** いま並べ替わっている列と向き。アプリが持つ値で、器は表明するだけ。 */
+    /** いま並べ替わっている列と向き。アプリが持つ値で、部品は表明するだけ。 */
     sort?: TableSort;
     /** 選ばれている行の id の集合。この値と onselectedchange が揃ったときだけ選択の列が現れる。 */
     selected?: string[];
@@ -99,7 +99,7 @@
     onrowactivate(row.id);
   };
 
-  // 送れる向きが残っているかを器が持つ。何も出さないと、貼り付いた列との境目が表の端に見えて
+  // 送れる向きが残っているかを部品が持つ。何も出さないと、貼り付いた列との境目が表の端に見えて
   // 続きがあることに気づけない(Table.md §2)。見せ方は CSS 側(Expressive)。
   let scroller = $state<HTMLElement>();
   let more = $state({ start: false, end: false });

@@ -5,7 +5,7 @@
   import type { Snippet } from 'svelte';
 
   interface Props {
-    /** 切替の閾値(器の幅がこれ未満で縦)。rem の長さ(裁定済み 2026-07。契約 alpha.1)。 */
+    /** 切替の閾値(部品の幅がこれ未満で縦)。rem の長さ(裁定済み 2026-07。契約 alpha.1)。 */
     threshold?: string;
     /** spacing の語彙: 段(sm / md / lg)または大域の原始 X(8〜24)。生の px は受けない。 */
     gap?: string;
@@ -28,7 +28,7 @@
   });
 </script>
 
-<!-- 見た目と意味を持たない器(契約 a11y): states 無し・focus 無し・構造の主張無し。
+<!-- 見た目と意味を持たない部品(契約 a11y): states 無し・focus 無し・構造の主張無し。
      切替は閾値駆動(flex-basis 算術)。DOM / 読み上げ順は切替で変わらない。 -->
 <div
   class="sc-switcher"

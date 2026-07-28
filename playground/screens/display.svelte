@@ -3,7 +3,7 @@
     Button, IconButton, Stack, Cluster, Icon, Divider, Badge, Avatar, Tag, Text, Code, CodeBlock, EmptyState, Card, Stat, Grid, toast,
   } from '../../src/lib';
 
-  // コードの塊(CodeBlock)。値は文字列で、着色は器の外。ここでは素のまま(器械を入れていない)
+  // コードの塊(CodeBlock)。値は文字列で、着色は部品の外。ここでは素のまま(道具を入れていない)
   const sample = `type Order = { id: string; total: number };
 
 // 直近の注文を合計する
@@ -43,14 +43,14 @@ export function sum(orders: Order[]): number {
       <Text as="h4" variant="body-lg">同じ body-lg を見出し要素(h4)に当てた例</Text>
       <div style="inline-size: 16rem; border: 1px dashed var(--color-semantic-plain-border);">
         <Text as="p" variant="body-md" truncate>
-          truncate は長い一行を器の幅で省略する。この文は器より長いので末尾が … で切れる。
+          truncate は長い一行を部品の幅で省略する。この文は親より長いので末尾が … で切れる。
         </Text>
       </div>
     </Stack>
   </section>
   <section>
     <Text as="h3" variant="title-lg">Divider</Text>
-    <Text as="p" variant="body-sm" muted>区切る線。装飾(支援技術から隠れる)。stack=水平線 / inline=垂直線(論理方向)。余白は器(Stack/Cluster の gap)が持つ。</Text>
+    <Text as="p" variant="body-sm" muted>区切る線。装飾(支援技術から隠れる)。stack=水平線 / inline=垂直線(論理方向)。余白は包む要素(Stack/Cluster の gap)が持つ。</Text>
     <Stack gap="md">
       <Text variant="body-sm">上のブロック</Text>
       <Divider />
@@ -177,7 +177,7 @@ export function sum(orders: Order[]): number {
   <section>
     <Text as="h3" variant="title-lg">Code / CodeBlock(コード)</Text>
     <Text as="p" variant="body-sm" muted>
-      文中のコードは <Code>Code</Code>、塊は <Code>CodeBlock</Code>。塊は値を文字列で受け取り、着色は器の外に
+      文中のコードは <Code>Code</Code>、塊は <Code>CodeBlock</Code>。塊は値を文字列で受け取り、着色は部品の外に
       置く(色だけ DS が持つ)。既定は折らずに横へ送り、溢れているときだけ焦点を受ける。ヘッダーは場所だけ
       で、複写ボタンはアプリが置く。
     </Text>
@@ -204,8 +204,8 @@ export function sum(orders: Order[]): number {
       {/snippet}
     </CodeBlock>
     <Text as="p" variant="body-sm" muted>
-      着色済みの中身を差した例(器械は入れていないので、Prism が吐く形の印を手で書いている)。色は DS が
-      持つ6役(comment / keyword / string / number / function / type)で、器械が無ければ本文の色で描かれる。
+      着色済みの中身を差した例(道具は入れていないので、Prism が吐く形の印を手で書いている)。色は DS が
+      持つ6役(comment / keyword / string / number / function / type)で、道具が無ければ本文の色で描かれる。
     </Text>
     <CodeBlock code={highlighted.text} language="ts" label="着色した例のコード">
       {#snippet children()}<span class="token keyword">const</span> total <span class="token keyword">=</span> orders<span class="token function">.reduce</span>((a, o) =&gt; a <span class="token keyword">+</span> o.total, <span class="token number">0</span>); <span class="token comment">// 円</span>{'\n'}<span class="token keyword">type</span> <span class="token class-name">Order</span> = &lbrace; id: <span class="token class-name">string</span>; label: <span class="token string">'注文'</span> &rbrace;;{/snippet}
@@ -215,7 +215,7 @@ export function sum(orders: Order[]): number {
   <section>
     <Text as="h3" variant="title-lg">EmptyState(空状態)</Text>
     <Text as="p" variant="body-sm" muted>
-      空は正常な状態である。器は何が無いのかを言葉にし、次にできることを置く場所を持つ。失敗は扱わない
+      空は正常な状態である。部品は何が無いのかを言葉にし、次にできることを置く場所を持つ。失敗は扱わない
       (空は正常、失敗は異常)。0 件になったことの告知も持たない(常設の領域がアプリ側で告げる。
       patterns/empty-results.md)。表の中の実物は「データ表示」の画面にある。
     </Text>
@@ -246,8 +246,8 @@ export function sum(orders: Order[]): number {
   <section>
     <Text as="h3" variant="title-lg">Stat(指標)</Text>
     <Text as="p" variant="body-sm" muted>
-      値は整形済みの文字列で受け取る(桁も通貨もアプリの政策)。変化は向きだけを器が持ち、良し悪しは
-      消費者が intent で渡す。増えたら悪い指標(解約率)があるので、器は向きから評価を導かない。変化の
+      値は整形済みの文字列で受け取る(桁も通貨もアプリの政策)。変化は向きだけを部品が持ち、良し悪しは
+      消費者が intent で渡す。増えたら悪い指標(解約率)があるので、部品は向きから評価を導かない。変化の
       意味は文字が運び、印は装飾である。数字は字幅を揃えて並ぶ。
     </Text>
     <Grid min="12rem" gap="md">

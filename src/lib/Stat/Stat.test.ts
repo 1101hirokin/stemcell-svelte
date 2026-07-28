@@ -18,7 +18,7 @@ it('変化を出さないときは補足の行ごと出ない', () => {
   expect(container.querySelector('.sc-stat-support')).toBeNull();
 });
 
-it('向きは値で、良し悪しは器が導かない(評価は消費者が渡す)', () => {
+it('向きは値で、良し悪しは部品が導かない(評価は消費者が渡す)', () => {
   const { container } = render(Stat, {
     props: { ...base, trend: 'up', color: 'danger', support: snip('前月比 +12%') },
   });

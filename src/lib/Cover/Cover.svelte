@@ -4,7 +4,7 @@
   import { useGap } from '../internal/spacing.svelte';
   import type { Snippet } from 'svelte';
 
-  // 1画面ぶんの骨格(Cover.md)。器の高さいっぱいに立ち、主役を残り空間の中央に置き、
+  // 1画面ぶんの骨格(Cover.md)。部品の高さいっぱいに立ち、主役を残り空間の中央に置き、
   // 頭と足を端に保つ。脇付きのページ骨格は Sidebar との合成、覆いは Dialog / Imposter の仕事。
   interface Props {
     /** spacing の語彙: 段(sm / md / lg。縦の間隔なので stack の意味層)または大域の原始 X(8〜24)。 */
@@ -21,9 +21,9 @@
   const gapUse = useGap('Cover', 'gap', () => gap, META.props.gap.default);
 </script>
 
-<!-- 見た目と意味を持たない器(契約 a11y): states 無し・focus 無し・構造の主張無し。
+<!-- 見た目と意味を持たない部品(契約 a11y): states 無し・focus 無し・構造の主張無し。
      頭と足は <header> / <footer> にしない。あれらは banner / contentinfo のランドマークを
-     主張してしまい、器が構造を主張しないという共通則(layout.md §6)に反する。
+     主張してしまい、部品が構造を主張しないという共通則(layout.md §6)に反する。
      意味づけが要るなら中身がその要素を持つ。 -->
 <div
   class="sc-cover"

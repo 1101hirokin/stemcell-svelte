@@ -47,7 +47,7 @@
 
 .sc-alert-content {
   flex: 1 1 auto;
-  min-inline-size: 0; /* 長い語で器を押し広げない(はみ出しは折り返す) */
+  min-inline-size: 0; /* 長い語で部品を押し広げない(はみ出しは折り返す) */
   display: flex;
   flex-direction: column;
   gap: 0.125rem;

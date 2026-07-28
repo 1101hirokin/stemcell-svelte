@@ -4,22 +4,22 @@
   import type { Snippet } from 'svelte';
 
   // コードの塊(CodeBlock.md)。値は文字列で受け取る: 持ち出すべきは着色前の文字であり、着色済みの木から
-  // 拾い直すと行番号や装飾が混ざる。着色は器の仕事ではない(言語の集合が閉じない)が、色は DS が持つ
+  // 拾い直すと行番号や装飾が混ざる。着色は部品の仕事ではない(言語の集合が閉じない)が、色は DS が持つ
   // (color.md §10。RFC 0018)。
   interface Props {
-    /** コードの文字列。器が持つ真実で、複写が渡すのもこれである。 */
+    /** コードの文字列。部品が持つ真実で、複写が渡すのもこれである。 */
     code: string;
-    /** 言語の印(ts / python)。器は解釈せず、着色の器械が読む印として素通しする。 */
+    /** 言語の印(ts / python)。部品は解釈せず、着色の道具が読む印として素通しする。 */
     language?: string;
-    /** 送れる領域の名前。溢れているときこの器は焦点を受けるので、名前が要る。 */
+    /** 送れる領域の名前。溢れているときこの部品は焦点を受けるので、名前が要る。 */
     label: string;
     /** 行を折り返すか。既定は折らない(行が構文の単位である。typography.md §5 の例外)。 */
     wrap?: boolean;
     /** 行番号を出すか。既定は出さない(そのまま複写する使い方の邪魔になる)。 */
     lineNumbers?: boolean;
-    /** 本体と線で区切られた上部。何を置くかは器が決めない(言語名・ファイル名・複写はアプリの政策)。 */
+    /** 本体と線で区切られた上部。何を置くかは部品が決めない(言語名・ファイル名・複写はアプリの政策)。 */
     header?: Snippet;
-    /** 着色済みの中身。省略すると器が code をそのまま描く。差されても複写は code を渡す。 */
+    /** 着色済みの中身。省略すると部品が code をそのまま描く。差されても複写は code を渡す。 */
     children?: Snippet;
   }
   let {
@@ -57,7 +57,7 @@
 </script>
 
 <!-- 空白と改行は native が保つ(pre)。「ここはコードである」も native が届ける(code = ARIA の code
-     ロール)。器が足すのは、送れることと、その領域の名前と、置き場所だけである(第2条)。 -->
+     ロール)。部品が足すのは、送れることと、その領域の名前と、置き場所だけである(第2条)。 -->
 <div class="sc-codeblock" data-wrap={wrap || undefined} data-line-numbers={lineNumbers || undefined}>
   {#if header}<div class="sc-codeblock-header">{@render header()}</div>{/if}
   <!-- svelte-ignore a11y_no_noninteractive_tabindex -->

@@ -4,7 +4,7 @@
   import { watchCompact } from './viewport';
   import type { Snippet } from 'svelte';
 
-  // トリガーに従属する面を、器の広さで類を変えて出す(RFC 0017 / overlay.md §5)。
+  // トリガーに従属する面を、画面の広さで類を変えて出す(RFC 0017 / overlay.md §5)。
   // 広い画面では popover 類(アンカー従属)、狭い画面では modal 類(下端のシート)。類が変われば modal の
   // 規範(背後を封じる・焦点を閉じ込める・Escape で閉じる)がそのまま効く。
   // DatePicker と DateRangePicker が同じ形を写していたので、ここへ寄せた。

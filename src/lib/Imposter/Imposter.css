@@ -1,10 +1,10 @@
-/* 下地の上への重ね(Imposter.md)。器が基準を自分で作り(position: relative)、重ねだけを
+/* 下地の上への重ね(Imposter.md)。部品が基準を自分で作り(position: relative)、重ねだけを
    フローの外へ出す。重ねの機構と下地を基準にする機構は契約が Expressive として開けている。 */
 .sc-imposter {
   position: relative;
   display: block;
 }
-/* 行内モード(Web 固有。Imposter.md §3)。行内の下地に重ねるとき、塊のままでは器が行幅まで
+/* 行内モード(Web 固有。Imposter.md §3)。行内の下地に重ねるとき、塊のままでは部品が行幅まで
    広がって隅の重ねが下地の隅ではなく行の端に着く */
 .sc-imposter[data-inline='true'] {
   display: inline-flex;
