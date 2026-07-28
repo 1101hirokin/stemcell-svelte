@@ -16,7 +16,6 @@
   import Data from './screens/data.svelte';
   import Ai from './screens/ai.svelte';
   import Foundations from './screens/foundations.svelte';
-  import Keyboard from './screens/keyboard.svelte';
 
   const VIEWS: Record<string, typeof Actions> = {
     actions: Actions,
@@ -31,7 +30,6 @@
     data: Data,
     ai: Ai,
     foundations: Foundations,
-    keyboard: Keyboard,
   };
 
   const routeOf = () => {

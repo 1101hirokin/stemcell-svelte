@@ -12,7 +12,6 @@ export const SCREENS = [
   { id: 'data', label: 'データ表示', note: 'クラスタ10。項目の並び、畳んで開くもの、そして日付。' },
   { id: 'ai', label: 'AI 有機体', note: 'クラスタ11。会話の part の上に乗る面。進行を値で持ち、段階が支援技術へ届く。' },
   { id: 'foundations', label: 'foundation の実験', note: '部品ではなく、トークンの値を実物で見比べる器。裁定の材料に使う。' },
-  { id: 'keyboard', label: '鍵盤の切り分け(一時)', note: '触点で鍵盤が出たときに欄が運ばれるかを層ごとに見る。片が付いたら落とす。' },
 ] as const;
 
 export type ScreenId = (typeof SCREENS)[number]['id'];

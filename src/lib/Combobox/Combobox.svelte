@@ -2,7 +2,6 @@
   import './Combobox.css';
   import { META, type ComboboxOption } from './meta';
   import { enabledIndexes, initialActive, nextActive } from '../internal/listbox';
-  import { keepAboveKeyboard } from '../internal/keyboard';
   import Icon from '../Icon/Icon.svelte';
   import Popover from '../Popover/Popover.svelte';
   import type { Snippet } from 'svelte';
@@ -72,13 +71,7 @@
     }
   });
 
-  let controlEl = $state<HTMLElement>();
   let open = $state(false);
-
-  let focused = $state(false);
-  // 鍵盤が出ている間、欄が隠れないようにする(面の開閉ではなく焦点に紐づける。打っている間ずっと要る)。
-  // 環境が自分で運べるならこちらの出番は無い
-  $effect(() => (focused && controlEl ? keepAboveKeyboard(controlEl) : undefined));
   let activeIndex = $state(-1); // 仮想焦点。DOM の焦点は欄に留まる
   const selectedIndex = $derived(options.findIndex((o) => o.value === value));
   const selectedOption = $derived(options.find((o) => o.value === value));
@@ -206,7 +199,7 @@
   {#if name}<input type="hidden" {name} {value} />{/if}
   <Popover {open} onopenchange={(o) => (o ? openList() : closeList())}>
     {#snippet anchor()}
-      <div class="sc-combobox-control" bind:this={controlEl}>
+      <div class="sc-combobox-control">
         <input
           class="sc-combobox-input"
           id={inputId}
@@ -229,11 +222,7 @@
           onpointerup={() => {
             if (!open) openList();
           }}
-          onfocus={() => (focused = true)}
-          onblur={() => {
-            focused = false;
-            closeList();
-          }}
+          onblur={() => closeList()}
         />
         <span class="sc-combobox-chevron" aria-hidden="true"><Icon name="chevron.down" /></span>
       </div>
