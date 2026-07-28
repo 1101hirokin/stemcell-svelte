@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconButton, Box, Stack, Cluster, TextField, Select, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Text, NumberField, PasswordField } from '../../src/lib';
+  import { IconButton, Box, Stack, Cluster, TextField, Select, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Text, NumberField, PasswordField, OneTimeCodeField } from '../../src/lib';
 
   let invite = $state('abc');
   let agree = $state(false);
@@ -7,6 +7,9 @@
   let toppings = $state({ cheese: true, tomato: false });
   let bio = $state('');
   let query = $state('土鍋');
+  let code = $state('');
+  let recovery = $state('');
+  let completed = $state('');
   let notify = $state(true);
   let fEmail = $state('a@b.com');
   let fQuantity = $state<number | null>(2);
@@ -241,4 +244,36 @@
         </RadioGroup>
       </Stack>
     </form>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">OneTimeCodeField(確認コード)</Text>
+    <Text as="p" variant="body-sm" muted>
+      見えている枠は桁の数だけ並ぶが、打てる欄は一つである。貼り付けも SMS からの自動入力も一度で入り、
+      読み上げには一つの値として届く。桁が揃ったら知らせる(何をするかはアプリが決める)。
+    </Text>
+    <Stack gap="lg">
+      <OneTimeCodeField
+        bind:value={code}
+        autoReceive
+        oncomplete={(v) => (completed = v)}
+      >
+        {#snippet label()}SMS に届いた 6 桁{/snippet}
+        {#snippet description()}数字だけ。揃うと下に出る。autoReceive は Chromium で SMS を待ち受ける{/snippet}
+      </OneTimeCodeField>
+      <Text variant="body-sm" muted>揃った値: {completed || '(まだ)'}</Text>
+      <OneTimeCodeField
+        bind:value={recovery}
+        length={8}
+        charset="alphanumeric"
+        masked
+        revealLabel="コードを表示する"
+        hideLabel="コードを隠す"
+        revealedMessage="コードを表示しました"
+        hiddenMessage="コードを隠しました"
+      >
+        {#snippet label()}回復コード(英数字 8 桁・伏せ字){/snippet}
+        {#snippet description()}伏せても見せ直せる。打ち間違いを直す手段を残す{/snippet}
+      </OneTimeCodeField>
+    </Stack>
   </section>

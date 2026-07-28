@@ -1,0 +1,166 @@
+/* 確認コードの欄(OneTimeCodeField.md)。枠は桁の数だけ並ぶが、打てる欄は一つで、その一つを枠の上に
+   重ねる。文字は枠が描くので、欄の文字と棒は透かす。 */
+.sc-otc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-stack-sm);
+  inline-size: 100%;
+  min-inline-size: 0;
+  --_border: var(--color-app-border);
+  --_ring: var(--color-semantic-plain-focus-ring);
+}
+.sc-otc[data-invalid='true'] {
+  --_border: var(--color-semantic-danger-border);
+  --_ring: var(--color-semantic-danger-focus-ring);
+}
+.sc-otc[data-disabled='true'] {
+  --_border: var(--color-semantic-disabled-border);
+}
+
+.sc-otc-label {
+  font-family: var(--typography-label-md-font-family);
+  font-size: var(--typography-label-md-font-size);
+  font-weight: var(--typography-label-md-font-weight);
+  line-height: var(--typography-label-md-line-height);
+  letter-spacing: var(--typography-label-md-letter-spacing);
+  color: var(--color-app-foreground);
+}
+/* 名前を視覚から隠す(field.md §2 の prop)。支援技術には届いたままにする */
+.sc-otc[data-label-hidden='true'] {
+  gap: 0;
+}
+.sc-otc[data-label-hidden='true'] .sc-otc-label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.sc-otc-required {
+  margin-inline-start: 0.25em;
+}
+
+.sc-otc-control {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: var(--spacing-inline-md);
+  inline-size: 100%;
+  min-inline-size: 0;
+  --_inset: var(--spacing-inset-md);
+}
+.sc-otc[data-size='sm'] .sc-otc-control {
+  --_inset: var(--spacing-inset-sm);
+}
+.sc-otc[data-size='lg'] .sc-otc-control {
+  --_inset: var(--spacing-inset-lg);
+}
+
+/* 桁の枠。器の幅いっぱいへ均等に割る(Normative)。造形(太さ・角・間隔)は Expressive */
+.sc-otc-cells {
+  display: grid;
+  grid-template-columns: repeat(var(--sc-otc-length), 1fr);
+  gap: var(--spacing-inline-sm);
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+.sc-otc-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 0;
+  /* 高さは中身の有無で変わらない(裁定 2026-07-28)。空の枠に行の箱が立たないので、素朴に書くと
+     打つほど枠が伸びる。他の欄と同じ行高(打つ文字の 1 行 + 縦の inset 二つ分)で固定する */
+  block-size: var(--sc-field-side);
+  padding-block: 0;
+  background: var(--color-app-surface);
+  border: var(--shape-border-width) solid var(--_border);
+  border-radius: var(--shape-semantic-control);
+  font-family: var(--typography-body-md-font-family);
+  /* 触点では 16px を下回らない(下回ると iOS がページごと拡大する) */
+  font-size: var(--_sc-typed-font-size, var(--typography-body-md-font-size));
+  line-height: var(--typography-body-md-line-height);
+  color: var(--color-app-foreground);
+  /* 数字は桁で揃える(typography.md §5 の数字の揃え) */
+  font-variant-numeric: tabular-nums;
+  transition:
+    border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+}
+/* いま打っている桁。焦点の輪は枠の並び全体ではなく、この桁に出す(次に何が起きるかが読める) */
+.sc-otc-cell[data-active='true'] {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--_ring);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--_ring);
+}
+.sc-otc[data-disabled='true'] .sc-otc-cell {
+  background: var(--color-semantic-disabled-soft-bg);
+  color: var(--color-semantic-disabled-fg);
+}
+
+/* 本物の欄。枠の上に重ね、文字と棒を透かす(見えているのは枠が描いた文字である)。
+   opacity: 0 にはしない: 自動入力の候補を出さない環境があるので、透明でも「見えている欄」に保つ */
+.sc-otc-input {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: transparent;
+  caret-color: transparent;
+  font-size: var(--_sc-typed-font-size, var(--typography-body-md-font-size));
+  /* 文字は見せないが、選択範囲の色は残さない(選ぶと帯が出て枠とずれる) */
+  text-align: center;
+  cursor: text;
+}
+.sc-otc-input::selection {
+  background: transparent;
+}
+.sc-otc-input:focus {
+  outline: none;
+}
+.sc-otc[data-disabled='true'] .sc-otc-input {
+  cursor: not-allowed;
+}
+/* 伏せる切り替えは枠の外(並びの後ろ)に立つ。姿は internal/field-button が持つ */
+.sc-otc-toggle {
+  position: relative; /* 重ねた欄より上に置き、押せるようにする */
+  z-index: 1;
+  border: var(--shape-border-width) solid transparent;
+}
+
+/* 切り替えの結果を伝える文。目には出さず、支援技術にだけ届ける */
+.sc-otc-announcement {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sc-otc-description,
+.sc-otc-error {
+  margin: 0;
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  font-weight: var(--typography-body-sm-font-weight);
+  line-height: var(--typography-body-sm-line-height);
+  letter-spacing: var(--typography-body-sm-letter-spacing);
+}
+.sc-otc-description {
+  color: var(--color-app-fg-muted);
+}
+.sc-otc-error {
+  color: var(--color-semantic-danger-soft-fg);
+}

@@ -1,5 +1,12 @@
 /* 欄の行高。中の付属(押せるもの)が正方形の一辺として引く。部品が --_inset を持つので、その内側で解ける */
-:where(.sc-field-button, .sc-textfield-control, .sc-textarea-control, .sc-passwordfield-control, .sc-numberfield-control) {
+:where(
+  .sc-field-button,
+  .sc-textfield-control,
+  .sc-textarea-control,
+  .sc-passwordfield-control,
+  .sc-numberfield-control,
+  .sc-otc-control
+) {
   --sc-field-side: calc(
     var(--_sc-typed-font-size, var(--typography-body-md-font-size)) *
       var(--typography-body-md-line-height) + var(--_inset, var(--spacing-inset-md)) * 2
