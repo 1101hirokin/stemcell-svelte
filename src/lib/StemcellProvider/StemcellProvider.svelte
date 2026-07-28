@@ -2,17 +2,18 @@
   import './StemcellProvider.css';
   import { META } from './meta';
   import { mount, unmount } from 'svelte';
+  import { defineTheme, type ThemeDefinition } from '@stemcell/tokens/theme';
   import Toaster from '../Toaster/Toaster.svelte';
 
-  interface CustomThemeDefinition {
-    key: string;
-    scheme: 'light' | 'dark';
-    colors: { brand: Record<'50'|'100'|'200'|'300'|'400'|'500'|'600'|'700'|'800'|'900', string> };
-  }
   interface Props {
     theme?: string;
     density?: (typeof META.props.density.values)[number];
-    themes?: CustomThemeDefinition[];
+    /**
+     * 消費者のテーマ。段は部分指定でよく、渡さなかった段は既定に落ちる。
+     * 規約を満たすかは消費者の責任で、測りたいときは `stemcell-theme check` を CI で回す
+     * (実行時には測らない。裁定 2026-07-28)。
+     */
+    themes?: ThemeDefinition[];
   }
   let {
     theme = META.props.theme.default,
@@ -39,10 +40,24 @@
     const host = mount(Toaster, { target: document.body, props: { isDefault: true } });
     return () => unmount(host);
   });
+  // 消費者のテーマを CSS として立てる。変換(キーの検証と値の検証)は @stemcell/tokens が持ち、
+  // 各実装で再発明しない(StemcellProvider.md §7)。テーマの CSS より後に来る必要があるので、
+  // head の末尾へ足す。渡さなかった段は宣言しないので、既定のまま残る
   $effect(() => {
-    // HOLES #5: themes(カスタムテーマの色→CSS 変換)は実装保留。
-    // 変換ユーティリティの置き場所が仕様側で未決(StemcellProvider.md §9: tokens 側が自然)。
-    // キー検証とエスケープを各実装で再発明しない、と仕様が定めるため、ここで自作しない。
-    if (themes?.length) console.warn('[stemcell] themes prop is not implemented yet (spec TODO: StemcellProvider.md §9)');
+    if (!themes?.length) return;
+    const el = document.createElement('style');
+    el.dataset.stemcellThemes = '';
+    const dropped: string[] = [];
+    el.textContent = themes
+      .map((t: ThemeDefinition) => {
+        const r = defineTheme(t);
+        dropped.push(...r.dropped.map((d: string) => `${t.key}: ${d}`));
+        return r.css;
+      })
+      .join('');
+    document.head.append(el);
+    // 落とした指定は開発中に気づけるように言う(値そのものは規約を測らない。測るのは CI の道具)
+    for (const d of dropped) console.warn(`[stemcell] themes: ${d}`);
+    return () => el.remove();
   });
 </script>
