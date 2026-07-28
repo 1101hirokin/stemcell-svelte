@@ -1,0 +1,25 @@
+/* 落とせる面(DropArea.md)。値は持たず、落ちたものを知らせるだけである。
+   落ちてくる最中(dragover。RFC 0022)の見せ方は Expressive で、ここでは面と縁を変える。 */
+.sc-droparea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-inline-md);
+  padding: var(--spacing-inset-md);
+  background: var(--color-app-surface);
+  border: var(--shape-border-width) dashed var(--color-app-border);
+  border-radius: var(--shape-semantic-control);
+  transition:
+    background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
+    border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
+}
+.sc-droparea[data-dragover='true'] {
+  background: var(--color-semantic-primary-soft-bg);
+  border-color: var(--color-semantic-primary-border);
+  border-style: solid;
+}
+.sc-droparea[data-disabled='true'] {
+  background: var(--color-semantic-disabled-soft-bg);
+  border-color: var(--color-semantic-disabled-border);
+}

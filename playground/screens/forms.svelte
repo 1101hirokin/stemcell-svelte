@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconButton, Box, Stack, Cluster, TextField, Select, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Text, NumberField, PasswordField, OneTimeCodeField } from '../../src/lib';
+  import { IconButton, Box, Stack, Cluster, TextField, Select, Checkbox, Textarea, Switch, Icon, Radio, RadioGroup, Text, NumberField, PasswordField, OneTimeCodeField, FileField, DropArea, FilePreview } from '../../src/lib';
 
   let invite = $state('abc');
   let agree = $state(false);
@@ -10,6 +10,10 @@
   let code = $state('');
   let recovery = $state('');
   let completed = $state('');
+  // 添付は三つの部品の合成(patterns/file-upload.md)。値はアプリが持つ
+  let attachments = $state<File[]>([]);
+  let field: { accepted: (files: File[]) => void } | undefined = $state();
+  const sizeText = (n: number) => `${(n / 1024).toFixed(1)} KB`;
   let notify = $state(true);
   let fEmail = $state('a@b.com');
   let fQuantity = $state<number | null>(2);
@@ -275,5 +279,39 @@
         {#snippet label()}回復コード(英数字 8 桁・伏せ字){/snippet}
         {#snippet description()}伏せても見せ直せる。打ち間違いを直す手段を残す{/snippet}
       </OneTimeCodeField>
+    </Stack>
+  </section>
+
+  <section>
+    <Text as="h3" variant="title-lg">添付(FileField / DropArea / FilePreview)</Text>
+    <Text as="p" variant="body-sm" muted>
+      三つの部品の合成である。落とせる面の中に選ぶ欄を置き(落とすだけでは鍵盤の利用者に届かない)、
+      選ばれたものは札で見せる。値はアプリが持ち、送信も進行も DS は持たない。
+    </Text>
+    <Stack gap="md">
+      <!-- 絞り込みは値を持つ側(FileField)に任せる。面が先に弾くと、受け取った件数と弾いた件数が
+           二度に分かれて告知が上書きされる(実物で分かった) -->
+      <DropArea ondrop={(files) => field?.accepted(files)}>
+        <FileField
+          bind:this={field}
+          bind:value={attachments}
+          multiple
+          accept={['image/*', 'application/pdf']}
+          triggerLabel="ファイルを選ぶ"
+          receivedLabel="{'{n}'} 件を受け取りました"
+          rejectedLabel="{'{n}'} 件は受け取れません"
+        >
+          {#snippet label()}請求書{/snippet}
+          {#snippet description()}画像か PDF。落とす・貼り付け・選ぶのどれでも入る{/snippet}
+        </FileField>
+      </DropArea>
+      {#each attachments as file, i (file.name + i)}
+        <FilePreview
+          fileName={file.name}
+          meta={`${sizeText(file.size)}・${file.type || '種類不明'}`}
+          removeLabel="添付を外す"
+          onremove={() => (attachments = attachments.filter((_, j) => j !== i))}
+        />
+      {/each}
     </Stack>
   </section>

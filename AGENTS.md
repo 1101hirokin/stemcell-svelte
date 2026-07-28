@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Combobox, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, OneTimeCodeField, Pagination, PasswordField, Popover, Radio, RadioGroup, Rating, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, TimeField, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Combobox, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, DropArea, EmptyState, FileField, FilePreview, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, OneTimeCodeField, Pagination, PasswordField, Popover, Radio, RadioGroup, Rating, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, TimeField, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -717,6 +717,32 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 背後スクロール封鎖(overlay.rules.json の modal.blocksScroll)。native showModal は背後を inert にし、body のスクロール固定は実装が併せて行う。
 - 側の方向は論理方向(side)である。位置(貼り付く端)とサイズは論理で持ち、RTL / 縦書きで自動反転する(視覚方向を直書きしない。layout.md §7)。入りの方向(スライドのアニメ)は Expressive で、Web の translate は物理プロパティのため RTL の水平反転までは追従するが、縦書きでの反転は範囲外(位置は正しく、入りの手触りだけが物理に留まる)。
 
+### DropArea(契約 0.0.0-alpha.1)
+
+ファイルを落とせる面。落ちたものを知らせるだけで、値は持たない(裁定 2026-07-28)。値を持たせると同じ値が欄と面の二箇所に現れる。面を欄から離れた場所(画面全体、カードの上、表の中)へ置けるのは、値を持たないからである。落として入れる形だけではポインタを引きずれない利用者に届かないので、押して選べる手段(FileField)の併置が Normative である(WCAG 2.2 SC 2.5.7)。
+
+props:
+
+- `accept`: array — 受け入れる種類。語彙と写像は FileField と同じ(MIME 型の列)。合わないものは弾き、reject で知らせる。
+- `disabled`: boolean(既定 false) — 落とせない(state.md §3.2)。
+- `label`: string — 面の名前。中の文言を名前として使えない場合に渡す。名前の無い面は許さない(WCAG 2.2 SC 1.3.1 / 3.3.2)。
+
+events(Svelte では callback prop):
+
+- `ondrop`: (payload: array) => void — ファイルが落ちた。要素の型は各プラットフォームの表現(FileField の value と同じ)。受け取った側(FileField かアプリ)が値へ足す。
+- `onreject`: (payload: array) => void — accept に合わないものが落ちた。件数を耳へ届けるのは値を持つ側の仕事である(面は最終的に何件になったかを知らない)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `default`(必須) — 面の中身。押して選べる手段(FileField)をここへ置く(併置は Normative)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 面そのものは焦点を受けない。焦点を受けるのは中に置かれた操作(FileField の選ぶボタン)である。
+- 落として入れる形だけでは足りない。押して選べる手段の併置が Normative(WCAG 2.2 SC 2.5.7)。
+- 落とせるものを持った指が面の上に来たことは状態で表す(dragover。RFC 0022)。hover と別なのは、持ち物の有無で次に起きることが違うからである。
+- 名前の無い面は許さない。中の文言を名前として使うか、label を渡す。
+
 ### EmptyState(契約 0.0.0-alpha.0)
 
 ここには何も無い、という報せ。空は正常な状態である(まだ作っていない、全部片付けた、条件に当たらなかった)。部品が持つのは、何が無いのかを言葉にすることと、次にできることを置く場所だけである。失敗(読み込めなかった・権限が無い)は扱わない: 空は正常で失敗は異常であり、同じ部品にすると正常な空状態にまで危険の語彙(intent)が持ち込まれる(裁定 2026-07-27。Carbon も失敗を空状態の pattern から外している)。0 件になったことの告知も持たない(部品は自分が現れたことしか知らず、検索の結果か最初から空かを判じられない。patterns/empty-results.md)。
@@ -736,6 +762,74 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 部品は焦点を奪わない。検索の結果として現れても、焦点は検索の欄に残る(WCAG 2.2 SC 4.1.3)。
 - 部品は告知しない(生きた領域を持たない)。0 件になったことを届けるのはアプリの仕事で、後から現れる領域に live region を置くと支援技術が拾い損ねる(patterns/empty-results.md)。
 - 部品自身は焦点を受けない。中に押せる要素があれば、焦点とフォーカスリングと当たり判定はその要素に生きる。
+
+### FileField(契約 0.0.0-alpha.1)
+
+ファイルを選ぶ欄。選ばせることと、選ばれたものを値として持つことだけを担う(裁定 2026-07-28)。落とせる面は DropArea、選ばれたものの見せ方は FilePreview で、よく見る一体の姿はこの三つの合成である(patterns/file-upload.md)。値は環境の型のまま持つ: ファイルは中身への参照であって文字で書き表せないので、日付のように中立の表記へ寄せられない。DS が独自の型で包むと、消費者は環境の API へ渡すたびに開け直すことになる。送信も検証も持たない(DS はデータを運ばず、正しさはアプリが決める)。
+
+props:
+
+- `name`: string — フォーム名(native の form 送信・FormData・reset に参加。field.md §5)。
+- `value`: array — 選ばれたファイルの列。要素の型は各プラットフォームの表現である(Web は File、iOS は URL、Android は Uri)。中立の型を発明しない(裁定 2026-07-28)。値の所有はアプリ(field.md §5)。
+- `accept`: array — 受け入れる種類。MIME 型の列で言う(三つのプラットフォームが同じ語彙へ写せる唯一の形)。総称(image/*)は Web と Android が素で通し、iOS は写像表を実装が持つ(FileField.md §2)。拡張子(.csv)は Web の方言。検証ではない: 環境の選択画面での絞り込みと、落とす・貼る経路での受け入れ判定に使う。中身が本当にその型かはアプリが確かめる。
+- `multiple`: boolean(既定 false) — 複数選べるか。
+- `capture`: "user" | "environment" — 触点でカメラを直接開く。user は自分側、environment は外側。要求であって命令ではない: カメラを持たない環境では通常の選択画面が開く(第7条)。
+- `directory`: boolean(既定 false) — フォルダごと選ぶ。三つのプラットフォームに対応物がある(Web は webkitdirectory、iOS は UIDocumentPickerViewController の .folder、Android は OpenDocumentTree)。
+- `disabled`: boolean(既定 false) — 操作を受け付けない(state.md §3.2)。readonly は持たない: HTML の input[type=file] は無視し、値を見せるだけなら FilePreview を並べればよい。
+- `invalid`: boolean(既定 false) — 値が受け入れられない。判定はアプリがする(field.md §3)。
+- `required`: boolean(既定 false) — 選択が要る。視覚の標示は部品が出す(field.md §4)。
+- `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 の prop。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 大きさの段(size.rules.json)。
+- `triggerLabel`: string — 選ぶ操作の名前(「ファイルを選ぶ」)。DS は文言を持たない(i18n.md §1)。
+- `receivedLabel`: string — 落とす・貼る経路で受け取ったことを耳へ届ける文のひな型({n} を件数で置き換える)。件数を知っているのは部品なので、常設の領域は部品が持ち、文言だけ消費者が渡す(Combobox の件数と同じ形)。
+- `rejectedLabel`: string — accept に合わずに弾いたことを耳へ届ける文のひな型({n} を件数で置き換える)。黙って捨てない(WCAG 2.2 SC 4.1.3 / 3.3.1)。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: array) => void — 選ばれたファイルの列が変わった(field.md §5 の change 一本)。
+- `onreject`: (payload: array) => void — accept に合わないものを弾いた。何をするか、画面に何を出すかはアプリが決める。耳への通知は部品が別に行う(rejectedLabel)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — この欄の名前。無名の欄は許さない(field.md §2)。
+- `description` — 補足。受け入れる条件(種類・件数・大きさ)は選ぶ前に読めるのがよい(WCAG 2.2 SC 3.3.2)。
+- `error` — エラー文。invalid のときだけ現れる(field.md §3)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 土台は環境のファイル選択である(Web は input[type=file])。選ばせる仕組みを自前で作らない: 環境の選択画面は accept の絞り込み、複数選択、カメラ、フォルダを無償で持つ(第2条)。
+- 入力要素を display:none で消して自前のボタンだけ置く形は採らない(焦点が当たらなくなる)。
+- 貼り付けはこの欄に焦点があるときに受ける。画面のどこに貼っても受ける形は採らない(他の欄への貼り付けを奪う)。機構はプラットフォームごとに違い、iOS は貼り付けボタン(UIPasteControl)を置く(FileField.md §2)。
+- 貼り付けの経路が無い環境でも、選ぶボタンがあるので WCAG 2.2 SC 2.5.7(ドラッグ動作)は満たす。
+- 落とす・貼る経路で受け取った件数と弾いた件数は、常設の領域で知らせる(WCAG 2.2 SC 4.1.3)。割り込ませない。
+- 解剖と所有は他のフィールドと同じである(label 必須・description・error ↔ invalid・値はアプリ所有・change 一本・name でフォーム参加)。
+
+### FilePreview(契約 0.0.0-alpha.0)
+
+選ばれたファイルを一つ見せ、消す操作を持つ(裁定 2026-07-28)。部品にしたのは、ここが a11y の落とし穴だからである: 消す操作は絵だけになりやすく名前を失い、長いファイル名は切り詰めると全文へ到達できなくなり、種類を絵だけで表すと視覚以外に届かない。文字は作らない(大きさの書式は言語と単位系で変わるので、消費者が作った文字列を受け取る)。絵の寿命も持たない(Web の URL.createObjectURL は作った側が捨てる責任を負う)。送信中や失敗の見せ方は持たない。
+
+props:
+
+- `fileName`: string — ファイルの名前。長いときは見た目だけ切り詰め、支援技術には全文が届く。
+- `meta`: string — 補足(大きさや種類)。書式は消費者が作る(i18n.md §1)。
+- `thumbnail`: string — 下見の絵の在りか。無ければ種類の印を出す。絵を作ることと捨てることはアプリの仕事である。
+- `removeLabel`: string — 外す操作の名前(「添付を外す」)。絵だけの操作なので文字列で足りる。DS は文言を持たない(i18n.md §1)。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 大きさの段(size.rules.json)。
+
+events(Svelte では callback prop):
+
+- `onremove`: (payload: void) => void — 外す操作が押された。列から外すのはアプリがする(部品は値を持たない)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `media` — 下見の絵を消費者が描く場合の差し込み先(PDF の1ページ目など)。thumbnail より優先する。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 外す操作は名前を必ず持つ(絵だけの操作)。欄の中の付属ではないので、正方形の規則(field.md §6-1-b)は当たらない。
+- 名前は見た目だけ切り詰め、支援技術には全文が届く(Text の省略と同じ規則)。
+- 種類を絵だけで表さない。名前と補足は常に文字で出る(色や絵だけに頼らない。WCAG 2.2 SC 1.4.1)。
+- 下見の絵は装飾である(名前が隣にある)。
 
 ### Frame(契約 0.0.0-alpha.0)
 
