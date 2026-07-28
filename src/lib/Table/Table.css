@@ -5,6 +5,12 @@
   position: relative;
   inline-size: 100%;
   min-inline-size: 0;
+  /* 重なりを部品の中に閉じ込める。見出しの行と貼り付く列は、表の中のセルより前に来ればよく、
+     ページの中の他のものと順位を争う筋合いが無い。閉じ込めないと、素の z-index が外へ漏れて
+     ページ側の貼り付く帯(navigation の層)を覆う(実測。stemcell-svelte-charts の playground で
+     表の見出しが切り替えの帯の上に出た)。層のスケール(layering.md §3)は、外から見える順位の
+     ためのものである */
+  isolation: isolate;
 }
 
 /* 送る箱。表は中身の幅で立ち、親より広ければここで送る(Table.md §2)。
@@ -98,6 +104,7 @@
   position: sticky;
   inset-block-start: 0;
   background: var(--sc-table-surface, var(--color-app-surface));
+  /* 表の中だけの順序。isolation: isolate で閉じているので、外の層とは争わない */
   z-index: 1;
 }
 
