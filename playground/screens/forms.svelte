@@ -304,7 +304,6 @@
            二度に分かれて告知が上書きされる(実物で分かった) -->
       <DropArea ondrop={(files) => field?.accepted(files)}>
         <div class="pg-drop">
-          <span class="pg-drop-mark" aria-hidden="true"><Icon name="file.upload" /></span>
           <FileField
           bind:this={field}
           bind:value={attachments}

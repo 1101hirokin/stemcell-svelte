@@ -137,8 +137,3 @@ section > .sc-text {
   text-align: center;
   --sc-filefield-trigger-align: center;
 }
-.pg-drop-mark {
-  color: var(--color-app-fg-muted);
-  font-size: 2rem;
-  line-height: 1;
-}
