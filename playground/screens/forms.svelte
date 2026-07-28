@@ -6,6 +6,7 @@
   let agreeTouched = $state(false);
   let toppings = $state({ cheese: true, tomato: false });
   let bio = $state('');
+  let query = $state('土鍋');
   let notify = $state(true);
   let fEmail = $state('a@b.com');
   let fQuantity = $state<number | null>(2);
@@ -35,7 +36,12 @@
       <TextField keyboard="email" autocomplete="email">
         {#snippet label()}メール(keyboard=email){/snippet}
         {#snippet start()}@{/snippet}
-        {#snippet end()}<IconButton label="消去" variant="text" size="sm"><Icon name="close" /></IconButton>{/snippet}
+        {#snippet end()}<IconButton label="確かめる" variant="text" size="sm"><Icon name="check" /></IconButton>{/snippet}
+      </TextField>
+      <TextField bind:value={query} clearable clearLabel="消去" placeholder="注文を探す">
+        {#snippet label()}検索(clearable){/snippet}
+        {#snippet start()}<Icon name="search" />{/snippet}
+        {#snippet description()}値があるときだけ消す操作が出る。Escape でも消える(RFC 0021){/snippet}
       </TextField>
       <Cluster gap="md">
         <TextField size="sm">

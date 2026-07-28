@@ -1,0 +1,54 @@
+/* 欄の行高。中の付属(押せるもの)が正方形の一辺として引く。器が --_inset を持つので、その内側で解ける */
+:where(.sc-field-button, .sc-textfield-control, .sc-textarea-control, .sc-passwordfield-control, .sc-numberfield-control) {
+  --sc-field-side: calc(
+    var(--_sc-typed-font-size, var(--typography-body-md-font-size)) *
+      var(--typography-body-md-line-height) + var(--_inset, var(--spacing-inset-md)) * 2
+  );
+}
+
+/* 欄の中に立つ押せる付属(消す・秘匿の切り替え・増減)。姿と手触りを一箇所で持つ。
+   四角い正方形にするのは裁定(2026-07-28)である。欄の高さいっぱいに伸ばし、その高さと同じ幅を取る
+   (aspect-ratio: 1)。押せる面が縦長だと欄の縁の飾りに見え、押す場所が読めない。
+   正方形の一辺は欄の行高(md で 43px)なので、当たり判定の門(24px。size.md §4 / WCAG 2.2 SC 2.5.8)は
+   幅でも高さでも満たす。 */
+.sc-field-button {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  background: none;
+  color: var(--color-app-fg-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  flex: none;
+  padding: 0;
+  /* 角は丸めない(裁定 2026-07-28)。欄の中の付属は器の縁の内側に収まるので、自分で丸めると器の曲がりと
+     ずれて隙間が出る(枠の太さのぶん内側に居るため)。外側の角は器が overflow で切る */
+  border-radius: 0;
+  /* 正方形の一辺は欄の行高である。高さは align-self: stretch が器から取るが、幅はそこから導けない
+     (器の高さが中身で決まるので、aspect-ratio が解けない。実測で確かめた)。同じ値を組み立てる:
+     行高 = 打つ文字の 1 行分(文字の大きさ x 行送り) + 縦の inset の二つ分。--_inset は器が持ち、
+     文字の大きさは欄と同じものを引く(触点で 16px へ上がる分も追う) */
+  inline-size: var(--sc-field-side);
+  /* 欄が低いとき(sm)でも門を割らない */
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+    var(--motion-feedback-easing);
+}
+.sc-field-button:hover:not(:disabled) {
+  background: var(--color-semantic-plain-soft-bg);
+}
+.sc-field-button:disabled {
+  color: var(--color-semantic-disabled-fg);
+  cursor: not-allowed;
+}
+.sc-field-button:focus {
+  outline: none;
+}
+.sc-field-button:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-app-system);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}

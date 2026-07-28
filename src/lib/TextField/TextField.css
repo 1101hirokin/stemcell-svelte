@@ -60,7 +60,8 @@
 .sc-textfield-control:has(.sc-textfield-start button) {
   padding-inline-start: 0;
 }
-.sc-textfield-control:has(.sc-textfield-end button) {
+.sc-textfield-control:has(.sc-textfield-end button),
+.sc-textfield-control:has(.sc-field-clear) {
   padding-inline-end: 0;
 }
 .sc-textfield[data-disabled='true'] .sc-textfield-control {
@@ -148,3 +149,23 @@
   color: var(--color-semantic-danger-soft-fg);
 }
 
+
+/* 消す操作(clearable)は共有の付属(internal/ClearButton)。端の面は器の角の内側で切る
+   (押した色が丸めた角から飛び出さない) */
+.sc-textfield-control:has(.sc-field-clear) {
+  overflow: hidden;
+}
+
+/* 消費者が start / end へ置いたアイコンのボタンも、欄の中では正方形になる(裁定 2026-07-28)。
+   文字を持つボタンはこの限りではない(幅は文字が決める) */
+.sc-textfield-start > .sc-iconbutton,
+.sc-textfield-end > .sc-iconbutton {
+  inline-size: var(--sc-field-side);
+  padding-inline: 0;
+  /* 角は丸めない(欄の中の付属の規則。器の曲がりとずれる) */
+  border-radius: 0;
+}
+/* 端の面は器の角の内側で切る */
+.sc-textfield-control:has(.sc-iconbutton) {
+  overflow: hidden;
+}

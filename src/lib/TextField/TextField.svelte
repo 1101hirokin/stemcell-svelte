@@ -1,6 +1,7 @@
 <script lang="ts">
   import './TextField.css';
   import { META } from './meta';
+  import ClearButton from '../internal/ClearButton.svelte';
   import type { Snippet } from 'svelte';
   import type { FullAutoFill } from 'svelte/elements';
 
@@ -11,6 +12,10 @@
     placeholder?: string;
     disabled?: boolean;
     readonly?: boolean;
+    /** 値をまとめて消す操作を出す(検索欄はこれで組む。TextField.md §2)。値があるときだけ現れる。 */
+    clearable?: boolean;
+    /** 消す操作の名前(「消去」)。clearable が真のときに要る。DS は文言を持たない(i18n.md §1)。 */
+    clearLabel?: string;
     invalid?: boolean;
     required?: boolean;
     /** WHATWG Autofill の開いた語彙(契約: 値域の機械検査は未整備)。string で受け、native 属性へは cast で渡す。 */
@@ -31,6 +36,8 @@
     placeholder,
     disabled = META.props.disabled.default,
     readonly = META.props.readonly.default,
+    clearable = META.props.clearable.default,
+    clearLabel,
     invalid = META.props.invalid.default,
     required = META.props.required.default,
     autocomplete,
@@ -43,6 +50,30 @@
     start,
     end,
   }: Props = $props();
+
+  let inputEl: HTMLInputElement | undefined = $state();
+
+  // 消す操作は値があるときだけ出す(空の欄に押せない印を残さない)。打てない欄では出さない
+  const showClear = $derived(clearable && value !== '' && !disabled && !readonly);
+  $effect(() => {
+    if (clearable && !clearLabel) {
+      console.warn('[stemcell] TextField: clearable には clearLabel が要る(絵だけの操作は名前を持つ。field.md §2)。');
+    }
+  });
+  const clear = () => {
+    if (!showClear) return;
+    value = '';
+    onchange?.('');
+    inputEl?.focus(); // 消すのは打ち直すためなので、焦点は欄に残す
+  };
+  // Escape で消す(RFC 0021)。値があるときだけ消してそこで止め、空なら外へ抜く
+  // (面の中の欄で、面が閉じなくなるのを避ける)
+  const onkeydown = (e: KeyboardEvent) => {
+    if (e.key !== 'Escape' || !showClear) return;
+    e.preventDefault();
+    e.stopPropagation();
+    clear();
+  };
 
   const uid = $props.id();
   const inputId = `${uid}-input`;
@@ -89,6 +120,7 @@
     <input
       class="sc-textfield-input"
       id={inputId}
+      bind:this={inputEl}
       type={inputType}
       {name}
       bind:value
@@ -102,7 +134,11 @@
       aria-describedby={describedby}
       oninput={(e) => onchange?.(e.currentTarget.value)}
       onchangecapture={(e) => e.stopPropagation()}
+      {onkeydown}
     />
+    <!-- 消す操作は end の中身より内側(欄寄り)に立つ。消すのは値に対する操作なので値の近くにいる。
+         タブ順には入る(native の type=search が描く × は鍵盤から触れないので引き継がない) -->
+    {#if showClear}<ClearButton label={clearLabel} onclear={clear} />{/if}
     {#if end}<span class="sc-textfield-end">{@render end()}</span>{/if}
   </div>
   {#if description}<p class="sc-textfield-description" id={descriptionId}>
