@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fireEvent, render } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { vi } from 'vitest';
@@ -148,4 +150,13 @@ it('折り返しと貼り付きを部品が持つ', () => {
   const root = q(container, '.sc-table');
   expect(root.dataset.overflow).toBe('wrap');
   expect(root.dataset.sticky).toBe('both');
+});
+
+// 重なりの回帰。表の中の順序(見出しの行 z-index:1 / 貼り付く列 z-index:2)は、閉じた stacking context の
+// 中にある前提で書いてある。isolation が外れると素の z-index がページへ漏れ、ページ側の貼り付く帯を
+// 覆う(2026-07-29 に実測。svelte-charts の playground で表の見出しが切り替えの帯の上に出た)。
+// jsdom は重なりを計算しないので、宣言そのものを見張る。
+it('表は重なりを自分の中へ閉じ込める', () => {
+  const css = readFileSync(join(import.meta.dirname, 'Table.css'), 'utf-8');
+  expect(css).toMatch(/\.sc-table \{[^}]*isolation: isolate/s);
 });
