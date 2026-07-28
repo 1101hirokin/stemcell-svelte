@@ -61,6 +61,7 @@ export { default as Code } from './Code/Code.svelte';
 export { default as EmptyState } from './EmptyState/EmptyState.svelte';
 export { default as CodeBlock } from './CodeBlock/CodeBlock.svelte';
 export { default as NumberField } from './NumberField/NumberField.svelte';
+export { default as OneTimeCodeField } from './OneTimeCodeField/OneTimeCodeField.svelte';
 export { default as PasswordField } from './PasswordField/PasswordField.svelte';
 export { default as Rating } from './Rating/Rating.svelte';
 export { default as Stat } from './Stat/Stat.svelte';

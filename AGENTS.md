@@ -6,7 +6,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ## 前提(まずこれだけ守る)
 
-- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Combobox, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, Pagination, PasswordField, Popover, Radio, RadioGroup, Rating, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, TimeField, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
+- Svelte 5(runes)。named import: `import { Accordion, Alert, Avatar, Badge, Box, Breadcrumb, Button, Calendar, Card, Center, Checkbox, CircularLoader, CircularProgress, Cluster, Code, CodeBlock, Combobox, Container, Conversation, Cover, DateField, DatePicker, DateRangePicker, Dialog, Disclosure, Divider, Drawer, EmptyState, Frame, Grid, Icon, IconButton, Imposter, LinearLoader, LinearProgress, Link, List, Menu, Message, NavList, NumberField, OneTimeCodeField, Pagination, PasswordField, Popover, Radio, RadioGroup, Rating, Reasoning, Reel, Select, Sidebar, Skeleton, Slider, Sources, Stack, Stat, StemcellProvider, Switch, Switcher, Table, Tabs, Tag, Text, TextField, Textarea, TimeField, Toast, Toaster, ToolCall, Tooltip } from '@stemcell/svelte'`
 - tokens の CSS をアプリの入口で読み込む: `import '@stemcell/tokens/standard.css'`
   (密度切替を使うなら `import '@stemcell/tokens/density-compact.css'` も)
 - `StemcellProvider` をアプリのルートに1回だけ、自己完結タグで置く: `<StemcellProvider theme="auto" />`。
@@ -1031,6 +1031,48 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - ホイールで値は動かない。長い表を送っている最中に、通り過ぎた欄の数量が書き換わる事故を避ける(送る操作と値を変える操作を同じ入力に重ねない)。
 - 解剖と所有は他のフィールドと同じである(label 必須・description・error ↔ invalid・値はアプリ所有・change 一本・name でフォーム参加。field.md §2 / §5 / §6-2)。
 - 名前を視覚から隠しても、支援技術には届く(labelHidden)。隠してよいのは、周りが既に何の値かを語っている場合だけである(field.md §2)。
+
+### OneTimeCodeField(契約 0.0.0-alpha.0)
+
+確認コードを打つ欄。見えている枠は桁の数だけ並ぶが、打てる欄は一つである(裁定 2026-07-28。field.md §6-2)。桁ごとに欄を分けると、貼り付けが一桁目にしか入らず、SMS からの自動入力(Web の autocomplete=one-time-code / iOS の textContentType=.oneTimeCode / Android の smsOTPCode)はどれも一つの欄を前提にしているので効かず、読み上げは「6 個の欄のうち 1 個目」と読んで一つの値に聞こえない。Ant Design の Input.OTP と shadcn/ui の InputOTP も本物の欄は一つで、見た目だけを桁に割る。TextField と別部品にするのは、桁への割り当てと完了の通知が prop では収まらないからである。
+
+props:
+
+- `name`: string — フォーム名(native の form 送信・FormData・reset に参加。field.md §5)。
+- `value`: string(既定 "") — 打たれた文字。桁が揃う前の途中の値も流れる(change は逐次。field.md §5)。値はアプリが持つ。
+- `length`: number(既定 6) — 桁の数。発行する側の政策なので消費者が渡す。部品はこの数だけ枠を並べ、親の幅いっぱいへ均等に割る。
+- `charset`: "numeric" | "alphanumeric"(既定 "numeric") — 打てる文字。正規表現は受け取らない(裁定 2026-07-28): 打てる文字は入力様式そのものを決める(数字だけなら数字の鍵盤を頼む)ので列挙でなければ対応が導けず、正規表現の方言はプラットフォームごとに違い(ECMAScript / ICU / Java)、そして DS は検証しない(field.md §3)。足りない集合が出たら値を足す(列挙は足しても壊れない)。大文字小文字の変換はしない(正規化はアプリ)。
+- `masked`: boolean(既定 false) — 打った文字を伏せる。回復コードのように肩越しに見られたくない場面のためにある。伏せたときは見せ直す手段を部品が必ず持つ(PasswordField と同じ判断: 打ち間違いを直す手段が全部消して打ち直すことしか無くなる)。伏せるのは見た目だけで、桁の数といま何桁埋まっているかは支援技術へ届く。
+- `revealLabel`: string — 見せる操作の名前(「コードを表示する」)。masked が真のときに要る。DS は文言を持たない(i18n.md §1)。
+- `hideLabel`: string — 隠す操作の名前(「コードを隠す」)。切り替えの名前は状態で入れ替わる。
+- `revealedMessage`: string — 見せたときに支援技術へ届ける文。切り替えの結果だけを伝え、値そのものは流さない(PasswordField と同じ)。
+- `hiddenMessage`: string — 隠したときに支援技術へ届ける文。
+- `disabled`: boolean(既定 false) — 操作を受け付けない(state.md §3.2)。
+- `readonly`: boolean(既定 false) — 読めるが変えられない。invalid とは同時に成立しない(state.md §6)。
+- `invalid`: boolean(既定 false) — 値が受け入れられない。判定はアプリがする(field.md §3)。error スロットはこのときだけ現れる。
+- `required`: boolean(既定 false) — 入力が要る。視覚の標示は部品が出す(field.md §4)。
+- `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 の prop。確認コードの画面は見出しが文脈を語っていることが多く、欄の名前が重なる。
+- `size`: "sm" | "md" | "lg"(既定 "md") — 大きさの段(size.rules.json)。
+
+events(Svelte では callback prop):
+
+- `onchange`: (payload: string) => void — 値が変わった(逐次。field.md §5)。桁が揃う前の途中の値も流れる。
+- `oncomplete`: (payload: string) => void — 桁が揃った。値の変化とは別の通知である(裁定 2026-07-28): 「揃ったら送る」は確認コードの画面の定型で、桁数の比較を消費者ごとに散らばらせない。部品は桁の数を知っているので部品が知らせる。何をするかはアプリが決める。揃うたびに出る(貼り付けや自動入力で一度に埋まったときも、消して打ち直して再び揃ったときも)。
+
+slots(Svelte では snippet。default は子要素をそのまま):
+
+- `label`(必須) — この欄の名前。無名の欄は許さない(field.md §2)。
+- `description` — 補足。error と並置する(field.md §3)。
+- `error` — エラー文。invalid のときだけ現れる(field.md §3)。
+
+a11y(実装が保証する。アプリ側で aria を足さないこと):
+
+- 打てる欄は一つである。桁は見た目の割り当てにすぎず、支援技術には一つの欄として届く(桁ごとの欄にすると、一つの値が 6 個の欄に聞こえる)。
+- 自動入力の機構は一つの欄に紐づく(Web の autocomplete=one-time-code、iOS の textContentType=.oneTimeCode、Android の smsOTPCode)。部品がこれを渡すので、消費者は autocomplete を渡さない。
+- 打てる文字の集合は入力様式のヒントへ写す(charset=numeric なら数字の鍵盤を頼む)。WCAG 2.2 SC 1.3.5(入力目的の特定)は autocomplete が満たす。
+- 伏せているときも、桁の数といま何桁埋まっているかは届く。見せ直す操作の名前は状態で入れ替わり、切り替えの結果は文で知らせる(値そのものは流さない。PasswordField と同じ)。
+- 焦点は欄が一つぶん受ける。枠のあいだを矢印キーで移る形は持たない(一つの欄なので、文字の移動は native のままである)。
+- 解剖と所有は他のフィールドと同じである(label 必須・description・error ↔ invalid・値はアプリ所有・change 一本・name でフォーム参加)。
 
 ### Pagination(契約 0.0.0-alpha.1)
 
