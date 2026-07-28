@@ -19,6 +19,9 @@ section > .sc-text {
 }
 .pg-row {
   display: flex;
+  /* 狭い画面では札を上へ回す。回さないとページが版面より広くなり、iOS は欄に焦点が乗った瞬間に
+     そこへ拡大する(見本の版面の話で、部品の話ではない) */
+  flex-wrap: wrap;
   gap: var(--spacing-gap-md);
   align-items: start;
   margin-block-end: var(--spacing-stack-sm);
@@ -100,6 +103,10 @@ section > .sc-text {
   gap: var(--spacing-gap-lg);
   max-inline-size: var(--container-lg);
   min-inline-size: 0;
+  /* ページの終わりに余地を残す。触点では、最後の欄に焦点が乗ったとき、環境が鍵盤の上まで運ぼうにも
+     送り代が無ければ運べない(iOS は鍵盤が出ても版面が縮まないので、送り代は増えない)。
+     部品が送り位置を奪う形は採らないので、余地はページの側で持つ */
+  padding-block-end: 40vh;
 }
 .pg-main > section {
   display: flex;
