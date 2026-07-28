@@ -1,0 +1,81 @@
+/* 添付の札(FilePreview.md)。見せることと外すことだけを持つ。 */
+.sc-filepreview {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-inline-md);
+  min-inline-size: 0;
+  padding: var(--spacing-inset-md);
+  background: var(--color-app-surface);
+  border: var(--shape-border-width) solid var(--color-app-border);
+  border-radius: var(--shape-semantic-control);
+}
+.sc-filepreview[data-size='sm'] {
+  padding: var(--spacing-inset-sm);
+}
+.sc-filepreview[data-size='lg'] {
+  padding: var(--spacing-inset-lg);
+}
+.sc-filepreview-media {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-app-fg-muted);
+}
+.sc-filepreview-image {
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  object-fit: cover;
+  border-radius: var(--shape-semantic-control);
+}
+.sc-filepreview-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+/* 名前は一行に収め、溢れは見た目だけ切り詰める(全文は支援技術へ届く) */
+.sc-filepreview-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--typography-body-md-font-family);
+  font-size: var(--typography-body-md-font-size);
+  line-height: var(--typography-body-md-line-height);
+  color: var(--color-app-foreground);
+}
+.sc-filepreview-meta {
+  font-family: var(--typography-body-sm-font-family);
+  font-size: var(--typography-body-sm-font-size);
+  line-height: var(--typography-body-sm-line-height);
+  color: var(--color-app-fg-muted);
+}
+/* 外す操作。欄の中の付属ではないので、正方形の規則は当たらない(field.md §6-1-b) */
+.sc-filepreview-remove {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: var(--spacing-inset-sm);
+  flex: none;
+  background: none;
+  color: var(--color-app-fg-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  border-radius: var(--shape-semantic-control);
+  transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale))
+    var(--motion-feedback-easing);
+}
+.sc-filepreview-remove:hover {
+  background: var(--color-semantic-plain-soft-bg);
+}
+.sc-filepreview-remove:focus {
+  outline: none;
+}
+.sc-filepreview-remove:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--color-semantic-plain-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
