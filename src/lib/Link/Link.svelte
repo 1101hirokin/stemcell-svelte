@@ -1,5 +1,6 @@
 <script lang="ts">
   import './Link.css';
+  import '../internal/visually-hidden.css';
   import { META, WEB } from './meta';
   import Icon from '../Icon/Icon.svelte';
   import openNewTab from '@stemcell/icons/open_newtab';
@@ -36,4 +37,4 @@
   {href}
   target={external ? '_blank' : undefined}
   rel={external ? 'noopener' : undefined}
->{@render children()}{#if external}<span class="sc-link-external"><Icon glyph={openNewTab} /></span><span class="sc-link-sr-only">{newTabLabel}</span>{/if}</a>
+>{@render children()}{#if external}<span class="sc-link-external"><Icon glyph={openNewTab} /></span><span class="sc-link-sr-only sc-visually-hidden">{newTabLabel}</span>{/if}</a>

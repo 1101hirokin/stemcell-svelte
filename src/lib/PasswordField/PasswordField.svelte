@@ -1,5 +1,6 @@
 <script lang="ts">
   import './PasswordField.css';
+  import '../internal/visually-hidden.css';
   import '../internal/field-button.css';
   import { META } from './meta';
   import Icon from '../Icon/Icon.svelte';
@@ -153,7 +154,7 @@
     </button>
   </div>
   <!-- 切り替えの結果だけを届ける。値そのものは流さない(GOV.UK の裁定) -->
-  <span class="sc-passwordfield-announcement" role="status">{announcement}</span>
+  <span class="sc-passwordfield-announcement sc-visually-hidden" role="status">{announcement}</span>
   {#if description}<p class="sc-passwordfield-description" id={descriptionId}>{@render description()}</p>{/if}
   {#if effectiveInvalid && error}<p class="sc-passwordfield-error" id={errorId}>{@render error()}</p>{/if}
 </div>

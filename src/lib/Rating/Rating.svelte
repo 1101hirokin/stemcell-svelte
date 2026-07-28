@@ -1,5 +1,6 @@
 <script lang="ts">
   import './Rating.css';
+  import '../internal/visually-hidden.css';
   import { META } from './meta';
   import Icon from '../Icon/Icon.svelte';
   import type { Snippet } from 'svelte';
@@ -100,7 +101,7 @@
 {#if readonly}
   <!-- 読むだけの星はフォーム部品ではない。一つの絵として名前つきで届き、星は支援技術から外す -->
   <div class="sc-rating" data-readonly="true" data-label-hidden={labelHidden}>
-    <span class="sc-rating-label" id={labelId}>{@render label()}</span>
+    <span class="sc-rating-label" class:sc-visually-hidden={labelHidden} id={labelId}>{@render label()}</span>
     <div class="sc-rating-stars" role="img" aria-label={valueLabel} style:--sc-rating-fill="{fillRatio}%">
       <div class="sc-rating-track" aria-hidden="true">
         {#each steps as step (step)}<span class="sc-rating-star"><Icon name="star" /></span>{/each}
@@ -154,7 +155,7 @@
           <span class="sc-rating-star" aria-hidden="true">
             <Icon name={step <= (preview ?? filled) ? 'star.fill' : 'star'} />
           </span>
-          <span class="sc-rating-name">{itemLabels?.[step - 1] ?? String(step)}</span>
+          <span class="sc-rating-name sc-visually-hidden">{itemLabels?.[step - 1] ?? String(step)}</span>
         </label>
       {/each}
     </div>

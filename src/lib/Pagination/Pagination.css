@@ -17,17 +17,8 @@
 }
 
 /* 領域と欄の名前。視覚には出さない: 前後の操作と現在地が既に文脈を語っている。
-   支援技術には届く(標準の clip 技法。field.md §2 と同じ線) */
+   隠す宣言は internal/visually-hidden が持つ(共有)。ここは文字の役だけを持つ */
 .sc-pagination-label {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
   color: var(--color-app-fg-muted);
   font-family: var(--typography-body-sm-font-family);
   font-size: var(--typography-body-sm-font-size);

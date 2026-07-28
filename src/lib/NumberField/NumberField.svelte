@@ -1,5 +1,6 @@
 <script lang="ts">
   import './NumberField.css';
+  import '../internal/visually-hidden.css';
   import '../internal/field-button.css';
   import { META } from './meta';
   import ClearButton from '../internal/ClearButton.svelte';
@@ -172,7 +173,7 @@
   data-disabled={disabled}
   data-label-hidden={labelHidden}
 >
-  <label class="sc-numberfield-label" for={inputId}>
+  <label class="sc-numberfield-label" class:sc-visually-hidden={labelHidden} for={inputId}>
     {@render label()}{#if required}<span class="sc-numberfield-required" aria-hidden="true">*</span>{/if}
   </label>
   <div class="sc-numberfield-control">
