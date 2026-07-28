@@ -103,6 +103,43 @@ it('何も選んでいなければ、閉じたときに空へ戻す', async () =
   expect(oninputchange).toHaveBeenLastCalledWith('');
 });
 
+it('消してから欄の外を押すと、選択も外れる', async () => {
+  const onchange = vi.fn();
+  const oninputchange = vi.fn();
+  const { container } = render(Combobox, {
+    props: { ...base, value: 'a', inputValue: '朝日商会', onchange, oninputchange },
+  });
+  const el = input(container);
+  await fireEvent.input(el, { target: { value: '' } });
+  await fireEvent.blur(el);
+  expect(onchange).toHaveBeenLastCalledWith('');
+  expect(el.value).toBe('');
+});
+
+it('消しても Escape なら取り消しなので、元の表示へ戻る', async () => {
+  const onchange = vi.fn();
+  const { container } = render(Combobox, {
+    props: { ...base, value: 'a', inputValue: '朝日商会', onchange },
+  });
+  const el = input(container);
+  await fireEvent.input(el, { target: { value: '' } });
+  await fireEvent.keyDown(el, { key: 'Escape' });
+  expect(onchange).not.toHaveBeenCalled();
+  expect(el.value).toBe('朝日商会');
+});
+
+it('空白だけ残して外を押した場合も、選んでいない扱いにする', async () => {
+  const onchange = vi.fn();
+  const { container } = render(Combobox, {
+    props: { ...base, value: 'a', inputValue: '朝日商会', onchange },
+  });
+  const el = input(container);
+  await fireEvent.input(el, { target: { value: '   ' } });
+  await fireEvent.blur(el);
+  expect(onchange).toHaveBeenLastCalledWith('');
+  expect(el.value).toBe('');
+});
+
 it('候補が無いときは空の一覧を出さずに言葉で伝える', async () => {
   const { container } = render(Combobox, { props: { ...base, options: [] } });
   await fireEvent.keyDown(input(container), { key: 'ArrowDown' });

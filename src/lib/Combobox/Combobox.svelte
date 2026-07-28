@@ -92,16 +92,32 @@
     inputValue = shownText;
     oninputchange?.(shownText);
   };
+  // 空にして欄の外を押したら、選択も外れる。欄が空なら「何も選んでいない」と読むのが自然で、
+  // 選び直す手段が無いまま値だけ残ると、見えているものと送られるものが食い違う
+  const clearSelection = () => {
+    selectedLabel = '';
+    if (inputValue !== '') {
+      inputValue = '';
+      oninputchange?.('');
+    }
+    if (!value) return;
+    value = '';
+    onchange?.('');
+  };
+  // 焦点が外れたときの後始末。空なら選択を外し、打ちかけなら選ばれている値の表示へ戻す
+  const commit = () => (inputValue.trim() === '' ? clearSelection() : revert());
 
   const openList = () => {
     if (disabled || readonly) return;
     open = true;
     activeIndex = initialActive(options, selectedIndex);
   };
-  const closeList = (opts: { revert?: boolean } = {}) => {
+  const closeList = (opts: { commit?: boolean } = {}) => {
     open = false;
     activeIndex = -1;
-    if (opts.revert !== false) revert();
+    // 閉じ方で後始末が違う。Escape は取り消しなので、消した文字ごと元の表示へ戻す
+    if (opts.commit) commit();
+    else revert();
   };
   const selectAt = (i: number) => {
     const o = options[i];
@@ -161,7 +177,7 @@
         closeList();
         break;
       case 'Tab':
-        closeList(); // 送りで抜けるときも打った文字は残さない
+        closeList({ commit: true }); // 送りで抜けるときも打った文字は残さない
         break;
     }
   };
@@ -212,7 +228,7 @@
           onpointerup={() => {
             if (!open) openList();
           }}
-          onblur={() => closeList()}
+          onblur={() => closeList({ commit: true })}
         />
         <span class="sc-combobox-chevron" aria-hidden="true"><Icon name="chevron.down" /></span>
       </div>
