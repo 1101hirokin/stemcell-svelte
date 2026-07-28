@@ -4,6 +4,9 @@
 .sc-container {
   box-sizing: border-box;
   margin-inline: auto;
+  /* 左右の最低余白(裁定 2026-07-28)。狭い画面で文字がページの端に張り付くと読みにくく、
+     端の近くは指も当てにくい。新しい段は作らず、既にある inset の段を引く(16px 相当) */
+  padding-inline: var(--spacing-inset-lg);
 }
 
 .sc-container[data-max='sm'] {

@@ -98,3 +98,20 @@ it('名前を視覚から隠しても、名前は残る(消えるのは見た目
   expect(label.getAttribute('for')).toBe(input(container).id);
   expect(label.textContent).toContain('数量');
 });
+
+it('境界に達したことを伝える(何も知らせない形は採らない。裁定 2026-07-28)', () => {
+  const { container } = render(NumberField, {
+    props: {
+      label: snip('<span>数量</span>'),
+      value: 5,
+      max: 5,
+      min: 0,
+      incrementLabel: '増やす',
+      decrementLabel: '減らす',
+    },
+  });
+  const steppers = [...container.querySelectorAll('.sc-numberfield-stepper')] as HTMLButtonElement[];
+  const up = steppers[1];
+  expect(up.disabled).toBe(true); // svelte は無効にする形で伝える(伝え方は Expressive)
+  expect(steppers[0].disabled).toBe(false);
+});
