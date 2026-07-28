@@ -75,8 +75,10 @@
   let controlEl = $state<HTMLElement>();
   let open = $state(false);
 
-  // 鍵盤が出ている間、欄が隠れないようにする。器が自分で運ぶならこちらの出番は無い(足りない分だけ送る)
-  $effect(() => (open && controlEl ? keepAboveKeyboard(controlEl) : undefined));
+  let focused = $state(false);
+  // 鍵盤が出ている間、欄が隠れないようにする(面の開閉ではなく焦点に紐づける。打っている間ずっと要る)。
+  // 環境が自分で運べるならこちらの出番は無い
+  $effect(() => (focused && controlEl ? keepAboveKeyboard(controlEl) : undefined));
   let activeIndex = $state(-1); // 仮想焦点。DOM の焦点は欄に留まる
   const selectedIndex = $derived(options.findIndex((o) => o.value === value));
   const selectedOption = $derived(options.find((o) => o.value === value));
@@ -227,7 +229,11 @@
           onpointerup={() => {
             if (!open) openList();
           }}
-          onblur={() => closeList()}
+          onfocus={() => (focused = true)}
+          onblur={() => {
+            focused = false;
+            closeList();
+          }}
         />
         <span class="sc-combobox-chevron" aria-hidden="true"><Icon name="chevron.down" /></span>
       </div>
