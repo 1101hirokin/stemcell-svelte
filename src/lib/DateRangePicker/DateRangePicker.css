@@ -1,4 +1,4 @@
-/* 期間を選ぶ(DateRangePicker.md)。器が持つのは2つの欄と開く操作の並びだけで、
+/* 期間を選ぶ(DateRangePicker.md)。部品が持つのは2つの欄と開く操作の並びだけで、
    欄の床は DateField、格子は Calendar、一時面は Popover が持つ。 */
 .sc-daterangepicker {
   /* 2ヶ月ぶんの暦が入る幅。狭い画面では面の側が画面幅で頭打ちになり、暦が月を縦へ折る */
@@ -43,7 +43,7 @@
   color: var(--color-app-fg-muted);
 }
 
-/* 暦を開く操作。Popover はアンカーの ARIA を張らないので、トリガーは器が持つ(Menu と同じ形)。
+/* 暦を開く操作。Popover はアンカーの ARIA を張らないので、トリガーは部品が持つ(Menu と同じ形)。
    自分で持つ以上、焦点の輪と当たり判定もここが担う */
 .sc-daterangepicker-trigger-button {
   appearance: none;

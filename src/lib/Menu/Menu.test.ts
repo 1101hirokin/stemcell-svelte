@@ -159,7 +159,7 @@ it('items が空のメニューは開かない(退化ケース)', async () => {
   expect(q(container, '.sc-menu-trigger').getAttribute('aria-expanded')).toBe('false');
 });
 
-it('全項目 disabled では開くが menu 容器へフォーカスし、Escape で閉じられる(退化ケース)', async () => {
+it('全項目 disabled では開くが menu 容部品へフォーカスし、Escape で閉じられる(退化ケース)', async () => {
   const allDisabled = [
     { id: 'a', label: 'A', disabled: true },
     { id: 'b', label: 'B', disabled: true },
@@ -170,7 +170,7 @@ it('全項目 disabled では開くが menu 容器へフォーカスし、Escape
   await tick();
   expect(t.getAttribute('aria-expanded')).toBe('true');
   const menu = q(container, '[role="menu"]');
-  expect(document.activeElement).toBe(menu); // 動かせる項目が無いので容器へ
+  expect(document.activeElement).toBe(menu); // 動かせる項目が無いので容部品へ
   expect(qa(container, '[role="menuitem"]').every((el) => el.getAttribute('tabindex') === '-1')).toBe(true);
   await fireEvent.keyDown(menu, { key: 'Escape' });
   await tick();
@@ -178,7 +178,7 @@ it('全項目 disabled では開くが menu 容器へフォーカスし、Escape
   expect(document.activeElement).toBe(t);
 });
 
-it('menu 容器は aria-labelledby でトリガーを指す(APG menu button)', () => {
+it('menu 容部品は aria-labelledby でトリガーを指す(APG menu button)', () => {
   const { container } = render(Menu, { props: { items, trigger } });
   const menu = q(container, '[role="menu"]');
   expect(menu.getAttribute('aria-labelledby')).toBe(q(container, '.sc-menu-trigger').id);

@@ -1,13 +1,13 @@
 /* 行と列に意味がある表(Table.md)。役割と構造は native の table がそのまま持つ(第2条)。
-   器が描くのは、見出しの行・区切り・寄せ・貼り付き・送れる向きの表現だけで、セルの中身は合成した部品が描く。 */
+   部品が描くのは、見出しの行・区切り・寄せ・貼り付き・送れる向きの表現だけで、セルの中身は合成した部品が描く。 */
 .sc-table {
-  /* 送れる向きの表現(::before / ::after)を器の端へ置くための基準。器自身は送らない(送るのは中の箱) */
+  /* 送れる向きの表現(::before / ::after)を置き場所の端へ置くための基準。部品自身は送らない(送るのは中の箱) */
   position: relative;
   inline-size: 100%;
   min-inline-size: 0;
 }
 
-/* 送る箱。表は中身の幅で立ち、器より広ければここで送る(Table.md §2)。
+/* 送る箱。表は中身の幅で立ち、親より広ければここで送る(Table.md §2)。
    overscroll-behavior-inline: contain は、表の端まで送ったあと親(ページや履歴)へ送りが移るのを止める */
 .sc-table-scroller {
   overflow: auto hidden;
@@ -58,7 +58,7 @@
 }
 
 /* セルは既定で1行に収める。行の高さが揃うことが表の走査を支える(Table.md §2)。
-   収まらない分は表が広がり、器の中で横へ送る */
+   収まらない分は表が広がり、部品の中で横へ送る */
 .sc-table[data-overflow='scroll'] .sc-table-grid :where(th, td) {
   white-space: nowrap;
 }
@@ -94,7 +94,7 @@
   line-height: var(--typography-label-md-line-height);
   letter-spacing: var(--typography-label-md-letter-spacing);
   color: var(--color-app-fg-muted);
-  /* 見出しの行は器の上端に貼り付く。縦に長い表で、送っても列の意味を見失わない */
+  /* 見出しの行は部品の上端に貼り付く。縦に長い表で、送っても列の意味を見失わない */
   position: sticky;
   inset-block-start: 0;
   background: var(--sc-table-surface, var(--color-app-surface));

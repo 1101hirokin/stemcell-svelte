@@ -3,7 +3,7 @@
  * 「実 Chromium で描画を確認した」という一過性の手動 QA 主張を、独立レビューが再実行できる
  * 検査に置き換える(WORKFLOW の証拠の規律。独立レビューの指摘への対応)。
  * 検証: (1) ライトで全部品が描画される (2) data-theme=standard-dark で地の面の色が変わる
- * (3) Switcher が狭い器(360px)で縦へ切り替わる (4) TextField のエラー文が light / dark とも
+ * (3) Switcher が狭い置き場所(360px)で縦へ切り替わる (4) TextField のエラー文が light / dark とも
  * danger.soft-fg を実際に引いている(転用の実機確認。TextField.md §2)。
  * 前提: bun run playground:build 済み。実行: bun experiments/playground-smoke/smoke.ts
  * Chromium の場所は PW_CHROMIUM(環境変数)→ /opt/pw-browsers/chromium → playwright の
@@ -128,7 +128,7 @@ try {
 
   // フィールドは fill(横いっぱい。裁定 2026-07)。検出力を持たせるため、stretch しない文脈で測る:
   // Stack の align=stretch は全子を伸ばすので fill の有無を隠す(独立レビュー指摘)。ここでは
-  // shrink-to-fit にならない固定幅の flex 行に clone を1つだけ置き、幅が器に一致するかを見る。
+  // shrink-to-fit にならない固定幅の flex 行に clone を1つだけ置き、幅が部品に一致するかを見る。
   // inline-size:100% が無ければ内容幅に縮むため、この検査は削除で RED 化する。
   const fillWidth = await page.evaluate(() => {
     const tf = document.querySelector('.sc-textfield') as HTMLElement;
@@ -142,10 +142,10 @@ try {
     return w;
   });
   if (fillWidth < 590)
-    throw new Error(`TextField が fill しない(600px の器で ${fillWidth}px。inline-size:100% を確認)`);
+    throw new Error(`TextField が fill しない(600px の部品で ${fillWidth}px。inline-size:100% を確認)`);
 
-  // TextField: affix に内包した対話要素が器を押し上げない(高さは一次内容が所有。size.md §2 裁定)。
-  // 内包ボタンは器の行高へ従属し、当たり判定は門(24px)を割らない
+  // TextField: affix に内包した対話要素が部品を押し上げない(高さは一次内容が所有。size.md §2 裁定)。
+  // 内包ボタンは部品の行高へ従属し、当たり判定は門(24px)を割らない
   const affix = await page.evaluate(() => {
     const all = [...document.querySelectorAll('.sc-textfield')] as HTMLElement[];
     const h = (tf: HTMLElement) => Math.round((tf.querySelector('.sc-textfield-control') as HTMLElement).getBoundingClientRect().height);
@@ -157,14 +157,14 @@ try {
       withBtnH: h(withBtn),
       plainH: plain ? h(plain) : null,
       btnH: Math.round(btn.getBoundingClientRect().height),
-      // 内包則の機構が生きているか(縦 inset を器が手放し、affix ボタンの padding-block が 0)。
-      // 詳細度で負けると 0 にならず、器が押し上げられうる(独立レビュー blocker の回帰検査)
+      // 内包則の機構が生きているか(縦 inset を部品が手放し、affix ボタンの padding-block が 0)。
+      // 詳細度で負けると 0 にならず、部品が押し上げられうる(独立レビュー blocker の回帰検査)
       btnPadBlock: getComputedStyle(btn).paddingBlockStart,
     };
   });
   if (!affix) throw new Error('TextField: affix にボタンを内包した例が playground に無い');
   if (affix.plainH !== null && affix.withBtnH !== affix.plainH)
-    throw new Error(`TextField: affix 内包で器が膨らむ(${affix.withBtnH}px ≠ 素の md ${affix.plainH}px。size.md §2 内包則)`);
+    throw new Error(`TextField: affix 内包で部品が膨らむ(${affix.withBtnH}px ≠ 素の md ${affix.plainH}px。size.md §2 内包則)`);
   if (affix.btnH < 24)
     throw new Error(`TextField: affix ボタンの当たり判定が門(24px)未満(${affix.btnH}px)`);
   if (affix.btnPadBlock !== '0px')
@@ -229,9 +229,9 @@ try {
     throw new Error('Select: 外側クリックで閉じない(native light dismiss)');
 
   // Select(native/touch 経路): pointer:coarse では UA の <select>。UA ドロップダウンは <select> の箱に
-  // 揃うので、(1) <select> が器の全幅を占める(選択肢幅=トリガー幅。inset を器でなく中身が持つ設計)、
+  // 揃うので、(1) <select> が親の全幅を占める(選択肢幅=トリガー幅。inset を部品でなく中身が持つ設計)、
   // (2) chevron の上を押しても背後の <select> に当たる(pointer-events:none で透過し、押下で開く)を守る。
-  // 実 Chromium の coarse 文脈でしか測れない層(横 inset を器へ戻すと (1) が、chevron を flex 兄弟へ戻すと (2) が RED)。
+  // 実 Chromium の coarse 文脈でしか測れない層(横 inset を部品へ戻すと (1) が、chevron を flex 兄弟へ戻すと (2) が RED)。
   const touch = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
   const tp = await touch.newPage();
   await tp.goto(`http://localhost:${PORT}/`);
@@ -254,7 +254,7 @@ try {
   await touch.close();
   if (nat.fillRatio < 0.98)
     throw new Error(
-      `Select(native): <select> が器の全幅でない(fill ${(nat.fillRatio * 100).toFixed(0)}%。UA dropdown がトリガー幅に揃わない)`,
+      `Select(native): <select> が親の全幅でない(fill ${(nat.fillRatio * 100).toFixed(0)}%。UA dropdown がトリガー幅に揃わない)`,
     );
   if (nat.chevronPE !== 'none' || !nat.chevronHitsSelect)
     throw new Error('Select(native): chevron の上のクリックが背後の <select> に届かない(押下で開けない)');
@@ -811,14 +811,14 @@ try {
   if (badge.anchoredPos !== 'absolute' || !badge.overlaps)
     throw new Error(`Badge: anchor の block-start/inline-end の隅へ重ならない(${JSON.stringify(badge)})`);
 
-  // Avatar: 器が role=img + name、寸法は avatar 段(lg=40px 相当。rem 建て)、src 無しは name のイニシャルへ
+  // Avatar: 部品が role=img + name、寸法は avatar 段(lg=40px 相当。rem 建て)、src 無しは name のイニシャルへ
   // 退避し装飾(aria-hidden)。壊れた src → イニシャルの退避は unit(native onerror)で検査済み。
   const avatar = await page.evaluate(() => {
     const avatars = [...document.querySelectorAll('.sc-avatar')] as HTMLElement[];
     const lg = avatars.find((a) => a.dataset.size === 'lg');
     const noSrc = avatars.find((a) => a.querySelector('.sc-avatar-initials'));
     const ini = noSrc?.querySelector('.sc-avatar-initials') as HTMLElement | undefined;
-    // meaningful(既定)は role=img + name、decorative は器ごと aria-hidden(role/aria-label なし)
+    // meaningful(既定)は role=img + name、decorative は部品ごと aria-hidden(role/aria-label なし)
     const meaningful = avatars.filter((a) => a.getAttribute('aria-hidden') !== 'true');
     const deco = avatars.find((a) => a.getAttribute('aria-hidden') === 'true');
     return {
@@ -833,7 +833,7 @@ try {
   });
   if (!avatar.meaningfulRoleImg) throw new Error('Avatar: 意味を持つ既定で role=img + aria-label(name)が無い');
   if (!avatar.hasDecorative || !avatar.decoHasNoName)
-    throw new Error(`Avatar: decorative が器ごと支援技術から隠れていない(${JSON.stringify(avatar)})`);
+    throw new Error(`Avatar: decorative が部品ごと支援技術から隠れていない(${JSON.stringify(avatar)})`);
   if (avatar.lgSize < 36 || avatar.lgSize > 44 || !avatar.lgSquare)
     throw new Error(`Avatar: lg の実寸が avatar-lg(40px 相当の正方)でない(${avatar.lgSize}px square=${avatar.lgSquare})`);
   if (!avatar.initialsHidden || !avatar.initialsText)
@@ -887,8 +887,8 @@ try {
   if ((await page.locator('.sc-tag-dismiss').count()) >= dismissBefore)
     throw new Error('Tag: × クリックでチップが取り除かれない(dismiss イベントが配線されていない)');
 
-  // Tag disabled は減衰(opacity)でなく token 差し替え(state.md §7)。器ごと disabled 系の面になり、
-  // 中身に opacity は残らない(dismissible では器=容器が :disabled になれないので data-disabled で駆動)
+  // Tag disabled は減衰(opacity)でなく token 差し替え(state.md §7)。外枠ごと disabled 系の面になり、
+  // 中身に opacity は残らない(dismissible では外枠が :disabled になれない部品が :disabled になれないので data-disabled で駆動)
   const tagDisabled = await page.evaluate(() => {
     const dis = document.querySelector('.sc-tag[data-disabled][data-dismissible]') as HTMLElement | null;
     if (!dis) return null;
@@ -905,7 +905,7 @@ try {
   });
   if (tagDisabled) {
     if (tagDisabled.bg !== tagDisabled.want)
-      throw new Error(`Tag(disabled): 器が disabled 系の面にならない(${JSON.stringify(tagDisabled)}。state.md §7)`);
+      throw new Error(`Tag(disabled): 部品が disabled 系の面にならない(${JSON.stringify(tagDisabled)}。state.md §7)`);
     if (tagDisabled.childOpacity !== '1')
       throw new Error('Tag(disabled): 中身に減衰(opacity<1)が残っている(state.md §7 は token 差し替え)');
   }
@@ -1044,7 +1044,7 @@ try {
   });
   if (rows !== 3) throw new Error(`360px で縦(3行)にならない: ${rows}行`);
 
-  // Sidebar: 狭い器で縦へ折れ、DOM 順(side=start: 脇→本体)は折れても変わらない
+  // Sidebar: 狭い置き場所で縦へ折れ、DOM 順(side=start: 脇→本体)は折れても変わらない
   const sb = await page.evaluate(() => {
     const el = document.querySelector('.sc-sidebar') as HTMLElement;
     (el.parentElement as HTMLElement).style.width = '260px';

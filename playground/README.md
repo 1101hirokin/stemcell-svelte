@@ -1,6 +1,6 @@
 # playground
 
-実装済み部品を実物で触って確認する器(WORKFLOW §2-6)。配信物ではない。
+実装済み部品を実物で触って確認する場(WORKFLOW §2-6)。配信物ではない。
 
 ```
 bun run playground

@@ -8,7 +8,7 @@
   import type { FullAutoFill } from 'svelte/elements';
 
   // 秘匿して打つ欄(PasswordField.md)。隠したまま打たせると、打ち間違いを直す手段が全部消して打ち直す
-  // ことしか無くなるので、切り替えは器が必ず持つ。切り替えたことは文で知らせ、値そのものは読み上げに
+  // ことしか無くなるので、切り替えは部品が必ず持つ。切り替えたことは文で知らせ、値そのものは読み上げに
   // 流さない(GOV.UK の裁定。周りに人が居る場所でパスワードが声に出る)。
   interface Props {
     name?: string;
@@ -18,7 +18,7 @@
     readonly?: boolean;
     invalid?: boolean;
     required?: boolean;
-    /** ログインは current-password、新しく決める欄は new-password。器は決められない。 */
+    /** ログインは current-password、新しく決める欄は new-password。部品は決められない。 */
     autocomplete?: string;
     keyboard?: (typeof META.props.keyboard.values)[number];
     size?: (typeof META.props.size.values)[number];

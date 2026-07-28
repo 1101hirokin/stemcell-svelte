@@ -1,6 +1,6 @@
 /* 読み込み中の代役。地は plain.soft-bg。脈動で「読み込み中」を示す(shimmer は expressive の
    「流れる光か脈動か」。脈動を採用: 白帯の重ねはライトでほぼ不可視だった。独立レビュー major)。
-   寸法は自前で持たない(Skeleton.md §2): text は font(1em)、box/circle は器いっぱい。 */
+   寸法は自前で持たない(Skeleton.md §2): text は font(1em)、box/circle は親いっぱい。 */
 .sc-skeleton {
   background-color: var(--color-semantic-plain-soft-bg);
   /* 地色↔hover 面を往復。両テーマで可視差が出る(light #f2f4f6↔#e6e8ec / dark #38414b↔#485362) */
@@ -18,13 +18,13 @@
   block-size: 1em;
   border-radius: var(--shape-semantic-tag);
 }
-/* box: 面(カード・画像)。器いっぱい。角は card */
+/* box: 面(カード・画像)。親いっぱい。角は card */
 .sc-skeleton[data-form='box'] {
   inline-size: 100%;
   block-size: 100%;
   border-radius: var(--shape-semantic-card);
 }
-/* circle: 円(Avatar 等)。器いっぱいの正円。角は pill。幅のみ制約された器でも潰れないよう
+/* circle: 円(Avatar 等)。親いっぱいの正円。角は pill。幅のみ制約された部品でも潰れないよう
    inline-size も 100% を敷く(高さのみ / 幅のみ どちらの制約でも aspect-ratio で正円。独立レビュー) */
 .sc-skeleton[data-form='circle'] {
   inline-size: 100%;

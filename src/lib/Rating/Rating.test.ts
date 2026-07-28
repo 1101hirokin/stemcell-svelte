@@ -64,7 +64,7 @@ it('取り消しを許すと押し直しでも鍵盤でも消える(ポインタ
   expect(onchange).toHaveBeenLastCalledWith(null);
 });
 
-it('読み取りに名前が無いと警告する(絵として届く器に名前が要る)', () => {
+it('読み取りに名前が無いと警告する(絵として届く部品に名前が要る)', () => {
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
   render(Rating, { props: { ...base, readonly: true, value: 3 } });
   expect(warn).toHaveBeenCalledWith(expect.stringContaining('valueLabel が要る'));

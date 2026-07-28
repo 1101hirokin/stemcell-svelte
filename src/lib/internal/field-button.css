@@ -1,4 +1,4 @@
-/* 欄の行高。中の付属(押せるもの)が正方形の一辺として引く。器が --_inset を持つので、その内側で解ける */
+/* 欄の行高。中の付属(押せるもの)が正方形の一辺として引く。部品が --_inset を持つので、その内側で解ける */
 :where(.sc-field-button, .sc-textfield-control, .sc-textarea-control, .sc-passwordfield-control, .sc-numberfield-control) {
   --sc-field-side: calc(
     var(--_sc-typed-font-size, var(--typography-body-md-font-size)) *
@@ -24,12 +24,12 @@
   align-self: stretch;
   flex: none;
   padding: 0;
-  /* 角は丸めない(裁定 2026-07-28)。欄の中の付属は器の縁の内側に収まるので、自分で丸めると器の曲がりと
-     ずれて隙間が出る(枠の太さのぶん内側に居るため)。外側の角は器が overflow で切る */
+  /* 角は丸めない(裁定 2026-07-28)。欄の中の付属は部品の縁の内側に収まるので、自分で丸めると部品の曲がりと
+     ずれて隙間が出る(枠の太さのぶん内側に居るため)。外側の角は部品が overflow で切る */
   border-radius: 0;
-  /* 正方形の一辺は欄の行高である。高さは align-self: stretch が器から取るが、幅はそこから導けない
-     (器の高さが中身で決まるので、aspect-ratio が解けない。実測で確かめた)。同じ値を組み立てる:
-     行高 = 打つ文字の 1 行分(文字の大きさ x 行送り) + 縦の inset の二つ分。--_inset は器が持ち、
+  /* 正方形の一辺は欄の行高である。高さは align-self: stretch が部品から取るが、幅はそこから導けない
+     (部品の高さが中身で決まるので、aspect-ratio が解けない。実測で確かめた)。同じ値を組み立てる:
+     行高 = 打つ文字の 1 行分(文字の大きさ x 行送り) + 縦の inset の二つ分。--_inset は部品が持ち、
      文字の大きさは欄と同じものを引く(触点で 16px へ上がる分も追う) */
   inline-size: var(--sc-field-side);
   /* 欄が低いとき(sm)でも門を割らない */

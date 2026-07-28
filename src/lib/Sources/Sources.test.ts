@@ -16,7 +16,7 @@ const item = createRawSnippet((source: () => SourceItem) => ({
 }));
 const label = createRawSnippet(() => ({ render: () => '<span>出典</span>' }));
 
-it('リストの器と項目の器は Sources が持つ(アプリの作法に頼らない)', () => {
+it('リストの部品と項目の部品は Sources が持つ(アプリの作法に頼らない)', () => {
   const { container } = render(Sources, { props: { items, children: item } });
   const list = container.querySelector('.sc-sources') as HTMLElement;
   expect(list.tagName).toBe('UL');

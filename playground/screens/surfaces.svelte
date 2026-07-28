@@ -8,7 +8,7 @@
   <section>
     <Text as="h3" variant="title-lg">Card</Text>
     <Text as="p" variant="body-sm" muted>
-      地の上の面(elevation surface の最初の消費者)。器であって意味を持たない(role なし)。押せない(裁定):
+      地の上の面(elevation surface の最初の消費者)。部品であって意味を持たない(role なし)。押せない(裁定):
       リンクや操作は中身が担う。既定は影の面、outlined は影を消し中立 border で縁取る。
     </Text>
     <Grid min="14rem" gap="md">

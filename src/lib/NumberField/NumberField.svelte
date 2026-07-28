@@ -91,7 +91,7 @@
     if (max != null && n > max) return max;
     return n;
   };
-  // 刻みの倍数からずれた値を打っている最中に器が書き換えない(確定の時機は検証の関心。field.md §5)。
+  // 刻みの倍数からずれた値を打っている最中に部品が書き換えない(確定の時機は検証の関心。field.md §5)。
   // 動かすときだけ刻みに乗せる。浮動小数の誤差は桁を揃えてから丸める
   const stepped = (from: number, by: number) => {
     const decimals = (String(step).split('.')[1] ?? '').length;

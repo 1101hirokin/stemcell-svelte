@@ -34,8 +34,8 @@
   margin-inline-start: 0.25em;
 }
 
-/* 内包時の高さは一次内容(入力)が決める(size.md §2 裁定)。縦 inset は入力に付き、器は横 inset だけを
-   持つ。align-items:stretch で affix は器の行高へ従属する(器を押し上げない) */
+/* 内包時の高さは一次内容(入力)が決める(size.md §2 裁定)。縦 inset は入力に付き、部品は横 inset だけを
+   持つ。align-items:stretch で affix は部品の行高へ従属する(部品を押し上げない) */
 .sc-numberfield-control {
   display: flex;
   align-items: stretch;
@@ -65,7 +65,7 @@
   min-inline-size: 0;
   border: none;
   background: none;
-  /* 縦 inset は一次内容(入力)が持ち、器の高さを決める(size.md §2)。横は器の padding-inline が持つ */
+  /* 縦 inset は一次内容(入力)が持ち、部品の高さを決める(size.md §2)。横は部品の padding-inline が持つ */
   padding-block: var(--_inset);
   padding-inline: 0;
   outline: none;
@@ -115,16 +115,16 @@
    二つは隣り合わせる: 欄をまたいで左右に離すと、続けて押すのに指と視線が往復する。
    横に並べるのは当たり判定のためである: 縦に積むと欄の高さを二つで分け合い、24px を割る(実測 21px)。
    姿(正方形・面・焦点の輪)は internal/field-button が持つ */
-/* 増減が居る側だけ器の横 inset を手放す(そこはボタンが縁と当たり判定を持つ。TextField の付属と
+/* 増減が居る側だけ部品の横 inset を手放す(そこはボタンが縁と当たり判定を持つ。TextField の付属と
    同じ扱い)。値の側は inset を残す: 手放すと打つ文字が枠に触れる。
    隣り合う二つの間は空けない。二つで一組の操作なので、離すと別々の操作に見える */
 .sc-numberfield-control:has(.sc-numberfield-stepper) {
   padding-inline-end: 0;
   gap: 0;
 }
-/* 端のボタンの面は器の角の内側で切る。四角い面のまま置くと押した色が丸めた角から飛び出し、
+/* 端のボタンの面は部品の角の内側で切る。四角い面のまま置くと押した色が丸めた角から飛び出し、
    ボタン側に同じ半径を与えると枠の曲がりとずれて隙間が出る(枠の太さのぶん内側に居るため)。
-   器で切れば、内側の曲がりは常に枠と一致する。焦点の輪は器の外に描かれるので切られない */
+   部品で切れば、内側の曲がりは常に枠と一致する。焦点の輪は部品の外に描かれるので切られない */
 .sc-numberfield-control {
   overflow: hidden;
 }

@@ -11,7 +11,7 @@ it('コードであることを native が届ける(code 要素)', () => {
   expect(el.textContent).toContain('npm install');
 });
 
-it('器は焦点を受けない(文中の一語に操作を足さない)', () => {
+it('部品は焦点を受けない(文中の一語に操作を足さない)', () => {
   const { container } = render(Code, { props: { children: snip('--flag') } });
   const el = container.querySelector('.sc-code') as HTMLElement;
   expect(el.hasAttribute('tabindex')).toBe(false);

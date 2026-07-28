@@ -59,7 +59,7 @@ it('値はアプリが持ち、change は逐次で来る', async () => {
   expect(onchange).toHaveBeenLastCalledWith('abc');
 });
 
-it('autocomplete は消費者が渡す(器は決めない)', () => {
+it('autocomplete は消費者が渡す(部品は決めない)', () => {
   const { container } = render(PasswordField, { props: { ...base, autocomplete: 'new-password' } });
   expect(input(container).getAttribute('autocomplete')).toBe('new-password');
 });

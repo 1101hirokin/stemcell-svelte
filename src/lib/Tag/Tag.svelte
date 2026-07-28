@@ -47,7 +47,7 @@
 </script>
 
 {#if dismissible}
-  <!-- 消せる形: 器の中で本体(選択 or 静的ラベル)と × を「兄弟」に置く。role=button の中に押せる × という
+  <!-- 消せる形: 部品の中で本体(選択 or 静的ラベル)と × を「兄弟」に置く。role=button の中に押せる × という
        対話要素の入れ子(WAI-ARIA のアンチパターン)にしない(§2)。フォーカス順は本体 → ×。× のアクセシブル
        ネームは本体ラベル(aria-labelledby)+ 削除語で合成する(§3)。 -->
   <span class="sc-tag" data-variant={variant} data-size={size} data-selected={selected} data-disabled={disabled || undefined} data-dismissible="true">

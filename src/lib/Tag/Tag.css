@@ -34,8 +34,8 @@
 /* 選択(値。§2)。見せ方は Expressive: soft を一段濃く + 先頭に check(§5 の第一候補。撤退条件つき) */
 .sc-tag[data-selected='true'] { background: var(--_soft-bg-pressed); }
 
-/* disabled は intent の差し替え(state.md §7。減衰=opacity ではない)。器へ立てて容器ごと disabled 系の面に
-   なるようにする(dismissible では器=容器が :disabled になれないため、data 属性で駆動する) */
+/* disabled は intent の差し替え(state.md §7。減衰=opacity ではない)。部品へ立てて外枠ごと disabled 系の面に
+   なるようにする(dismissible では外枠が :disabled になれないため、data 属性で駆動する) */
 .sc-tag[data-disabled] {
   --_soft-bg: var(--color-semantic-disabled-soft-bg);
   --_soft-fg: var(--color-semantic-disabled-soft-fg);
@@ -44,13 +44,13 @@
   --_border: var(--color-semantic-disabled-border);
 }
 
-/* 静的/選べる(器そのものが本体): 段の inset は器に。基準の高さは相互作用形で門(24px)を兼ねる */
+/* 静的/選べる(外枠そのものが本体): 段の inset は部品に。基準の高さは相互作用形で門(24px)を兼ねる */
 .sc-tag:not([data-dismissible]) {
   padding-inline: var(--_inset);
   min-block-size: 1.5rem;
 }
 
-/* 相互作用の共通(選べる器ボタン・消せる本体・×): native button の見た目を消し、門(24px)を守る */
+/* 相互作用の共通(選べる外枠のボタン・消せる本体・×): native button の見た目を消し、門(24px)を守る */
 button.sc-tag,
 .sc-tag-body,
 .sc-tag-dismiss {
@@ -91,8 +91,8 @@ button.sc-tag:focus-visible,
   outline-offset: var(--focus-ring-offset);
 }
 
-/* 消せる形(器=容器): 本体と × を内包し、段の inset は中身が持つ。器の角丸を左右の端の中身へ受け継ぐ。
-   器の gap は 0 にする(inset の padding が本体と × を分ける。器の gap が残ると隙間に容器色の筋が出て、
+/* 消せる形(外枠が包む): 本体と × を内包し、段の inset は中身が持つ。部品の角丸を左右の端の中身へ受け継ぐ。
+   部品の gap は 0 にする(inset の padding が本体と × を分ける。部品の gap が残ると隙間に地の色の筋が出て、
    受け継いだ角丸で一つの丸角矩形にタイルするのを崩す) */
 .sc-tag[data-dismissible] { gap: 0; }
 .sc-tag[data-dismissible] .sc-tag-body {

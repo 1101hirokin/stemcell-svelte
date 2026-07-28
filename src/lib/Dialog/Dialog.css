@@ -7,7 +7,7 @@
    (以前は @media で個別に 0ms を書いていた。HOLES #36)。loop を使う部品だけは特例で、0 にすると
    動きが消えて意味が落ちるため @media で沈静させる。 */
 .sc-dialog {
-  /* 器はパネルを包むだけ。背後クリック判定のため padding を持たない(target===dialog で背後を見分ける) */
+  /* 部品はパネルを包むだけ。背後クリック判定のため padding を持たない(target===dialog で背後を見分ける) */
   padding: 0;
   border: 0;
   /* ビューポート中央(overlay.md §5 の modal 類)。UA 任せにしない。

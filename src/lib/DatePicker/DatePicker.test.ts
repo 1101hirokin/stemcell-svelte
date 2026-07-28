@@ -13,7 +13,7 @@ it('欄と、暦を開く操作を持つ', () => {
   expect(trigger.getAttribute('aria-label')).toBe('暦を開く');
 });
 
-it('暦が開いているかは器が内部で持つ。トリガーがその状態を告げる', async () => {
+it('暦が開いているかは部品が内部で持つ。トリガーがその状態を告げる', async () => {
   const { container } = render(DatePicker, { props: { ...props, value: '2026-07-20' } });
   const trigger = container.querySelector('button') as HTMLElement;
   expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');

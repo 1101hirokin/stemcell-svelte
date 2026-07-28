@@ -1,4 +1,4 @@
-/* 内在スタイルの器。既定は何も足さない(inset 省略時は余白なし)。 */
+/* 内在スタイルの部品。既定は何も足さない(inset 省略時は余白なし)。 */
 .sc-box[data-inset='sm'] {
   padding: var(--spacing-inset-sm);
 }

@@ -49,7 +49,7 @@
   let contentEl = $state<HTMLElement>();
 
   // 開く向きは overlay-position.ts の規則で決める(Tooltip と共有。overlay.md §5: 反転は Expressive)。
-  // 揃えはトリガーの中心で、はみ出すときだけ端へ寄る。面と器の幅が同じとき(fill の Select / Menu)は
+  // 揃えはトリガーの中心で、はみ出すときだけ端へ寄る。面と部品の幅が同じとき(fill の Select / Menu)は
   // 中心揃えと始端揃えが一致するので、fill の見え方は変わらない。測る前は placement を優先の向きに使う。
   let measured = $state<OverlaySides>();
   const blockSide = $derived(measured?.block ?? (placement === 'block-start' ? 'start' : 'end'));

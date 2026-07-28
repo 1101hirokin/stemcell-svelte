@@ -44,7 +44,7 @@
   });
 </script>
 
-<!-- 見た目と意味を持たない器(契約 a11y)。DOM / 読み上げ順は side が決め、視覚だけの
+<!-- 見た目と意味を持たない部品(契約 a11y)。DOM / 読み上げ順は side が決め、視覚だけの
      入替(order / row-reverse)はしない(WCAG 1.3.2)。折れても DOM 順は不変 -->
 <div
   class="sc-sidebar"

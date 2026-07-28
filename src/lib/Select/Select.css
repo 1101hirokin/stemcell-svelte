@@ -33,7 +33,7 @@
   color: var(--color-app-foreground);
 }
 /* 名前を視覚から隠す(field.md §2)。支援技術には届く標準の clip 技法で、
-   欄と名前の間の律動も消す(器が文脈を語っている場面で使う) */
+   欄と名前の間の律動も消す(部品が文脈を語っている場面で使う) */
 .sc-select[data-label-hidden='true'] {
   gap: 0;
 }
@@ -53,13 +53,13 @@
   margin-inline-start: 0.25em;
 }
 
-/* 器(native の wrapper / custom のトリガー button が共有)。inset は中身が持ち、器は端まで面を張る。
-   こうすると native の <select> が器の全幅を占め、UA ドロップダウンがトリガー幅に一致する(選択肢のずれ防止)。
+/* 外枠(native の wrapper / custom のトリガー button が共有)。inset は中身が持ち、部品は端まで面を張る。
+   こうすると native の <select> が親の全幅を占め、UA ドロップダウンがトリガー幅に一致する(選択肢のずれ防止)。
    フィールドは fill(横いっぱい。field.md §2・第3条)。custom の button は既定 shrink-wrap なので明示する */
 .sc-select-control {
   display: flex;
   align-items: stretch;
-  /* chevron を絶対配置のオーバーレイにするための基準。主内容が器の全幅を占め、chevron はその上に浮く。
+  /* chevron を絶対配置のオーバーレイにするための基準。主内容が親の全幅を占め、chevron はその上に浮く。
      これで native は <select> がクリック領域全体を覆い、chevron の上を押しても開く(chevron は透過) */
   position: relative;
   inline-size: 100%;
@@ -96,7 +96,7 @@
   border: none;
   background: none;
   padding-block: var(--_inset);
-  /* 横 inset は中身(=<select>)が持つ。右は chevron の分だけ足す。器は端まで面なので全幅に広がる */
+  /* 横 inset は中身(=<select>)が持つ。右は chevron の分だけ足す。部品は端まで面なので全幅に広がる */
   padding-inline: var(--_inset) calc(var(--_inset) + var(--_chevron-room));
   outline: none;
   font-family: var(--typography-body-md-font-family);
@@ -119,7 +119,7 @@
   outline-offset: var(--focus-ring-offset);
 }
 
-/* custom path: combobox トリガー(button を器として使う) */
+/* custom path: combobox トリガー(button を部品として使う) */
 .sc-select-trigger {
   padding-block: var(--_inset);
   font: inherit;
@@ -154,7 +154,7 @@
   color: var(--color-app-fg-muted);
 }
 
-/* 開閉インジケータ(装飾。native の矢印は appearance:none で消し自前で描く)。器の右端に絶対配置で浮かせ、
+/* 開閉インジケータ(装飾。native の矢印は appearance:none で消し自前で描く)。部品の右端に絶対配置で浮かせ、
    pointer-events:none でクリックを背後(native は <select>、custom は button)へ透過する */
 .sc-select-chevron {
   position: absolute;

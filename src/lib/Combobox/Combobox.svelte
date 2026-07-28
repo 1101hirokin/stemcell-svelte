@@ -8,12 +8,12 @@
 
   // 打ちながら候補を絞り、その中から一つ選ぶ欄(Combobox.md)。native の自動補完(<datalist>)は採らない
   // (拡大に追従せず、高コントラストに応答せず、NVDA と Firefox で候補が読み上げられない)。
-  // 絞り込みは器が持たない: 打たれた文字を知らせるだけで、絞った候補は消費者が渡し直す。
+  // 絞り込みは部品が持たない: 打たれた文字を知らせるだけで、絞った候補は消費者が渡し直す。
   interface Props {
     name?: string;
     /** 選ばれている選択肢の識別子。打った文字はここに入らない。 */
     value?: string;
-    /** いま出す候補。器は絞らず、この並びをそのまま出す。 */
+    /** いま出す候補。部品は絞らず、この並びをそのまま出す。 */
     options: ComboboxOption[];
     /** 打たれている文字。アプリが値として持ちたい場合に渡す。 */
     inputValue?: string;
@@ -77,7 +77,7 @@
   const selectedOption = $derived(options.find((o) => o.value === value));
   const enabled = $derived(enabledIndexes(options));
 
-  // 選ばれている値の表示。絞り込みで候補から外れても、選んだ相手の名前は器が覚えている
+  // 選ばれている値の表示。絞り込みで候補から外れても、選んだ相手の名前は部品が覚えている
   // (候補は打つたびに入れ替わるので、そのときの並びに頼ると、戻す先を見失って欄が空になる)
   let selectedLabel = $state('');
   $effect(() => {
@@ -181,7 +181,7 @@
       .filter(Boolean)
       .join(' ') || undefined,
   );
-  // 候補の件数は器が知っているので器が告げる(0 件も件数である)
+  // 候補の件数は部品が知っているので部品が告げる(0 件も件数である)
   const count = $derived(countLabel.replace('{n}', String(options.length)));
 </script>
 

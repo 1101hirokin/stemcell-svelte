@@ -4,14 +4,14 @@
   import type { Snippet } from 'svelte';
 
   // 回答の根拠(出典)の集合を一枚に集める有機体(Sources.md)。何を根拠に選ぶか(検索 / RAG /
-  // 引用生成)には触れない。与えられた出典を到達可能に描き、本文の引用と結ぶ器である。
+  // 引用生成)には触れない。与えられた出典を到達可能に描き、本文の引用と結ぶ部品である。
   interface Props {
     /** 出典の集まりの領域名(「出典」等)。任意。名前があると何のリストかを掴める。 */
     label?: Snippet;
     /**
      * 出典の列。契約の既定スロットは「項目の列」で、それをどう受け取るか(項目ごとのスロット・
      * スニペット・配列)は各実装の表現である(契約 a11y notes)。Svelte では配列 + 項目のスニペットに
-     * 写す。項目の器(li)は Sources が出すので、アプリが差すのは中身だけでよい。
+     * 写す。項目の外枠(li)は Sources が出すので、アプリが差すのは中身だけでよい。
      */
     items: T[];
     /** 各出典の中身。項目を引数に受ける(到達手段の Link、題や抜粋の Text を組む)。 */
@@ -60,7 +60,7 @@
   {/if}
   <!-- role=list を明示する: 一覧の見た目を整えるために list-style や display を触ると、
        ul の暗黙の役割が落ちる環境がある(layout.md §6 の「役割の再付与」)。
-       リストの器は Sources が持ち、項目の器(li)も Sources が出す(アプリの作法に頼らない。契約 a11y)。 -->
+       リストの部品は Sources が持ち、項目の外枠(li)も Sources が出す(アプリの作法に頼らない。契約 a11y)。 -->
   <ul class="sc-sources" role="list" aria-labelledby={label ? labelId : undefined}>
     {#each rows as row (row.key)}
       <!-- 各項目は source の id を帯びる。本文中の引用の印は同じ id を指し、両端とも採番しない。

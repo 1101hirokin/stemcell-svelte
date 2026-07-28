@@ -1,4 +1,4 @@
-/* 暦日をひとつ選ぶ(DatePicker.md)。器が持つのは欄と開く操作の並びだけで、
+/* 暦日をひとつ選ぶ(DatePicker.md)。部品が持つのは欄と開く操作の並びだけで、
    欄の床は DateField、格子は Calendar、一時面は Popover が持つ(参照が必須のトークンだけを引く)。 */
 .sc-datepicker {
   /* 浮かぶ面の幅はアンカーに一致するのが Popover の既定だが、ここのアンカーは絵だけのボタンで
@@ -21,7 +21,7 @@
   padding: var(--spacing-inset-md);
 }
 
-/* 暦を開く操作。Popover はアンカーの ARIA を張らないので、トリガーは器が持つ(Menu と同じ形)。
+/* 暦を開く操作。Popover はアンカーの ARIA を張らないので、トリガーは部品が持つ(Menu と同じ形)。
    自分で持つ以上、焦点の輪と当たり判定もここが担う */
 .sc-datepicker-trigger-button {
   appearance: none;

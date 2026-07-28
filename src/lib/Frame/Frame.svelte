@@ -22,7 +22,7 @@
   });
 </script>
 
-<!-- 見た目と意味を持たない器(契約 a11y): states 無し・focus 無し・構造の主張無し。 -->
+<!-- 見た目と意味を持たない部品(契約 a11y): states 無し・focus 無し・構造の主張無し。 -->
 <div class="sc-frame" style:--sc-frame-ratio={valid ? ratio : META.props.ratio.default}>
   {@render children()}
 </div>

@@ -178,7 +178,7 @@
     const el = e.currentTarget as HTMLInputElement;
     const data = (e as InputEvent).data ?? '';
     const deleting = ((e as InputEvent).inputType ?? '').startsWith('delete');
-    el.value = shown(type); // 表示は器が決める
+    el.value = shown(type); // 表示は部品が決める
     if (disabled || readonly) return;
     if (deleting) clear(type);
     else for (const ch of data) if (/\d/.test(ch)) takeOne(type, ch);

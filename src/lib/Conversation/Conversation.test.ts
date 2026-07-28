@@ -52,7 +52,7 @@ it('末尾から離れると知らせ、戻る手段が出る', async () => {
   expect(onfollowingchange).toHaveBeenLastCalledWith(false);
 });
 
-it('末尾を追うかを消費者が持てる(持っているあいだも器は判じた結果を知らせる)', async () => {
+it('末尾を追うかを消費者が持てる(持っているあいだも部品は判じた結果を知らせる)', async () => {
   const onfollowingchange = vi.fn();
   const { container } = render(Conversation, { props: { ...base, following: true, onfollowingchange } });
   const scroller = container.querySelector('.sc-conversation-scroller') as HTMLElement;

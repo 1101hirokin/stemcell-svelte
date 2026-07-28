@@ -20,7 +20,7 @@
   const gapUse = useGap('Cluster', 'gap', () => gap, META.props.gap.default);
 </script>
 
-<!-- 見た目と意味を持たない器(契約 a11y): states 無し・focus 無し・構造の主張無し。
+<!-- 見た目と意味を持たない部品(契約 a11y): states 無し・focus 無し・構造の主張無し。
      項目ごとに流れる(折返し)のが Cluster。全体が一斉に切り替わるのは Switcher。 -->
 <div
   class="sc-cluster"

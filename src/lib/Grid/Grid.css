@@ -1,9 +1,9 @@
-/* 内在的な格子(Grid.md)。列数は器が決める: 各列は min を下回らず、余れば 1fr で伸びる。
-   min(var, 100%) の防波堤は、器が min より狭いときに単一列が器からあふれるのを防ぐ。 */
+/* 内在的な格子(Grid.md)。列数は部品が決める: 各列は min を下回らず、余れば 1fr で伸びる。
+   min(var, 100%) の防波堤は、部品が min より狭いときに単一列が部品からあふれるのを防ぐ。 */
 .sc-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(var(--sc-grid-min), 100%), 1fr));
-  /* 包む器は、中身が縮めるように場所を作る(layout.md §2)。ここが内容幅で広がると、
+  /* 包む要素は、中身が縮めるように場所を作る(layout.md §2)。ここが内容幅で広がると、
      内側の min-inline-size: 0 は無効になり、送れる中身がページごと横へ伸びる */
   min-inline-size: 0;
 }

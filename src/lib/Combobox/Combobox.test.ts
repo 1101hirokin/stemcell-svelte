@@ -25,13 +25,13 @@ it('打てる欄自身が combobox である(ARIA 1.2)', () => {
   expect(el.getAttribute('aria-autocomplete')).toBe('list');
 });
 
-it('打つと候補が開き、打った文字を知らせる(器は絞らない)', async () => {
+it('打つと候補が開き、打った文字を知らせる(部品は絞らない)', async () => {
   const oninputchange = vi.fn();
   const { container } = render(Combobox, { props: { ...base, oninputchange } });
   await fireEvent.input(input(container), { target: { value: '朝' } });
   expect(oninputchange).toHaveBeenLastCalledWith('朝');
   expect(input(container).getAttribute('aria-expanded')).toBe('true');
-  // 器は options をそのまま出す(絞り込みは消費者の仕事)
+  // 部品は options をそのまま出す(絞り込みは消費者の仕事)
   expect(container.querySelectorAll('[role="option"]').length).toBe(3);
 });
 
@@ -136,7 +136,7 @@ it('候補が無いときは空の一覧を出さずに言葉で伝える', asyn
   expect(container.querySelectorAll('[role="option"]').length).toBe(0);
 });
 
-it('件数は器が告げる(0 件も件数である)', async () => {
+it('件数は部品が告げる(0 件も件数である)', async () => {
   const { container } = render(Combobox, { props: { ...base, options: [] } });
   const live = container.querySelector('.sc-combobox-count') as HTMLElement;
   expect(live.getAttribute('role')).toBe('status');

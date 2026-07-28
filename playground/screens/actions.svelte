@@ -71,7 +71,7 @@
   <section>
     <Text as="h3" variant="title-lg">Icon</Text>
     <Text as="p" variant="body-sm" muted>
-      語彙を絵で示す描画器。色は currentColor(文字色を継承)、寸法は 1em(font-size に追従)。
+      語彙を絵で示す部品。色は currentColor(文字色を継承)、寸法は 1em(font-size に追従)。
       既定は装飾で支援技術から隠れ、label を付けると意味を運ぶ。
     </Text>
     <div class="pg-row">

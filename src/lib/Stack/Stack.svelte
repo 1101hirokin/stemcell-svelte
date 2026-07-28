@@ -23,7 +23,7 @@
   const gapUse = useGap('Stack', 'gap', () => gap, META.props.gap.default);
 </script>
 
-<!-- 見た目と意味を持たない器(契約 a11y): states 無し・focus 無し・構造の主張無し。 -->
+<!-- 見た目と意味を持たない部品(契約 a11y): states 無し・focus 無し・構造の主張無し。 -->
 <div
   class="sc-stack"
   data-direction={direction}

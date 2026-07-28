@@ -1,6 +1,6 @@
 <script lang="ts" module>
   /**
-   * as の許可リスト。多相の目的は「意味的要素へ」(layout.md §6)であり、器になりうる
+   * as の許可リスト。多相の目的は「意味的要素へ」(layout.md §6)であり、部品になりうる
    * 意味的要素だけを開く。型(keyof HTMLElementTagNameMap)は script / style / iframe も
    * 通してしまい、実行時検証が無いと危険要素をそのまま生成できる(独立レビューが実測で指摘)。
    */
@@ -23,7 +23,7 @@
     /**
      * 逃げ道(契約外 = Svelte の土地の声)。layout.md §6: Box のみ最高自由度を持ち、
      * as 多相(意味的要素へ)と自由 style を許す唯一の逃げ道。素の div の直接使用は非推奨で、
-     * 素の器が欲しいケースはここに集約する。トークン値の使用を推奨(自由な指定は最終手段)。
+     * 素の部品が欲しいケースはここに集約する。トークン値の使用を推奨(自由な指定は最終手段)。
      */
     as?: (typeof AS_ALLOWED)[number];
     style?: string;
@@ -55,7 +55,7 @@
   });
 </script>
 
-<!-- 見た目と意味を持たない器(契約 a11y)。意味が要るときは as で意味的要素になる。 -->
+<!-- 見た目と意味を持たない部品(契約 a11y)。意味が要るときは as で意味的要素になる。 -->
 <svelte:element
   this={asValid ? as : 'div'}
   class={klass ? `sc-box ${klass}` : 'sc-box'}

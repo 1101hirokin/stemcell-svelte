@@ -32,7 +32,7 @@ it('selected=true は aria-pressed=true で、先頭に check(装飾。意味は
   expect(icon.getAttribute('aria-hidden')).toBe('true');
 });
 
-it('消せる札(dismissible)は器の中に静的ラベルと × を兄弟に持ち、× で ondismiss が発火(§2)', () => {
+it('消せる札(dismissible)は部品の中に静的ラベルと × を兄弟に持ち、× で ondismiss が発火(§2)', () => {
   let dismissed = 0;
   const { container } = render(Tag, { props: { children: label, dismissible: true, ondismiss: () => dismissed++ } });
   const root = container.querySelector('.sc-tag') as HTMLElement;
@@ -81,7 +81,7 @@ it('disabled は相互作用を止める(選べる札の click が発火しな�
   expect(fired).toBe(0);
 });
 
-it('disabled は器へ data-disabled を立てる(CSS は token を disabled 系へ差し替え。減衰でない。state.md §7)', () => {
+it('disabled は部品へ data-disabled を立てる(CSS は token を disabled 系へ差し替え。減衰でない。state.md §7)', () => {
   const sel = render(Tag, { props: { children: label, selected: false, disabled: true } });
   expect((sel.container.querySelector('.sc-tag') as HTMLElement).dataset.disabled).toBe('true');
   const dis = render(Tag, { props: { children: label, dismissible: true, disabled: true } });

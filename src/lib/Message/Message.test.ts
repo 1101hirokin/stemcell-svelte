@@ -13,7 +13,7 @@ it('発話は一つのまとまりとして届き、名前は消費者が渡し�
   expect(el.textContent).toContain('土鍋の発注点');
 });
 
-it('話者は conversation の閉集合から来る(器が発明しない)', () => {
+it('話者は conversation の閉集合から来る(部品が発明しない)', () => {
   const { container } = render(Message, { props: { ...base, role: 'user', speakerLabel: 'あなた' } });
   expect((container.querySelector('.sc-message') as HTMLElement).dataset.role).toBe('user');
 });
@@ -25,7 +25,7 @@ it('名乗りと補助は省ける(名前は speakerLabel が運ぶ)', () => {
   expect((container.querySelector('.sc-message') as HTMLElement).getAttribute('aria-label')).toBe('アシスタント');
 });
 
-it('名乗りと補助を差せば同じ器に載る', () => {
+it('名乗りと補助を差せば同じ部品に載る', () => {
   const { container } = render(Message, {
     props: { ...base, speaker: snip('AI'), meta: snip('12:04') },
   });

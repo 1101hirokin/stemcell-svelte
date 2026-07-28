@@ -58,7 +58,7 @@
       <Stack gap="lg">
         <header class="pg-header">
           <Text as="h1" variant="title-md">stemcell playground</Text>
-          <Text as="p" variant="body-sm" muted>実装済み部品を実物で触って確認する器(WORKFLOW §2-6)。配信物ではない。</Text>
+          <Text as="p" variant="body-sm" muted>実装済み部品を実物で触って確認する場(WORKFLOW §2-6)。配信物ではない。</Text>
         </header>
 
         <NavList items={SCREENS.map((s) => ({ id: s.id, label: s.label, href: `#/${s.id}` }))} current={route}>

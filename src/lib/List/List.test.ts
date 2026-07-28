@@ -7,13 +7,13 @@ const items = [
   { id: 'b', name: 'まな板' },
   { id: 'c', name: 'ざる' },
 ];
-// testing-library の render は総称の推論を通さないので、スニペットは器の側の型で受ける
+// testing-library の render は総称の推論を通さないので、スニペットは部品の側の型で受ける
 // (実際の .svelte からは generics で具体型が推論される。Sources のテストと同じ形)
 const row = createRawSnippet((item: () => { id: string }) => ({
   render: () => `<span>${(item() as unknown as { name: string }).name}</span>`,
 }));
 
-it('並びの構造と項目の器は List が持つ(アプリの作法に頼らない)', () => {
+it('並びの構造と項目の部品は List が持つ(アプリの作法に頼らない)', () => {
   const { container } = render(List, { props: { items, children: row } });
   const list = container.querySelector('ul') as HTMLElement;
   expect(list.getAttribute('role')).toBe('list');
@@ -33,7 +33,7 @@ it('区切りは既定で引かない。divided で引く', () => {
   expect((c2.querySelector('ul') as HTMLElement).dataset.divided).toBe('true');
 });
 
-it('器自身は焦点を受けない(焦点は項目の中の押せる要素に立つ)', () => {
+it('部品自身は焦点を受けない(焦点は項目の中の押せる要素に立つ)', () => {
   const { container } = render(List, { props: { items, children: row } });
   expect((container.querySelector('ul') as HTMLElement).hasAttribute('tabindex')).toBe(false);
 });

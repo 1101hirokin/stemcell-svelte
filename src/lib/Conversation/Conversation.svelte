@@ -4,25 +4,25 @@
   import Icon from '../Icon/Icon.svelte';
   import type { Snippet } from 'svelte';
 
-  // 発話の並びを収める器(Conversation.md)。会話は「新しい情報が末尾にだけ足される、意味のある順序の
+  // 発話の並びを収める部品(Conversation.md)。会話は「新しい情報が末尾にだけ足される、意味のある順序の
   // 記録」で、この形は ARIA が log として持つ(MDN の log の例が chat logs)。feed は採らない: 各記事が
   // 焦点を受けページキーで読み飛ばす前提が、焦点を受けない発話と合わない。
   interface Props {
     /** いま発話が生成されているか。進行は状態ではなく値である(streaming.md §2)。 */
     busy?: boolean;
-    /** 末尾を追っているか。省略すると器が自分で判じる(利用者が末尾に居るあいだは追う)。
-     *  渡せばそちらが勝つ(送信直後に必ず末尾へ送る等)。値はアプリが持ち、器は followingchange で
+    /** 末尾を追っているか。省略すると部品が自分で判じる(利用者が末尾に居るあいだは追う)。
+     *  渡せばそちらが勝つ(送信直後に必ず末尾へ送る等)。値はアプリが持ち、部品は followingchange で
      *  変更を要求する。要求を受けて値を戻さないと、利用者は遡れないままになる。 */
     following?: boolean;
-    /** 末尾を追っているかが器の判断で変わった。消費者が following を持っていても知らせる。 */
+    /** 末尾を追っているかが部品の判断で変わった。消費者が following を持っていても知らせる。 */
     onfollowingchange?: (following: boolean) => void;
     /** この記録の名前(ARIA は log に名前を要求する)。 */
     label: Snippet;
     /** 末尾へ戻る操作の名前(絵だけの操作なので文字列で足りる)。 */
     resumeLabel: string;
-    /** 末尾へ戻る手段の中身を差し替える。省略すると器が既定の手段(絵のボタン)を出す。 */
+    /** 末尾へ戻る手段の中身を差し替える。省略すると部品が既定の手段(絵のボタン)を出す。 */
     resume?: Snippet;
-    /** 並ぶもの。多くは Message だが、器は中身を解釈しない。 */
+    /** 並ぶもの。多くは Message だが、部品は中身を解釈しない。 */
     children: Snippet;
   }
   let {
@@ -40,7 +40,7 @@
 
   let scroller = $state<HTMLElement>();
   let content = $state<HTMLElement>();
-  // 末尾に居るか。器が自分で判じるが、消費者が following を渡せばそちらが勝つ(送信直後に必ず追う等)
+  // 末尾に居るか。部品が自分で判じるが、消費者が following を渡せばそちらが勝つ(送信直後に必ず追う等)
   let atBottom = $state(true);
   let unseen = $state(false);
   const followingNow = $derived(following ?? atBottom);
@@ -51,7 +51,7 @@
   };
   const toBottom = () => scroller?.scrollTo({ top: scroller.scrollHeight });
 
-  // 器が判じた結果は、消費者が値を持っているときも知らせる(値はアプリ所有で、器は変更要求を出す側で
+  // 部品が判じた結果は、消費者が値を持っているときも知らせる(値はアプリ所有で、部品は変更要求を出す側で
   // ある。field.md §5。知らせないと、貼り付けたままのアプリが利用者の遡りに気づけず制御を戻せない)
   const onscroll = () => {
     const next = distance() < 8;
@@ -68,8 +68,8 @@
     return { last, size: last?.offsetHeight ?? 0 };
   };
 
-  // 中身が伸びたときと器が縮んだときに動く。末尾を追っているなら送り、離れているなら新着があることを
-  // 覚える(読んでいる最中に画面を引きずらない。第1条)。器の伸縮は新着ではないので覚えない
+  // 中身が伸びたときと部品が縮んだときに動く。末尾を追っているなら送り、離れているなら新着があることを
+  // 覚える(読んでいる最中に画面を引きずらない。第1条)。部品の伸縮は新着ではないので覚えない
   $effect(() => {
     const box = content;
     const view = scroller;

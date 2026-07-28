@@ -2,7 +2,7 @@
   import './LinearLoader.css';
 
   // 線形・不確定。いつ終わるか分からない待ちを領域の幅で告げる(LinearLoader.md)。
-  // 終わりの割合が分かるなら LinearProgress(別部品)。径を持たず、幅は器いっぱい。
+  // 終わりの割合が分かるなら LinearProgress(別部品)。径を持たず、幅は親いっぱい。
   interface Props {
     /** 何を待っているか(必須)。流れる帯は視覚でしか語らないので、意味は名前が運ぶ。 */
     label: string;

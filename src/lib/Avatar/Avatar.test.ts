@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import Avatar from './Avatar.svelte';
 
-it('器が role=img と name(アクセシブルネーム)を持ち、既定 size は md(Avatar.md §3)', () => {
+it('部品が role=img と name(アクセシブルネーム)を持ち、既定 size は md(Avatar.md §3)', () => {
   render(Avatar, { props: { name: '山田太郎' } });
   const a = screen.getByRole('img');
   expect(a.getAttribute('aria-label')).toBe('山田太郎');
@@ -51,7 +51,7 @@ it('size は sm / lg を data 属性で持つ', () => {
   expect((container.querySelector('.sc-avatar') as HTMLElement).dataset.size).toBe('lg');
 });
 
-it('decorative=true は器ごと支援技術から隠す(role/aria-label を持たず aria-hidden。§3)', () => {
+it('decorative=true は部品ごと支援技術から隠す(role/aria-label を持たず aria-hidden。§3)', () => {
   const { container } = render(Avatar, { props: { name: '山田太郎', decorative: true } });
   const a = container.querySelector('.sc-avatar') as HTMLElement;
   expect(a.getAttribute('role')).toBeNull();

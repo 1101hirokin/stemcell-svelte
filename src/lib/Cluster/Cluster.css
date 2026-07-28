@@ -2,7 +2,7 @@
 .sc-cluster {
   display: flex;
   flex-wrap: wrap;
-  /* 包む器は、中身が縮めるように場所を作る(layout.md §2)。ここが内容幅で広がると、
+  /* 包む要素は、中身が縮めるように場所を作る(layout.md §2)。ここが内容幅で広がると、
      内側の min-inline-size: 0 は無効になり、送れる中身がページごと横へ伸びる */
   min-inline-size: 0;
 }

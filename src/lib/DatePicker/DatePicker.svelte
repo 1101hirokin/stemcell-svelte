@@ -9,7 +9,7 @@
   import type { Snippet } from 'svelte';
 
   // 暦日をひとつ選ぶ(DatePicker.md)。打つ欄と開く暦を束ね、両者は同じ値を指す。
-  // 暦が開いているかは器が内部で持つ(トリガーに従属する一時面。Menu / Select と同じ形)。
+  // 暦が開いているかは部品が内部で持つ(トリガーに従属する一時面。Menu / Select と同じ形)。
   interface Props {
     name?: string;
     value?: string;

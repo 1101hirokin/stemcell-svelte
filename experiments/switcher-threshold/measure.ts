@@ -2,12 +2,12 @@
  * Switcher threshold の実測(layout.md §9 の裁定材料 + 純 CSS 実装の検証 = 実装 Done の条件)。
  *
  * 問い:
- *   1. flex-basis 算術は契約の意味論(器の幅が threshold 未満で縦・以上で横)を正確に実装するか。
+ *   1. flex-basis 算術は契約の意味論(部品の幅が threshold 未満で縦・以上で横)を正確に実装するか。
  *   2. threshold の単位(px / rem)は文字拡大(ブラウザのフォント設定 = root font-size 変更)で
  *      どう振る舞うか。「同じ幅なら同じ形」の「幅」の定義が割れる点を数値で観測する。
  *
  * 方法: 実装そのものの CSS(Switcher.css)と tokens のビルド出力を実 Chromium に読み込み、
- * Switcher が描画する DOM と同一のマークアップ(sc-switcher > sc-button x3)で器の幅を
+ * Switcher が描画する DOM と同一のマークアップ(sc-switcher > sc-button x3)で部品の幅を
  * 1px 刻みに走査して切替点を測る。jsdom はレイアウトを計算しないため実ブラウザを使う。
  */
 import { chromium } from 'playwright-core';
@@ -44,7 +44,7 @@ const LABELS = ['変更を保存', 'キャンセル', 'プレビュー'];
 const browser = await chromium.launch({ executablePath, args: ['--no-sandbox'] });
 const page = await browser.newPage();
 
-/** 器の幅 containerPx で描画し、形(horizontal / vertical / mixed)と溢れを返す。 */
+/** 部品の幅 containerPx で描画し、形(horizontal / vertical / mixed)と溢れを返す。 */
 async function render(rootPx: number, threshold: string, containerPx: number) {
   await page.setContent(PAGE(rootPx, threshold, containerPx, LABELS));
   return page.evaluate(() => {
@@ -52,7 +52,7 @@ async function render(rootPx: number, threshold: string, containerPx: number) {
     const kids = [...sw.children] as HTMLElement[];
     const tops = new Set(kids.map((k) => k.offsetTop));
     const shape = tops.size === 1 ? 'horizontal' : tops.size === kids.length ? 'vertical' : 'mixed';
-    // 溢れ: 行全体が器からはみ出す(row)か、ラベルが部品内で折り返して部品が縦に育つ(textWrap)か。
+    // 溢れ: 行全体が部品からはみ出す(row)か、ラベルが部品内で折り返して部品が縦に育つ(textWrap)か。
     const overflow = sw.scrollWidth > sw.clientWidth + 1;
     const heights = kids.map((k) => k.offsetHeight);
     const textWrap = Math.max(...heights) > Math.min(...heights) + 1 || Math.max(...heights) > 80;
@@ -61,7 +61,7 @@ async function render(rootPx: number, threshold: string, containerPx: number) {
   });
 }
 
-/** 切替点: shape が vertical → horizontal に変わる最小の器の幅を二分探索で求める。 */
+/** 切替点: shape が vertical → horizontal に変わる最小の部品の幅を二分探索で求める。 */
 async function switchPoint(rootPx: number, threshold: string, lo = 100, hi = 1400): Promise<number> {
   while (lo < hi) {
     const mid = Math.floor((lo + hi) / 2);
@@ -87,13 +87,13 @@ for (const rootPx of [16, 20, 24]) {
 }
 
 console.log('== 3. 実害: px 閾値 + 文字拡大時、横のまま中身が溢れるか ==');
-console.log('   (器 490px = px 閾値 480 の直上。root を上げると横形のまま中身だけ育つ)');
+console.log('   (親 490px = px 閾値 480 の直上。root を上げると横形のまま中身だけ育つ)');
 for (const rootPx of [16, 20, 24]) {
   const px = await render(rootPx, '480px', 490);
   const rem = await render(rootPx, '30rem', 490);
   const fmt = (r: Awaited<ReturnType<typeof render>>) =>
-    `${r.shape}${r.overflow ? '・行が器から溢れ' : ''}(部品高 ${r.maxH}px)`;
-  console.log(`  root=${rootPx}px 器490px: [480px閾値] ${fmt(px)} / [30rem閾値] ${fmt(rem)}`);
+    `${r.shape}${r.overflow ? '・行が部品から溢れ' : ''}(部品高 ${r.maxH}px)`;
+  console.log(`  root=${rootPx}px 親490px: [480px閾値] ${fmt(px)} / [30rem閾値] ${fmt(rem)}`);
 }
 
 console.log('== 4. gap 語彙の解決 ==');

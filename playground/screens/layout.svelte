@@ -8,7 +8,7 @@
 
   <section>
     <Text as="h3" variant="title-lg">Box</Text>
-    <Text as="p" variant="body-sm" muted>内在スタイルの器。inset は段(sm/md/lg)と大域の原始 X(8〜24)。1値で全周、2値「縦 横」で別指定。</Text>
+    <Text as="p" variant="body-sm" muted>内在スタイルの部品。inset は段(sm/md/lg)と大域の原始 X(8〜24)。1値で全周、2値「縦 横」で別指定。</Text>
     <Cluster gap="sm" align="center">
       {#each ['sm', 'md', 'lg', '12'] as inset (inset)}
         <div class="pg-outline">
@@ -49,7 +49,7 @@
   </section>
   <section>
     <Text as="h3" variant="title-lg">Cluster</Text>
-    <Text as="p" variant="body-sm" muted>項目ごとに流れる折返し(全体の一斉切替は Switcher)。器を狭めると行送りされる。</Text>
+    <Text as="p" variant="body-sm" muted>項目ごとに流れる折返し(全体の一斉切替は Switcher)。部品を狭めると行送りされる。</Text>
     <div class="pg-resizable">
       <Cluster gap="sm">
         {#each ['設計', 'トークン', '契約', '散文', '適合', '実測', 'レビュー', '裁定', '配信'] as t (t)}
@@ -61,8 +61,8 @@
   <section>
     <Text as="h3" variant="title-lg">Grid</Text>
     <Text as="p" variant="body-sm" muted>
-      内在的な格子。列は min({gridMin})を下回らず、器に応じて増減する
-      (メディアクエリなし)。右下の掴みで器をドラッグして確認する。
+      内在的な格子。列は min({gridMin})を下回らず、部品に応じて増減する
+      (メディアクエリなし)。右下の掴みで部品をドラッグして確認する。
     </Text>
     <label class="pg-field">
       min
@@ -81,12 +81,12 @@
     <Text as="p" variant="body-sm" muted>
       同じ機構(論理方向の自動余白)で目的が違う二つ。Center は読める幅(既定 prose = 66ch)、Container は
       ページの殻(既定 xl)。段は container のトークンで rem 建てなので、読者が文字を拡大すると幅も一緒に
-      広がる。破線は器の輪郭を見せるための playground の飾り。
+      広がる。破線は部品の輪郭を見せるための playground の飾り。
     </Text>
     <div class="pg-outline">
       <Center>
         <Text as="p" variant="body-md">
-          測度の中に置かれた本文。器がどれだけ広くても、行の長さはおよそ66文字で頭打ちになる。
+          測度の中に置かれた本文。部品がどれだけ広くても、行の長さはおよそ66文字で頭打ちになる。
           横いっぱいに広がろうとする既定(layout.md §2)の、唯一の明示的な例外がこれ。
           文字揃えは持たない: 中央に置くのは箱であって文字ではない。
         </Text>
@@ -102,7 +102,7 @@
   <section>
     <Text as="h3" variant="title-lg">Cover(1画面ぶんの骨格)</Text>
     <Text as="p" variant="body-sm" muted>
-      器の高さいっぱいに立ち、頭と足を端に残して主役を残りの空間の中央に置く。高さは 100dvh
+      部品の高さいっぱいに立ち、頭と足を端に残して主役を残りの空間の中央に置く。高さは 100dvh
       (動くブラウザ UI を勘定に入れた画面の高さ)で、非対応環境は 100vh に残る。下の枠は1画面ぶんの
       高さを持つので、枠の中がスクロールする。
     </Text>
@@ -135,14 +135,14 @@
         {#snippet aside()}
           <div class="pg-chip">ナビ(脇)</div>
         {/snippet}
-        <div class="pg-chip">本体。器を狭めると縦積みへ折れ、DOM 順は変わらない。</div>
+        <div class="pg-chip">本体。部品を狭めると縦積みへ折れ、DOM 順は変わらない。</div>
       </Sidebar>
     </div>
   </section>
   <section>
     <Text as="h3" variant="title-lg">Switcher</Text>
     <Text as="p" variant="body-sm" muted>
-      右下の掴みで器の幅をドラッグして切替を確認する。器の幅が threshold
+      右下の掴みで部品の幅をドラッグして切替を確認する。部品の幅が threshold
       ({threshold})未満で縦へ一斉に切り替わる(閾値駆動。rem 裁定済み)。
     </Text>
     <label class="pg-field">
@@ -184,7 +184,7 @@
     <Text as="p" variant="body-sm" muted>
       あふれても折り返さず流れる(折り返すのは Cluster)。実際にあふれているときだけ焦点を受ける:
       Tab で帯に入って矢印キーでスクロールできる。収まっている帯は中身の無い停留所を作らないので
-      Tab で素通りする。下の2つ目は器に収まる帯で、こちらは焦点を受けない。
+      Tab で素通りする。下の2つ目は部品に収まる帯で、こちらは焦点を受けない。
     </Text>
     <Reel>
       {#each ['契約', 'トークン', '適合検査', '門', '還流', '原始', '有機体', '層', '間隔', '曲率'] as word (word)}
@@ -199,7 +199,7 @@
   <section>
     <Text as="h3" variant="title-lg">Imposter(下地の上への重ね)</Text>
     <Text as="p" variant="body-sm" muted>
-      器が下地と重ねの両方を持つ。基準を祖先に求めないので、周囲に transform や container-type が
+      部品が下地と重ねの両方を持つ。基準を祖先に求めないので、周囲に transform や container-type が
       付いても重ねの位置は動かない。位置は論理の3×3(alignBlock × alignInline)。守らない・閉じない・
       奪わない: 下も支援技術から読め、覆っても意味は生まれない。Badge の anchor はこの原始の自己利用。
     </Text>

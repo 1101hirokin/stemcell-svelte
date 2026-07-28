@@ -2,7 +2,7 @@
    余白は持たない(間隔は置かれた場所が所有。layout.md §1)。向きは論理プロパティで描く。 */
 .sc-divider {
   border: 0;
-  align-self: stretch; /* 器(Stack/Cluster)の交差軸いっぱいに伸びる */
+  align-self: stretch; /* 包む要素(Stack/Cluster)の交差軸いっぱいに伸びる */
 }
 /* 積みの流れを切る = 横書きでは水平線。幅いっぱい、線は block 方向の縁 */
 .sc-divider[data-orientation='stack'] {
@@ -10,7 +10,7 @@
   block-size: 0;
   border-block-start: var(--shape-border-width) solid var(--color-app-divider);
 }
-/* 並びの流れを切る = 同・垂直線。高さは器から(align-self: stretch で兄弟に揃う)、線は inline 方向の縁。
+/* 並びの流れを切る = 同・垂直線。高さは部品から(align-self: stretch で兄弟に揃う)、線は inline 方向の縁。
    flex 兄弟が無い/非 flex に単独で置かれた場合でも消えないよう最低高を敷く(独立レビュー: stretch は
    flex 文脈でしか効かず、単独では 0 高になりうる) */
 .sc-divider[data-orientation='inline'] {

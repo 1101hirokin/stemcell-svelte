@@ -140,7 +140,7 @@
       </button>
     {/snippet}
     {#snippet panel()}
-      <!-- 面の先頭に差し込む中身(候補の列など)。器は中身を解釈しない。狭い画面では暦の上へ回る
+      <!-- 面の先頭に差し込む中身(候補の列など)。部品は中身を解釈しない。狭い画面では暦の上へ回る
            (行の始まり側に置く場所が無い。patterns/date-range.md §3) -->
       <div class="sc-daterangepicker-panel" aria-live="polite">
         {#if panelLead}<div class="sc-daterangepicker-panel-lead">{@render panelLead()}</div>{/if}

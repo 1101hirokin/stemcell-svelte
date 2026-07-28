@@ -1,12 +1,12 @@
-/* 閾値駆動の一斉切替(契約: 器の幅が threshold 未満で縦)。
+/* 閾値駆動の一斉切替(契約: 部品の幅が threshold 未満で縦)。
    機構は flex-basis 算術(Every Layout の Switcher と同型): (threshold - 100%) は
-   器が閾値より狭いときだけ正になり、999 倍で basis が器を溢れて各子が1行を占める。
+   部品が閾値より狭いときだけ正になり、999 倍で basis が部品を溢れて各子が1行を占める。
    コンテナクエリを採らないのは、@container の条件部が custom property を受けず
    (layout.md §8)、prop 駆動の閾値をインスタンスごとに CSS へ運べないため。 */
 .sc-switcher {
   display: flex;
   flex-wrap: wrap;
-  /* 包む器は、中身が縮めるように場所を作る(layout.md §2)。ここが内容幅で広がると、
+  /* 包む要素は、中身が縮めるように場所を作る(layout.md §2)。ここが内容幅で広がると、
      内側の min-inline-size: 0 は無効になり、送れる中身がページごと横へ伸びる */
   min-inline-size: 0;
 }
