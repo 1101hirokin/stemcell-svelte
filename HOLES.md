@@ -12,7 +12,7 @@
 | 2 | Icon | アイコンセット未受領のため name → グリフの描画が定義できない | 実装保留(スタブも作らない) | A(解消済み。アイコンセットを受領し、name / glyph の二経路で実装済み。2026-07-28 の棚卸しで確認) |
 | 3 | Button | disabled の機構(native 属性 か aria-disabled か)は Web の表現として実装に委ねられている | native `disabled` 属性を選択。根拠: 契約の mirrorsNativeAttr、抑制(state.md §3.2)が無償、支援技術からは閲覧カーソルで到達可能 | B(state.md §5 の3要求は満たす。実測検証は実装 Done の条件) |
 | 4 | Button | click イベントの FW 写像 | Svelte 5 の callback prop(`onclick`)に写像 | B(契約: 命名は各 FW の規約に写像される) |
-| 5 | StemcellProvider | themes(カスタムテーマ)の色→CSS 変換ユーティリティの置き場所が仕様側で未決 | 実装保留。渡されたら warn を出して無視 | A・既知(StemcellProvider.md §9。tokens 側に置く判断が要る) |
+| 5 | StemcellProvider | themes(カスタムテーマ)の色→CSS 変換ユーティリティの置き場所が仕様側で未決 | 実装保留。渡されたら warn を出して無視 | A(解消済み。変換は @stemcell/tokens の defineTheme が持ち(キーと値の検証つき)、Provider は返ってきた CSS を head へ立てるだけになった。規約の検査は実行時に走らせない: 消費者の責任という裁定(2026-07-28)で、測りたい消費者は stemcell-theme を CI で回す) |
 | 6 | Button | pressed の視覚の Web 機構 | `:active` 擬似クラス | B(state.md §3.3 の発火条件の記録と整合) |
 | 7 | (harness) | enum を持たない string prop(theme 等)は適合テストが値を照合できない | 名前と既定値のみ照合 | C(契約スキーマの表現力の既知の限界と同根) |
 | 8 | Switcher | 閾値評価の実現機構(契約が expressive と明示) | flex-basis 算術(Every Layout 同型)。コンテナクエリは `@container` の条件部が custom property を受けず、prop 駆動の閾値をインスタンスごとに運べないため不採用 | B(切替点の正確さは実測済み。experiments/switcher-threshold/RESULTS.md §1) |
