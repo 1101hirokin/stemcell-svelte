@@ -162,4 +162,10 @@
 .sc-textfield-end > .sc-iconbutton {
   inline-size: var(--sc-field-side);
   padding-inline: 0;
+  /* 角は丸めない(欄の中の付属の規則。器の曲がりとずれる) */
+  border-radius: 0;
+}
+/* 端の面は器の角の内側で切る */
+.sc-textfield-control:has(.sc-iconbutton) {
+  overflow: hidden;
 }
