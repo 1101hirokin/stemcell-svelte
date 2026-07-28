@@ -91,8 +91,8 @@ it('並べ替えない列は器も並べ替えない(行の順は渡されたま
   ]);
 });
 
-// 選択は値で、口は値と受け口が揃ったときだけ現れる(第3条)
-it('選択の値と受け口が揃ったときだけ選択の列が出る', () => {
+// 選択は値で、選択の列は値と受け取り先が揃ったときだけ現れる(第3条)
+it('選択の値と受け取り先が揃ったときだけ選択の列が出る', () => {
   const { container } = render(Table<Row>, { props });
   expect(container.querySelector('.sc-table-selection')).toBeNull();
 

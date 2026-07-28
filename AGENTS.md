@@ -41,7 +41,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 - autocomplete は WHATWG Autofill の語彙で書く(例: name / email / tel / postal-code /
   street-address / organization)。個人情報を集める欄では省略しない
 - disabled と invalid が同時のときは disabled の見た目が勝つ(仕様)
-- Icon は二つの口を持つ(iconography.md §6)。`<Icon name="check" />`(中立契約。文字列。使う分だけ
+- Icon は二つの受け取り先を持つ(iconography.md §6)。`<Icon name="check" />`(中立契約。文字列。使う分だけ
   でなく全 208 グリフが束に入る。読み込みは name 使用時のみの別チャンク)/ `<Icon glyph={check} />`
   (Web 方言。`import check from '@stemcell/icons/check'` で静的に取って渡す。使ったものだけ束に入る=
   ツリーシェイク)。バンドルを絞りたいときは glyph 渡しを使う
@@ -50,7 +50,7 @@ stemcell デザインシステムの Svelte 5 実装。部品の事実は機械�
 
 ### Accordion(契約 0.0.0-alpha.1)
 
-畳んで開く項目を束ねる。各項目は Disclosure と同じ形(常に見える見出しと、開いたときに現れる中身)で、開いている項目の集合をアプリが持つ。排他(1つだけ開く)の口は持たない: 値がアプリにあるので、排他にしたいアプリは集合を1つに保てばよい(Radix が type を持つのは、あちらが状態を部品側で管理するからである)。state.md §6 が「親が複数項目の開示を管理する形は Accordion の契約時に扱う」として残していた論点への回答。
+畳んで開く項目を束ねる。各項目は Disclosure と同じ形(常に見える見出しと、開いたときに現れる中身)で、開いている項目の集合をアプリが持つ。排他(1つだけ開く)の prop は持たない: 値がアプリにあるので、排他にしたいアプリは集合を1つに保てばよい(Radix が type を持つのは、あちらが状態を部品側で管理するからである)。state.md §6 が「親が複数項目の開示を管理する形は Accordion の契約時に扱う」として残していた論点への回答。
 
 props:
 
@@ -142,7 +142,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 ### Box(契約 0.0.0-alpha.1)
 
-内在スタイルの器。唯一の最高自由度の逃げ道(layout.md §6)。ただし逃げ道(自由 style の受け口)は契約に無い(裁定): プラットフォーム中立に定義できないため、契約はトークン値の中立表面だけを持ち、生 style の口は各実装の土地の声である。
+内在スタイルの器。唯一の最高自由度の逃げ道(layout.md §6)。ただし逃げ道(自由な style の受け取り先)は契約に無い(裁定): プラットフォーム中立に定義できないため、契約はトークン値の中立表面だけを持ち、生の style を受け取るかは各実装の土地の声である。
 
 props:
 
@@ -249,7 +249,7 @@ slots(Svelte では snippet。default は子要素をそのまま):
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 - 意味を持たない器である。landmark や見出しは中身の仕事で、Card 自体は支援技術に構造を主張しない。
-- 押せない(裁定)。states を持たず、全面クリックの口も無い。素朴な全面リンクは対話要素の入れ子で成立せず、業界の代替(stretched-link)も採らない: 操作対象が2つ以上あるとき「全面」がどの操作かは読めない(Card.md §2)。
+- 押せない(裁定)。states を持たず、全面クリックの prop も無い。素朴な全面リンクは対話要素の入れ子で成立せず、業界の代替(stretched-link)も採らない: 操作対象が2つ以上あるとき「全面」がどの操作かは読めない(Card.md §2)。
 
 ### Center(契約 0.0.0-alpha.0)
 
@@ -373,7 +373,7 @@ props:
 - `code`: string — コードの文字列。器が持つ真実で、複写が渡すのもこれである。着色済みの中身を children で差した場合も、この値は受け取ったままにする(着色済みの木から文字を拾い直すと行番号や装飾が混ざる)。
 - `language`: string((省略可)) — 言語の印(ts / python / sql)。自由な文字列である: 世の中の言語は増え続けるので DS が列挙できない。器は解釈せず、着色の器械が読む印として素通しする(Web の表現は code 要素の language-* クラス)。画面に出すかどうかは Expressive。
 - `label`: string — 送れる領域の名前。溢れているとき、この器はキーボードの焦点を受ける(WCAG 2.2 SC 2.1.1。Chrome と Firefox は自動で与えるが Safari は与えない)ので、名前が要る。DS は文言を持たない(i18n.md §1)。
-- `wrap`: boolean(既定 false) — 行を折り返すか。既定は折らない: 行が構文の単位で、段付けが入れ子の深さを表すからである(typography.md §5 のコードの例外)。折るのは器の端であって、語や禁則の規則ではない。狭い器で読めれば足りる場面のための口。
+- `wrap`: boolean(既定 false) — 行を折り返すか。既定は折らない: 行が構文の単位で、段付けが入れ子の深さを表すからである(typography.md §5 のコードの例外)。折るのは器の端であって、語や禁則の規則ではない。狭い器で読めれば足りる場面のための prop である。
 - `lineNumbers`: boolean(既定 false) — 行番号を出すか。既定は出さない(そのまま複写する使い方の邪魔になる)。折り返した先には振らない(番号は論理行に付く)。番号は行頭側に貼り付き、横送りで流れない。支援技術からは隠す(全行に数字が挟まると中身が追えない)。
 
 slots(Svelte では snippet。default は子要素をそのまま):
@@ -406,7 +406,7 @@ props:
 - `readonly`: boolean(既定 false) — 読むだけ。invalid とは同時に成立しない(field.md §5)。
 - `invalid`: boolean(既定 false) — 拒否された(state.md §7)。
 - `required`: boolean(既定 false) — 必須(field.md §4)。
-- `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 の口で、消費者が現れた欄から開ける。
+- `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 の prop で、消費者が現れた欄から足す。
 - `size`: "sm" | "md" | "lg"(既定 "md") — 段(size.md §2)。
 - `emptyLabel`: string — 候補が一件も無いときに出す言葉(「該当する取引先がありません」)。空の一覧をそのまま出さない(patterns/empty-results.md の線)。DS は文言を持たない(i18n.md §1)。
 - `countLabel`: string — 候補の件数を支援技術へ届ける文の型(「{n} 件」)。器は件数を知っているので器が告げる(EmptyState と違う点である)。0 件も件数として届ける。文言は消費者が持つ。
@@ -414,7 +414,7 @@ props:
 events(Svelte では callback prop):
 
 - `onchange`: (payload: string) => void — 選ばれた選択肢が変わった。payload は選択肢の識別子で、選択が外れたときは空文字列。値はアプリが所有する(field.md §5)。
-- `oninputchange`: (payload: string) => void — 打たれている文字が変わった。payload は打たれた文字。消費者はこれを受けて候補を絞り、options を渡し直す(器は絞らない)。打った文字は値ではないので、change とは別の口である。
+- `oninputchange`: (payload: string) => void — 打たれている文字が変わった。payload は打たれた文字。消費者はこれを受けて候補を絞り、options を渡し直す(器は絞らない)。打った文字は値ではないので、change とは別の通知である。
 
 slots(Svelte では snippet。default は子要素をそのまま):
 
@@ -455,7 +455,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
-- `busy`: boolean(既定 false) — いま発話が生成されているか。進行は状態ではなく値である(streaming.md §2)。真のあいだ器は記録の告知を抑え、偽へ戻ったところで一度届ける。逐次のトークンを chunk ごとに読み上げないという規範(streaming.md §4)を器が実現するための口で、Web の表現は aria-busy である。
+- `busy`: boolean(既定 false) — いま発話が生成されているか。進行は状態ではなく値である(streaming.md §2)。真のあいだ器は記録の告知を抑え、偽へ戻ったところで一度届ける。逐次のトークンを chunk ごとに読み上げないという規範(streaming.md §4)を器が実現するための prop で、Web の表現は aria-busy である。
 - `following`: boolean((省略可)) — 末尾を追っているか。省略すると器が自分で判じる(利用者が末尾に居るあいだは追い、離れたら追わない)。アプリが値として持ちたい場合(送信直後に必ず末尾へ送る等)に渡す。値はアプリが所有し、器は followingchange で変更を要求する側にいる(field.md §5 の単方向)。
 - `resumeLabel`: string — 末尾へ戻る操作の名前。絵だけの操作なので文字列で足りる(DatePicker の calendarLabel と同じ形)。DS は文言を持たない(i18n.md §1)。alpha.1 で追加: 既定の手段を器が出す以上、その名前が要る。
 
@@ -506,7 +506,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 props:
 
 - `name`: string((省略可)) — フォーム名(native の form 送信・FormData・reset に参加。field.md §5)。
-- `value`: string(既定 "") — 暦日。中立の表記は ISO 8601 の日付(YYYY-MM-DD)で、時刻もタイムゾーンも持たない(date.md §2)。空文字列は未入力を表す。各実装は土地の型(Swift の DateComponents、Kotlin の LocalDate、Web の Temporal.PlainDate 等)を追加の口として持ってよいが、中立の表記はこれである。値の所有はアプリにある(field.md §5)。
+- `value`: string(既定 "") — 暦日。中立の表記は ISO 8601 の日付(YYYY-MM-DD)で、時刻もタイムゾーンも持たない(date.md §2)。空文字列は未入力を表す。各実装は土地の型(Swift の DateComponents、Kotlin の LocalDate、Web の Temporal.PlainDate 等)を追加の受け取り先として持ってよいが、中立の表記はこれである。値の所有はアプリにある(field.md §5)。
 - `min`: string((省略可)) — 選べる下限(同じ表記)。矢印での増減はこの外へ出ない。打ち込みは通す: native の <input type="date"> も範囲外を打てて不正になるだけであり、検証の時機はアプリが持つ(field.md §3)。範囲の外であることは invalid の宣言で示す(alpha.1 で言い回しを改めた)。
 - `max`: string((省略可)) — 選べる上限(同じ表記)。扱いは min と同じ。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。
@@ -651,7 +651,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 props:
 
 - `open`: boolean(既定 false) — 開いているか。アプリが所有する値(state.md §6。native <details> の open 属性、Radix / MUI も open)。true で content を現し、false で畳む。トリガーの操作は openchange を発火し、アプリが open を更新する(値としての結線。Dialog の open と同型)。aria-expanded はこの値のトリガー側への射影で Web の表現。
-- `disabled`: boolean(既定 false) — 開けない開示。トリガーは活性化されず、openchange も出ない(state.md §3.2 の抑制)。既に開いている中身は閉じない: disabled が抑えるのは操作であって値ではなく、開いているという値はアプリのものである(state.md §6)。Accordion の項目が「今は開けない節」を表すために要る(消費者が現れて開けた口。alpha.1)。Radix の Collapsible も単体で disabled を持つので、束ねる部品に固有の観念ではない。
+- `disabled`: boolean(既定 false) — 開けない開示。トリガーは活性化されず、openchange も出ない(state.md §3.2 の抑制)。既に開いている中身は閉じない: disabled が抑えるのは操作であって値ではなく、開いているという値はアプリのものである(state.md §6)。Accordion の項目が「今は開けない節」を表すために要る(消費者が現れて足した prop。alpha.1)。Radix の Collapsible も単体で disabled を持つので、束ねる部品に固有の観念ではない。
 
 events(Svelte では callback prop):
 
@@ -892,7 +892,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 props:
 
 - `items`: array — 項目の列。id 以外の中身は器が解釈しない(Sources と同じ形)。どう受け取るか(項目ごとのスロット・スニペット・配列)は各実装の表現である。
-- `divided`: boolean(既定 false) — 項目のあいだに区切りを引く。既定は引かない(増やさない側の既定)。区切りは装飾であり、支援技術には並びの構造(項目の数と境目)が別途届く。Ant Design は既定で引き(split)、MUI は消費者が Divider を明示的に挟むので、業界は割れている。器が項目の器を持つ以上、消費者があいだへ差し込む余地は無いので、口をここに置く。
+- `divided`: boolean(既定 false) — 項目のあいだに区切りを引く。既定は引かない(増やさない側の既定)。区切りは装飾であり、支援技術には並びの構造(項目の数と境目)が別途届く。Ant Design は既定で引き(split)、MUI は消費者が Divider を明示的に挟むので、業界は割れている。器が項目の器を持つ以上、消費者があいだへ差し込む余地は無いので、prop をここに置く。
 
 slots(Svelte では snippet。default は子要素をそのまま):
 
@@ -938,7 +938,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 ### Message(契約 0.0.0-alpha.2)
 
-会話のひと続きの発話(turn)を描く器。conversation §2 の primitive は role を帯びた content unit の列で、turn はその列に対する描画時の view である(§6 で Expressive と定めた grouping の形状)。この器はその view を一つ描くだけで、データが turn にネストしていても平坦な列でも上に置ける。中身(文・絵・出典・道具・推論)は解釈しない: part の集合は閉じており(§3)、part ごとの描画を器が持つと part が増えるたびに器を直すことになり、data の不透明パススルーを受け取れなくなる。吹き出しの形(面を持つか地に置くか、左右に寄せるか)は Expressive で、業界も割れている(ChatGPT は利用者の発話だけ面を持ち、Slack は両方とも地に置き、LINE と iMessage は自分の発話をブランド色で塗る)。割れているからこそ選ぶ口を持ち、語彙は発明しない: 面の量は emphasis の4段(variant)、色は intent(color)、寄せは start/center/end(align)。姿は role から導かない: role は帰属であって見た目ではなく、どの発話の姿も消費者が選ぶ。結ぶとその分だけ選べなくなる(助手を面で包みたい画面も、利用者を地に置きたい画面も、配線を外す手段を持たない)(alpha.2)。RFC 0014 の seed(status: draft)。native 写像の一次確認まで暫定。
+会話のひと続きの発話(turn)を描く器。conversation §2 の primitive は role を帯びた content unit の列で、turn はその列に対する描画時の view である(§6 で Expressive と定めた grouping の形状)。この器はその view を一つ描くだけで、データが turn にネストしていても平坦な列でも上に置ける。中身(文・絵・出典・道具・推論)は解釈しない: part の集合は閉じており(§3)、part ごとの描画を器が持つと part が増えるたびに器を直すことになり、data の不透明パススルーを受け取れなくなる。吹き出しの形(面を持つか地に置くか、左右に寄せるか)は Expressive で、業界も割れている(ChatGPT は利用者の発話だけ面を持ち、Slack は両方とも地に置き、LINE と iMessage は自分の発話をブランド色で塗る)。割れているからこそ選ぶ prop を持ち、語彙は発明しない: 面の量は emphasis の4段(variant)、色は intent(color)、寄せは start/center/end(align)。姿は role から導かない: role は帰属であって見た目ではなく、どの発話の姿も消費者が選ぶ。結ぶとその分だけ選べなくなる(助手を面で包みたい画面も、利用者を地に置きたい画面も、配線を外す手段を持たない)(alpha.2)。RFC 0014 の seed(status: draft)。native 写像の一次確認まで暫定。
 
 props:
 
@@ -983,7 +983,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 現在地が支援技術へ届く(Web の aria-current=page、native は各々の表現)。色や太さだけで示さない(WCAG 1.4.1 の同型)。これが本契約の要である: 移動の一覧そのものは Link の並びで書けるが、現在地の表明は合成では守られない。
 - 現在地の項目もリンクのままでよい(今いる場所を選び直せることは害でない。Breadcrumb の最後とは事情が違う: あちらは道筋の終点で、行き先ではない)。
 - 領域自身は焦点を受けない。焦点とフォーカスリングは各行き先(合成した Link)に立ち、当たり判定の門(size.md §4)もそちらに生きる。
-- 移動の横取り(SPA の routing)は契約に無い。Link と同じく、移動は行き先(href)が起こす。横取りが要る実装は、土地の声でその口を持つ(Web は祖先での捕捉)。
+- 移動の横取り(SPA の routing)は契約に無い。Link と同じく、移動は行き先(href)が起こす。横取りが要る実装は、土地の声でその手段を持つ(Web は祖先での捕捉)。
 
 ### NumberField(契約 0.0.0-alpha.2)
 
@@ -1006,7 +1006,7 @@ props:
 - `step`: number(既定 1) — 一回の増減で動く量。大きく動かすキー(PageUp / PageDown)の倍率は実装の判断で、値そのものは規範にしない(web-keys.rules.json の arrows.number-field。slider と同じ)。
 - `incrementLabel`: string — 増やす操作の名前。絵だけの操作なので文字列で足りる(DatePicker の calendarLabel と同じ形)。DS は文言を持たない(i18n.md §1)。
 - `decrementLabel`: string — 減らす操作の名前。同上。
-- `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 の口で、消費者が現れた欄から開ける。消費者は買い物かごの行の数量で、隣に商品名が出ているので欄の名前は視覚に要らない(実物で行の組みが縦に伸びた。2026-07-27)。 既定は false: 名前は見えているのが良く、隠すのは器の側が既に文脈を語っている場合の例外である。
+- `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 の prop で、消費者が現れた欄から足す。消費者は買い物かごの行の数量で、隣に商品名が出ているので欄の名前は視覚に要らない(実物で行の組みが縦に伸びた。2026-07-27)。 既定は false: 名前は見えているのが良く、隠すのは器の側が既に文脈を語っている場合の例外である。
 
 events(Svelte では callback prop):
 
@@ -1192,7 +1192,7 @@ props:
 - `allowClear`: boolean(既定 false) — 評価を取り消せるか。既定は取り消せない。真にしたときは鍵盤にも消す道を用意する: radio の群は鍵盤で選択を外せないので、同じ星を押し直すだけの実装はポインタ専用の機能になり WCAG 2.2 SC 2.1.1 に触れる。 Web のキーは Delete と Backspace(RFC 0020。web-keys.rules.json の clear.rating)。alpha.1 で明記。
 - `valueLabel`: string((省略可)) — 読み取りのときの名前(「5 段階中 4.2」)。readonly のときは必須である: 絵として届く器に名前が無いと、評価そのものが読み上げに乗らない。DS は文言を持たない(i18n.md §1)。件数を含めるかは消費者の判断。
 - `itemLabels`: array((省略可)) — 入力のときの各段の名前(「5 段階中 2」等)。max と同じ数だけ並べる。入力のときは必須である: 数字だけの名前では、何段階中の 2 かが読み上げで分からない。関数ではなく並びで受け取るのは、どのプラットフォームでも同じ形で渡せるようにするためである。
-- `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 の口で、消費者が現れた欄から開ける。消費者は商品カードの星で、すぐ上に商品名が出ているので評価の名前は視覚に要らない(実物で確認。2026-07-27)。読み取りのとき Rating はフォーム部品ではないが、名前を見せるかどうかという観念にフォームかどうかは関わらないので、同じ口を使う(語彙を分けると消費者が二つ覚える)。 既定は false: 名前は見えているのが良く、隠すのは器の側が既に文脈を語っている場合の例外である。
+- `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 の prop で、消費者が現れた欄から足す。消費者は商品カードの星で、すぐ上に商品名が出ているので評価の名前は視覚に要らない(実物で確認。2026-07-27)。読み取りのとき Rating はフォーム部品ではないが、名前を見せるかどうかという観念にフォームかどうかは関わらないので、同じ prop を使う(語彙を分けると消費者が二つ覚える)。 既定は false: 名前は見えているのが良く、隠すのは器の側が既に文脈を語っている場合の例外である。
 
 events(Svelte では callback prop):
 
@@ -1274,7 +1274,7 @@ props:
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。
 - `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2)。intent を danger へ差し替える(state.md §7)。
 - `required`: boolean(既定 false) — 選択が必須(placeholder のまま送信させない)。支援技術に届くことは Normative、視覚標示は部品が自動で出す(field.md §4。裁定済み 2026-07)。
-- `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 が「視覚的に隠すことは許すが、隠しても支援技術に 名前が届く形が要る」と定めているのに、その口がどの欄にも無かった。消費者(Pagination の中央の頁選択)が現れたので開ける。普遍である: SwiftUI は .labelsHidden() を第一級の API として持ち、Web は視覚に隠す定型があり、Compose は semantics で名前だけを残せる。既定は false: 名前は見えているのが良い(隠すのは、器の側が既に文脈を語っている場合の例外)。他の7つの欄へ広げるのは、それぞれに消費者が現れてからにする(第3条)。
+- `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 が「視覚的に隠すことは許すが、隠しても支援技術に 名前が届く形が要る」と定めているのに、その prop がどの欄にも無かった。消費者(Pagination の中央の頁選択)が現れたので足す。普遍である: SwiftUI は .labelsHidden() を第一級の API として持ち、Web は視覚に隠す定型があり、Compose は semantics で名前だけを残せる。既定は false: 名前は見えているのが良い(隠すのは、器の側が既に文脈を語っている場合の例外)。他の7つの欄へ広げるのは、それぞれに消費者が現れてからにする(第3条)。
 - `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段(TextField と同じ)。
 
 events(Svelte では callback prop):
@@ -1494,14 +1494,14 @@ props:
 - `overflow`: "scroll" | "wrap"(既定 "scroll") — セルに収まらない中身をどう扱うか。scroll はセルを1行に収め(折り返さない)、収まらない分は表が広がって器の中で横へ送る。wrap は折り返して行を高くする(説明文の列を持つ表向け)。切り詰め(省略)は器の既定ではなく、列に幅を与えた消費者のところでだけ起きる。文字そのものは消えないので支援技術には全文が届く。
 - `sticky`: "none" | "start" | "end" | "both"(既定 "none") — 横へ送るとき、行の始まり側 / 終わり側の列を貼り付けるか。始まり側は行を特定する列、終わり側は行の操作を置く列が多く、流れて消えると今どの行を見ているか読めなくなる。overflow=wrap のときは送る方向が無いので効かない。
 - `sort`: object((省略可)) — いま並べ替わっている列と向き。アプリが持つ値で、器は表明するだけ(Web は aria-sort)。省略は「並べ替えていない」。
-- `selected`: array((省略可)) — 選ばれている行の id の集合。アプリが持つ値。この値と selectedchange が渡されたときだけ選択の列が現れる(真偽値の口を別に持たない。開閉が値で決まるのと同じ形)。選択は値であって状態ではないので aria-selected は使わない(table は選択を持たない。state.rules.json)。
+- `selected`: array((省略可)) — 選ばれている行の id の集合。アプリが持つ値。この値と selectedchange が渡されたときだけ選択の列が現れる(真偽値の prop を別に持たない。開閉が値で決まるのと同じ形)。選択は値であって状態ではないので aria-selected は使わない(table は選択を持たない。state.rules.json)。
 - `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る(表は密度の主な消費者で、密な表は sm を採る)。段が引く余白の配線は foundations/size.rules.json。密度と直交する(size.md §3)。
 
 events(Svelte では callback prop):
 
-- `onsortchange`: (payload: { column: string; direction: 'ascending' | 'descending' } | null) => void — 並べ替えの要求。器は行を並べ替えない。解除(null)を返すかどうか、昇降の循環の回し方は Expressive。名前が sortchange なのは、値(sort)と同じ名前の口を作らないため(GOVERNANCE §4。open / openchange と同じ形)。
+- `onsortchange`: (payload: { column: string; direction: 'ascending' | 'descending' } | null) => void — 並べ替えの要求。器は行を並べ替えない。解除(null)を返すかどうか、昇降の循環の回し方は Expressive。名前が sortchange なのは、値(sort)と同じ名前の prop を作らないため(GOVERNANCE §4。open / openchange と同じ形)。
 - `onselectedchange`: (payload: string[]) => void — 選択の要求。選ばれている行の id の集合を渡す。器は選択を保持しない。
-- `onrowactivate`: (payload: string) => void — 行の押下。一次の行き先へ進む要求で、行の id を渡す。行そのものは押せる要素ではない(表の構造である)。一次の行き先は行の中の要素(多くは名前の列のリンク)が持ち、この口はその活性化を指の操作から起こすためにある。行の中の別の操作を押したときは発火しない。
+- `onrowactivate`: (payload: string) => void — 行の押下。一次の行き先へ進む要求で、行の id を渡す。行そのものは押せる要素ではない(表の構造である)。一次の行き先は行の中の要素(多くは名前の列のリンク)が持ち、この通知はその活性化を指の操作から起こすためにある。行の中の別の操作を押したときは発火しない。
 
 slots(Svelte では snippet。default は子要素をそのまま):
 
@@ -1682,7 +1682,7 @@ props:
 - `value`: string(既定 "") — いまの時刻。HH:mm(秒を出すときは HH:mm:ss)の文字列で、常に 24 時間の表記である。午後 3 時は 15:00 で持つ。空文字列は未入力で、値はアプリが所有する(field.md §5)。
 - `min`: string((省略可)) — 下限(HH:mm)。営業時間の始まりなど。
 - `max`: string((省略可)) — 上限(HH:mm)。
-- `hourCycle`: "auto" | "12" | "24"(既定 "auto") — 時間の刻み。既定の auto は環境から借りる(date.md §3 の「地域の慣習は環境から借りる」)。上書きの口を持つのは、地域だけでは決まらないからである: 日本の業務アプリでも午後 3 時と出したい画面があり、米国の運行管理では 24 時間制が要る(裁定 2026-07-28。React Spectrum も同じ形)。12 のときは午前・午後の二択が出る(桁ではない。alpha.1 で改めた: 桁にすると触点で詰む。打てる欄なので環境が鍵盤を出すが、そこに打てる文字が無く、押して回す形は押せることにも変わったことにも気づけなかった。実機で二度踏んだ)。表示だけが変わり、value は変わらない。
+- `hourCycle`: "auto" | "12" | "24"(既定 "auto") — 時間の刻み。既定の auto は環境から借りる(date.md §3 の「地域の慣習は環境から借りる」)。上書きする prop を持つのは、地域だけでは決まらないからである: 日本の業務アプリでも午後 3 時と出したい画面があり、米国の運行管理では 24 時間制が要る(裁定 2026-07-28。React Spectrum も同じ形)。12 のときは午前・午後の二択が出る(桁ではない。alpha.1 で改めた: 桁にすると触点で詰む。打てる欄なので環境が鍵盤を出すが、そこに打てる文字が無く、押して回す形は押せることにも変わったことにも気づけなかった。実機で二度踏んだ)。表示だけが変わり、value は変わらない。
 - `seconds`: boolean(既定 false) — 秒の桁を出すか。既定では出さない: 秒まで打たせる画面は限られる(動画の位置指定、計測の記録)。真のとき value は HH:mm:ss になる。
 - `disabled`: boolean(既定 false) — 選べない(state.md §7)。
 - `readonly`: boolean(既定 false) — 読むだけ。invalid とは同時に成立しない(field.md §5)。
@@ -1720,7 +1720,7 @@ props:
 - `message`: string — 通知の本文。data として渡す(スロットでない): 召喚が命令形で、置き場所を持たない出来事だから(RFC 0013)。支援技術へ届く核。リッチ内容は将来 RFC。
 - `color`: "danger" | "warning" | "success" | "info"(既定 "info") — 報告の intent(color.md §5)。Alert / Badge と同じ4値・同じ既定。primary / plain を含まない理由も同じ(行動の語彙を報告に使わない)。intent は割り込みの度合いにも連動する(a11y。Alert と同規範)。
 - `duration`: number((省略可)) — 自律退去までの時間(ミリ秒)。省略時はホストの既定(seed)。SC 2.2.1: 調整可能で、hover / focus 中は一時停止する(a11y)。actionLabel があるときは無視され、自律退去しない(消える前にアクションへ届くため。RFC 0013)。ミリ秒は中立の時間量であり、これは motion の遷移(entrance / exit)とは別の量(motion トークンは ~150–300ms、自律退去は桁が違う)。既定値の置き場所は Toaster(overlay.md §8 の open TODO をここで閉じる)。
-- `dismissible`: boolean(既定 true) — 明示的に閉じられるか。Alert(既定 false: 状況が続く限り読める)と逆で、Toast の既定は true: 一時的で自律退去する報告は、利用者が待たずに閉じられるべき(第1条)。actionLabel があり自律退去しないときも、閉じる口が利用者の逃げ道になる。
+- `dismissible`: boolean(既定 true) — 明示的に閉じられるか。Alert(既定 false: 状況が続く限り読める)と逆で、Toast の既定は true: 一時的で自律退去する報告は、利用者が待たずに閉じられるべき(第1条)。actionLabel があり自律退去しないときも、閉じる操作が利用者の逃げ道になる。
 - `actionLabel`: string((省略可)) — 単一の任意アクションのラベル(Undo / Retry 等)。与えると action イベントを発火する押せる要素が現れ、その通知は自律退去しなくなる(RFC 0013。第1条: キーボード / 支援技術がアクションへ届く前に消えない)。複数アクション・アイコン付きは範囲外(将来 RFC)。
 
 events(Svelte では callback prop):

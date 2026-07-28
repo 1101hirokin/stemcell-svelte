@@ -8,7 +8,7 @@ export const META = {
     disabled: { default: false },
     invalid: { default: false },
     required: { default: false },
-    labelHidden: { default: false }, // 名前を視覚から隠す(field.md §2 の口。Pagination の中央が最初の消費者)
+    labelHidden: { default: false }, // 名前を視覚から隠す(field.md §2 の prop。Pagination の中央が最初の消費者)
     size: { values: ['sm', 'md', 'lg'], default: 'md' },
   },
 } as const;
