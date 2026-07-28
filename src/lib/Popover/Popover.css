@@ -27,13 +27,12 @@
   z-index: var(--layer-popover-z);
   /* 幅は消費者が変数で与える。既定はアンカー幅(fill)。overlay.md §5・第3条を popover まで */
   inline-size: var(--sc-popover-inline-size, var(--sc-popover-anchor-inline-size, max-content));
-  /* 下限も描画領域で頭打ちにする。CSS では min が max に勝つので、消費者が置いた下限
-     (Select や Combobox の max-content)をそのまま通すと、長い項目のときに面が画面より広くなる。
-     iOS ではそこでページごと拡大が起きた(実機で判明) */
-  min-inline-size: min(
-    var(--sc-popover-min-inline-size, max-content),
-    calc(100dvw - var(--spacing-inline-md) * 2)
-  );
+  /* 下限は中身の幅である。既定の幅はアンカー幅なので、これが無いとアンカーより広い中身が切れる
+     (絵だけのトリガーに付くメニューが 45px に潰れ、項目の文字が隠れた。2026-07-29 の報告)。
+     min() の中へ max-content のような内在の値は書けない: 宣言ごと無効になり、下限が 0 に落ちる。
+     一度その形で書いて壊した(prior: 画面幅で頭打ちにしようとした。狭い画面の心配は、
+     欄を包む要素が縮まないという別の原因だった。HOLES #130 で解決済み) */
+  min-inline-size: var(--sc-popover-min-inline-size, max-content);
   /* 面は描画領域より広くならない。向きの規則は面をどちらへ伸ばすかしか決められないので、
      面自身が画面より広ければどちらへ開いても切れる(overlay.md §5) */
   max-inline-size: min(

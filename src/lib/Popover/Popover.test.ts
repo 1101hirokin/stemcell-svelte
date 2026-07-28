@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { render, fireEvent } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { vi } from 'vitest';
@@ -78,4 +80,13 @@ it.each([
   const c = container.querySelector('.sc-popover-content') as HTMLElement;
   expect(c.dataset.block).toBe(block);
   expect(c.dataset.inline).toBe(inline);
+});
+
+it('面の下限は中身の幅である(アンカーより広い中身が切れない)', () => {
+  // 実測できない代わりに、出荷される CSS の宣言を検査する。
+  // min() の中へ max-content のような内在の値を書くと宣言ごと無効になり、下限が 0 へ落ちて
+  // 絵だけのトリガーに付くメニューが 45px に潰れる(2026-07-29 の報告。一度その形で壊した)
+  const css = readFileSync(join(import.meta.dirname, 'Popover.css'), 'utf-8');
+  expect(css).toContain('min-inline-size: var(--sc-popover-min-inline-size, max-content)');
+  expect(css).not.toMatch(/min-inline-size:\s*min\(/);
 });
