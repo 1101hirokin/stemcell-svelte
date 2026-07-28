@@ -1,5 +1,6 @@
 <script lang="ts">
   import './Pagination.css';
+  import '../internal/visually-hidden.css';
   import Button from '../Button/Button.svelte';
   import Select from '../Select/Select.svelte';
   import type { Snippet } from 'svelte';
@@ -45,7 +46,7 @@
      中央は現在地の表示であると同時に行き先の選択で、選ばれている値がそのまま現在地を語る。
      欄の名前は領域の名前と同じものを使い、視覚からは隠す(部品が文脈を語っている。field.md §2)。 -->
 <nav class="sc-pagination" aria-labelledby={labelId}>
-  <span class="sc-pagination-label" id={labelId}>{@render label()}</span>
+  <span class="sc-pagination-label sc-visually-hidden" id={labelId}>{@render label()}</span>
 
   <Button variant="outlined" color="plain" size="sm" disabled={page <= 1} onclick={() => go(page - 1)}>
     {@render previous()}

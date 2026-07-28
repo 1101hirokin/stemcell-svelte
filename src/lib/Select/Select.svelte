@@ -1,5 +1,6 @@
 <script lang="ts">
   import './Select.css';
+  import '../internal/visually-hidden.css';
   import { META } from './meta';
   import { enabledIndexes, initialActive, nextActive } from '../internal/listbox';
   import Icon from '../Icon/Icon.svelte';
@@ -160,7 +161,7 @@
 </script>
 
 <div class="sc-select" data-size={size} data-invalid={invalid} data-disabled={disabled} data-label-hidden={labelHidden}>
-  <label class="sc-select-label" for={inputId}>
+  <label class="sc-select-label" class:sc-visually-hidden={labelHidden} for={inputId}>
     {@render label()}{#if required}<span class="sc-select-required" aria-hidden="true">*</span
       >{/if}
   </label>

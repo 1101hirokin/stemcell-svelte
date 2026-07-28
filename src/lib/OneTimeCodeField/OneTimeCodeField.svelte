@@ -1,5 +1,6 @@
 <script lang="ts">
   import './OneTimeCodeField.css';
+  import '../internal/visually-hidden.css';
   import '../internal/field-button.css';
   import { META, sanitize } from './meta';
   import Icon from '../Icon/Icon.svelte';
@@ -157,7 +158,7 @@
   data-disabled={disabled}
   data-label-hidden={labelHidden}
 >
-  <label class="sc-otc-label" for={inputId}>
+  <label class="sc-otc-label" class:sc-visually-hidden={labelHidden} for={inputId}>
     {@render label()}{#if required}<span class="sc-otc-required" aria-hidden="true">*</span>{/if}
   </label>
   <div class="sc-otc-control">
@@ -209,7 +210,7 @@
       </button>
     {/if}
   </div>
-  {#if masked}<span class="sc-otc-announcement" role="status">{announcement}</span>{/if}
+  {#if masked}<span class="sc-otc-announcement sc-visually-hidden" role="status">{announcement}</span>{/if}
   {#if description}<p class="sc-otc-description" id={descriptionId}>{@render description()}</p>{/if}
   {#if effectiveInvalid && error}<p class="sc-otc-error" id={errorId}>{@render error()}</p>{/if}
 </div>

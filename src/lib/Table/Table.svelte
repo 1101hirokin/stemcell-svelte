@@ -1,5 +1,6 @@
 <script lang="ts" generics="T extends { id: string }">
   import './Table.css';
+  import '../internal/visually-hidden.css';
   import { META, type TableColumn, type TableSort } from './meta';
   import Checkbox from '../Checkbox/Checkbox.svelte';
   import Icon from '../Icon/Icon.svelte';
@@ -148,7 +149,7 @@
                 indeterminate={someSelected}
                 onchange={(v) => toggleAll(v)}
               >
-                {#snippet label()}<span class="sc-table-visually-hidden">{selectionLabel}</span>{/snippet}
+                {#snippet label()}<span class="sc-visually-hidden">{selectionLabel}</span>{/snippet}
               </Checkbox>
             </th>
           {/if}
@@ -199,7 +200,7 @@
                     onchange={(v) => toggleRow(row.id, v)}
                   >
                     {#snippet label()}
-                      <span class="sc-table-visually-hidden">{rowLabel?.(row) ?? row.id}</span>
+                      <span class="sc-visually-hidden">{rowLabel?.(row) ?? row.id}</span>
                     {/snippet}
                   </Checkbox>
                 </td>

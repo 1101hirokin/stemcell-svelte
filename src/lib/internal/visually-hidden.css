@@ -1,0 +1,21 @@
+/**
+ * 目から隠して、支援技術には残す。
+ *
+ * 名前を視覚から隠す prop(field.md §2)、耳へだけ届ける告知(件数・切り替えの結果)、読み上げ専用の
+ * 補足(新しいタブで開く、選択の列の名前)で同じものが要る。display:none や visibility:hidden は
+ * 名前ごと消えるので使えない。
+ *
+ * 以前は 13 の部品に 17 回写し取られていた(HOLES #129)。焦点を受けうる要素には当てない
+ * (当てると焦点の位置が画面の外に見える)。ここに置くのは、焦点を受けない文だけである。
+ */
+.sc-visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

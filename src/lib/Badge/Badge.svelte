@@ -1,5 +1,6 @@
 <script lang="ts">
   import './Badge.css';
+  import '../internal/visually-hidden.css';
   import { META } from './meta';
   import Imposter from '../Imposter/Imposter.svelte';
   import type { Snippet } from 'svelte';
@@ -70,7 +71,7 @@
     data-variant={variant}
   >
     {#if dot}
-      {#if label}<span class="sc-badge-sr">{label}</span>{/if}
+      {#if label}<span class="sc-badge-sr sc-visually-hidden">{label}</span>{/if}
     {:else}{shown}{/if}
   </span>
 {/snippet}

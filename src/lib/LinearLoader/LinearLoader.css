@@ -36,17 +36,6 @@
 }
 
 /* 待ちの意味を支援技術へ(視覚に隠したテキスト。標準の clip 技法) */
-.sc-linearloader-sr {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
 
 /* reduced-motion では低速へ沈静させる(motion.md §6 の loop 特例。裁定 2026-07-25。
    CircularLoader と同じ判断: 止めると見る人に待ちが伝わらない)。

@@ -28,17 +28,6 @@
 .sc-filefield[data-label-hidden='true'] {
   gap: 0;
 }
-.sc-filefield[data-label-hidden='true'] .sc-filefield-label {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
 .sc-filefield-required {
   margin-inline-start: 0.25em;
 }
@@ -103,17 +92,6 @@
 }
 
 /* 受け取った件数・弾いた件数を耳へ届ける。目には出さない(目には選ばれたものが見えている) */
-.sc-filefield-announcement {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
 
 .sc-filefield-description,
 .sc-filefield-error {

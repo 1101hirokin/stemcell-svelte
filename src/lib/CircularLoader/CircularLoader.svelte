@@ -1,5 +1,6 @@
 <script lang="ts">
   import './CircularLoader.css';
+  import '../internal/visually-hidden.css';
   import { META } from './meta';
 
   // 円形・不確定。いつ終わるか分からない待ちを告げる(CircularLoader.md)。
@@ -18,7 +19,7 @@
      標準だが、live region でないため出現を告げない。要求は「待ちの状態が支援技術に届く」なので status。
      図形は装飾として隠し、意味は視覚に隠した文字が運ぶ(Badge の dot と同じ clip 技法)。 -->
 <div class="sc-circularloader" data-size={size} role="status">
-  <span class="sc-circularloader-sr">{label}</span>
+  <span class="sc-circularloader-sr sc-visually-hidden">{label}</span>
   <svg class="sc-circularloader-figure" viewBox="0 0 40 40" aria-hidden="true">
     <!-- 弧。全周の一部だけを描き、回転で待ちを示す。端は丸(stroke-linecap) -->
     <circle class="sc-circularloader-arc" cx="20" cy="20" r="16" fill="none" />

@@ -1,5 +1,6 @@
 <script lang="ts">
   import './Combobox.css';
+  import '../internal/visually-hidden.css';
   import { META, type ComboboxOption } from './meta';
   import { enabledIndexes, initialActive, nextActive } from '../internal/listbox';
   import Icon from '../Icon/Icon.svelte';
@@ -192,7 +193,7 @@
   data-disabled={disabled}
   data-label-hidden={labelHidden}
 >
-  <label class="sc-combobox-label" id={`${uid}-label`} for={inputId}>
+  <label class="sc-combobox-label" class:sc-visually-hidden={labelHidden} id={`${uid}-label`} for={inputId}>
     {@render label()}{#if required}<span class="sc-combobox-required" aria-hidden="true">*</span>{/if}
   </label>
   <!-- 打てる欄自身が combobox である(ARIA 1.2)。焦点は欄に留まり、候補は aria-activedescendant が指す -->
@@ -262,7 +263,7 @@
     {/snippet}
   </Popover>
   <!-- 件数は常設の領域が告げる(0 件も件数である)。領域は最初から居て、中身だけ差し替わる -->
-  <span class="sc-combobox-count" role="status">{open ? count : ''}</span>
+  <span class="sc-combobox-count sc-visually-hidden" role="status">{open ? count : ''}</span>
   {#if description}<p class="sc-combobox-description" id={descriptionId}>{@render description()}</p>{/if}
   {#if effectiveInvalid && error}<p class="sc-combobox-error" id={errorId}>{@render error()}</p>{/if}
 </div>

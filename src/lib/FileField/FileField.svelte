@@ -1,5 +1,6 @@
 <script lang="ts">
   import './FileField.css';
+  import '../internal/visually-hidden.css';
   import { META } from './meta';
   import { filesFrom, splitByAccept } from '../internal/files';
   import type { Snippet } from 'svelte';
@@ -135,7 +136,7 @@
     if (!e.currentTarget.contains(e.relatedTarget as Node)) focusWithin = false;
   }}
 >
-  <label class="sc-filefield-label" for={inputId}>
+  <label class="sc-filefield-label" class:sc-visually-hidden={labelHidden} for={inputId}>
     {@render label()}{#if required}<span class="sc-filefield-required" aria-hidden="true">*</span>{/if}
   </label>
   <!-- 土台は環境のファイル選択である。入力を display:none で消して自前のボタンだけ置く形は採らない
@@ -161,7 +162,7 @@
     />
   </div>
   <!-- 落とす・貼る経路の結果を耳へ届ける。常設の領域で、割り込ませない(WCAG 2.2 SC 4.1.3) -->
-  <span class="sc-filefield-announcement" role="status">{announcement}</span>
+  <span class="sc-filefield-announcement sc-visually-hidden" role="status">{announcement}</span>
   {#if description}<p class="sc-filefield-description" id={descriptionId}>{@render description()}</p>{/if}
   {#if invalid && error}<p class="sc-filefield-error" id={errorId}>{@render error()}</p>{/if}
 </div>
