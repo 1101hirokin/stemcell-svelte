@@ -104,13 +104,22 @@
     <script type="module">
       const b = document.getElementById('b');
       const bPanel = document.getElementById('b-panel');
-      b.addEventListener('pointerup', () => {
-        if (!bPanel.matches(':popover-open')) bPanel.showPopover();
+      // 面の位置は、画面が動くたびに置き直す(押した時点の座標のままだと、鍵盤で版面が動いた分ずれる)
+      const placeB = () => {
+        if (!bPanel.matches(':popover-open')) return;
         const r = b.getBoundingClientRect();
         bPanel.style.insetBlockStart = `${r.bottom + 4}px`;
         bPanel.style.insetInlineStart = `${r.left}px`;
         bPanel.style.inlineSize = `${r.width}px`;
+      };
+      b.addEventListener('pointerup', () => {
+        if (!bPanel.matches(':popover-open')) bPanel.showPopover();
+        placeB();
       });
+      addEventListener('scroll', placeB, true);
+      addEventListener('resize', placeB);
+      visualViewport?.addEventListener('resize', placeB);
+      visualViewport?.addEventListener('scroll', placeB);
       b.addEventListener('blur', () => bPanel.matches(':popover-open') && bPanel.hidePopover());
 
       const c = document.getElementById('c');
