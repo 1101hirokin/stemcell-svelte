@@ -5,6 +5,8 @@
 import { render, fireEvent } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import OneTimeCodeField from './OneTimeCodeField.svelte';
 import { sanitize } from './meta';
 
@@ -120,6 +122,14 @@ it('name を渡すとフォーム送信に値が載る(欄が一つなので隠�
   expect(el.name).toBe('code');
   expect(el.value).toBe('123');
   expect(container.querySelectorAll('input[type="hidden"]').length).toBe(0);
+});
+
+it('枠の高さは中身の有無で変わらない(他の欄と同じ行高で固定する)', () => {
+  // jsdom はレイアウトを計算しないので、出荷される CSS の宣言を検査する
+  const css = readFileSync(join(import.meta.dirname, 'OneTimeCodeField.css'), 'utf-8');
+  const block = css.slice(css.indexOf('.sc-otc-cell {'), css.indexOf('}', css.indexOf('.sc-otc-cell {')));
+  expect(block).toContain('block-size: var(--sc-field-side)');
+  expect(block).toContain('padding-block: 0');
 });
 
 it('打てる文字の絞り込みは純粋な計算として持つ', () => {

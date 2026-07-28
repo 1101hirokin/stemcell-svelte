@@ -73,7 +73,10 @@
   align-items: center;
   justify-content: center;
   min-inline-size: 0;
-  padding-block: var(--_inset);
+  /* 高さは中身の有無で変わらない(裁定 2026-07-28)。空の枠に行の箱が立たないので、素朴に書くと
+     打つほど枠が伸びる。他の欄と同じ行高(打つ文字の 1 行 + 縦の inset 二つ分)で固定する */
+  block-size: var(--sc-field-side);
+  padding-block: 0;
   background: var(--color-app-surface);
   border: var(--shape-border-width) solid var(--_border);
   border-radius: var(--shape-semantic-control);
