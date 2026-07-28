@@ -129,3 +129,73 @@ it('disabled / placeholder / autocomplete / keyboard は native 属性へ写る(
   expect(el.getAttribute('autocomplete')).toBe('name');
   expect(el.getAttribute('inputmode')).toBe('email');
 });
+
+// 消す操作(TextField.md §2 / RFC 0021)
+describe('clearable', () => {
+  const clearBtn = (c: HTMLElement) => c.querySelector('.sc-field-clear') as HTMLButtonElement | null;
+
+  it('値があるときだけ現れる(空の欄に押せない印を残さない)', async () => {
+    const { container, rerender } = render(TextField, {
+      props: { label: snip('<span>探す</span>'), clearable: true, clearLabel: '消去', value: '' },
+    });
+    expect(clearBtn(container)).toBe(null);
+    await rerender({ label: snip('<span>探す</span>'), clearable: true, clearLabel: '消去', value: '土鍋' });
+    expect(clearBtn(container)?.getAttribute('aria-label')).toBe('消去');
+  });
+
+  it('押すと値が空になり、焦点は欄に残る', async () => {
+    const onchange = vi.fn();
+    const { container } = render(TextField, {
+      props: { label: snip('<span>探す</span>'), clearable: true, clearLabel: '消去', value: '土鍋', onchange },
+    });
+    await fireEvent.click(clearBtn(container)!);
+    expect(onchange).toHaveBeenLastCalledWith('');
+    expect(document.activeElement).toBe(container.querySelector('.sc-textfield-input'));
+  });
+
+  it('タブ順に入る(鍵盤からも押せる)', () => {
+    const { container } = render(TextField, {
+      props: { label: snip('<span>探す</span>'), clearable: true, clearLabel: '消去', value: '土鍋' },
+    });
+    expect(clearBtn(container)?.getAttribute('tabindex')).toBe(null); // 既定のまま = 順路に載る
+  });
+
+  it('Escape で消し、そこで止める(面の Escape へ伝えない)', async () => {
+    const onchange = vi.fn();
+    const outer = vi.fn();
+    const { container } = render(TextField, {
+      props: { label: snip('<span>探す</span>'), clearable: true, clearLabel: '消去', value: '土鍋', onchange },
+    });
+    container.ownerDocument.addEventListener('keydown', outer);
+    await fireEvent.keyDown(container.querySelector('.sc-textfield-input')!, { key: 'Escape', bubbles: true });
+    expect(onchange).toHaveBeenLastCalledWith('');
+    expect(outer).not.toHaveBeenCalled();
+    container.ownerDocument.removeEventListener('keydown', outer);
+  });
+
+  it('値が空なら Escape は外へ抜ける(面が閉じられなくならない)', async () => {
+    const outer = vi.fn();
+    const { container } = render(TextField, {
+      props: { label: snip('<span>探す</span>'), clearable: true, clearLabel: '消去', value: '' },
+    });
+    container.ownerDocument.addEventListener('keydown', outer);
+    await fireEvent.keyDown(container.querySelector('.sc-textfield-input')!, { key: 'Escape', bubbles: true });
+    expect(outer).toHaveBeenCalled();
+    container.ownerDocument.removeEventListener('keydown', outer);
+  });
+
+  it('消す操作は end に消費者が置いたものより内側(欄寄り)に立つ', () => {
+    const { container } = render(TextField, {
+      props: { label: snip('<span>探す</span>'), clearable: true, clearLabel: '消去', value: '土鍋', end: snip('<span>件</span>') },
+    });
+    const kids = [...container.querySelectorAll('.sc-textfield-control > *')].map((n) => n.className);
+    expect(kids.indexOf('sc-field-clear')).toBeLessThan(kids.indexOf('sc-textfield-end'));
+  });
+
+  it('打てない欄(disabled / readonly)では出さない', () => {
+    const { container } = render(TextField, {
+      props: { label: snip('<span>探す</span>'), clearable: true, clearLabel: '消去', value: '土鍋', readonly: true },
+    });
+    expect(clearBtn(container)).toBe(null);
+  });
+});

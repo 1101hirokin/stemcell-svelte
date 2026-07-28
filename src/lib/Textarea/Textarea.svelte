@@ -1,6 +1,7 @@
 <script lang="ts">
   import './Textarea.css';
   import { META } from './meta';
+  import ClearButton from '../internal/ClearButton.svelte';
   import type { Snippet } from 'svelte';
   import type { FullAutoFill } from 'svelte/elements';
 
@@ -13,6 +14,10 @@
     placeholder?: string;
     disabled?: boolean;
     readonly?: boolean;
+    /** 値をまとめて消す操作を出す(TextField から降りる prop。TextField.md §2)。 */
+    clearable?: boolean;
+    /** 消す操作の名前。clearable が真のときに要る。 */
+    clearLabel?: string;
     invalid?: boolean;
     required?: boolean;
     autocomplete?: string;
@@ -33,6 +38,8 @@
     placeholder,
     disabled = META.props.disabled.default,
     readonly = META.props.readonly.default,
+    clearable = META.props.clearable.default,
+    clearLabel,
     invalid = META.props.invalid.default,
     required = META.props.required.default,
     autocomplete,
@@ -50,6 +57,27 @@
   const inputId = `${uid}-input`;
   const descriptionId = `${uid}-description`;
   const errorId = `${uid}-error`;
+
+  let inputEl: HTMLTextAreaElement | undefined = $state();
+  const showClear = $derived(clearable && value !== '' && !disabled && !readonly);
+  $effect(() => {
+    if (clearable && !clearLabel) {
+      console.warn('[stemcell] Textarea: clearable には clearLabel が要る(絵だけの操作は名前を持つ)。');
+    }
+  });
+  const clear = () => {
+    if (!showClear) return;
+    value = '';
+    onchange?.('');
+    inputEl?.focus(); // 消すのは打ち直すためなので、焦点は欄に残す
+  };
+  // Escape で消す(RFC 0021)。値があるときだけ消してそこで止め、空なら外へ抜く
+  const onkeydown = (e: KeyboardEvent) => {
+    if (e.key !== 'Escape' || !showClear) return;
+    e.preventDefault();
+    e.stopPropagation();
+    clear();
+  };
 
   // readonly は invalid と同時に成立しない(state.md §6。HOLES #14。TextField と同じ)
   const effectiveInvalid = $derived(readonly ? false : invalid);
@@ -78,6 +106,7 @@
     <textarea
       class="sc-textarea-input"
       id={inputId}
+      bind:this={inputEl}
       style:--sc-textarea-rows={rows}
       style:--sc-textarea-max-rows={maxRows}
       {name}
@@ -93,7 +122,9 @@
       aria-describedby={describedby}
       oninput={(e) => onchange?.(e.currentTarget.value)}
       onchangecapture={(e) => e.stopPropagation()}
+      {onkeydown}
     ></textarea>
+    {#if showClear}<ClearButton label={clearLabel} onclear={clear} />{/if}
   </div>
   {#if description}<p class="sc-textarea-description" id={descriptionId}>
       {@render description()}

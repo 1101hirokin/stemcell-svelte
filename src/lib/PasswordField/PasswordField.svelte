@@ -2,6 +2,7 @@
   import './PasswordField.css';
   import { META } from './meta';
   import Icon from '../Icon/Icon.svelte';
+  import ClearButton from '../internal/ClearButton.svelte';
   import type { Snippet } from 'svelte';
   import type { FullAutoFill } from 'svelte/elements';
 
@@ -27,6 +28,10 @@
     /** 見せたときに支援技術へ届ける文。値そのものは流さない。 */
     revealedMessage: string;
     /** 隠したときに支援技術へ届ける文。 */
+    /** 値をまとめて消す操作を出す(TextField から降りる prop。TextField.md §2)。 */
+    clearable?: boolean;
+    /** 消す操作の名前。clearable が真のときに要る。 */
+    clearLabel?: string;
     hiddenMessage: string;
     onchange?: (value: string) => void;
     label: Snippet;
@@ -44,6 +49,8 @@
     autocomplete,
     keyboard = META.props.keyboard.default,
     size = META.props.size.default,
+    clearable = META.props.clearable.default,
+    clearLabel,
     revealLabel,
     hideLabel,
     revealedMessage,
@@ -70,6 +77,28 @@
   });
 
   // 既定は隠す。切り替えの結果だけを文で伝え、値は流さない
+  let inputEl: HTMLInputElement | undefined = $state();
+  // 消す操作(TextField から降りる prop)。切り替えの隣に立つので、消費者は詰み具合を見て決める
+  const showClear = $derived(clearable && value !== '' && !disabled && !readonly);
+  $effect(() => {
+    if (clearable && !clearLabel) {
+      console.warn('[stemcell] PasswordField: clearable には clearLabel が要る(絵だけの操作は名前を持つ)。');
+    }
+  });
+  const clear = () => {
+    if (!showClear) return;
+    value = '';
+    onchange?.('');
+    inputEl?.focus();
+  };
+  // Escape で消す(RFC 0021)。値があるときだけ消してそこで止め、空なら外へ抜く
+  const onkeydown = (e: KeyboardEvent) => {
+    if (e.key !== 'Escape' || !showClear) return;
+    e.preventDefault();
+    e.stopPropagation();
+    clear();
+  };
+
   let revealed = $state(false);
   // 生きた領域は最初から DOM に居て、中身だけ差し替える(後から現れる領域は拾われない)
   let announcement = $state('');
@@ -93,6 +122,7 @@
     <input
       class="sc-passwordfield-input"
       id={inputId}
+      bind:this={inputEl}
       type={revealed ? 'text' : 'password'}
       {name}
       bind:value
@@ -106,7 +136,9 @@
       aria-describedby={describedby}
       oninput={(e) => onchange?.(e.currentTarget.value)}
       onchangecapture={(e) => e.stopPropagation()}
+      {onkeydown}
     />
+    {#if showClear}<ClearButton label={clearLabel} onclear={clear} />{/if}
     <!-- 切り替えは焦点を受ける(矢印キーのような代替が無いので、タブ順から外せない)。
          名前は状態で入れ替わり、aria-pressed は使わない(押されていることと、見えていることは別) -->
     <button

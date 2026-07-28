@@ -60,7 +60,8 @@
 .sc-textfield-control:has(.sc-textfield-start button) {
   padding-inline-start: 0;
 }
-.sc-textfield-control:has(.sc-textfield-end button) {
+.sc-textfield-control:has(.sc-textfield-end button),
+.sc-textfield-control:has(.sc-field-clear) {
   padding-inline-end: 0;
 }
 .sc-textfield[data-disabled='true'] .sc-textfield-control {
@@ -148,3 +149,9 @@
   color: var(--color-semantic-danger-soft-fg);
 }
 
+
+/* 消す操作(clearable)は共有の付属(internal/ClearButton)。端の面は器の角の内側で切る
+   (押した色が丸めた角から飛び出さない) */
+.sc-textfield-control:has(.sc-field-clear) {
+  overflow: hidden;
+}

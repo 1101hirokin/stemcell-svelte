@@ -1,6 +1,7 @@
 <script lang="ts">
   import './NumberField.css';
   import { META } from './meta';
+  import ClearButton from '../internal/ClearButton.svelte';
   import Icon from '../Icon/Icon.svelte';
   import type { Snippet } from 'svelte';
   import type { FullAutoFill } from 'svelte/elements';
@@ -19,6 +20,10 @@
     placeholder?: string;
     disabled?: boolean;
     readonly?: boolean;
+    /** 値をまとめて消す操作を出す(TextField から降りる prop。TextField.md §2)。数の欄では未入力(null)へ戻す。 */
+    clearable?: boolean;
+    /** 消す操作の名前。clearable が真のときに要る。 */
+    clearLabel?: string;
     invalid?: boolean;
     required?: boolean;
     autocomplete?: string;
@@ -45,6 +50,8 @@
     placeholder,
     disabled = META.props.disabled.default,
     readonly = META.props.readonly.default,
+    clearable = META.props.clearable.default,
+    clearLabel,
     invalid = META.props.invalid.default,
     required = META.props.required.default,
     autocomplete,
@@ -114,10 +121,34 @@
     onchange?.(n);
   };
 
+  let inputEl: HTMLInputElement | undefined = $state();
+  // 消す操作(TextField から降りる prop)。数の欄では未入力(null)へ戻す
+  const showClear = $derived(clearable && value != null && !disabled && !readonly);
+  $effect(() => {
+    if (clearable && !clearLabel) {
+      console.warn('[stemcell] NumberField: clearable には clearLabel が要る(絵だけの操作は名前を持つ)。');
+    }
+  });
+  const clear = () => {
+    if (!showClear) return;
+    typed = null;
+    value = null;
+    onchange?.(null);
+    inputEl?.focus();
+  };
+
   // 上で増え、下で減る。PageUp / PageDown は大きく動かす(倍率は実装の判断)。
   // Home / End は割り当てない: 打てる欄なので文字の移動に残す(RFC 0019)
   const onkeydown = (e: KeyboardEvent) => {
     const factor = e.key === 'PageUp' || e.key === 'PageDown' ? 10 : 1;
+    // Escape で消す(RFC 0021)。値があるときだけ消してそこで止め、空なら外へ抜く
+    if (e.key === 'Escape') {
+      if (!showClear) return;
+      e.preventDefault();
+      e.stopPropagation();
+      clear();
+      return;
+    }
     const direction = e.key === 'ArrowUp' || e.key === 'PageUp' ? 1 : e.key === 'ArrowDown' || e.key === 'PageDown' ? -1 : 0;
     if (!direction) return;
     e.preventDefault();
@@ -149,6 +180,7 @@
     <input
       class="sc-numberfield-input"
       id={inputId}
+      bind:this={inputEl}
       type="text"
       role="spinbutton"
       inputmode={keyboard}
@@ -168,6 +200,7 @@
       onblur={() => (typed = null)}
       onchangecapture={(e) => e.stopPropagation()}
     />
+    {#if showClear}<ClearButton label={clearLabel} onclear={clear} />{/if}
     <!-- 増減はタブ順から外す(同じことが矢印キーでできる)。押せることは見えていなければならない。
          二つを隣り合わせるのは、続けて押すのに指と視線を往復させないためである。押下で焦点を
          奪わない(pointerdown を止める): 焦点が欄から外れると、続けて打てなくなる。横に並べるのは

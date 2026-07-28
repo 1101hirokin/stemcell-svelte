@@ -996,6 +996,8 @@ props:
 - `placeholder`: string((省略可)) — 入力例のヒント。label の代替ではない(field.md §2: 入力した瞬間に消える名前は、名前ではない)。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
 - `readonly`: boolean(既定 false) — 読めるが編集できない。状態ではなく property である(state.md §6)。invalid と同時に成立しない(HTML が readonly を constraint validation から除外する)。コントラストの免除は受けない(Understanding SC 1.4.3 は disabled のみを例示)。
+- `clearable`: boolean(既定 false) — 値をまとめて消す操作を欄の中に出す。値があるときだけ現れる(空の欄に押せない印を残さない)。検索欄はこれで組む: 普通の欄との違いは消せることと虫眼鏡の絵だけで、相互作用は増えないので別部品にしない(field.md §6-2 の線。裁定 2026-07-28)。真のときは clearLabel が要る。消した結果は change の空文字列で届き、専用の通知は作らない。
+- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の revealLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
 - `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2。判定が値から来たかサーバから来たかは問わない)。intent を danger へ差し替える(state.md §7)。いつ立てるか(blur / submit / 逐次)は Stemcell が規範化しない(field.md §3「バリデーションの所有」)。
 - `required`: boolean(既定 false) — 必須。支援技術に届くことは Normative、視覚標示も部品が自動で出す(field.md §4。裁定済み 2026-07。記号そのものは seed)。
 - `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。
@@ -1068,6 +1070,8 @@ props:
 - `placeholder`: string((省略可)) — 入力例のヒント。label の代替ではない(field.md §2: 入力した瞬間に消える名前は、名前ではない)。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
 - `readonly`: boolean(既定 false) — 読めるが編集できない。状態ではなく property である(state.md §6)。invalid と同時に成立しない(HTML が readonly を constraint validation から除外する)。コントラストの免除は受けない(Understanding SC 1.4.3 は disabled のみを例示)。
+- `clearable`: boolean(既定 false) — 値をまとめて消す操作を欄の中に出す。値があるときだけ現れる(空の欄に押せない印を残さない)。検索欄はこれで組む: 普通の欄との違いは消せることと虫眼鏡の絵だけで、相互作用は増えないので別部品にしない(field.md §6-2 の線。裁定 2026-07-28)。真のときは clearLabel が要る。消した結果は change の空文字列で届き、専用の通知は作らない。
+- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の revealLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
 - `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2。判定が値から来たかサーバから来たかは問わない)。intent を danger へ差し替える(state.md §7)。いつ立てるか(blur / submit / 逐次)は Stemcell が規範化しない(field.md §3「バリデーションの所有」)。
 - `required`: boolean(既定 false) — 必須。支援技術に届くことは Normative、視覚標示も部品が自動で出す(field.md §4。裁定済み 2026-07。記号そのものは seed)。
 - `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。
@@ -1599,7 +1603,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - truncate は視覚だけの省略で、要素の文字内容は全文のまま残る(text-overflow の実務: DOM のテキストは完全で、支援技術は全文を読む)。省略された全文を別途 title 属性等で見せるかは実装の表現。
 - Text は相互作用しない。role を持たず、フォーカスを受けない(意味要素が持つ既定の意味論だけが残る)。
 
-### TextField(契約 0.0.0-alpha.2)
+### TextField(契約 0.0.0-alpha.3)
 
 1行のテキスト入力。label / description / error を内包する複合フィールド(README の命名根拠)。解剖は foundations/field.md §2、値とイベントは同 §5(change 1本。裁定済み 2026-07)。8種の語彙の基準器: label の技術形状(slot)はここで決まり、Checkbox のリッチ label が検算する(field.md §6)。
 
@@ -1610,6 +1614,8 @@ props:
 - `placeholder`: string((省略可)) — 入力例のヒント。label の代替ではない(field.md §2: 入力した瞬間に消える名前は、名前ではない)。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
 - `readonly`: boolean(既定 false) — 読めるが編集できない。状態ではなく property である(state.md §6)。invalid と同時に成立しない(HTML が readonly を constraint validation から除外する)。コントラストの免除は受けない(Understanding SC 1.4.3 は disabled のみを例示)。
+- `clearable`: boolean(既定 false) — 値をまとめて消す操作を欄の中に出す。値があるときだけ現れる(空の欄に押せない印を残さない)。検索欄はこれで組む: 普通の欄との違いは消せることと虫眼鏡の絵だけで、相互作用は増えないので別部品にしない(field.md §6-2 の線。裁定 2026-07-28)。真のときは clearLabel が要る。消した結果は change の空文字列で届き、専用の通知は作らない。
+- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の revealLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
 - `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2。判定が値から来たかサーバから来たかは問わない)。intent を danger へ差し替える(state.md §7)。いつ立てるか(blur / submit / 逐次)は Stemcell が規範化しない(field.md §3「バリデーションの所有」)。
 - `required`: boolean(既定 false) — 必須。支援技術に届くことは Normative、視覚標示も部品が自動で出す(field.md §4。裁定済み 2026-07。記号そのものは seed)。
 - `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。
@@ -1648,6 +1654,8 @@ props:
 - `placeholder`: string((省略可)) — 入力例のヒント。label の代替ではない(field.md §2: 入力した瞬間に消える名前は、名前ではない)。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
 - `readonly`: boolean(既定 false) — 読めるが編集できない。状態ではなく property である(state.md §6)。invalid と同時に成立しない(HTML が readonly を constraint validation から除外する)。コントラストの免除は受けない(Understanding SC 1.4.3 は disabled のみを例示)。
+- `clearable`: boolean(既定 false) — 値をまとめて消す操作を欄の中に出す。値があるときだけ現れる(空の欄に押せない印を残さない)。検索欄はこれで組む: 普通の欄との違いは消せることと虫眼鏡の絵だけで、相互作用は増えないので別部品にしない(field.md §6-2 の線。裁定 2026-07-28)。真のときは clearLabel が要る。消した結果は change の空文字列で届き、専用の通知は作らない。
+- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の revealLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
 - `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2。判定が値から来たかサーバから来たかは問わない)。intent を danger へ差し替える(state.md §7)。いつ立てるか(blur / submit / 逐次)は Stemcell が規範化しない(field.md §3「バリデーションの所有」)。
 - `required`: boolean(既定 false) — 必須。支援技術に届くことは Normative、視覚標示も部品が自動で出す(field.md §4。裁定済み 2026-07。記号そのものは seed)。
 - `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。

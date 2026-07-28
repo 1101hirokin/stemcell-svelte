@@ -10,6 +10,8 @@ export const META = {
     placeholder: {},
     disabled: { default: false },
     readonly: { default: false },
+    clearable: { default: false },
+    clearLabel: {},
     invalid: { default: false },
     required: { default: false },
     autocomplete: {},
