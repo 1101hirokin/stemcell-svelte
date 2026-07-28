@@ -13,7 +13,18 @@
   // 添付は三つの部品の合成(patterns/file-upload.md)。値はアプリが持つ
   let attachments = $state<File[]>([]);
   let field: { accepted: (files: File[]) => void } | undefined = $state();
-  const sizeText = (n: number) => `${(n / 1024).toFixed(1)} KB`;
+  // 大きさの書式はアプリの仕事である(FilePreview は文字を作らない。i18n.md §1)。
+  // 1024 を超えるたびに単位を上げ、TB で止める(それ以上を扱う画面は無い)
+  const sizeText = (n: number) => {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let i = 0;
+    let v = n;
+    while (v >= 1024 && i < units.length - 1) {
+      v /= 1024;
+      i += 1;
+    }
+    return `${i === 0 ? v : v.toFixed(1)} ${units[i]}`;
+  };
   let notify = $state(true);
   let fEmail = $state('a@b.com');
   let fQuantity = $state<number | null>(2);
