@@ -192,6 +192,16 @@ describe('clearable', () => {
     expect(kids.indexOf('sc-field-clear')).toBeLessThan(kids.indexOf('sc-textfield-end'));
   });
 
+  it('欄の中の押せる付属は正方形になる(一辺は欄の行高)', () => {
+    // jsdom はレイアウトを計算しないので、出荷される CSS の宣言を検査する
+    const css = readFileSync(join(import.meta.dirname, '../internal/field-button.css'), 'utf-8');
+    expect(css).toContain('inline-size: var(--sc-field-side)');
+    expect(css).toContain('align-self: stretch');
+    // 一辺は「打つ文字の1行 + 縦の inset 二つ分」で組み立てる(器の高さと同じ式)
+    expect(css).toContain('--typography-body-md-line-height');
+    expect(css).toContain('var(--_inset, var(--spacing-inset-md)) * 2');
+  });
+
   it('打てない欄(disabled / readonly)では出さない', () => {
     const { container } = render(TextField, {
       props: { label: snip('<span>探す</span>'), clearable: true, clearLabel: '消去', value: '土鍋', readonly: true },

@@ -1,5 +1,6 @@
 <script lang="ts">
   import './NumberField.css';
+  import '../internal/field-button.css';
   import { META } from './meta';
   import ClearButton from '../internal/ClearButton.svelte';
   import Icon from '../Icon/Icon.svelte';
@@ -208,7 +209,7 @@
          WCAG 2.2 SC 2.5.8) -->
     <button
       type="button"
-      class="sc-numberfield-stepper"
+      class="sc-field-button sc-numberfield-stepper"
       tabindex="-1"
       aria-label={decrementLabel}
       disabled={disabled || readonly || atMin}
@@ -219,7 +220,7 @@
     </button>
     <button
       type="button"
-      class="sc-numberfield-stepper"
+      class="sc-field-button sc-numberfield-stepper"
       tabindex="-1"
       aria-label={incrementLabel}
       disabled={disabled || readonly || atMax}

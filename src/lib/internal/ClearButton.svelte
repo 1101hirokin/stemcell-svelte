@@ -1,5 +1,5 @@
 <script lang="ts">
-  import './ClearButton.css';
+  import './field-button.css';
   import Icon from '../Icon/Icon.svelte';
 
   // 値をまとめて消す操作(TextField.md §2)。TextField から一族(Textarea / PasswordField / NumberField)へ
@@ -12,6 +12,6 @@
   let { label, onclear }: Props = $props();
 </script>
 
-<button type="button" class="sc-field-clear" aria-label={label} onclick={onclear}>
+<button type="button" class="sc-field-button sc-field-clear" aria-label={label} onclick={onclear}>
   <Icon name="close" />
 </button>

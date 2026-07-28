@@ -36,6 +36,7 @@
       <TextField keyboard="email" autocomplete="email">
         {#snippet label()}メール(keyboard=email){/snippet}
         {#snippet start()}@{/snippet}
+        {#snippet end()}<IconButton label="確かめる" variant="text" size="sm"><Icon name="check" /></IconButton>{/snippet}
       </TextField>
       <TextField bind:value={query} clearable clearLabel="消去" placeholder="注文を探す">
         {#snippet label()}検索(clearable){/snippet}

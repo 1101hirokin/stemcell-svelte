@@ -155,3 +155,11 @@
 .sc-textfield-control:has(.sc-field-clear) {
   overflow: hidden;
 }
+
+/* 消費者が start / end へ置いたアイコンのボタンも、欄の中では正方形になる(裁定 2026-07-28)。
+   文字を持つボタンはこの限りではない(幅は文字が決める) */
+.sc-textfield-start > .sc-iconbutton,
+.sc-textfield-end > .sc-iconbutton {
+  inline-size: var(--sc-field-side);
+  padding-inline: 0;
+}

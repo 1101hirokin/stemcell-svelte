@@ -1,5 +1,6 @@
 <script lang="ts">
   import './PasswordField.css';
+  import '../internal/field-button.css';
   import { META } from './meta';
   import Icon from '../Icon/Icon.svelte';
   import ClearButton from '../internal/ClearButton.svelte';
@@ -143,7 +144,7 @@
          名前は状態で入れ替わり、aria-pressed は使わない(押されていることと、見えていることは別) -->
     <button
       type="button"
-      class="sc-passwordfield-toggle"
+      class="sc-field-button sc-passwordfield-toggle"
       aria-label={revealed ? hideLabel : revealLabel}
       disabled={disabled || readonly}
       onclick={toggle}
