@@ -19,6 +19,18 @@ export const META = {
   },
 } as const;
 
+/**
+ * autoReceive は Web 層の取り決めで中立契約に無い(Icon の glyph と同じ形)。ゆえに META.props
+ * (契約と照合される)には入れず、Web 方言としてここに記録する。
+ *
+ * Chromium は届いた SMS のコードを JS から受け取る道(WebOTP)を持つ。Safari は属性だけで動く
+ * (欄に autocomplete=one-time-code があれば OS が鍵盤の上に候補を出す)ので、この方言は要らない。
+ * 既定では待ち受けない: 待ち受けるとブラウザの許可の確認が出るので、出す画面は消費者が選ぶ。
+ */
+export const WEB = {
+  autoReceive: 'Web 方言: Chromium の WebOTP で SMS のコードを待ち受ける。既定は false',
+} as const;
+
 /** 打てる文字。列挙で選ぶ(正規表現は受け取らない。OneTimeCodeField.md §2)。 */
 export const ALLOWED: Record<(typeof META.props.charset.values)[number], RegExp> = {
   numeric: /[0-9]/,

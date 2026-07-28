@@ -4,7 +4,7 @@
  */
 import { render, fireEvent } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
-import { vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import OneTimeCodeField from './OneTimeCodeField.svelte';
@@ -130,6 +130,70 @@ it('枠の高さは中身の有無で変わらない(他の欄と同じ行高で
   const block = css.slice(css.indexOf('.sc-otc-cell {'), css.indexOf('}', css.indexOf('.sc-otc-cell {')));
   expect(block).toContain('block-size: var(--sc-field-side)');
   expect(block).toContain('padding-block: 0');
+});
+
+// 届いた SMS のコードを待ち受ける(Web 方言。Chromium だけが持つ道)
+describe('autoReceive', () => {
+  const stubOtp = (code?: string) => {
+    const get = vi.fn(
+      (opts: any) =>
+        new Promise((resolve, reject) => {
+          if (code) resolve({ code });
+          else opts.signal?.addEventListener('abort', () => reject(new Error('AbortError')));
+        }),
+    );
+    Object.defineProperty(window, 'OTPCredential', { configurable: true, value: class {} });
+    Object.defineProperty(navigator, 'credentials', { configurable: true, value: { get } });
+    return get;
+  };
+  afterEach(() => {
+    Object.defineProperty(window, 'OTPCredential', { configurable: true, value: undefined });
+    Object.defineProperty(navigator, 'credentials', { configurable: true, value: undefined });
+  });
+
+  it('既定では待ち受けない(許可の確認を勝手に出さない)', () => {
+    const get = stubOtp('123456');
+    render(OneTimeCodeField, { props: { label } });
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it('待ち受けて、届いたコードを値にし、揃えば知らせる', async () => {
+    const get = stubOtp('123456');
+    const onchange = vi.fn();
+    const oncomplete = vi.fn();
+    render(OneTimeCodeField, { props: { label, autoReceive: true, onchange, oncomplete } });
+    expect(get).toHaveBeenCalledWith(expect.objectContaining({ otp: { transport: ['sms'] } }));
+    await vi.waitFor(() => expect(onchange).toHaveBeenCalledWith('123456'));
+    expect(oncomplete).toHaveBeenCalledWith('123456');
+  });
+
+  it('届いたコードにも打てる文字の規則が効く', async () => {
+    stubOtp('12ab34');
+    const onchange = vi.fn();
+    render(OneTimeCodeField, { props: { label, autoReceive: true, onchange } });
+    await vi.waitFor(() => expect(onchange).toHaveBeenCalledWith('1234'));
+  });
+
+  it('欄が居なくなったら待ち受けを中止する(許可の確認を残さない)', () => {
+    const get = stubOtp();
+    const { unmount } = render(OneTimeCodeField, { props: { label, autoReceive: true } });
+    const signal = get.mock.calls[0][0].signal as AbortSignal;
+    expect(signal.aborted).toBe(false);
+    unmount();
+    expect(signal.aborted).toBe(true);
+  });
+
+  it('打てない欄では待ち受けない', () => {
+    const get = stubOtp('123456');
+    render(OneTimeCodeField, { props: { label, autoReceive: true, readonly: true } });
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it('持たない環境では何も起きない(第7条)', () => {
+    render(OneTimeCodeField, { props: { label, autoReceive: true } });
+    // OTPCredential も navigator.credentials も無い状態。例外を投げずに描けていれば足りる
+    expect(document.querySelectorAll('.sc-otc-input').length).toBeGreaterThan(0);
+  });
 });
 
 it('打てる文字の絞り込みは純粋な計算として持つ', () => {

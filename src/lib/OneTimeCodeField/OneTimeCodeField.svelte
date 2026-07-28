@@ -32,6 +32,12 @@
     required?: boolean;
     labelHidden?: boolean;
     size?: (typeof META.props.size.values)[number];
+    /**
+     * 届いた SMS のコードを待ち受ける(Web 方言。中立契約に無い)。Chromium だけが持つ道で、
+     * 待ち受けるとブラウザの許可の確認が出る。SMS の本文が `@ドメイン #コード` の形でなければ働かない
+     * (本文の形は送信側の仕事)。Safari は属性だけで候補を出すので、この prop は要らない。
+     */
+    autoReceive?: boolean;
     /** 値が変わった(逐次)。桁が揃う前の途中の値も流れる。 */
     onchange?: (value: string) => void;
     /** 桁が揃った。揃うたびに出る(貼り付けや自動入力で一度に埋まったときも)。 */
@@ -56,6 +62,7 @@
     required = META.props.required.default,
     labelHidden = META.props.labelHidden.default,
     size = META.props.size.default,
+    autoReceive = false,
     onchange,
     oncomplete,
     label,
@@ -88,6 +95,34 @@
     revealed = !revealed;
     announcement = revealed ? (revealedMessage ?? '') : (hiddenMessage ?? '');
   };
+
+  // 値を外から入れる道(自動入力・待ち受け)。打てない文字は落とし、揃えば知らせる
+  const receive = (raw: string) => {
+    const next = sanitize(raw, charset, length);
+    if (!next || next === value) return;
+    value = next;
+    onchange?.(next);
+    if (next.length === length) oncomplete?.(next);
+  };
+
+  // Chromium の WebOTP。待ち受けは欄が居るあいだだけで、離れたら中止する(許可の確認が残らない)。
+  // 持たない環境では何も起きない(第7条 グレースフル・フォールバック)
+  $effect(() => {
+    if (!autoReceive || disabled || readonly) return;
+    const creds = typeof navigator !== 'undefined' ? navigator.credentials : undefined;
+    if (!creds || !('OTPCredential' in window)) return;
+    const controller = new AbortController();
+    creds
+      .get({ otp: { transport: ['sms'] }, signal: controller.signal } as CredentialRequestOptions)
+      .then((cred) => {
+        const code = (cred as { code?: string } | null)?.code;
+        if (code) receive(code);
+      })
+      .catch(() => {
+        // 利用者が断った、時間切れ、画面を離れた。いずれも欄の側ですることは無い
+      });
+    return () => controller.abort();
+  });
 
   const oninput = (e: Event & { currentTarget: HTMLInputElement }) => {
     const next = sanitize(e.currentTarget.value, charset, length);

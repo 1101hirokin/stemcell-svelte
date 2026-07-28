@@ -255,10 +255,11 @@
     <Stack gap="lg">
       <OneTimeCodeField
         bind:value={code}
+        autoReceive
         oncomplete={(v) => (completed = v)}
       >
         {#snippet label()}SMS に届いた 6 桁{/snippet}
-        {#snippet description()}数字だけ。揃うと下に出る{/snippet}
+        {#snippet description()}数字だけ。揃うと下に出る。autoReceive は Chromium で SMS を待ち受ける{/snippet}
       </OneTimeCodeField>
       <Text variant="body-sm" muted>揃った値: {completed || '(まだ)'}</Text>
       <OneTimeCodeField
