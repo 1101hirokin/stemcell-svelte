@@ -92,32 +92,24 @@
     inputValue = shownText;
     oninputchange?.(shownText);
   };
-  // 空にして欄の外を押したら、選択も外れる。欄が空なら「何も選んでいない」と読むのが自然で、
-  // 選び直す手段が無いまま値だけ残ると、見えているものと送られるものが食い違う
+  // 消したら、その場で選択が外れる。欄が空なら「何も選んでいない」と読むのが自然で、
+  // 値だけ残ると、見えているものと送られるものが食い違う
   const clearSelection = () => {
     selectedLabel = '';
-    if (inputValue !== '') {
-      inputValue = '';
-      oninputchange?.('');
-    }
     if (!value) return;
     value = '';
     onchange?.('');
   };
-  // 焦点が外れたときの後始末。空なら選択を外し、打ちかけなら選ばれている値の表示へ戻す
-  const commit = () => (inputValue.trim() === '' ? clearSelection() : revert());
 
   const openList = () => {
     if (disabled || readonly) return;
     open = true;
     activeIndex = initialActive(options, selectedIndex);
   };
-  const closeList = (opts: { commit?: boolean } = {}) => {
+  const closeList = () => {
     open = false;
     activeIndex = -1;
-    // 閉じ方で後始末が違う。Escape は取り消しなので、消した文字ごと元の表示へ戻す
-    if (opts.commit) commit();
-    else revert();
+    revert();
   };
   const selectAt = (i: number) => {
     const o = options[i];
@@ -134,6 +126,8 @@
   const oninput = (e: Event & { currentTarget: HTMLInputElement }) => {
     inputValue = e.currentTarget.value;
     oninputchange?.(inputValue);
+    // 消したら、その場で選択が外れる(閉じるまで待たない。打ちかけの文字とは違い、消したことは意思である)
+    if (inputValue.trim() === '') clearSelection();
     // 打っている間は候補を先に選ばない(APG の manual selection)。打つたびに候補は入れ替わるので、
     // 仮の焦点を残すと、さっき指していた位置に別の選択肢が来て、Enter が見ていない相手を選ぶ
     open = !disabled && !readonly;
@@ -177,7 +171,7 @@
         closeList();
         break;
       case 'Tab':
-        closeList({ commit: true }); // 送りで抜けるときも打った文字は残さない
+        closeList(); // 送りで抜けるときも打った文字は残さない
         break;
     }
   };
@@ -228,7 +222,7 @@
           onpointerup={() => {
             if (!open) openList();
           }}
-          onblur={() => closeList({ commit: true })}
+          onblur={() => closeList()}
         />
         <span class="sc-combobox-chevron" aria-hidden="true"><Icon name="chevron.down" /></span>
       </div>

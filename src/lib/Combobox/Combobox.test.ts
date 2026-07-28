@@ -103,40 +103,29 @@ it('何も選んでいなければ、閉じたときに空へ戻す', async () =
   expect(oninputchange).toHaveBeenLastCalledWith('');
 });
 
-it('消してから欄の外を押すと、選択も外れる', async () => {
-  const onchange = vi.fn();
-  const oninputchange = vi.fn();
-  const { container } = render(Combobox, {
-    props: { ...base, value: 'a', inputValue: '朝日商会', onchange, oninputchange },
-  });
-  const el = input(container);
-  await fireEvent.input(el, { target: { value: '' } });
-  await fireEvent.blur(el);
-  expect(onchange).toHaveBeenLastCalledWith('');
-  expect(el.value).toBe('');
-});
-
-it('消しても Escape なら取り消しなので、元の表示へ戻る', async () => {
+it('消したら、その場で選択が外れる(閉じるまで待たない)', async () => {
   const onchange = vi.fn();
   const { container } = render(Combobox, {
     props: { ...base, value: 'a', inputValue: '朝日商会', onchange },
   });
   const el = input(container);
   await fireEvent.input(el, { target: { value: '' } });
-  await fireEvent.keyDown(el, { key: 'Escape' });
-  expect(onchange).not.toHaveBeenCalled();
-  expect(el.value).toBe('朝日商会');
+  expect(onchange).toHaveBeenLastCalledWith('');
+  // 一覧の側でも、選ばれている印が消えている
+  expect(container.querySelector('[aria-selected="true"]')).toBe(null);
 });
 
-it('空白だけ残して外を押した場合も、選んでいない扱いにする', async () => {
+it('空白だけ残した場合も、選んでいない扱いにする', async () => {
   const onchange = vi.fn();
   const { container } = render(Combobox, {
     props: { ...base, value: 'a', inputValue: '朝日商会', onchange },
   });
   const el = input(container);
   await fireEvent.input(el, { target: { value: '   ' } });
-  await fireEvent.blur(el);
   expect(onchange).toHaveBeenLastCalledWith('');
+  // 打っている文字は取り上げない(欄の外へ出たときに空へ揃う)
+  expect(el.value).toBe('   ');
+  await fireEvent.blur(el);
   expect(el.value).toBe('');
 });
 
