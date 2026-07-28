@@ -117,7 +117,7 @@
     <Text as="h3" variant="title-lg">List / Accordion(クラスタ10 第1段)</Text>
     <Text as="p" variant="body-sm" muted>
       List は項目の並びで、選択は持たない(選ぶ場面は RadioGroup / Menu / Tabs が埋めている)。項目の器は List が
-      持ち、区切りは口で選ぶ。Accordion は Disclosure の束で、開いている集合をアプリが持つ。排他の口は無く、
+      持ち、区切りは prop で選ぶ。Accordion は Disclosure の束で、開いている集合をアプリが持つ。排他の prop は無く、
       1つに保ちたいアプリは受け取った集合を絞る(下の切替で試せる)。
     </Text>
 

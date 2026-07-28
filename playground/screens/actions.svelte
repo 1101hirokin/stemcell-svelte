@@ -113,7 +113,7 @@
       <code class="pg-tag">glyph 渡し</code>
       <Cluster gap="md" align="center">
         <Icon glyph={checkGlyph} label="完了(静的・ツリーシェイク)" />
-        <Text variant="body-sm">name(全束)と glyph(使う分だけ)の二口。iconography.md §6</Text>
+        <Text variant="body-sm">name(全束)と glyph(使う分だけ)の二つ。iconography.md §6</Text>
       </Cluster>
     </div>
   </section>

@@ -1,6 +1,6 @@
 /* 会話のひと続きの発話(Message.md)。器が持つのは発話の境界と話者の帰属だけで、吹き出しの形は
    Expressive である。ただし業界が割れている(ChatGPT は利用者だけ面を持ち、Slack は両方地に置き、
-   LINE と iMessage は自分の発話をブランド色で塗る)ので、選ぶ口は持つ。語彙は発明せず、面の量は
+   LINE と iMessage は自分の発話をブランド色で塗る)ので、選ぶ prop は持つ。語彙は発明せず、面の量は
    emphasis.md §3 の4段、色は intent、寄せは Cluster と同じ start/center/end を使う。
    姿は role から導かない(人間同士のチャットでは発話が全部 user になる。Message.md §2)。 */
 .sc-message {

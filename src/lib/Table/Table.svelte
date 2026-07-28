@@ -64,7 +64,7 @@
 
   const uid = $props.id();
   const captionId = `${uid}-caption`;
-  // 選択の列は、値と受け口が揃ったときだけ現れる(真偽値の口を別に持たない。第3条)
+  // 選択の列は、値と受け取り先が揃ったときだけ現れる(真偽値の prop を別に持たない。第3条)
   const selectable = $derived(!!selected && !!onselectedchange);
   const selectedSet = $derived(new Set(selected ?? []));
   const allSelected = $derived(rows.length > 0 && rows.every((r) => selectedSet.has(r.id)));

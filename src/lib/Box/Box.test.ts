@@ -78,7 +78,7 @@ it('as: 許可リスト外(script 等の危険要素・不正な文字列)は wa
   warn.mockRestore();
 });
 
-it('style / class: 自由 style の受け口(Svelte の土地の声)が通る', () => {
+it('style / class: 自由な style の受け取り先(Svelte の土地の声)が通る', () => {
   const { container } = render(Box, {
     props: { children: kids, style: 'max-width: 20rem', class: 'consumer' },
   });

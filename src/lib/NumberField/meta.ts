@@ -16,7 +16,7 @@ export const META = {
     max: {},
     step: { default: 1 },
     keyboard: { values: ['numeric', 'decimal'], default: 'numeric' },
-    labelHidden: { default: false }, // 名前を視覚から隠す(field.md §2 の口。買い物かごの行が消費者)
+    labelHidden: { default: false }, // 名前を視覚から隠す(field.md §2 の prop。買い物かごの行が消費者)
     incrementLabel: {},
     decrementLabel: {},
   },

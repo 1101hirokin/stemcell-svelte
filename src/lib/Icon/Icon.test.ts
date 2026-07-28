@@ -1,6 +1,6 @@
 /**
  * 実装側テスト。語彙を絵で示す描画器(iconography.md)。name(中立契約。非同期解決)と
- * glyph(Web 方言。同期・ツリーシェイク)の両口、意味/装飾の a11y、fillRule、mirrorInRTL を検証。
+ * glyph(Web 方言。同期・ツリーシェイク)の両方、意味/装飾の a11y、fillRule、mirrorInRTL を検証。
  * 色 currentColor・寸法 1em の実測は smoke。
  */
 import { render, waitFor } from '@testing-library/svelte';

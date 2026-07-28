@@ -128,7 +128,7 @@ it('無効のときは暦を開けない', () => {
   expect((container.querySelector('button') as HTMLButtonElement).disabled).toBe(true);
 });
 
-// 面の先頭へ差し込む口(候補の列など)。器は中身を解釈しない(patterns/date-range.md §3)
+// 面の先頭へ差し込むスロット(候補の列など)。器は中身を解釈しない(patterns/date-range.md §3)
 it('面の先頭へ差し込んだ中身が暦と一緒に出る', async () => {
   const { container } = render(DateRangePicker, {
     props: { ...props, panelLead: snip('期間の候補') },

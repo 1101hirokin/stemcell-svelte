@@ -6,7 +6,7 @@
   import type { Snippet } from 'svelte';
 
   // 畳んで開く項目を束ねる(Accordion.md)。各項目は Disclosure と同じ形で、開いている集合をアプリが持つ。
-  // 排他の口は持たない: 排他にしたいアプリは集合を1つに保てばよい。
+  // 排他の prop は持たない: 排他にしたいアプリは集合を1つに保てばよい。
   interface Props {
     /** 項目の列。データで渡す(Tabs の items と同じ理由)。 */
     items: AccordionItem[];
