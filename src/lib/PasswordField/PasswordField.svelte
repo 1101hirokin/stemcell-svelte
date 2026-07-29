@@ -24,9 +24,9 @@
     keyboard?: (typeof META.props.keyboard.values)[number];
     size?: (typeof META.props.size.values)[number];
     /** 見せる操作の名前。 */
-    revealLabel: string;
+    showValueLabel: string;
     /** 隠す操作の名前。 */
-    hideLabel: string;
+    hideValueLabel: string;
     /** 見せたときに支援技術へ届ける文。値そのものは流さない。 */
     revealedMessage: string;
     /** 隠したときに支援技術へ届ける文。 */
@@ -53,8 +53,8 @@
     size = META.props.size.default,
     clearable = META.props.clearable.default,
     clearLabel,
-    revealLabel,
-    hideLabel,
+    showValueLabel,
+    hideValueLabel,
     revealedMessage,
     hiddenMessage,
     onchange,
@@ -146,7 +146,7 @@
     <button
       type="button"
       class="sc-field-button sc-passwordfield-toggle"
-      aria-label={revealed ? hideLabel : revealLabel}
+      aria-label={revealed ? hideValueLabel : showValueLabel}
       disabled={disabled || readonly}
       onclick={toggle}
     >

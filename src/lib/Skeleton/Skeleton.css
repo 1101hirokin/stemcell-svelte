@@ -13,20 +13,20 @@
 }
 
 /* text: 文字行。高さは周囲の font に従う(1em)。角は tag */
-.sc-skeleton[data-form='text'] {
+.sc-skeleton[data-kind='text'] {
   inline-size: 100%;
   block-size: 1em;
   border-radius: var(--shape-semantic-tag);
 }
 /* box: 面(カード・画像)。親いっぱい。角は card */
-.sc-skeleton[data-form='box'] {
+.sc-skeleton[data-kind='box'] {
   inline-size: 100%;
   block-size: 100%;
   border-radius: var(--shape-semantic-card);
 }
 /* circle: 円(Avatar 等)。親いっぱいの正円。角は pill。幅のみ制約された部品でも潰れないよう
    inline-size も 100% を敷く(高さのみ / 幅のみ どちらの制約でも aspect-ratio で正円。独立レビュー) */
-.sc-skeleton[data-form='circle'] {
+.sc-skeleton[data-kind='circle'] {
   inline-size: 100%;
   block-size: 100%;
   aspect-ratio: 1;

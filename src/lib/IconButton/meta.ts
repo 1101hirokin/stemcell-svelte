@@ -6,7 +6,7 @@ export const META = {
     color: { values: ['primary', 'danger', 'warning', 'plain'], default: 'primary' },
     size: { values: ['sm', 'md', 'lg'], default: 'md' },
     disabled: { default: false },
-    block: { default: false },
+    fullWidth: { default: false },
     // IconButton 固有
     label: {}, // 名前(必須・string)。可視文字が絵に置き換わったぶん名前の経路が prop へ移る
     shape: { values: ['control', 'pill'], default: 'control' },

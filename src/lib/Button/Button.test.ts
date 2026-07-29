@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import Button from './Button.svelte';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const css = readFileSync(join(import.meta.dirname, 'Button.css'), 'utf-8');
 
 const label = createRawSnippet(() => ({ render: () => '<span>save</span>' }));
 
@@ -45,4 +49,16 @@ it('type: submit を指定すると form が実際に送信される(既定 butt
   (r2.container.querySelector('.sc-button') as HTMLButtonElement).click();
   expect(submitted, 'type=submit で送信されない').toBe(1);
   form2.remove();
+});
+
+// prop を改名すると、template の data 属性と CSS の選択子が別々に動きうる。属性名の大小は
+// HTML では無視されるので綴りがズレても描画は壊れないが、綴りが二通りある状態は読む人を迷わせる。
+// 名前が一箇所ずつ手で書かれている以上、機械で突き合わせておく(RFC 0025 で fullWidth へ改名)。
+it('fullWidth の data 属性の綴りが CSS の選択子と揃っている', () => {
+  const { container } = render(Button, { props: { children: label, fullWidth: true } });
+  const el = container.querySelector('.sc-button')!;
+  const names = el.getAttributeNames().filter((n) => n.startsWith('data-'));
+  expect(names).toContain('data-fullwidth');
+  expect(names.every((n) => n === n.toLowerCase()), `大文字混じりの data 属性: ${names}`).toBe(true);
+  expect(css, 'CSS がその綴りで選んでいる').toContain("[data-fullwidth='true']");
 });

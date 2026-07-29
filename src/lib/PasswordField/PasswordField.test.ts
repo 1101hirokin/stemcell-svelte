@@ -6,8 +6,8 @@ import PasswordField from './PasswordField.svelte';
 const snip = (t: string) => createRawSnippet(() => ({ render: () => `<span>${t}</span>` }));
 const base = {
   label: snip('パスワード'),
-  revealLabel: 'パスワードを表示する',
-  hideLabel: 'パスワードを隠す',
+  showValueLabel: 'パスワードを表示する',
+  hideValueLabel: 'パスワードを隠す',
   revealedMessage: 'パスワードを表示しました',
   hiddenMessage: 'パスワードを隠しました',
 };

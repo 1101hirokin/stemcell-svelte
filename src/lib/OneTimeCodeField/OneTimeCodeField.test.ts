@@ -80,7 +80,7 @@ it('消して打ち直して再び揃ったら、また知らせる', async () =
 
 it('伏せると枠の文字は隠れるが、桁の数と埋まった桁は残る', async () => {
   const { container } = render(OneTimeCodeField, {
-    props: { label, length: 4, value: '12', masked: true, revealLabel: '表示', hideLabel: '隠す' },
+    props: { label, length: 4, value: '12', masked: true, showValueLabel: '表示', hideValueLabel: '隠す' },
   });
   const texts = cells(container).map((c) => c.textContent);
   expect(texts).toEqual(['•', '•', '', '']);
@@ -93,8 +93,8 @@ it('伏せたら見せ直せる。切り替えの結果は文で届き、値は�
       label,
       value: '12',
       masked: true,
-      revealLabel: '表示',
-      hideLabel: '隠す',
+      showValueLabel: '表示',
+      hideValueLabel: '隠す',
       revealedMessage: 'コードを表示しました',
       hiddenMessage: 'コードを隠しました',
     },
@@ -112,7 +112,7 @@ it('伏せたら見せ直せる。切り替えの結果は文で届き、値は�
 it('伏せるのに見せ直す名前が無ければ警告する', () => {
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
   render(OneTimeCodeField, { props: { label, masked: true } });
-  expect(warn).toHaveBeenCalledWith(expect.stringContaining('masked には revealLabel と hideLabel が要る'));
+  expect(warn).toHaveBeenCalledWith(expect.stringContaining('masked には showValueLabel と hideValueLabel が要る'));
   warn.mockRestore();
 });
 

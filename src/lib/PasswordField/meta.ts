@@ -15,8 +15,8 @@ export const META = {
     size: { values: ['sm', 'md', 'lg'], default: 'md' },
     // 秘匿の欄が足すもの
     keyboard: { values: ['text'], default: 'text' },
-    revealLabel: {},
-    hideLabel: {},
+    showValueLabel: {},
+    hideValueLabel: {},
     revealedMessage: {},
     hiddenMessage: {},
   },

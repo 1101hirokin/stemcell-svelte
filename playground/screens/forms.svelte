@@ -213,8 +213,8 @@
       <PasswordField
         bind:value={fPassword}
         autocomplete="new-password"
-        revealLabel="パスワードを表示する"
-        hideLabel="パスワードを隠す"
+        showValueLabel="パスワードを表示する"
+        hideValueLabel="パスワードを隠す"
         revealedMessage="パスワードを表示しました"
         hiddenMessage="パスワードを隠しました"
       >
@@ -282,8 +282,8 @@
         length={8}
         charset="alphanumeric"
         masked
-        revealLabel="コードを表示する"
-        hideLabel="コードを隠す"
+        showValueLabel="コードを表示する"
+        hideValueLabel="コードを隠す"
         revealedMessage="コードを表示しました"
         hiddenMessage="コードを隠しました"
       >

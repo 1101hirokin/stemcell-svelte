@@ -180,7 +180,7 @@
     <div class="pg-row">
       <code class="pg-tag">付ける</code>
       <Stack gap="sm">
-        <Rating bind:value={stars} itemLabels={starLabels} allowClear>
+        <Rating bind:value={stars} itemLabels={starLabels} clearable>
           {#snippet label()}あなたの評価{/snippet}
           {#snippet description()}矢印キーで動く。Delete か Backspace で取り消せる{/snippet}
         </Rating>
