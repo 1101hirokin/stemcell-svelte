@@ -8,7 +8,7 @@
     color?: (typeof META.props.color.values)[number];
     size?: (typeof META.props.size.values)[number];
     disabled?: boolean;
-    block?: boolean;
+    fill?: boolean;
     /** フォーム参加の type。Web 層の取り決め(Button.md §6。既定 button で form 内の暗黙送信を塞ぐ。HOLES #24)。 */
     type?: (typeof WEB.type.values)[number];
     /** 契約の click。Svelte 5 の土地の声では callback prop(HOLES #4)。 */
@@ -22,7 +22,7 @@
     color = META.props.color.default,
     size = META.props.size.default,
     disabled = META.props.disabled.default,
-    block = META.props.block.default,
+    fill = META.props.fill.default,
     type = WEB.type.default,
     onclick,
     start,
@@ -37,7 +37,7 @@
   data-variant={variant}
   data-color={color}
   data-size={size}
-  data-block={block}
+  data-fill={fill}
   {type}
   {disabled}
   onclick={() => { if (!disabled) onclick?.(); }}

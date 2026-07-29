@@ -7,7 +7,7 @@ const snip = (t: string) => createRawSnippet(() => ({ render: () => `<span>${t}<
 const base = {
   label: snip('パスワード'),
   revealLabel: 'パスワードを表示する',
-  hideLabel: 'パスワードを隠す',
+  concealLabel: 'パスワードを隠す',
   revealedMessage: 'パスワードを表示しました',
   hiddenMessage: 'パスワードを隠しました',
 };

@@ -16,7 +16,7 @@ export const META = {
     // 秘匿の欄が足すもの
     keyboard: { values: ['text'], default: 'text' },
     revealLabel: {},
-    hideLabel: {},
+    concealLabel: {},
     revealedMessage: {},
     hiddenMessage: {},
   },

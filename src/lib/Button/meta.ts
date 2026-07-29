@@ -5,7 +5,7 @@ export const META = {
     color: { values: ['primary', 'danger', 'warning', 'plain'], default: 'primary' },
     size: { values: ['sm', 'md', 'lg'], default: 'md' },
     disabled: { default: false },
-    block: { default: false },
+    fill: { default: false },
   },
 } as const;
 

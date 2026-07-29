@@ -17,7 +17,7 @@
     invalid?: boolean;
     name?: string;
     /** 取り消しを許すか。許すときは鍵盤にも道が要る(radio の群は鍵盤で選択を外せない。SC 2.1.1)。 */
-    allowClear?: boolean;
+    clearable?: boolean;
     /** 名前を視覚から隠す(支援技術には届く)。周りが既に何の評価かを語っている場所で使う。 */
     labelHidden?: boolean;
     /** 読み取りのときの名前(「5 段階中 4.2」)。 */
@@ -37,7 +37,7 @@
     required = META.props.required.default,
     invalid = META.props.invalid.default,
     name,
-    allowClear = META.props.allowClear.default,
+    clearable = META.props.clearable.default,
     labelHidden = META.props.labelHidden.default,
     valueLabel,
     itemLabels,
@@ -84,13 +84,13 @@
   });
 
   const pick = (step: number) => {
-    const next = allowClear && value === step ? null : step;
+    const next = clearable && value === step ? null : step;
     value = next;
     onchange?.(next);
   };
   // 取り消しは鍵盤からも届く(押し直しだけにするとポインタ専用の機能になる。SC 2.1.1)
   const onkeydown = (e: KeyboardEvent) => {
-    if (!allowClear || readonly || disabled) return;
+    if (!clearable || readonly || disabled) return;
     if (e.key !== 'Delete' && e.key !== 'Backspace') return;
     e.preventDefault();
     value = null;

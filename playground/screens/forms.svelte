@@ -214,7 +214,7 @@
         bind:value={fPassword}
         autocomplete="new-password"
         revealLabel="パスワードを表示する"
-        hideLabel="パスワードを隠す"
+        concealLabel="パスワードを隠す"
         revealedMessage="パスワードを表示しました"
         hiddenMessage="パスワードを隠しました"
       >
@@ -283,7 +283,7 @@
         charset="alphanumeric"
         masked
         revealLabel="コードを表示する"
-        hideLabel="コードを隠す"
+        concealLabel="コードを隠す"
         revealedMessage="コードを表示しました"
         hiddenMessage="コードを隠しました"
       >

@@ -30,7 +30,7 @@
     </div>
     <div class="pg-row">
       <code class="pg-tag">block</code>
-      <Button block>block(横いっぱいに広がろうとする既定の実演)</Button>
+      <Button fill>fill(横いっぱいに広がる)</Button>
     </div>
   </section>
   <section>

@@ -7,7 +7,7 @@ export const META = {
     charset: { values: ['numeric', 'alphanumeric'], default: 'numeric' },
     masked: { default: false },
     revealLabel: {},
-    hideLabel: {},
+    concealLabel: {},
     revealedMessage: {},
     hiddenMessage: {},
     disabled: { default: false },

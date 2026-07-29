@@ -8,7 +8,7 @@ export const META = {
     required: { default: false },
     invalid: { default: false },
     name: {},
-    allowClear: { default: false },
+    clearable: { default: false },
     labelHidden: { default: false }, // 名前を視覚から隠す(field.md §2 の prop。商品カードが消費者)
     valueLabel: {}, // 読み取りのときの名前(「5 段階中 4.2」)
     itemLabels: {}, // 入力のときの各段の名前

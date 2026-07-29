@@ -54,7 +54,7 @@ it('取り消しは既定で起きない', async () => {
 
 it('取り消しを許すと押し直しでも鍵盤でも消える(ポインタ専用にしない)', async () => {
   const onchange = vi.fn();
-  const { container } = render(Rating, { props: { ...base, value: 2, allowClear: true, onchange } });
+  const { container } = render(Rating, { props: { ...base, value: 2, clearable: true, onchange } });
   const radios = [...container.querySelectorAll('input[type="radio"]')] as HTMLInputElement[];
   await fireEvent.click(radios[1]!);
   expect(onchange).toHaveBeenLastCalledWith(null);

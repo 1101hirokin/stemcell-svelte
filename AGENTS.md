@@ -176,7 +176,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 区切りの印(/ や >)は装飾であり、支援技術から隠す。読み上げに「スラッシュ」が並ばないようにする。
 - 領域自身は焦点を受けない。焦点とフォーカスリングは各行き先(合成した Link)に立つ。
 
-### Button(契約 0.0.0-alpha.7)
+### Button(契約 0.0.0-alpha.8)
 
 ユーザーがその場で起こす行動。押すと何かが起きる。
 
@@ -186,7 +186,7 @@ props:
 - `color`: "primary" | "danger" | "warning" | "plain"(既定 "primary") — intent。disabled を含まない。選ぶものではなく、状態から差し替わる(state.md §7)。success / info も含まない。報告にしか使わない intent であり、行動には立たない(color.md §5「行動の intent と報告の intent」。裁定済み)。肯定的な確定は primary である。
 - `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る。段が引く余白の配線は foundations/size.rules.json が持つ。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。属性か aria-disabled かは Web の表現であり第2条により固有。
-- `block`: boolean(既定 false) — layout.md §2: コントロールの既定は shrink-wrap(内容幅)。block で fill(親いっぱい)にオプトインする。憲法前文の「Button を block・color=primary で」という共通言語の一部。
+- `fill`: boolean(既定 false) — layout.md §2: コントロールの既定は shrink-wrap(内容幅)。fill で親いっぱいへオプトインする。憲法前文の「Button を fill・color=primary で」という共通言語の一部。
 
 events(Svelte では callback prop):
 
@@ -890,7 +890,7 @@ props:
 - `color`: "primary" | "danger" | "warning" | "plain"(既定 "primary") — intent。disabled を含まない。選ぶものではなく、状態から差し替わる(state.md §7)。success / info も含まない。報告にしか使わない intent であり、行動には立たない(color.md §5「行動の intent と報告の intent」。裁定済み)。肯定的な確定は primary である。
 - `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る。段が引く余白の配線は foundations/size.rules.json が持つ。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。属性か aria-disabled かは Web の表現であり第2条により固有。
-- `block`: boolean(既定 false) — layout.md §2: コントロールの既定は shrink-wrap(内容幅)。block で fill(親いっぱい)にオプトインする。憲法前文の「Button を block・color=primary で」という共通言語の一部。
+- `fill`: boolean(既定 false) — layout.md §2: コントロールの既定は shrink-wrap(内容幅)。fill で親いっぱいへオプトインする。憲法前文の「Button を fill・color=primary で」という共通言語の一部。
 - `label`: string — 名前。可視ラベルが絵に置き換わったぶん、名前の経路が prop へ移る(必須)。Tooltip の併用は補強であって名前の代替ではない(overlay.md §4: hover でしか到達できない情報を作らない)。
 - `shape`: "control" | "pill"(既定 "control") — shape.md §6 のカテゴリから選ぶ(発明不可)。pill は全円。既定は control(裁定: 非選択時のフォールバック)。丸いアイコンボタンと角丸のアイコンボタンはどちらも実在するので、割当てではなく選択に開いた最初の部品。
 
@@ -1128,7 +1128,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 名前を視覚から隠しても、支援技術には届く(labelHidden)。隠してよいのは、周りが既に何の値かを語っている場合だけである(field.md §2)。
 - 境界(min / max)に達したことは利用者に分かる形で伝える。値と境界は spinbutton の aria-valuenow / aria-valuemin / aria-valuemax で支援技術へ届いているので、ここで足すのは視覚と手触りの側である(裁定 2026-07-28)。
 
-### OneTimeCodeField(契約 0.0.0-alpha.0)
+### OneTimeCodeField(契約 0.0.0-alpha.1)
 
 確認コードを打つ欄。見えている枠は桁の数だけ並ぶが、打てる欄は一つである(裁定 2026-07-28。field.md §6-2)。桁ごとに欄を分けると、貼り付けが一桁目にしか入らず、SMS からの自動入力(Web の autocomplete=one-time-code / iOS の textContentType=.oneTimeCode / Android の smsOTPCode)はどれも一つの欄を前提にしているので効かず、読み上げは「6 個の欄のうち 1 個目」と読んで一つの値に聞こえない。Ant Design の Input.OTP と shadcn/ui の InputOTP も本物の欄は一つで、見た目だけを桁に割る。TextField と別部品にするのは、桁への割り当てと完了の通知が prop では収まらないからである。
 
@@ -1140,7 +1140,7 @@ props:
 - `charset`: "numeric" | "alphanumeric"(既定 "numeric") — 打てる文字。正規表現は受け取らない(裁定 2026-07-28): 打てる文字は入力様式そのものを決める(数字だけなら数字の鍵盤を頼む)ので列挙でなければ対応が導けず、正規表現の方言はプラットフォームごとに違い(ECMAScript / ICU / Java)、そして DS は検証しない(field.md §3)。足りない集合が出たら値を足す(列挙は足しても壊れない)。大文字小文字の変換はしない(正規化はアプリ)。
 - `masked`: boolean(既定 false) — 打った文字を伏せる。回復コードのように肩越しに見られたくない場面のためにある。伏せたときは見せ直す手段を部品が必ず持つ(PasswordField と同じ判断: 打ち間違いを直す手段が全部消して打ち直すことしか無くなる)。伏せるのは見た目だけで、桁の数といま何桁埋まっているかは支援技術へ届く。
 - `revealLabel`: string — 見せる操作の名前(「コードを表示する」)。masked が真のときに要る。DS は文言を持たない(i18n.md §1)。
-- `hideLabel`: string — 隠す操作の名前(「コードを隠す」)。切り替えの名前は状態で入れ替わる。
+- `concealLabel`: string — 伏せる操作の名前(「コードを隠す」)。切り替えの名前は状態で入れ替わる。hide ではなく conceal を使うのは、`labelHidden`(名前を視覚から隠す)と一字違いで意味が別だったためである(guidelines/naming.md)。
 - `revealedMessage`: string — 見せたときに支援技術へ届ける文。切り替えの結果だけを伝え、値そのものは流さない(PasswordField と同じ)。
 - `hiddenMessage`: string — 隠したときに支援技術へ届ける文。
 - `disabled`: boolean(既定 false) — 操作を受け付けない(state.md §3.2)。
@@ -1197,7 +1197,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 領域自身は焦点を受けない。焦点とフォーカスリングは合成した操作(Button)に立ち、当たり判定の門(size.md §4)もそちらに生きる。
 - 中央の選択は欄であり、名前が要る(field.md §2)。部品の側が既に文脈を語っているので、その名前は視覚から隠してよい(Select の labelHidden。SwiftUI の labelsHidden と同型)。
 
-### PasswordField(契約 0.0.0-alpha.0)
+### PasswordField(契約 0.0.0-alpha.1)
 
 秘匿して打つ欄。隠したまま打たせると打ち間違いを直す手段が「全部消して打ち直す」しか無くなるので、見せる・隠すの切り替えを部品が必ず持つ(既定は隠す)。TextField と別部品にするのは、秘匿が入力様式ではなく値の扱いの違いであり、切り替えという相互作用も増えるからである(field.md §6-2 の線。SwiftUI が SecureField を別の型として持つのも同じ理由)。切り替えたことは文で知らせ、値そのものは読み上げに流さない: GOV.UK が調査の末に採った形で、値を読み上げる案は周りに人が居る場所で声に出てしまうため捨てられている。強度の判定は持たない(何を強いとするかは製品の政策)。
 
@@ -1216,7 +1216,7 @@ props:
 - `keyboard`: "text"(既定 "text") — 入力様式は text に固定する(継承元の値域から絞る)。秘匿の欄に数値やメールの入力様式を与える意味は無く、与えると打てる文字を誤って狭める。
 - `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る(Carbon / Ant / Spectrum も入力に複数段を持つ)。段が引く余白の配線は foundations/size.rules.json。
 - `revealLabel`: string — 見せる操作の名前(「パスワードを表示する」)。絵だけの操作なので文字列で足りる(DatePicker の calendarLabel と同じ形)。DS は文言を持たない(i18n.md §1)。
-- `hideLabel`: string — 隠す操作の名前(「パスワードを隠す」)。切り替えの名前は状態で入れ替わる。
+- `concealLabel`: string — 伏せる操作の名前(「パスワードを隠す」)。切り替えの名前は状態で入れ替わる。hide ではなく conceal を使うのは、`labelHidden`(名前を視覚から隠す)と一字違いで意味が別だったためである(guidelines/naming.md)。
 - `revealedMessage`: string — 見せたときに支援技術へ届ける文(「パスワードを表示しました」)。切り替えの結果だけを伝え、値そのものは流さない(GOV.UK の裁定と同じ)。
 - `hiddenMessage`: string — 隠したときに支援技術へ届ける文(「パスワードを隠しました」)。
 
@@ -1318,7 +1318,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - invalid はグループの状態として届き(Web の表現は radiogroup への aria-invalid + aria-describedby)、error 文はグループの説明として届く。
 - 既定選択を置かない場合、Tab での進入先は先頭項目になる。未選択のまま送信された required グループが invalid の典型である。
 
-### Rating(契約 0.0.0-alpha.2)
+### Rating(契約 0.0.0-alpha.3)
 
 段で表す評価。読むだけの星と、付ける星の両方をこの部品が持つ。WAI-ARIA Authoring Practices に評価の型は無いので、既にある型を当てはめる: 読み取り専用のときは選択の集合ではなく一つの絵として届き(Web の表現は role=img と名前。星は支援技術から外す)、入力のときは段の集合から一つを選ぶ形で届く(Web の表現は radio の群)。aria-readonly を足した選択の集合にはしない: 読むだけの星に「グループ、ラジオボタン 5 個」を聞かせるのは冗長である。半分の段は読み取りだけで許す: 入力で半分を許すと段が 10 になり、「2.5 段階目」に名前を付けることになり、指の的も半分になる(24px の門を割る)。
 
@@ -1331,7 +1331,7 @@ props:
 - `required`: boolean(既定 false) — 必須(field.md §4)。入力のときだけ意味を持つ。
 - `invalid`: boolean(既定 false) — 拒否された(state.md §7)。readonly とは同時に成立しない(field.md §5)。
 - `name`: string((省略可)) — フォーム名(native の form 送信・FormData・reset に参加。field.md §5)。入力のときだけ意味を持つ。
-- `allowClear`: boolean(既定 false) — 評価を取り消せるか。既定は取り消せない。真にしたときは鍵盤にも消す道を用意する: radio の群は鍵盤で選択を外せないので、同じ星を押し直すだけの実装はポインタ専用の機能になり WCAG 2.2 SC 2.1.1 に触れる。 Web のキーは Delete と Backspace(RFC 0020。web-keys.rules.json の clear.rating)。alpha.1 で明記。
+- `clearable`: boolean(既定 false) — 評価を取り消せるか。既定は取り消せない。真にしたときは鍵盤にも消す道を用意する: radio の群は鍵盤で選択を外せないので、同じ星を押し直す経路だけでは指でしか消せない(web-keys の clear.rating。RFC 0020)。語彙は TextField の clearable と同一(同じ観念に同じ名。guidelines/naming.md)。
 - `valueLabel`: string((省略可)) — 読み取りのときの名前(「5 段階中 4.2」)。readonly のときは必須である: 絵として届く部品に名前が無いと、評価そのものが読み上げに乗らない。DS は文言を持たない(i18n.md §1)。件数を含めるかは消費者の判断。
 - `itemLabels`: array((省略可)) — 入力のときの各段の名前(「5 段階中 2」等)。max と同じ数だけ並べる。入力のときは必須である: 数字だけの名前では、何段階中の 2 かが読み上げで分からない。関数ではなく並びで受け取るのは、どのプラットフォームでも同じ形で渡せるようにするためである。
 - `labelHidden`: boolean(既定 false) — 名前を視覚から隠す(支援技術には届く)。field.md §2 の prop で、消費者が現れた欄から足す。消費者は商品カードの星で、すぐ上に商品名が出ているので評価の名前は視覚に要らない(実物で確認。2026-07-27)。読み取りのとき Rating はフォーム部品ではないが、名前を見せるかどうかという観念にフォームかどうかは関わらないので、同じ prop を使う(語彙を分けると消費者が二つ覚える)。 既定は false: 名前は見えているのが良く、隠すのは部品の側が既に文脈を語っている場合の例外である。
@@ -1461,13 +1461,13 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 - 見た目と意味を持たない部品である。states を持たず、focus を受けず、支援技術に構造を主張しない。意味を運ぶのは中身の仕事(layout.md §6)。
 - DOM / 読み上げ順は常に視覚順と一致させる: side が DOM 順も決め(start = 脇→本体、end = 本体→脇)、視覚順だけを CSS(order / row-reverse 等)で入れ替えてはならない(WCAG 1.3.2 Meaningful Sequence)。折れたときは同じ DOM 順のまま縦に積むので、折返しで読み上げ順は変わらない。
 
-### Skeleton(契約 0.0.0-alpha.0)
+### Skeleton(契約 0.0.0-alpha.1)
 
 読み込み中の内容の代役。来るものの形を先に置いて、レイアウトの跳ねを防ぐ。
 
 props:
 
-- `form`: "text" | "box" | "circle"(既定 "text") — 何を模するか。text は文字行(高さは周囲の font に従う。角は tag)、box は面(親いっぱい。角は card)、circle は円(親いっぱいの正円。角は pill)。prop 名の経緯と業界対応は Skeleton.md §2。
+- `mimics`: "text" | "box" | "circle"(既定 "text") — 何を模するか。text は文字行(高さは周囲の font に従う。角は tag)、box は面(親いっぱい。角は card)、circle は円(親いっぱいの正円。角は pill)。`variant` と `shape` はどちらも予約で許容集合が別に決まっており、「何を模すか」はそのどちらにも属さない(GOVERNANCE §6-1)。名前の導出は Skeleton.md §2。
 
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 

@@ -22,7 +22,7 @@
     /** 見せる操作の名前。masked が真のときに要る。 */
     revealLabel?: string;
     /** 隠す操作の名前。 */
-    hideLabel?: string;
+    concealLabel?: string;
     /** 見せたときに支援技術へ届ける文。値そのものは流さない。 */
     revealedMessage?: string;
     /** 隠したときに支援技術へ届ける文。 */
@@ -54,7 +54,7 @@
     charset = META.props.charset.default,
     masked = META.props.masked.default,
     revealLabel,
-    hideLabel,
+    concealLabel,
     revealedMessage,
     hiddenMessage,
     disabled = META.props.disabled.default,
@@ -81,8 +81,8 @@
     if (readonly && invalid) {
       console.warn('[stemcell] OneTimeCodeField: readonly と invalid は同時に成立しない(state.md §6)。invalid を無視する。');
     }
-    if (masked && !(revealLabel && hideLabel)) {
-      console.warn('[stemcell] OneTimeCodeField: masked には revealLabel と hideLabel が要る(見せ直す手段の無い伏せ字は許さない)。');
+    if (masked && !(revealLabel && concealLabel)) {
+      console.warn('[stemcell] OneTimeCodeField: masked には revealLabel と concealLabel が要る(見せ直す手段の無い伏せ字は許さない)。');
     }
   });
 
@@ -202,7 +202,7 @@
       <button
         type="button"
         class="sc-field-button sc-otc-toggle"
-        aria-label={revealed ? hideLabel : revealLabel}
+        aria-label={revealed ? concealLabel : revealLabel}
         disabled={disabled || readonly}
         onclick={toggle}
       >
