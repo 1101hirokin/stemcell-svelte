@@ -25,7 +25,7 @@
 .sc-iconbutton[data-shape='pill'] {
   border-radius: var(--shape-semantic-pill);
 }
-.sc-iconbutton[data-fill='true'] {
+.sc-iconbutton[data-fullwidth='true'] {
   display: flex;
   inline-size: 100%;
 }

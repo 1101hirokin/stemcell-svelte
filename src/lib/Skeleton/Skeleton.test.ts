@@ -4,14 +4,14 @@ import Skeleton from './Skeleton.svelte';
 it('既定は text で、支援技術から常に隠れる(Skeleton.md §3。代役は情報ではない)', () => {
   const { container } = render(Skeleton, {});
   const s = container.querySelector('.sc-skeleton') as HTMLElement;
-  expect(s.dataset.mimics).toBe('text');
+  expect(s.dataset.kind).toBe('text');
   expect(s.getAttribute('aria-hidden')).toBe('true');
 });
 
-it('mimics は text/box/circle を取る(Skeleton.md §2)', () => {
-  for (const mimics of ['box', 'circle'] as const) {
-    const { container } = render(Skeleton, { props: { mimics } });
-    expect((container.querySelector('.sc-skeleton') as HTMLElement).dataset.mimics).toBe(mimics);
+it('kind は text/box/circle を取る(Skeleton.md §2)', () => {
+  for (const kind of ['box', 'circle'] as const) {
+    const { container } = render(Skeleton, { props: { kind } });
+    expect((container.querySelector('.sc-skeleton') as HTMLElement).dataset.kind).toBe(kind);
   }
 });
 

@@ -4,13 +4,13 @@
   import type { Snippet } from 'svelte';
 
   // Button の一種。ラベルが絵になっただけ(契約 extends。IconButton.md §1)。variant/color/size/
-  // disabled/fill/states は Button を継承。start/end は継承しない(スロット構成は部品の形。契約)。
+  // disabled/fullWidth/states は Button を継承。start/end は継承しない(スロット構成は部品の形。契約)。
   interface Props {
     variant?: (typeof META.props.variant.values)[number];
     color?: (typeof META.props.color.values)[number];
     size?: (typeof META.props.size.values)[number];
     disabled?: boolean;
-    fill?: boolean;
+    fullWidth?: boolean;
     /** shape.md §6 のカテゴリから選ぶ。pill は全円、control は角丸(既定)。 */
     shape?: (typeof META.props.shape.values)[number];
     /** 名前(必須)。可視ラベルが絵に置き換わったぶん名前の経路が prop へ移る(IconButton.md §3)。 */
@@ -27,7 +27,7 @@
     color = META.props.color.default,
     size = META.props.size.default,
     disabled = META.props.disabled.default,
-    fill = META.props.fill.default,
+    fullWidth = META.props.fullWidth.default,
     shape = META.props.shape.default,
     label,
     type = WEB.type.default,
@@ -44,7 +44,7 @@
   data-color={color}
   data-size={size}
   data-shape={shape}
-  data-fill={fill}
+  data-fullwidth={fullWidth}
   {type}
   {disabled}
   aria-label={label}

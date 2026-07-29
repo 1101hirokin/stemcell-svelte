@@ -17,7 +17,7 @@
   transition: background-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing),
     border-color calc(var(--motion-feedback-duration) * var(--motion-scale)) var(--motion-feedback-easing);
 }
-.sc-button[data-fill='true'] { display: flex; inline-size: 100%; }
+.sc-button[data-fullwidth='true'] { display: flex; inline-size: 100%; }
 .sc-button[data-size='sm'] { padding: var(--spacing-inset-sm); }
 .sc-button[data-size='md'] { padding: var(--spacing-inset-md); }
 .sc-button[data-size='lg'] { padding: var(--spacing-inset-lg); }

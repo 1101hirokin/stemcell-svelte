@@ -54,11 +54,11 @@
     <Text as="h3" variant="title-lg">Skeleton</Text>
     <Text as="p" variant="body-sm" muted>読み込み中の代役。text=文字行 / box=面 / circle=円。寸法は親か font に従う。reduced-motion で shimmer 停止。</Text>
     <Cluster gap="md">
-      <div style="inline-size: 3rem; block-size: 3rem;"><Skeleton mimics="circle" /></div>
+      <div style="inline-size: 3rem; block-size: 3rem;"><Skeleton kind="circle" /></div>
       <Stack gap="sm">
-        <div style="inline-size: 14rem;"><Skeleton mimics="text" /></div>
-        <div style="inline-size: 10rem;"><Skeleton mimics="text" /></div>
+        <div style="inline-size: 14rem;"><Skeleton kind="text" /></div>
+        <div style="inline-size: 10rem;"><Skeleton kind="text" /></div>
       </Stack>
     </Cluster>
-    <div style="inline-size: 14rem; block-size: 6rem;"><Skeleton mimics="box" /></div>
+    <div style="inline-size: 14rem; block-size: 6rem;"><Skeleton kind="box" /></div>
   </section>

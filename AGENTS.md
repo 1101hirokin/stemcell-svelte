@@ -186,7 +186,7 @@ props:
 - `color`: "primary" | "danger" | "warning" | "plain"(既定 "primary") — intent。disabled を含まない。選ぶものではなく、状態から差し替わる(state.md §7)。success / info も含まない。報告にしか使わない intent であり、行動には立たない(color.md §5「行動の intent と報告の intent」。裁定済み)。肯定的な確定は primary である。
 - `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る。段が引く余白の配線は foundations/size.rules.json が持つ。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。属性か aria-disabled かは Web の表現であり第2条により固有。
-- `fill`: boolean(既定 false) — layout.md §2: コントロールの既定は shrink-wrap(内容幅)。fill で親いっぱいへオプトインする。憲法前文の「Button を fill・color=primary で」という共通言語の一部。
+- `fullWidth`: boolean(既定 false) — layout.md §2: コントロールの既定は shrink-wrap(内容幅)。fullWidth で親いっぱいへオプトインする。憲法前文の「Button を fullWidth・color=primary で」という共通言語の一部。
 
 events(Svelte では callback prop):
 
@@ -890,7 +890,7 @@ props:
 - `color`: "primary" | "danger" | "warning" | "plain"(既定 "primary") — intent。disabled を含まない。選ぶものではなく、状態から差し替わる(state.md §7)。success / info も含まない。報告にしか使わない intent であり、行動には立たない(color.md §5「行動の intent と報告の intent」。裁定済み)。肯定的な確定は primary である。
 - `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る。段が引く余白の配線は foundations/size.rules.json が持つ。
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。属性か aria-disabled かは Web の表現であり第2条により固有。
-- `fill`: boolean(既定 false) — layout.md §2: コントロールの既定は shrink-wrap(内容幅)。fill で親いっぱいへオプトインする。憲法前文の「Button を fill・color=primary で」という共通言語の一部。
+- `fullWidth`: boolean(既定 false) — layout.md §2: コントロールの既定は shrink-wrap(内容幅)。fullWidth で親いっぱいへオプトインする。憲法前文の「Button を fullWidth・color=primary で」という共通言語の一部。
 - `label`: string — 名前。可視ラベルが絵に置き換わったぶん、名前の経路が prop へ移る(必須)。Tooltip の併用は補強であって名前の代替ではない(overlay.md §4: hover でしか到達できない情報を作らない)。
 - `shape`: "control" | "pill"(既定 "control") — shape.md §6 のカテゴリから選ぶ(発明不可)。pill は全円。既定は control(裁定: 非選択時のフォールバック)。丸いアイコンボタンと角丸のアイコンボタンはどちらも実在するので、割当てではなく選択に開いた最初の部品。
 
@@ -1092,7 +1092,7 @@ props:
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
 - `readonly`: boolean(既定 false) — 読めるが編集できない。状態ではなく property である(state.md §6)。invalid と同時に成立しない(HTML が readonly を constraint validation から除外する)。コントラストの免除は受けない(Understanding SC 1.4.3 は disabled のみを例示)。
 - `clearable`: boolean(既定 false) — 値をまとめて消す操作を欄の中に出す。値があるときだけ現れる(空の欄に押せない印を残さない)。検索欄はこれで組む: 普通の欄との違いは消せることと虫眼鏡の絵だけで、相互作用は増えないので別部品にしない(field.md §6-2 の線。裁定 2026-07-28)。真のときは clearLabel が要る。消した結果は change の空文字列で届き、専用の通知は作らない。
-- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の revealLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
+- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の showValueLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
 - `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2。判定が値から来たかサーバから来たかは問わない)。intent を danger へ差し替える(state.md §7)。いつ立てるか(blur / submit / 逐次)は Stemcell が規範化しない(field.md §3「バリデーションの所有」)。
 - `required`: boolean(既定 false) — 必須。支援技術に届くことは Normative、視覚標示も部品が自動で出す(field.md §4。裁定済み 2026-07。記号そのものは seed)。
 - `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。
@@ -1139,8 +1139,8 @@ props:
 - `length`: number(既定 6) — 桁の数。発行する側の政策なので消費者が渡す。部品はこの数だけ枠を並べ、親の幅いっぱいへ均等に割る。
 - `charset`: "numeric" | "alphanumeric"(既定 "numeric") — 打てる文字。正規表現は受け取らない(裁定 2026-07-28): 打てる文字は入力様式そのものを決める(数字だけなら数字の鍵盤を頼む)ので列挙でなければ対応が導けず、正規表現の方言はプラットフォームごとに違い(ECMAScript / ICU / Java)、そして DS は検証しない(field.md §3)。足りない集合が出たら値を足す(列挙は足しても壊れない)。大文字小文字の変換はしない(正規化はアプリ)。
 - `masked`: boolean(既定 false) — 打った文字を伏せる。回復コードのように肩越しに見られたくない場面のためにある。伏せたときは見せ直す手段を部品が必ず持つ(PasswordField と同じ判断: 打ち間違いを直す手段が全部消して打ち直すことしか無くなる)。伏せるのは見た目だけで、桁の数といま何桁埋まっているかは支援技術へ届く。
-- `revealLabel`: string — 見せる操作の名前(「コードを表示する」)。masked が真のときに要る。DS は文言を持たない(i18n.md §1)。
-- `concealLabel`: string — 伏せる操作の名前(「コードを隠す」)。切り替えの名前は状態で入れ替わる。hide ではなく conceal を使うのは、`labelHidden`(名前を視覚から隠す)と一字違いで意味が別だったためである(guidelines/naming.md)。
+- `showValueLabel`: string — コードを見せる操作の名前(「コードを表示する」)。何を隠すのかを名前に含めるのは、`labelHidden`(欄の名前を視覚から隠す)と読み違えないためである(guidelines/naming.md)。
+- `hideValueLabel`: string — コードを伏せる操作の名前(「コードを隠す」)。切り替えの名前は状態で入れ替わる。
 - `revealedMessage`: string — 見せたときに支援技術へ届ける文。切り替えの結果だけを伝え、値そのものは流さない(PasswordField と同じ)。
 - `hiddenMessage`: string — 隠したときに支援技術へ届ける文。
 - `disabled`: boolean(既定 false) — 操作を受け付けない(state.md §3.2)。
@@ -1209,14 +1209,14 @@ props:
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
 - `readonly`: boolean(既定 false) — 読めるが編集できない。状態ではなく property である(state.md §6)。invalid と同時に成立しない(HTML が readonly を constraint validation から除外する)。コントラストの免除は受けない(Understanding SC 1.4.3 は disabled のみを例示)。
 - `clearable`: boolean(既定 false) — 値をまとめて消す操作を欄の中に出す。値があるときだけ現れる(空の欄に押せない印を残さない)。検索欄はこれで組む: 普通の欄との違いは消せることと虫眼鏡の絵だけで、相互作用は増えないので別部品にしない(field.md §6-2 の線。裁定 2026-07-28)。真のときは clearLabel が要る。消した結果は change の空文字列で届き、専用の通知は作らない。
-- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の revealLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
+- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の showValueLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
 - `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2。判定が値から来たかサーバから来たかは問わない)。intent を danger へ差し替える(state.md §7)。いつ立てるか(blur / submit / 逐次)は Stemcell が規範化しない(field.md §3「バリデーションの所有」)。
 - `required`: boolean(既定 false) — 必須。支援技術に届くことは Normative、視覚標示も部品が自動で出す(field.md §4。裁定済み 2026-07。記号そのものは seed)。
 - `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。
 - `keyboard`: "text"(既定 "text") — 入力様式は text に固定する(継承元の値域から絞る)。秘匿の欄に数値やメールの入力様式を与える意味は無く、与えると打てる文字を誤って狭める。
 - `size`: "sm" | "md" | "lg"(既定 "md") — 寸法。size.md §2 の3段すべてを採る(Carbon / Ant / Spectrum も入力に複数段を持つ)。段が引く余白の配線は foundations/size.rules.json。
-- `revealLabel`: string — 見せる操作の名前(「パスワードを表示する」)。絵だけの操作なので文字列で足りる(DatePicker の calendarLabel と同じ形)。DS は文言を持たない(i18n.md §1)。
-- `concealLabel`: string — 伏せる操作の名前(「パスワードを隠す」)。切り替えの名前は状態で入れ替わる。hide ではなく conceal を使うのは、`labelHidden`(名前を視覚から隠す)と一字違いで意味が別だったためである(guidelines/naming.md)。
+- `showValueLabel`: string — パスワードを見せる操作の名前(「パスワードを表示する」)。何を隠すのかを名前に含めるのは、`labelHidden`(欄の名前を視覚から隠す)と読み違えないためである(guidelines/naming.md)。
+- `hideValueLabel`: string — パスワードを伏せる操作の名前(「パスワードを隠す」)。切り替えの名前は状態で入れ替わる。
 - `revealedMessage`: string — 見せたときに支援技術へ届ける文(「パスワードを表示しました」)。切り替えの結果だけを伝え、値そのものは流さない(GOV.UK の裁定と同じ)。
 - `hiddenMessage`: string — 隠したときに支援技術へ届ける文(「パスワードを隠しました」)。
 
@@ -1467,7 +1467,7 @@ a11y(実装が保証する。アプリ側で aria を足さないこと):
 
 props:
 
-- `mimics`: "text" | "box" | "circle"(既定 "text") — 何を模するか。text は文字行(高さは周囲の font に従う。角は tag)、box は面(親いっぱい。角は card)、circle は円(親いっぱいの正円。角は pill)。`variant` と `shape` はどちらも予約で許容集合が別に決まっており、「何を模すか」はそのどちらにも属さない(GOVERNANCE §6-1)。名前の導出は Skeleton.md §2。
+- `kind`: "text" | "box" | "circle"(既定 "text") — 何を模するか。text は文字行(高さは周囲の font に従う。角は tag)、box は面(親いっぱい。角は card)、circle は円(親いっぱいの正円。角は pill)。`variant` と `shape` はどちらも予約で許容集合が別に決まっており、「何を模すか」はそのどちらにも属さない(GOVERNANCE §6-1)。名前の導出は Skeleton.md §2。
 
 a11y(実装が保証する。アプリ側で aria を足さないこと):
 
@@ -1753,7 +1753,7 @@ props:
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
 - `readonly`: boolean(既定 false) — 読めるが編集できない。状態ではなく property である(state.md §6)。invalid と同時に成立しない(HTML が readonly を constraint validation から除外する)。コントラストの免除は受けない(Understanding SC 1.4.3 は disabled のみを例示)。
 - `clearable`: boolean(既定 false) — 値をまとめて消す操作を欄の中に出す。値があるときだけ現れる(空の欄に押せない印を残さない)。検索欄はこれで組む: 普通の欄との違いは消せることと虫眼鏡の絵だけで、相互作用は増えないので別部品にしない(field.md §6-2 の線。裁定 2026-07-28)。真のときは clearLabel が要る。消した結果は change の空文字列で届き、専用の通知は作らない。
-- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の revealLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
+- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の showValueLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
 - `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2。判定が値から来たかサーバから来たかは問わない)。intent を danger へ差し替える(state.md §7)。いつ立てるか(blur / submit / 逐次)は Stemcell が規範化しない(field.md §3「バリデーションの所有」)。
 - `required`: boolean(既定 false) — 必須。支援技術に届くことは Normative、視覚標示も部品が自動で出す(field.md §4。裁定済み 2026-07。記号そのものは seed)。
 - `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。
@@ -1793,7 +1793,7 @@ props:
 - `disabled`: boolean(既定 false) — state.md §3.1 / §5。3要求(活性化しない / interaction の状態が現れない / 支援技術から到達でき無効と伝わる)。
 - `readonly`: boolean(既定 false) — 読めるが編集できない。状態ではなく property である(state.md §6)。invalid と同時に成立しない(HTML が readonly を constraint validation から除外する)。コントラストの免除は受けない(Understanding SC 1.4.3 は disabled のみを例示)。
 - `clearable`: boolean(既定 false) — 値をまとめて消す操作を欄の中に出す。値があるときだけ現れる(空の欄に押せない印を残さない)。検索欄はこれで組む: 普通の欄との違いは消せることと虫眼鏡の絵だけで、相互作用は増えないので別部品にしない(field.md §6-2 の線。裁定 2026-07-28)。真のときは clearLabel が要る。消した結果は change の空文字列で届き、専用の通知は作らない。
-- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の revealLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
+- `clearLabel`: string — 消す操作の名前(「消去」)。絵だけの操作なので文字列で足りる(PasswordField の showValueLabel と同じ形)。DS は文言を持たない(i18n.md §1)。clearable が真のときに要る。
 - `invalid`: boolean(既定 false) — アプリが宣言する(state.md §2。判定が値から来たかサーバから来たかは問わない)。intent を danger へ差し替える(state.md §7)。いつ立てるか(blur / submit / 逐次)は Stemcell が規範化しない(field.md §3「バリデーションの所有」)。
 - `required`: boolean(既定 false) — 必須。支援技術に届くことは Normative、視覚標示も部品が自動で出す(field.md §4。裁定済み 2026-07。記号そのものは seed)。
 - `autocomplete`: string((省略可)) — 入力目的の宣言(WCAG 2.2 SC 1.3.5 Identify Input Purpose、AA。manifest の適合宣言により必須の関心)。語彙は WHATWG Autofill のトークン(name / email / street-address 等)を正とし、native は写像できる範囲で写す(iOS の textContentType / Compose の autofill semantics。写像は一部 lossy — 第7条 Graceful Degradation)。個人情報を集める欄では省略しないこと。値域の機械検査は未整備(field.md §8)。
